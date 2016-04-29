@@ -16,6 +16,10 @@
 // via the QEMU Machine Protocol (QMP).
 package qmp
 
+import (
+	"fmt"
+)
+
 // Monitor represents a QEMU Machine Protocol socket.
 // See: http://wiki.qemu.org/QMP
 type Monitor interface {
@@ -38,14 +42,30 @@ type Cmd struct {
 // See http://wiki.qemu.org/QMP
 type Event struct {
 	// Event name, e.g., BLOCK_JOB_COMPLETE
-	Event string
+	Event string `json:"event"`
 
 	// Arbitrary event data
-	Data map[string]interface{}
+	Data map[string]interface{} `json:"data"`
 
 	// Event timestamp, provided by QEMU.
 	Timestamp struct {
-		Seconds      int64
-		Microseconds int64
-	}
+		Seconds      int64 `json:"seconds"`
+		Microseconds int64 `json:"microseconds"`
+	} `json:"timestamp"`
+}
+
+// Version is the QEMU version structure returned when a QMP connection is
+// initiated.
+type Version struct {
+	Package string `json:"package"`
+	QEMU    struct {
+		Major int `json:"major"`
+		Micro int `json:"micro"`
+		Minor int `json:"minor"`
+	} `json:"qemu"`
+}
+
+func (v Version) String() string {
+	q := v.QEMU
+	return fmt.Sprintf("%d.%d.%d", q.Major, q.Minor, q.Micro)
 }
