@@ -283,8 +283,8 @@ func (d *Domain) Version() (string, error) {
 	}
 
 	var response struct {
-		ID     string  `json:"id"`
-		Return version `json:"return"`
+		ID     string      `json:"id"`
+		Return qmp.Version `json:"return"`
 	}
 
 	if err = json.Unmarshal(raw, &response); err != nil {
