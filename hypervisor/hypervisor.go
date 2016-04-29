@@ -131,6 +131,10 @@ func (hv *Hypervisor) connectDomain(name string) (*qemu.Domain, error) {
 		return nil, err
 	}
 
+	if err := mon.Connect(); err != nil {
+		return nil, err
+	}
+
 	dom, err := qemu.NewDomain(mon, name)
 	if err != nil {
 		return nil, err
