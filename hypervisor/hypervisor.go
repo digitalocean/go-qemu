@@ -18,8 +18,6 @@ package hypervisor
 
 import (
 	"fmt"
-	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/digitalocean/go-qemu"
@@ -27,62 +25,28 @@ import (
 )
 
 // A Hypervisor enables access to all virtual machines on a QEMU hypervisor.
-type Hypervisor interface {
-	Domains() ([]*qemu.Domain, error)
-	Domain(name string) (*qemu.Domain, error)
-	DomainNames() ([]string, error)
-	Disconnect() error
-}
-
-var _ Hypervisor = &Libvirt{}
-
-// Libvirt represents a libvirt hypervisor.
-type Libvirt struct {
-	// URI of hypervisor
-	url *url.URL
-
+type Hypervisor struct {
 	// Currently connected monitor sockets
 	mu        sync.Mutex
 	connected []qmp.Monitor
 
-	// Functions which can be swapped for easy testing
-	newMonitor  monitorFunc
-	domainNames domainNamesFunc
+	// Driver used to communicate with domains
+	driver Driver
 }
 
-// A monitorFunc is a function which can create a qmp.Monitor.
-type monitorFunc func(uri string, domain string) (qmp.Monitor, error)
-
-// A domainNamesFunc is a function which can return a list of
-// domain names.
-type domainNamesFunc func() ([]string, error)
-
-// NewLibvirt configures a connection to the provided hypervisor.
-//
-// Hypervisor URIs may be local or remote, e.g.,
-//	qemu:///system
-//	qemu+ssh://libvirt@example.com/system
-func NewLibvirt(uri string) (*Libvirt, error) {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	hv := &Libvirt{
-		url:       u,
+// New creates a new Hypervisor using the input Driver.
+func New(driver Driver) *Hypervisor {
+	return &Hypervisor{
 		connected: make([]qmp.Monitor, 0),
-
-		// Default to creating libvirt monitors and using virsh to
-		// retrieve domain names.
-		newMonitor: func(uri string, domain string) (qmp.Monitor, error) {
-			return qmp.NewLibvirtMonitor(uri, domain)
-		},
-		domainNames: func() ([]string, error) {
-			return virshList(uri)
-		},
+		driver:    driver,
 	}
+}
 
-	return hv, nil
+// A Driver is a QEMU QMP monitor driver that a Hypervisor can use to perform
+// actions on groups of virtual machines.
+type Driver interface {
+	NewMonitor(domain string) (qmp.Monitor, error)
+	DomainNames() ([]string, error)
 }
 
 // Domains retrieves all virtual machines which reside on a given hypervisor,
@@ -93,8 +57,8 @@ func NewLibvirt(uri string) (*Libvirt, error) {
 //
 // The Disconnect method must be called to clean up monitor socket connections
 // once the virtual machines are no longer needed.
-func (hv *Libvirt) Domains() ([]*qemu.Domain, error) {
-	domains, err := hv.domainNames()
+func (hv *Hypervisor) Domains() ([]*qemu.Domain, error) {
+	domains, err := hv.driver.DomainNames()
 	if err != nil {
 		return nil, err
 	}
@@ -121,8 +85,8 @@ func (hv *Libvirt) Domains() ([]*qemu.Domain, error) {
 //
 // The Disconnect method must be called to clean up the monitor socket
 // connection once the virtual machine is no longer needed.
-func (hv *Libvirt) Domain(name string) (*qemu.Domain, error) {
-	domains, err := hv.domainNames()
+func (hv *Hypervisor) Domain(name string) (*qemu.Domain, error) {
+	domains, err := hv.driver.DomainNames()
 	if err != nil {
 		return nil, err
 	}
@@ -139,13 +103,13 @@ func (hv *Libvirt) Domain(name string) (*qemu.Domain, error) {
 // DomainNames retrieves the names of all virtual machines which reside on
 // a given hypervisor, so that individual connections can be opened using
 // the Domain method, as needed.
-func (hv *Libvirt) DomainNames() ([]string, error) {
-	return hv.domainNames()
+func (hv *Hypervisor) DomainNames() ([]string, error) {
+	return hv.driver.DomainNames()
 }
 
 // Disconnect cleans up monitor socket connections for all virtual
 // machines.
-func (hv *Libvirt) Disconnect() error {
+func (hv *Hypervisor) Disconnect() error {
 	hv.mu.Lock()
 	defer hv.mu.Unlock()
 
@@ -161,8 +125,8 @@ func (hv *Libvirt) Disconnect() error {
 
 // connectDomain opens a monitor socket connection and creates a virtual
 // machine for the machine with the specified name.
-func (hv *Libvirt) connectDomain(name string) (*qemu.Domain, error) {
-	mon, err := hv.newMonitor(hv.url.String(), name)
+func (hv *Hypervisor) connectDomain(name string) (*qemu.Domain, error) {
+	mon, err := hv.driver.NewMonitor(name)
 	if err != nil {
 		return nil, err
 	}
@@ -177,17 +141,4 @@ func (hv *Libvirt) connectDomain(name string) (*qemu.Domain, error) {
 	hv.mu.Unlock()
 
 	return dom, nil
-}
-
-// virshList shells out to 'virsh list --all --name' to produce a list of domain names.
-func virshList(uri string) ([]string, error) {
-	out, err := qmp.Virsh(uri, "list", "--all", "--name")
-	if err != nil {
-		return nil, err
-	}
-
-	// Remove blank newline at end of domains list
-	domains := strings.Split(string(out), "\n")
-	domains = domains[:len(domains)-2]
-	return domains, nil
 }
