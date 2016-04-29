@@ -21,16 +21,16 @@ import (
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
-func TestLibvirtDomains(t *testing.T) {
+func TestHypervisorDomains(t *testing.T) {
 	wantDomains := []string{"ubuntu", "arch", "gentoo"}
 
 	var seenDomains []string
-	hv := testLibvirt(
+	hv := testHypervisor(
 		t,
 		wantDomains,
-		func(_ string, domain string) (qmp.Monitor, error) {
+		func(domain string) (qmp.Monitor, error) {
 			seenDomains = append(seenDomains, domain)
-			return noopMonitorFunc()("", "")
+			return &noopMonitor{}, nil
 		},
 	)
 
@@ -60,10 +60,10 @@ func TestLibvirtDomains(t *testing.T) {
 	}
 }
 
-func TestLibvirtDomainOK(t *testing.T) {
+func TestHypervisorDomainOK(t *testing.T) {
 	const wantDomain = "ubuntu"
 
-	hv := testLibvirt(
+	hv := testHypervisor(
 		t,
 		[]string{wantDomain},
 		noopMonitorFunc(),
@@ -86,8 +86,8 @@ func TestLibvirtDomainOK(t *testing.T) {
 
 }
 
-func TestLibvirtDomainNotFound(t *testing.T) {
-	hv := testLibvirt(
+func TestHypervisorDomainNotFound(t *testing.T) {
+	hv := testHypervisor(
 		t,
 		nil,
 		noopMonitorFunc(),
@@ -100,10 +100,10 @@ func TestLibvirtDomainNotFound(t *testing.T) {
 	}
 }
 
-func TestLibvirtDomainNames(t *testing.T) {
+func TestHypervisorDomainNames(t *testing.T) {
 	wantDomains := []string{"ubuntu", "arch", "gentoo"}
 
-	hv := testLibvirt(
+	hv := testHypervisor(
 		t,
 		wantDomains,
 		noopMonitorFunc(),
@@ -125,8 +125,8 @@ func TestLibvirtDomainNames(t *testing.T) {
 	}
 }
 
-func TestLibvirtDisconnect(t *testing.T) {
-	hv := testLibvirt(
+func TestHypervisorDisconnect(t *testing.T) {
+	hv := testHypervisor(
 		t,
 		[]string{"ubuntu"},
 		noopMonitorFunc(),
@@ -151,8 +151,11 @@ func TestLibvirtDisconnect(t *testing.T) {
 	}
 }
 
+// A monitorFunc is a function which can create a qmp.Monitor.
+type monitorFunc func(domain string) (qmp.Monitor, error)
+
 func noopMonitorFunc() monitorFunc {
-	return func(_ string, _ string) (qmp.Monitor, error) {
+	return func(_ string) (qmp.Monitor, error) {
 		return &noopMonitor{}, nil
 	}
 }
@@ -166,20 +169,26 @@ func (noopMonitor) Disconnect() error                 { return nil }
 func (noopMonitor) Run(_ []byte) ([]byte, error)      { return nil, nil }
 func (noopMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
 
-func testLibvirt(
+func testHypervisor(
 	t *testing.T,
 	domains []string,
-	newMonitor func(uri string, domain string) (qmp.Monitor, error),
-) *Libvirt {
-	hv, err := NewLibvirt("qemu:///system")
-	if err != nil {
-		t.Fatalf("failed to create Libvirt: %v", err)
-	}
+	newMonitor monitorFunc,
+) *Hypervisor {
+	return New(&testDriver{
+		newMonitor: newMonitor,
+		domains:    domains,
+	})
+}
 
-	hv.newMonitor = newMonitor
-	hv.domainNames = func() ([]string, error) {
-		return domains, nil
-	}
+type testDriver struct {
+	newMonitor monitorFunc
+	domains    []string
+}
 
-	return hv
+func (d *testDriver) NewMonitor(domain string) (qmp.Monitor, error) {
+	return d.newMonitor(domain)
+}
+
+func (d *testDriver) DomainNames() ([]string, error) {
+	return d.domains, nil
 }
