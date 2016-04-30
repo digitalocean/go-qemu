@@ -126,10 +126,14 @@ func TestHypervisorDomainNames(t *testing.T) {
 }
 
 func TestHypervisorDisconnect(t *testing.T) {
+	mon := &testConnectMonitor{}
+
 	hv := testHypervisor(
 		t,
 		[]string{"ubuntu"},
-		noopMonitorFunc(),
+		func(_ string) (qmp.Monitor, error) {
+			return mon, nil
+		},
 	)
 
 	if _, err := hv.Domains(); err != nil {
@@ -141,12 +145,22 @@ func TestHypervisorDisconnect(t *testing.T) {
 			want, got)
 	}
 
+	if want, got := true, mon.connected; want != got {
+		t.Fatalf("unexpected monitor connected value:\n- want: %v\n-  got: %v",
+			want, got)
+	}
+
 	if err := hv.Disconnect(); err != nil {
 		t.Fatalf("failed to disconnect Libvirt: %v", err)
 	}
 
 	if want, got := 0, len(hv.connected); want != got {
 		t.Fatalf("unexpected number of connected domains:\n- want: %v\n-  got: %v",
+			want, got)
+	}
+
+	if want, got := false, mon.connected; want != got {
+		t.Fatalf("unexpected monitor connected value:\n- want: %v\n-  got: %v",
 			want, got)
 	}
 }
@@ -168,6 +182,21 @@ func (noopMonitor) Connect() error                    { return nil }
 func (noopMonitor) Disconnect() error                 { return nil }
 func (noopMonitor) Run(_ []byte) ([]byte, error)      { return nil, nil }
 func (noopMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
+
+type testConnectMonitor struct {
+	connected bool
+	noopMonitor
+}
+
+func (m *testConnectMonitor) Connect() error {
+	m.connected = true
+	return nil
+}
+
+func (m *testConnectMonitor) Disconnect() error {
+	m.connected = false
+	return nil
+}
 
 func testHypervisor(
 	t *testing.T,
