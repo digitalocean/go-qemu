@@ -106,7 +106,14 @@ func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
 // cause the returned event channel to be closed.
 func (mon *Libvirt) Events() (<-chan Event, error) {
 	stream := make(chan Event)
-	cmd := exec.Command("virsh", "qemu-monitor-event", "--loop", mon.domain)
+	cmd := exec.Command(
+		"virsh",
+		"-c",
+		mon.url.String(),
+		"qemu-monitor-event",
+		"--loop",
+		mon.domain,
+	)
 
 	output, err := cmd.StdoutPipe()
 	if err != nil {
