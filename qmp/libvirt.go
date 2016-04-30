@@ -25,6 +25,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/digitalocean/go-qemu/internal/shellexec"
 )
 
 // eventFormat represents QEMU event JSON formatting.
@@ -58,12 +60,14 @@ type Libvirt struct {
 	domain     string
 	url        *url.URL
 	disconnect chan error
+
+	cmd shellexec.Command
 }
 
 // Connect sets up a QEMU QMP connection via libvirt's QEMU monitor socket.
 // An error is returned if the libvirt daemon is unreachable.
 func (mon Libvirt) Connect() error {
-	_, err := Virsh(mon.url.String(), "connect")
+	_, err := Virsh(mon.cmd, mon.url.String(), "connect")
 	return err
 }
 
@@ -83,7 +87,13 @@ func (mon *Libvirt) Disconnect() error {
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
 func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
-	raw, err := Virsh(mon.url.String(), "qemu-monitor-command", mon.domain, string(cmd))
+	raw, err := Virsh(
+		mon.cmd,
+		mon.url.String(),
+		"qemu-monitor-command",
+		mon.domain,
+		string(cmd),
+	)
 	if err != nil {
 		return raw, err
 	}
@@ -106,7 +116,14 @@ func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
 // cause the returned event channel to be closed.
 func (mon *Libvirt) Events() (<-chan Event, error) {
 	stream := make(chan Event)
-	cmd := exec.Command("virsh", "qemu-monitor-event", "--loop", mon.domain)
+	cmd := mon.cmd.Prepare(
+		"virsh",
+		"-c",
+		mon.url.String(),
+		"qemu-monitor-event",
+		"--loop",
+		mon.domain,
+	)
 
 	output, err := cmd.StdoutPipe()
 	if err != nil {
@@ -120,14 +137,13 @@ func (mon *Libvirt) Events() (<-chan Event, error) {
 	go func() {
 		<-mon.disconnect
 
-		if err := cmd.Process.Kill(); err != nil {
+		if err := cmd.Kill(); err != nil {
 			mon.disconnect <- err
 			return
 		}
 
 		// Must wait after killing process to avoid creating zombie processes
-		_, err := cmd.Process.Wait()
-		mon.disconnect <- err
+		mon.disconnect <- cmd.Wait()
 	}()
 
 	go streamEvents(output, stream)
@@ -147,10 +163,14 @@ func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
 		return nil, err
 	}
 
+	// Shell out to virsh to perform management actions
+	cmd := &shellexec.SystemCommand{}
+
 	monitor := &Libvirt{
 		url:        u,
 		domain:     domain,
 		disconnect: make(chan error, 1),
+		cmd:        cmd,
 	}
 
 	return monitor, nil
@@ -159,9 +179,9 @@ func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
 // TODO(mdlayher): move Virsh function to internal/libvirt or similar.
 
 // Virsh is a wrapper for shelling out to the `virsh` executable.
-func Virsh(url string, args ...string) ([]byte, error) {
+func Virsh(command shellexec.Command, url string, args ...string) ([]byte, error) {
 	args = append([]string{"-c", url}, args...)
-	cmd := exec.Command("virsh", args...)
+	cmd := command.Prepare("virsh", args...)
 
 	stdout, err := cmd.Output()
 	if err != nil {
