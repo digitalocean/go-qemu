@@ -14,10 +14,7 @@
 
 package shellexec
 
-import (
-	"io"
-	"testing"
-)
+import "testing"
 
 func TestSystemPreparer(t *testing.T) {
 	testHelloWorldOutput(
@@ -53,7 +50,8 @@ type customPreparer struct{}
 
 func (p *customPreparer) Prepare(_ string, _ ...string) Command {
 	return &customCommand{
-		out: []byte("hello world\n"),
+		out:     []byte("hello world\n"),
+		Command: NoopCommand(),
 	}
 }
 
@@ -61,19 +59,9 @@ var _ Command = &customCommand{}
 
 type customCommand struct {
 	out []byte
-	noopCommand
+	Command
 }
 
 func (cmd *customCommand) Output() ([]byte, error) {
 	return cmd.out, nil
 }
-
-var _ Command = &noopCommand{}
-
-type noopCommand struct{}
-
-func (noopCommand) Kill() error                        { return nil }
-func (noopCommand) Output() ([]byte, error)            { return nil, nil }
-func (noopCommand) Start() error                       { return nil }
-func (noopCommand) StdoutPipe() (io.ReadCloser, error) { return nil, nil }
-func (noopCommand) Wait() error                        { return nil }

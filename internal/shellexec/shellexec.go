@@ -61,3 +61,21 @@ type systemCommand struct {
 func (cmd *systemCommand) Kill() error {
 	return cmd.Cmd.Process.Kill()
 }
+
+// NoopCommand returns a Command which does nothing and returns no error
+// for all Command methods.
+//
+// The returned Command should only be used in tests.
+func NoopCommand() Command {
+	return &noopCommand{}
+}
+
+var _ Command = &noopCommand{}
+
+type noopCommand struct{}
+
+func (noopCommand) Kill() error                        { return nil }
+func (noopCommand) Output() ([]byte, error)            { return nil, nil }
+func (noopCommand) Start() error                       { return nil }
+func (noopCommand) StdoutPipe() (io.ReadCloser, error) { return nil, nil }
+func (noopCommand) Wait() error                        { return nil }
