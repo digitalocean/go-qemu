@@ -23,6 +23,10 @@ import (
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
+// ExampleStub exists to prevent godoc from treating this as a "whole-file"
+// example, and showing the code for the unexported exampleMonitor type.
+func ExampleStub() {}
+
 // This example demonstrates how to use qemu.NewDomain with a qmp.Monitor to
 // perform actions on a Domain.
 //
@@ -131,7 +135,6 @@ func (mon *exampleMonitor) runQueryCommands() ([]byte, error) {
 }
 
 func (mon *exampleMonitor) runQueryVersion() ([]byte, error) {
-
 	var response struct {
 		ID     string      `json:"id"`
 		Return qmp.Version `json:"return"`
