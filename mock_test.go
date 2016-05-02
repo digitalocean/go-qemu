@@ -63,6 +63,10 @@ func (mm mockMonitor) Run(cmd []byte) ([]byte, error) {
 		return mockSuccessJSON, nil
 	}
 
+	if strings.Contains(string(cmd), "screendump") {
+		return mockSuccessJSON, nil
+	}
+
 	if strings.Contains(string(cmd), "block-commit") {
 		if mm.activeJobs {
 			return []byte(`{"id":"libvirt-00","error":{"class":"GenericError","desc":""}}`), errors.New("no")
