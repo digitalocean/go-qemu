@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/digitalocean/go-qemu/internal/shellexec"
+	"github.com/digitalocean/go-qemu/internal/virsh"
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
@@ -64,7 +65,7 @@ func NewLibvirtDriver(uri string) (*LibvirtDriver, error) {
 
 // virshList shells out to 'virsh list --all --name' to produce a list of domain names.
 func (d *LibvirtDriver) virshList() ([]string, error) {
-	out, err := qmp.Virsh(
+	out, err := virsh.Virsh(
 		d.prep,
 		d.uri.String(),
 		"list",
