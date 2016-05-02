@@ -18,7 +18,12 @@ package qemu
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/digitalocean/go-qemu/qmp"
 )
@@ -36,6 +41,8 @@ type Domain struct {
 	connect    chan chan qmp.Event
 	disconnect chan chan qmp.Event
 	listeners  []chan qmp.Event
+
+	tempFileName func(domainName string, method string) string
 }
 
 // Close cleans up internal resources of a Domain.  Close must be called
@@ -211,6 +218,34 @@ func (d *Domain) Run(c qmp.Cmd) ([]byte, error) {
 	return d.m.Run(cmd)
 }
 
+// ScreenDump captures the domain's screen and creates an output PPM image
+// stream.  ScreenDump will only work if the Domain resides on a local
+// hypervisor; not a remote one connected over SSH or TCP socket.
+//
+// If needed, a PPM image can be decoded using Go's package image and a
+// PPM decoder, such as https://godoc.org/github.com/jbuchbinder/gopnm.
+func (d *Domain) ScreenDump() (io.ReadCloser, error) {
+	// Since QEMU only allows capturing output to a file, we create a
+	// temporary file and use it for the screendump, providing a stream
+	// to it on return which can be used with anything that accepts
+	// io.Reader.
+	name := d.tempFileName(d.Name, "screendump")
+
+	cmd := qmp.Cmd{
+		Execute: "screendump",
+		Args: map[string]string{
+			"filename": name,
+		},
+	}
+	if _, err := d.Run(cmd); err != nil {
+		return nil, err
+	}
+
+	// Automatically remove temporary file when the Close method
+	// is called.
+	return newRemoveFileReadCloser(name)
+}
+
 // Status represents the current status of the domain.
 type Status string
 
@@ -372,6 +407,19 @@ func NewDomain(m qmp.Monitor, name string) (*Domain, error) {
 		connect:    make(chan chan qmp.Event),
 		disconnect: make(chan chan qmp.Event),
 		listeners:  []chan qmp.Event{},
+
+		// By default, try to generate decently random file names
+		// for temporary files.
+		tempFileName: func(domainName string, method string) string {
+			return filepath.Join(
+				os.TempDir(),
+				fmt.Sprintf("go-qemu-%s-%s-%d",
+					domainName,
+					method,
+					time.Now().UnixNano(),
+				),
+			)
+		},
 	}
 
 	// start event broadcast
