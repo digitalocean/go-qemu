@@ -27,8 +27,8 @@ var _ Driver = &LibvirtDriver{}
 // A LibvirtDriver is a QEMU QMP monitor driver which utilizes libvirt by
 // shelling out to 'virsh'.
 type LibvirtDriver struct {
-	uri *url.URL
-	cmd shellexec.Command
+	uri  *url.URL
+	prep shellexec.Preparer
 }
 
 // NewMonitor creates a new qmp.Monitor using libvirt with 'virsh'.
@@ -54,18 +54,18 @@ func NewLibvirtDriver(uri string) (*LibvirtDriver, error) {
 	}
 
 	// Shell out to virsh to perform management actions
-	cmd := &shellexec.SystemCommand{}
+	prep := &shellexec.SystemPreparer{}
 
 	return &LibvirtDriver{
-		uri: u,
-		cmd: cmd,
+		uri:  u,
+		prep: prep,
 	}, nil
 }
 
 // virshList shells out to 'virsh list --all --name' to produce a list of domain names.
 func (d *LibvirtDriver) virshList() ([]string, error) {
 	out, err := qmp.Virsh(
-		d.cmd,
+		d.prep,
 		d.uri.String(),
 		"list",
 		"--all",

@@ -21,13 +21,14 @@ import (
 	"os/exec"
 )
 
+// A Preparer can prepare a Command for execution using the input binary
+// name and arguments.
+type Preparer interface {
+	Prepare(name string, args ...string) Command
+}
+
 // A Command is a command which is typically executed by shelling out.
 type Command interface {
-	// Prepare copies a Command and prepares it for use with the input binary
-	// name and arguments.
-	Prepare(name string, args ...string) Command
-
-	// Standard methods used by os/exec.Command.
 	Kill() error
 	Output() ([]byte, error)
 	Start() error
@@ -35,21 +36,28 @@ type Command interface {
 	Wait() error
 }
 
-var _ Command = &SystemCommand{}
+var _ Preparer = &SystemPreparer{}
 
-// A SystemCommand is a wrapper type for os/exec.Command.
-type SystemCommand struct {
+// A SystemPreparer is a Preparer which prepares Commands that shells out
+// using package os/exec.
+type SystemPreparer struct{}
+
+// Prepare prepares a Command which shells out to a binary with arguments,
+// using package os/exec.
+func (SystemPreparer) Prepare(name string, args ...string) Command {
+	return &systemCommand{
+		Cmd: exec.Command(name, args...),
+	}
+}
+
+var _ Command = &systemCommand{}
+
+// A systemCommand is a Command which shells out to perform actions.
+type systemCommand struct {
 	*exec.Cmd
 }
 
-// Prepare prepares a copy of a SystemCommand for shelling out to
-// a binary with arguments.
-func (cmd SystemCommand) Prepare(name string, args ...string) Command {
-	cmd.Cmd = exec.Command(name, args...)
-	return &cmd
-}
-
-// Kill kills the process wrapped by an os/exec.Command.
-func (cmd *SystemCommand) Kill() error {
+// Kill kills the process wrapped by the systemCommand.
+func (cmd *systemCommand) Kill() error {
 	return cmd.Cmd.Process.Kill()
 }
