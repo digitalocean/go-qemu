@@ -14,7 +14,9 @@
 
 package shellexec
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestSystemPreparer(t *testing.T) {
 	testHelloWorldOutput(
