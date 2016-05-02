@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"os/exec"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/digitalocean/go-qemu/internal/shellexec"
+	"github.com/digitalocean/go-qemu/internal/virsh"
 )
 
 // eventFormat represents QEMU event JSON formatting.
@@ -67,7 +67,7 @@ type Libvirt struct {
 // Connect sets up a QEMU QMP connection via libvirt's QEMU monitor socket.
 // An error is returned if the libvirt daemon is unreachable.
 func (mon Libvirt) Connect() error {
-	_, err := Virsh(mon.prep, mon.url.String(), "connect")
+	_, err := virsh.Virsh(mon.prep, mon.url.String(), "connect")
 	return err
 }
 
@@ -87,7 +87,7 @@ func (mon *Libvirt) Disconnect() error {
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
 func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
-	raw, err := Virsh(
+	raw, err := virsh.Virsh(
 		mon.prep,
 		mon.url.String(),
 		"qemu-monitor-command",
@@ -174,26 +174,6 @@ func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
 	}
 
 	return monitor, nil
-}
-
-// TODO(mdlayher): move Virsh function to internal/libvirt or similar.
-
-// Virsh is a wrapper for shelling out to the `virsh` executable.
-func Virsh(prep shellexec.Preparer, url string, args ...string) ([]byte, error) {
-	args = append([]string{"-c", url}, args...)
-	cmd := prep.Prepare("virsh", args...)
-
-	stdout, err := cmd.Output()
-	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			msg := strings.TrimPrefix(string(ee.Stderr), "error: ")
-			return stdout, errors.New(strings.ToLower(msg))
-		}
-
-		return stdout, err
-	}
-
-	return stdout, nil
 }
 
 // streamEvents monitors the provided io.Reader, passing Events
