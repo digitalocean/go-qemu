@@ -61,13 +61,13 @@ type Libvirt struct {
 	url        *url.URL
 	disconnect chan error
 
-	cmd shellexec.Command
+	prep shellexec.Preparer
 }
 
 // Connect sets up a QEMU QMP connection via libvirt's QEMU monitor socket.
 // An error is returned if the libvirt daemon is unreachable.
 func (mon Libvirt) Connect() error {
-	_, err := Virsh(mon.cmd, mon.url.String(), "connect")
+	_, err := Virsh(mon.prep, mon.url.String(), "connect")
 	return err
 }
 
@@ -88,7 +88,7 @@ func (mon *Libvirt) Disconnect() error {
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
 func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
 	raw, err := Virsh(
-		mon.cmd,
+		mon.prep,
 		mon.url.String(),
 		"qemu-monitor-command",
 		mon.domain,
@@ -116,7 +116,7 @@ func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
 // cause the returned event channel to be closed.
 func (mon *Libvirt) Events() (<-chan Event, error) {
 	stream := make(chan Event)
-	cmd := mon.cmd.Prepare(
+	cmd := mon.prep.Prepare(
 		"virsh",
 		"-c",
 		mon.url.String(),
@@ -164,13 +164,13 @@ func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
 	}
 
 	// Shell out to virsh to perform management actions
-	cmd := &shellexec.SystemCommand{}
+	prep := &shellexec.SystemPreparer{}
 
 	monitor := &Libvirt{
 		url:        u,
 		domain:     domain,
 		disconnect: make(chan error, 1),
-		cmd:        cmd,
+		prep:       prep,
 	}
 
 	return monitor, nil
@@ -179,9 +179,9 @@ func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
 // TODO(mdlayher): move Virsh function to internal/libvirt or similar.
 
 // Virsh is a wrapper for shelling out to the `virsh` executable.
-func Virsh(command shellexec.Command, url string, args ...string) ([]byte, error) {
+func Virsh(prep shellexec.Preparer, url string, args ...string) ([]byte, error) {
 	args = append([]string{"-c", url}, args...)
-	cmd := command.Prepare("virsh", args...)
+	cmd := prep.Prepare("virsh", args...)
 
 	stdout, err := cmd.Output()
 	if err != nil {

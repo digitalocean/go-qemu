@@ -15,19 +15,26 @@
 package shellexec
 
 import (
-	"reflect"
+	"io"
 	"testing"
 )
 
-func TestSystemCommand(t *testing.T) {
-	sys := &SystemCommand{}
+func TestSystemPreparer(t *testing.T) {
+	testHelloWorldOutput(
+		t,
+		&SystemPreparer{},
+	)
+}
 
-	cmd := sys.Prepare("echo", "hello", "world")
+func TestCustomPreparer(t *testing.T) {
+	testHelloWorldOutput(
+		t,
+		&customPreparer{},
+	)
+}
 
-	if reflect.DeepEqual(sys, cmd) {
-		t.Fatalf("Prepare should create a copy; SystemCommands should not be equal:\n- %#v\n- %#v",
-			sys, cmd)
-	}
+func testHelloWorldOutput(t *testing.T, prep Preparer) {
+	cmd := prep.Prepare("echo", "hello", "world")
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -39,3 +46,34 @@ func TestSystemCommand(t *testing.T) {
 			want, got)
 	}
 }
+
+var _ Preparer = &customPreparer{}
+
+type customPreparer struct{}
+
+func (p *customPreparer) Prepare(_ string, _ ...string) Command {
+	return &customCommand{
+		out: []byte("hello world\n"),
+	}
+}
+
+var _ Command = &customCommand{}
+
+type customCommand struct {
+	out []byte
+	noopCommand
+}
+
+func (cmd *customCommand) Output() ([]byte, error) {
+	return cmd.out, nil
+}
+
+var _ Command = &noopCommand{}
+
+type noopCommand struct{}
+
+func (noopCommand) Kill() error                        { return nil }
+func (noopCommand) Output() ([]byte, error)            { return nil, nil }
+func (noopCommand) Start() error                       { return nil }
+func (noopCommand) StdoutPipe() (io.ReadCloser, error) { return nil, nil }
+func (noopCommand) Wait() error                        { return nil }
