@@ -15,6 +15,10 @@
 package qemu
 
 import (
+	"bytes"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -256,6 +260,48 @@ func TestCommandsInvalidJSON(t *testing.T) {
 
 	if _, err := d.Commands(); err == nil {
 		t.Error("expected invalid json to cause failure")
+	}
+}
+
+func TestDomainScreenDump(t *testing.T) {
+	m := mockMonitor{}
+
+	d, err := NewDomain(m, "foo")
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Use a fixed file name generation function
+	name := filepath.Join(os.TempDir(), "test-screendump")
+	d.tempFileName = func(_ string, _ string) string {
+		return name
+	}
+
+	want := []byte("hello world")
+	if err := ioutil.WriteFile(name, want, 0666); err != nil {
+		t.Error(err)
+	}
+
+	rc, err := d.ScreenDump()
+	if err != nil {
+		t.Error(err)
+	}
+
+	got, err := ioutil.ReadAll(rc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !bytes.Equal(want, got) {
+		t.Errorf("unexpected bytes:\n- want: %v\n-  got: %v", want, got)
+	}
+
+	if err := rc.Close(); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Stat(name); !os.IsNotExist(err) {
+		t.Errorf("file should no longer exist, but got: %v", err)
 	}
 }
 
