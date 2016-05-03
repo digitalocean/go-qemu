@@ -162,6 +162,15 @@ type response struct {
 	Status  uint32
 }
 
+// libvirt error response
+type libvirtError struct {
+	Code     uint32
+	DomainID uint32
+	Padding  uint8
+	Message  string
+	Level    uint32
+}
+
 // Monitor implements LibVirt's remote procedure call protocol.
 type Monitor struct {
 	// Domain name as seen by libvirt, e.g., stage-lb-1
@@ -608,13 +617,15 @@ func encode(data interface{}) (bytes.Buffer, error) {
 
 // decodeError extracts an error message from the provider buffer.
 func decodeError(buf []byte) error {
+	var e libvirtError
+
 	dec := xdr.NewDecoder(bytes.NewReader(buf))
-	msg, _, err := dec.DecodeString()
+	_, err := dec.Decode(&e)
 	if err != nil {
 		return err
 	}
 
-	return errors.New(msg)
+	return errors.New(e.Message)
 }
 
 // decodeEvent extracts an event from the given byte slice.
