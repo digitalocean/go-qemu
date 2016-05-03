@@ -87,6 +87,7 @@ const (
 	procConnectOpen        = 1
 	procConnectClose       = 2
 	procDomainLookupByName = 23
+	procAuthList           = 66
 )
 
 // qemu procedure identifiers
@@ -261,12 +262,24 @@ func (rpc *Monitor) Connect() error {
 		return err
 	}
 
-	resp, err := rpc.request(procConnectOpen, programRemote, &buf)
+	// libvirt requires that we call auth-list prior to connecting,
+	// event when no authentication is used.
+	resp, err := rpc.request(procAuthList, programRemote, &buf)
 	if err != nil {
 		return err
 	}
 
 	r := <-resp
+	if r.Status != StatusOK {
+		return decodeError(r.Payload)
+	}
+
+	resp, err = rpc.request(procConnectOpen, programRemote, &buf)
+	if err != nil {
+		return err
+	}
+
+	r = <-resp
 	if r.Status != StatusOK {
 		return decodeError(r.Payload)
 	}
