@@ -422,7 +422,7 @@ func (rpc *Monitor) Run(cmd []byte) ([]byte, error) {
 	}
 
 	// drop QMP control characters from start and end of line
-	return data[4 : len(data)-1], err
+	return data[4 : len(data)-2], err
 }
 
 // callback sends rpc responses to their respective caller.
