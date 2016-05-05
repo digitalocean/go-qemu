@@ -429,8 +429,9 @@ func (rpc *Monitor) Run(cmd []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	// drop QMP control characters from start and end of line
-	return data[4 : len(data)-2], err
+	// drop QMP control characters from start of line, and drop
+	// any trailing NULL characters from the end
+	return bytes.TrimRight(data[4:len(data)], "\x00"), err
 }
 
 // callback sends rpc responses to their respective caller.
