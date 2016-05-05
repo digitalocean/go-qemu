@@ -304,8 +304,8 @@ func (rpc *Monitor) Connect() error {
 	return nil
 }
 
-// Disconnect shuts down communication with the libvirt server.
-// The underlying net.Conn is not closed.
+// Disconnect shuts down communication with the libvirt server
+// and closes the underlying net.Conn.
 func (rpc *Monitor) Disconnect() error {
 	// close event streams
 	for id := range rpc.events {
@@ -325,7 +325,7 @@ func (rpc *Monitor) Disconnect() error {
 		return decodeError(r.Payload)
 	}
 
-	return nil
+	return rpc.conn.Close()
 }
 
 // Events streams QEMU QMP Events.
