@@ -84,10 +84,11 @@ const (
 
 // libvirt procedure identifiers
 const (
-	procConnectOpen        = 1
-	procConnectClose       = 2
-	procDomainLookupByName = 23
-	procAuthList           = 66
+	procConnectOpen           = 1
+	procConnectClose          = 2
+	procDomainLookupByName    = 23
+	procAuthList              = 66
+	procConnectListAllDomains = 273
 )
 
 // qemu procedure identifiers
@@ -196,8 +197,15 @@ type Monitor struct {
 // The provided domain should be the name of the domain as seen
 // by libvirt, e.g., stage-lb-1.
 func New(domain string, conn net.Conn) *Monitor {
-	l := &Monitor{
-		Domain:    domain,
+	rpc := setup(conn)
+	rpc.Domain = domain
+
+	return rpc
+}
+
+// setup configures a new RPC QMP monitor.
+func setup(conn net.Conn) *Monitor {
+	rpc := &Monitor{
 		conn:      conn,
 		s:         0,
 		r:         bufio.NewReader(conn),
@@ -206,9 +214,9 @@ func New(domain string, conn net.Conn) *Monitor {
 		events:    make(map[uint32]chan *event),
 	}
 
-	go l.listen()
+	go rpc.listen()
 
-	return l
+	return rpc
 }
 
 // listen processes incoming data and routes the
