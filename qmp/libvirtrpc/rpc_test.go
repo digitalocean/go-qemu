@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"net"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -100,7 +101,7 @@ var testDomainResponse = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x17, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x01, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 
 	// domain name ("test")
@@ -120,7 +121,7 @@ var testRegisterEvent = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x04, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x02, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 	0x00, 0x00, 0x00, 0x01, // callback id
 }
@@ -131,7 +132,7 @@ var testDeregisterEvent = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x05, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x01, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 }
 
@@ -141,7 +142,7 @@ var testAuthReply = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x42, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x01, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 }
 
@@ -151,7 +152,7 @@ var testConnectReply = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x01, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x02, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 }
 
@@ -161,7 +162,7 @@ var testDisconnectReply = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x02, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x01, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 }
 
@@ -171,7 +172,7 @@ var testRunReply = []byte{
 	0x00, 0x00, 0x00, 0x01, // version
 	0x00, 0x00, 0x00, 0x01, // procedure
 	0x00, 0x00, 0x00, 0x01, // type
-	0x00, 0x00, 0x00, 0x02, // serial
+	0x00, 0x00, 0x00, 0x00, // serial
 	0x00, 0x00, 0x00, 0x00, // status
 
 	// {"return":{"qemu":{"micro":1,"minor":5,"major":2},"package":""},"id":"libvirt-53"}
@@ -214,7 +215,8 @@ var testDomain = domain{
 
 type mockLibvirt struct {
 	net.Conn
-	test net.Conn
+	test   net.Conn
+	serial uint32
 }
 
 func setupTest(t *testing.T) *mockLibvirt {
@@ -245,25 +247,34 @@ func (m *mockLibvirt) handle(conn net.Conn) {
 		case programRemote:
 			switch proc {
 			case procAuthList:
-				conn.Write(testAuthReply)
+				conn.Write(m.reply(testAuthReply))
 			case procConnectOpen:
-				conn.Write(testConnectReply)
+				conn.Write(m.reply(testConnectReply))
 			case procConnectClose:
-				conn.Write(testDisconnectReply)
+				conn.Write(m.reply(testDisconnectReply))
 			case procDomainLookupByName:
-				conn.Write(testDomainResponse)
+				conn.Write(m.reply(testDomainResponse))
 			}
 		case programQEMU:
 			switch proc {
 			case qemuConnectDomainMonitorEventRegister:
-				conn.Write(testRegisterEvent)
+				conn.Write(m.reply(testRegisterEvent))
 			case qemuConnectDomainMonitorEventDeregister:
-				conn.Write(testDeregisterEvent)
+				conn.Write(m.reply(testDeregisterEvent))
 			case qemuDomainMonitor:
-				conn.Write(testRunReply)
+				conn.Write(m.reply(testRunReply))
 			}
 		}
 	}
+}
+
+// reply automatically injects the correct serial
+// number into the provided response buffer.
+func (m *mockLibvirt) reply(buf []byte) []byte {
+	atomic.AddUint32(&m.serial, 1)
+	binary.BigEndian.PutUint32(buf[20:24], m.serial)
+
+	return buf
 }
 
 func TestNew(t *testing.T) {
