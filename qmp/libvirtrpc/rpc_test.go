@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"log"
 	"net"
 	"sync"
 	"testing"
@@ -219,25 +218,14 @@ type mockLibvirt struct {
 }
 
 func setupTest(t *testing.T) *mockLibvirt {
-	serv, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Fatal(err)
+	serv, conn := net.Pipe()
+
+	m := &mockLibvirt{
+		Conn: conn,
+		test: serv,
 	}
 
-	conn, err := net.Dial("tcp", serv.Addr().String())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	m := &mockLibvirt{Conn: conn}
-
-	go func() {
-		for {
-			conn, _ := serv.Accept()
-			m.test = conn
-			go m.handle(m.test)
-		}
-	}()
+	go m.handle(serv)
 
 	return m
 }
