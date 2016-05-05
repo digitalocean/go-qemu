@@ -361,6 +361,10 @@ func (rpc *Monitor) Events() (<-chan qmp.Event, error) {
 	}
 
 	res := <-resp
+	if res.Status != StatusOK {
+		return nil, decodeError(res.Payload)
+	}
+
 	dec := xdr.NewDecoder(bytes.NewReader(res.Payload))
 
 	cbID, _, err := dec.DecodeUint()
