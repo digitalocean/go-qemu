@@ -29,6 +29,7 @@ type Preparer interface {
 
 // A Command is a command which is typically executed by shelling out.
 type Command interface {
+	Exited() bool
 	Kill() error
 	Output() ([]byte, error)
 	Start() error
@@ -57,6 +58,11 @@ type systemCommand struct {
 	*exec.Cmd
 }
 
+// Exited reports whether the command has exited.
+func (cmd *systemCommand) Exited() bool {
+	return cmd.Cmd.ProcessState.Exited()
+}
+
 // Kill kills the process wrapped by the systemCommand.
 func (cmd *systemCommand) Kill() error {
 	return cmd.Cmd.Process.Kill()
@@ -74,6 +80,7 @@ var _ Command = &noopCommand{}
 
 type noopCommand struct{}
 
+func (noopCommand) Exited() bool                       { return false }
 func (noopCommand) Kill() error                        { return nil }
 func (noopCommand) Output() ([]byte, error)            { return nil, nil }
 func (noopCommand) Start() error                       { return nil }
