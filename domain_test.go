@@ -463,3 +463,39 @@ func TestSupportedMonitorFailure(t *testing.T) {
 		t.Error("expected monitor failure")
 	}
 }
+
+func TestEvents(t *testing.T) {
+	m := &mockMonitor{}
+
+	d, err := NewDomain(m, "foo")
+	if err != nil {
+		t.Error(err)
+	}
+
+	events, done, err := d.Events()
+	if err != nil {
+		t.Error(err)
+	}
+
+	select {
+	case <-events:
+		done <- struct{}{}
+	case <-time.After(time.Second * 2):
+		t.Error("expected event")
+	}
+}
+
+func TestEventsUnsupported(t *testing.T) {
+	m := &mockMonitor{}
+	m.eventsUnsupported = true
+
+	d, err := NewDomain(m, "foo")
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, _, err = d.Events()
+	if err != qmp.ErrEventsNotSupported {
+		t.Errorf("expected qmp.ErrEventsNotSupported, got %s", err.Error())
+	}
+}

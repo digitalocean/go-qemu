@@ -42,6 +42,8 @@ type Domain struct {
 	disconnect chan chan qmp.Event
 	listeners  []chan qmp.Event
 
+	eventsUnsupported bool
+
 	tempFileName func(domainName string, method string) string
 }
 
@@ -333,7 +335,11 @@ func (d *Domain) Version() (string, error) {
 // Two channels are returned, the first contains events emitted by the domain.
 // The second is used to signal completion of event processing.
 // It is the responsibility of the caller to always signal when finished.
-func (d *Domain) Events() (chan qmp.Event, chan struct{}) {
+func (d *Domain) Events() (chan qmp.Event, chan struct{}, error) {
+	if d.eventsUnsupported {
+		return nil, nil, qmp.ErrEventsNotSupported
+	}
+
 	stream := make(chan qmp.Event)
 	done := make(chan struct{})
 
@@ -348,13 +354,19 @@ func (d *Domain) Events() (chan qmp.Event, chan struct{}) {
 	// add stream to broadcast
 	d.connect <- stream
 
-	return stream, done
+	return stream, done, nil
 }
 
 // listenAndServe handles a domain's event broadcast service.
 func (d *Domain) listenAndServe() error {
 	stream, err := d.m.Events()
 	if err != nil {
+		// let Event() inform the user events are not supported
+		if err == qmp.ErrEventsNotSupported {
+			d.eventsUnsupported = true
+			return nil
+		}
+
 		return err
 	}
 
