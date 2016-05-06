@@ -17,8 +17,13 @@
 package qmp
 
 import (
+	"errors"
 	"fmt"
 )
+
+// ErrEventsNotSupported is returned by Events() if event streams
+// are unsupported by either QEMU or libvirt.
+var ErrEventsNotSupported = errors.New("event monitor is not supported")
 
 // Monitor represents a QEMU Machine Protocol socket.
 // See: http://wiki.qemu.org/QMP

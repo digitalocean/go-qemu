@@ -134,6 +134,12 @@ func (mon *Libvirt) Events() (<-chan Event, error) {
 		return nil, err
 	}
 
+	// older versions of libvirt do not support 'qemu-monitor-event'
+	if cmd.Exited() {
+		close(stream)
+		return nil, ErrEventsNotSupported
+	}
+
 	go func() {
 		<-mon.disconnect
 
