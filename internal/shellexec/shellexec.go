@@ -60,6 +60,10 @@ type systemCommand struct {
 
 // Exited reports whether the command has exited.
 func (cmd *systemCommand) Exited() bool {
+	if cmd.Cmd.ProcessState == nil {
+		return true
+	}
+
 	return cmd.Cmd.ProcessState.Exited()
 }
 
