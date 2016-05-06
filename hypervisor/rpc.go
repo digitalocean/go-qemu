@@ -41,7 +41,7 @@ func (d *RPCDriver) DomainNames() ([]string, error) {
 	return d.h.DomainNames()
 }
 
-// NewLibvirtDriver configures a RPCDriver.
+// NewRPCDriver configures a RPCDriver.
 // The provided newConn function should return an established
 // network connection with the target libvirt daemon.
 func NewRPCDriver(newConn func() (net.Conn, error)) *RPCDriver {
