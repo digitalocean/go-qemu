@@ -230,7 +230,9 @@ func (rpc *Monitor) listen() {
 		// response packet length
 		length, err := pktlen(rpc.r)
 		if err != nil {
-			if err == io.EOF {
+			// When the underlying connection EOFs or is closed, stop
+			// this goroutine
+			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
 				return
 			}
 
