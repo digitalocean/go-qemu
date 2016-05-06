@@ -26,12 +26,13 @@ import (
 var mockSuccessJSON = []byte(`{"return":{},"id":"libvirt-00"}`)
 
 type mockMonitor struct {
-	activeJobs   bool
-	alwaysFail   bool
-	eventErrors  bool
-	eventTimeout bool
-	invalidJSON  bool
-	poweredOff   bool
+	activeJobs        bool
+	alwaysFail        bool
+	eventErrors       bool
+	eventTimeout      bool
+	invalidJSON       bool
+	poweredOff        bool
+	eventsUnsupported bool
 }
 
 func (mm mockMonitor) Connect() error {
@@ -129,12 +130,15 @@ func (mm mockMonitor) runQueryCommand(cmd []byte) ([]byte, bool) {
 }
 
 func (mm mockMonitor) Events() (<-chan qmp.Event, error) {
-	c := make(chan qmp.Event)
-
 	if mm.alwaysFail {
-		return c, errors.New("fail")
+		return nil, errors.New("fail")
 	}
 
+	if mm.eventsUnsupported {
+		return nil, qmp.ErrEventsNotSupported
+	}
+
+	c := make(chan qmp.Event)
 	go func() {
 		events := []string{blockJobReady, blockJobCompleted}
 

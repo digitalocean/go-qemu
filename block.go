@@ -227,13 +227,17 @@ func (bd BlockDevice) Snapshot(d *Domain, overlay string) error {
 func waitForSignal(d *Domain, signal string, timeout time.Duration, fn func() error) error {
 	// "done" signal must be sent in both the error and non-error case, to
 	// avoid leaking goroutines.
-	events, done := d.Events()
-	if err := fn(); err != nil {
+	events, done, err := d.Events()
+	if err != nil {
+		return err
+	}
+
+	if err = fn(); err != nil {
 		done <- struct{}{}
 		return err
 	}
 
-	err := waitForJob(events, signal, timeout)
+	err = waitForJob(events, signal, timeout)
 	done <- struct{}{}
 	return err
 }
