@@ -460,20 +460,22 @@ func TestEvents(t *testing.T) {
 		t.Error(err)
 	}
 
-	// send an event
 	go func() {
-		conn.test.Write(append(testEventHeader, testEvent...))
+		var e qmp.Event
+		select {
+		case e = <-stream:
+		case <-time.After(time.Second * 1):
+			t.Error("expected event, received timeout")
+		}
+
+		expected := "drive-ide0-0-0"
+		if e.Data["device"] != expected {
+			t.Errorf("expected device %q, got %q", expected, e.Data["device"])
+		}
 	}()
 
-	var e qmp.Event
-	select {
-	case e = <-stream:
-	case <-time.After(time.Second * 1):
-		t.Error("expected event, received timeout")
-	}
-
-	expected := "drive-ide0-0-0"
-	if e.Data["device"] != expected {
-		t.Errorf("expected device %q, got %q", expected, e.Data["device"])
-	}
+	// send an event to the listener goroutine; since this will
+	// block, the listener should get scheduled to receive the
+	// value immediately
+	conn.test.Write(append(testEventHeader, testEvent...))
 }
