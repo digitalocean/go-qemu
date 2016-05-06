@@ -136,6 +136,7 @@ func (mon *Libvirt) Events() (<-chan Event, error) {
 
 	// older versions of libvirt do not support 'qemu-monitor-event'
 	if cmd.Exited() {
+		_ = cmd.Wait()
 		close(stream)
 		return nil, ErrEventsNotSupported
 	}
