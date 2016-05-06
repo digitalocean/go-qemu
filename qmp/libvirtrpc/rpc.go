@@ -24,6 +24,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -32,6 +33,9 @@ import (
 )
 
 var _ qmp.Monitor = &Monitor{}
+
+// ErrUnsupported is returned if a procedure is not supported by libvirt
+var ErrUnsupported = errors.New("unsupported procedure requested")
 
 // request and response types
 const (
@@ -362,6 +366,11 @@ func (rpc *Monitor) Events() (<-chan qmp.Event, error) {
 
 	res := <-resp
 	if res.Status != StatusOK {
+		err := decodeError(res.Payload)
+		if err == ErrUnsupported {
+			return nil, qmp.ErrEventsNotSupported
+		}
+
 		return nil, decodeError(res.Payload)
 	}
 
@@ -636,6 +645,10 @@ func decodeError(buf []byte) error {
 	_, err := dec.Decode(&e)
 	if err != nil {
 		return err
+	}
+
+	if strings.Contains(e.Message, "unknown procedure") {
+		return ErrUnsupported
 	}
 
 	return errors.New(e.Message)
