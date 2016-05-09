@@ -312,6 +312,18 @@ func (d *Domain) Supported(cmd string) (bool, error) {
 	return false, nil
 }
 
+// SystemPowerdown sends a system power down event to the domain.
+func (d *Domain) SystemPowerdown() error {
+	_, err := d.Run(qmp.Cmd{Execute: "system_powerdown"})
+	return err
+}
+
+// SystemReset sends a system reset event to the domain.
+func (d *Domain) SystemReset() error {
+	_, err := d.Run(qmp.Cmd{Execute: "system_reset"})
+	return err
+}
+
 // Version returns the domain's QEMU version.
 func (d *Domain) Version() (string, error) {
 	raw, err := d.Run(qmp.Cmd{Execute: "query-version"})

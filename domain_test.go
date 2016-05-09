@@ -464,6 +464,32 @@ func TestSupportedMonitorFailure(t *testing.T) {
 	}
 }
 
+func TestSystemPowerdown(t *testing.T) {
+	m := mockMonitor{}
+
+	d, err := NewDomain(m, "foo")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := d.SystemPowerdown(); err != nil {
+		t.Errorf("error powering down domain: %v", err)
+	}
+}
+
+func TestSystemReset(t *testing.T) {
+	m := mockMonitor{}
+
+	d, err := NewDomain(m, "foo")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := d.SystemReset(); err != nil {
+		t.Errorf("error resetting domain: %v", err)
+	}
+}
+
 func TestEvents(t *testing.T) {
 	m := &mockMonitor{}
 
