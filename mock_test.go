@@ -76,6 +76,10 @@ func (mm mockMonitor) Run(cmd []byte) ([]byte, error) {
 		return mockSuccessJSON, nil
 	}
 
+	if strings.Contains(string(cmd), "system_powerdown") || strings.Contains(string(cmd), "system_reset") {
+		return mockSuccessJSON, nil
+	}
+
 	if out, ok := mm.runBlockCommand(cmd); ok {
 		return out, nil
 	}
