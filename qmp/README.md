@@ -7,12 +7,37 @@ Package `qmp` enables interaction with QEMU instances via the QEMU Machine Proto
 
 ### Libvirt
 
-Accessing an instance's monitor socket is available by proxying requests through the libvirt daemon.
-Support for direct interaction with an instance's unix socket can be added should the need arise.
+If your environment is managed by Libvirt, QMP interaction must be proxied through the Libvirt daemon. This can be be done through two available drivers:
+
+#### RPC
+
+The RPC driver provides a pure Go implementation of Libvirt's RPC protocol.
+
+```go
+//conn, err := net.DialTimeout("unix", "/var/run/libvirt/libvirt-sock", 2*time.Second)
+conn, err := net.DialTimeout("tcp", "192.168.1.1:16509", 2*time.Second)
+monitor := libvirtrpc.New("stage-lb-1", conn)
+```
+
+#### virsh
+
+A connection to the monitor socket is provided by proxing requests through the `virsh` executable.
+
+```go
+monitor, err := qmp.NewLibvirtMonitor("qemu:///system", "stage-lb-1")
+```
+
+### Socket
+
+If your QEMU instances are not managed by libvirt, direct communication over its UNIX socket is available.
+
+```go
+monitor, err := qmp.NewSocketMonitor("unix", "/var/lib/qemu/example.monitor", 2*time.Second)
+```
 
 ## Examples
 
-The following examples provide a brief overview of QMP usage.
+Using the above to establish a new `qmp.Monitor`, the following examples provide a brief overview of QMP usage.
 
 _error checking omitted for the sake of brevity._
 
@@ -27,8 +52,8 @@ type StatusResult struct {
 	} `json:"return"`
 }
 
-monitor, _ := NewLibvirtMonitor("qemu:///system", "example")
 monitor.Connect()
+defer monitor.Disconnect()
 
 cmd := []byte(`{ "execute": "query-status" }`)
 raw, _ := monitor.Run(cmd)
@@ -46,8 +71,8 @@ running
 ### Event Monitor
 
 ```go
-monitor, _ := NewLibvirtMonitor("qemu:///system", "example")
 monitor.Connect()
+defer monitor.Disconnect()
 
 stream, _ := monitor.Events()
 for e := range stream {
