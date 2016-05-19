@@ -153,6 +153,17 @@ var testDomainsReply = []byte{
 	0x00, 0x00, 0x02,
 }
 
+var testLibVersionReply = []byte{
+	0x00, 0x00, 0x00, 0x24, // length
+	0x20, 0x00, 0x80, 0x86, // program
+	0x00, 0x00, 0x00, 0x01, // version
+	0x00, 0x00, 0x00, 0x9d, // procedure
+	0x00, 0x00, 0x00, 0x01, // type
+	0x00, 0x00, 0x00, 0x00, // serial
+	0x00, 0x00, 0x00, 0x00, // status
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x4d, 0xfc, // version (1003004)
+}
+
 type mockLibvirt struct {
 	net.Conn
 	test   net.Conn
@@ -200,6 +211,8 @@ func (m *mockLibvirt) handleRemote(procedure uint32, conn net.Conn) {
 		conn.Write(m.reply(testConnectReply))
 	case procConnectClose:
 		conn.Write(m.reply(testDisconnectReply))
+	case procConnectGetLibVersion:
+		conn.Write(m.reply(testLibVersionReply))
 	case procDomainLookupByName:
 		conn.Write(m.reply(testDomainResponse))
 	case procConnectListAllDomains:

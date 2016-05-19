@@ -45,3 +45,17 @@ func TestDomainNames(t *testing.T) {
 		}
 	}
 }
+
+func TestVersion(t *testing.T) {
+	h := NewHypervisor(hvConn)
+
+	version, err := h.Version()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := "1.3.4"
+	if version != expected {
+		t.Errorf("expected version %q, got %q", expected, version)
+	}
+}
