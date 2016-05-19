@@ -92,6 +92,7 @@ const (
 	procConnectClose          = 2
 	procDomainLookupByName    = 23
 	procAuthList              = 66
+	procConnectGetLibVersion  = 157
 	procConnectListAllDomains = 273
 )
 
