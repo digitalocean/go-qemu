@@ -49,6 +49,12 @@ type Driver interface {
 	DomainNames() ([]string, error)
 }
 
+// A Versioner is a Driver that is able to report its version on the
+// Hypervisor.
+type Versioner interface {
+	Version() (string, error)
+}
+
 // Domains retrieves all virtual machines which reside on a given hypervisor,
 // connecting to the monitor socket of each machine.
 //
