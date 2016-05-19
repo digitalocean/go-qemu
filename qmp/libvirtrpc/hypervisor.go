@@ -16,6 +16,7 @@ package libvirtrpc
 
 import (
 	"bytes"
+	"fmt"
 	"net"
 
 	"github.com/davecgh/go-xdr/xdr2"
@@ -52,7 +53,7 @@ func (h *Hypervisor) DomainNames() ([]string, error) {
 	}()
 
 	// these are the flags as passed by `virsh`, defined in:
-	// src/remote/remote_protocol.x # connect_remote_list_all_domains_args
+	// src/remote/remote_protocol.x # remote_connect_list_all_domains_args
 	req := struct {
 		NeedResults uint32
 		Flags       uint32
@@ -93,4 +94,55 @@ func (h *Hypervisor) DomainNames() ([]string, error) {
 	}
 
 	return domains, nil
+}
+
+// Version returns the version of the libvirt daemon.
+func (h *Hypervisor) Version() (string, error) {
+	conn, err := h.newConn()
+	if err != nil {
+		return "", err
+	}
+
+	rpc := setup(conn)
+	if err := rpc.Connect(); err != nil {
+		conn.Close()
+		return "", err
+	}
+	defer func() {
+		rpc.Disconnect()
+		conn.Close()
+	}()
+
+	resp, err := rpc.request(procConnectGetLibVersion, programRemote, nil)
+	if err != nil {
+		return "", err
+	}
+
+	r := <-resp
+	if r.Status != StatusOK {
+		return "", decodeError(r.Payload)
+	}
+
+	result := struct {
+		Version uint64
+	}{}
+
+	dec := xdr.NewDecoder(bytes.NewReader(r.Payload))
+	_, err = dec.Decode(&result)
+	if err != nil {
+		return "", err
+	}
+
+	// The version is provided as an int following this formula:
+	// version * 1,000,000 + minor * 1000 + micro
+	// See src/libvirt-host.c # virConnectGetLibVersion
+	version := result.Version
+	major := version / 1000000
+	version %= 1000000
+	minor := version / 1000
+	version %= 1000
+	micro := version
+
+	versionString := fmt.Sprintf("%d.%d.%d", major, minor, micro)
+	return versionString, nil
 }
