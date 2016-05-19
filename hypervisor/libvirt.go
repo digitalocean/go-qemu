@@ -24,6 +24,7 @@ import (
 )
 
 var _ Driver = &LibvirtDriver{}
+var _ Versioner = &LibvirtDriver{}
 
 // A LibvirtDriver is a QEMU QMP monitor driver which utilizes libvirt by
 // shelling out to 'virsh'.
@@ -41,6 +42,21 @@ func (d *LibvirtDriver) NewMonitor(domain string) (qmp.Monitor, error) {
 // 'virsh'.
 func (d *LibvirtDriver) DomainNames() ([]string, error) {
 	return d.virshList()
+}
+
+// Version returns the version string for libvirt on the hypervisor.
+func (d *LibvirtDriver) Version() (string, error) {
+	out, err := virsh.Virsh(
+		d.prep,
+		d.uri.String(),
+		"--version",
+	)
+	if err != nil {
+		return "", err
+	}
+
+	// Strip all newlines down to the version string
+	return strings.TrimSpace(string(out)), nil
 }
 
 // NewLibvirtDriver configures a LibvirtDriver using the provided hypervisor URI.

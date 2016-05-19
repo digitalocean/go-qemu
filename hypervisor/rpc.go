@@ -22,6 +22,7 @@ import (
 )
 
 var _ Driver = &RPCDriver{}
+var _ Versioner = &RPCDriver{}
 
 // RPCDriver is a QEMU QMP monitor driver which
 // communicates via libvirt's RPC interface.
@@ -39,6 +40,11 @@ func (d *RPCDriver) NewMonitor(domain string) (qmp.Monitor, error) {
 // DomainNames retrieves all hypervisor domain names using libvirt RPC.
 func (d *RPCDriver) DomainNames() ([]string, error) {
 	return d.h.DomainNames()
+}
+
+// Version returns the version string for the libvirt daemon.
+func (d *RPCDriver) Version() (string, error) {
+	return d.h.Version()
 }
 
 // NewRPCDriver configures a RPCDriver.
