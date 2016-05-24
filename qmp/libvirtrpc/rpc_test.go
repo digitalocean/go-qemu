@@ -15,109 +15,64 @@
 package libvirtrpc
 
 import (
-	"bytes"
 	"encoding/json"
-	"sync"
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-xdr/xdr2"
+	"github.com/digitalocean/go-libvirt"
+	"github.com/digitalocean/go-libvirt/libvirttest"
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
-var (
-	// dc229f87d4de47198cfd2e21c6105b01
-	testUUID = [uuidSize]byte{
-		0xdc, 0x22, 0x9f, 0x87, 0xd4, 0xde, 0x47, 0x19,
-		0x8c, 0xfd, 0x2e, 0x21, 0xc6, 0x10, 0x5b, 0x01,
-	}
+var testEvent = []byte{
+	0x00, 0x00, 0x00, 0xb0, // length
+	0x20, 0x00, 0x80, 0x87, // program
+	0x00, 0x00, 0x00, 0x01, // version
+	0x00, 0x00, 0x00, 0x06, // procedure
+	0x00, 0x00, 0x00, 0x01, // type
+	0x00, 0x00, 0x00, 0x00, // serial
+	0x00, 0x00, 0x00, 0x00, // status
+	0x00, 0x00, 0x00, 0x01, // callback id
 
-	testHeader = []byte{
-		0x20, 0x00, 0x80, 0x86, // program
-		0x00, 0x00, 0x00, 0x01, // version
-		0x00, 0x00, 0x00, 0x01, // procedure
-		0x00, 0x00, 0x00, 0x00, // type
-		0x00, 0x00, 0x00, 0x00, // serial
-		0x00, 0x00, 0x00, 0x00, // status
-	}
+	// domain name ("test")
+	0x00, 0x00, 0x00, 0x04, 0x74, 0x65, 0x73, 0x74,
 
-	testEventHeader = []byte{
-		0x00, 0x00, 0x00, 0xb0, // length
-		0x20, 0x00, 0x80, 0x87, // program
-		0x00, 0x00, 0x00, 0x01, // version
-		0x00, 0x00, 0x00, 0x06, // procedure
-		0x00, 0x00, 0x00, 0x01, // type
-		0x00, 0x00, 0x00, 0x00, // serial
-		0x00, 0x00, 0x00, 0x00, // status
-	}
+	// uuid (dc229f87d4de47198cfd2e21c6105b01)
+	0xdc, 0x22, 0x9f, 0x87, 0xd4, 0xde, 0x47, 0x19,
+	0x8c, 0xfd, 0x2e, 0x21, 0xc6, 0x10, 0x5b, 0x01,
 
-	testEvent = []byte{
-		0x00, 0x00, 0x00, 0x01, // callback id
+	// domain id (14)
+	0x00, 0x00, 0x00, 0x0e,
 
-		// domain name ("test")
-		0x00, 0x00, 0x00, 0x04, 0x74, 0x65, 0x73, 0x74,
+	// event name (BLOCK_JOB_COMPLETED)
+	0x00, 0x00, 0x00, 0x13, 0x42, 0x4c, 0x4f, 0x43,
+	0x4b, 0x5f, 0x4a, 0x4f, 0x42, 0x5f, 0x43, 0x4f,
+	0x4d, 0x50, 0x4c, 0x45, 0x54, 0x45, 0x44, 0x00,
 
-		// uuid (dc229f87d4de47198cfd2e21c6105b01)
-		0xdc, 0x22, 0x9f, 0x87, 0xd4, 0xde, 0x47, 0x19,
-		0x8c, 0xfd, 0x2e, 0x21, 0xc6, 0x10, 0x5b, 0x01,
+	// seconds (1462211891)
+	0x00, 0x00, 0x00, 0x00, 0x57, 0x27, 0x95, 0x33,
 
-		// domain id (14)
-		0x00, 0x00, 0x00, 0x0e,
+	// microseconds (931791)
+	0x00, 0x0e, 0x37, 0xcf,
 
-		// event name (BLOCK_JOB_COMPLETED)
-		0x00, 0x00, 0x00, 0x13, 0x42, 0x4c, 0x4f, 0x43,
-		0x4b, 0x5f, 0x4a, 0x4f, 0x42, 0x5f, 0x43, 0x4f,
-		0x4d, 0x50, 0x4c, 0x45, 0x54, 0x45, 0x44, 0x00,
-
-		// seconds (1462211891)
-		0x00, 0x00, 0x00, 0x00, 0x57, 0x27, 0x95, 0x33,
-
-		// microseconds (931791)
-		0x00, 0x0e, 0x37, 0xcf,
-
-		// event json data
-		// ({"device":"drive-ide0-0-0","len":0,"offset":0,"speed":0,"type":"commit"})
-		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x48,
-		0x7b, 0x22, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65,
-		0x22, 0x3a, 0x22, 0x64, 0x72, 0x69, 0x76, 0x65,
-		0x2d, 0x69, 0x64, 0x65, 0x30, 0x2d, 0x30, 0x2d,
-		0x30, 0x22, 0x2c, 0x22, 0x6c, 0x65, 0x6e, 0x22,
-		0x3a, 0x30, 0x2c, 0x22, 0x6f, 0x66, 0x66, 0x73,
-		0x65, 0x74, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x73,
-		0x70, 0x65, 0x65, 0x64, 0x22, 0x3a, 0x30, 0x2c,
-		0x22, 0x74, 0x79, 0x70, 0x65, 0x22, 0x3a, 0x22,
-		0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x22, 0x7d,
-	}
-
-	testErrorMessage = []byte{
-		0x00, 0x00, 0x00, 0x37, // code
-		0x00, 0x00, 0x00, 0x0a, // domain id
-
-		// message ("Requested operation is not valid: domain is not running")
-		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x37,
-		0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x65,
-		0x64, 0x20, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
-		0x69, 0x6f, 0x6e, 0x20, 0x69, 0x73, 0x20, 0x6e,
-		0x6f, 0x74, 0x20, 0x76, 0x61, 0x6c, 0x69, 0x64,
-		0x3a, 0x20, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e,
-		0x20, 0x69, 0x73, 0x20, 0x6e, 0x6f, 0x74, 0x20,
-		0x72, 0x75, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x00,
-
-		// error level
-		0x00, 0x00, 0x00, 0x02,
-	}
-
-	testDomain = domain{
-		Name: "test-domain",
-		UUID: testUUID,
-		ID:   1,
-	}
-)
+	// event json data
+	// ({"device":"drive-ide0-0-0","len":0,"offset":0,"speed":0,"type":"commit"})
+	0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x48,
+	0x7b, 0x22, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65,
+	0x22, 0x3a, 0x22, 0x64, 0x72, 0x69, 0x76, 0x65,
+	0x2d, 0x69, 0x64, 0x65, 0x30, 0x2d, 0x30, 0x2d,
+	0x30, 0x22, 0x2c, 0x22, 0x6c, 0x65, 0x6e, 0x22,
+	0x3a, 0x30, 0x2c, 0x22, 0x6f, 0x66, 0x66, 0x73,
+	0x65, 0x74, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x73,
+	0x70, 0x65, 0x65, 0x64, 0x22, 0x3a, 0x30, 0x2c,
+	0x22, 0x74, 0x79, 0x70, 0x65, 0x22, 0x3a, 0x22,
+	0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x22, 0x7d,
+}
 
 func TestNew(t *testing.T) {
-	domain := "test-1"
+	conn := libvirttest.New()
 
-	conn := setupTest()
+	domain := "test-1"
 	rpc := New(domain, conn)
 
 	if rpc.Domain != domain {
@@ -126,9 +81,9 @@ func TestNew(t *testing.T) {
 }
 
 func TestQMPEvent(t *testing.T) {
-	e := &event{
+	e := &libvirt.DomainEvent{
 		CallbackID:   1,
-		Domain:       testDomain,
+		Domain:       libvirt.Domain{Name: "test"},
 		Event:        "test",
 		Seconds:      1,
 		Microseconds: 1,
@@ -163,267 +118,31 @@ func TestQMPEvent(t *testing.T) {
 	}
 }
 
-func TestExtractHeader(t *testing.T) {
-	r := bytes.NewBuffer(testHeader)
-	h, err := extractHeader(r)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if h.Program != programRemote {
-		t.Errorf("expected Program %q, got %q", programRemote, h.Program)
-	}
-
-	if h.Version != programVersion {
-		t.Errorf("expected version %q, got %q", programVersion, h.Version)
-	}
-
-	if h.Procedure != procConnectOpen {
-		t.Errorf("expected procedure %q, got %q", procConnectOpen, h.Procedure)
-	}
-
-	if h.Type != Call {
-		t.Errorf("expected type %q, got %q", Call, h.Type)
-	}
-
-	if h.Status != StatusOK {
-		t.Errorf("expected status %q, got %q", StatusOK, h.Status)
-	}
-}
-
-func TestPktLen(t *testing.T) {
-	data := []byte{0x00, 0x00, 0x00, 0xa} // uint32:10
-	r := bytes.NewBuffer(data)
-
-	expected := uint32(10)
-	actual, err := pktlen(r)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if expected != actual {
-		t.Errorf("expected packet length %q, got %q", expected, actual)
-	}
-}
-
-func TestDecodeEvent(t *testing.T) {
-	e, err := decodeEvent(testEvent)
-	if err != nil {
-		t.Error(err)
-	}
-
-	expCbID := uint32(1)
-	if e.CallbackID != expCbID {
-		t.Errorf("expected callback id %d, got %d", expCbID, e.CallbackID)
-	}
-
-	expName := "test"
-	if e.Domain.Name != expName {
-		t.Errorf("expected domain %s, got %s", expName, e.Domain.Name)
-	}
-
-	expUUID := testUUID
-	if !bytes.Equal(e.Domain.UUID[:], expUUID[:]) {
-		t.Errorf("expected uuid:\t%x, got\n\t\t\t%x", expUUID, e.Domain.UUID)
-	}
-
-	expID := 14
-	if e.Domain.ID != expID {
-		t.Errorf("expected id %d, got %d", expID, e.Domain.ID)
-	}
-
-	expEvent := "BLOCK_JOB_COMPLETED"
-	if e.Event != expEvent {
-		t.Errorf("expected %s, got %s", expEvent, e.Event)
-	}
-
-	expSec := uint64(1462211891)
-	if e.Seconds != expSec {
-		t.Errorf("expected seconds to be %d, got %d", expSec, e.Seconds)
-	}
-
-	expMs := uint32(931791)
-	if e.Microseconds != expMs {
-		t.Errorf("expected microseconds to be %d, got %d", expMs, e.Microseconds)
-	}
-
-	expDetails := []byte(`{"device":"drive-ide0-0-0","len":0,"offset":0,"speed":0,"type":"commit"}`)
-	if e.Domain.ID != expID {
-		t.Errorf("expected data %s, got %s", expDetails, e.Details)
-	}
-}
-
-func TestDecodeError(t *testing.T) {
-	expected := "Requested operation is not valid: domain is not running"
-
-	err := decodeError(testErrorMessage)
-	if err.Error() != expected {
-		t.Errorf("expected error %s, got %s", expected, err.Error())
-	}
-}
-
-func TestEncode(t *testing.T) {
-	data := "test"
-	buf, err := encode(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	dec := xdr.NewDecoder(bytes.NewReader(buf.Bytes()))
-	res, _, err := dec.DecodeString()
-	if err != nil {
-		t.Error(err)
-	}
-
-	if res != data {
-		t.Errorf("expected %s, got %s", data, res)
-	}
-}
-
-func TestRegister(t *testing.T) {
-	rpc := &Monitor{}
-	rpc.callbacks = make(map[uint32]chan response)
-	id := uint32(1)
-	c := make(chan response)
-
-	rpc.register(id, c)
-	if _, ok := rpc.callbacks[id]; !ok {
-		t.Error("expected callback to register")
-	}
-}
-
-func TestDeregister(t *testing.T) {
-	id := uint32(1)
-
-	rpc := &Monitor{}
-	rpc.callbacks = map[uint32]chan response{
-		id: make(chan response),
-	}
-
-	rpc.deregister(id)
-	if _, ok := rpc.callbacks[id]; ok {
-		t.Error("expected callback to deregister")
-	}
-}
-
-func TestAddStream(t *testing.T) {
-	id := uint32(1)
-	c := make(chan *event)
-
-	rpc := &Monitor{}
-	rpc.events = make(map[uint32]chan *event)
-
-	rpc.addStream(id, c)
-	if _, ok := rpc.events[id]; !ok {
-		t.Error("expected event stream to exist")
-	}
-}
-
-func TestRemoveStream(t *testing.T) {
-	id := uint32(1)
-
-	conn := setupTest()
-	rpc := New("test", conn)
-	rpc.events[id] = make(chan *event)
-
-	err := rpc.removeStream(id)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if _, ok := rpc.events[id]; ok {
-		t.Error("expected event stream to be removed")
-	}
-}
-
-func TestStream(t *testing.T) {
-	id := uint32(1)
-	c := make(chan *event, 1)
-
-	rpc := &Monitor{}
-	rpc.events = map[uint32]chan *event{
-		id: c,
-	}
-
-	rpc.stream(testEvent)
-	e := <-c
-
-	if e.Event != "BLOCK_JOB_COMPLETED" {
-		t.Error("expected event")
-	}
-}
-
-func TestSerial(t *testing.T) {
-	count := uint32(10)
-	rpc := &Monitor{}
-
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go func() {
-			rpc.serial()
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
-
-	expected := count + uint32(1)
-	actual := rpc.serial()
-	if expected != actual {
-		t.Errorf("expected serial to be %d, got %d", expected, actual)
-	}
-}
-
-func TestLookup(t *testing.T) {
-	id := uint32(1)
-	c := make(chan response)
-	name := "test"
-
-	conn := setupTest()
-	rpc := New(name, conn)
-
-	rpc.register(id, c)
-
-	d, err := rpc.lookup(name)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if d == nil {
-		t.Error("nil domain returned")
-	}
-
-	if d.Name != name {
-		t.Errorf("expected domain %s, got %s", name, d.Name)
-	}
-}
-
 func TestConnect(t *testing.T) {
-	conn := setupTest()
-	rpc := New("test", conn)
+	conn := libvirttest.New()
+	mon := New("test", conn)
 
-	err := rpc.Connect()
+	err := mon.Connect()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestDisconnect(t *testing.T) {
-	conn := setupTest()
-	rpc := New("test", conn)
+	conn := libvirttest.New()
+	mon := New("test", conn)
 
-	err := rpc.Disconnect()
+	err := mon.Disconnect()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestRun(t *testing.T) {
-	conn := setupTest()
-	rpc := New("test", conn)
+	conn := libvirttest.New()
+	mon := New("test", conn)
 
-	res, err := rpc.Run([]byte(`{"query-version"}`))
+	res, err := mon.Run([]byte(`{"query-version"}`))
 	if err != nil {
 		t.Error(err)
 	}
@@ -452,10 +171,11 @@ func TestRun(t *testing.T) {
 }
 
 func TestEvents(t *testing.T) {
-	conn := setupTest()
-	rpc := New("test", conn)
+	conn := libvirttest.New()
+	mon := New("test", conn)
+	done := make(chan struct{})
 
-	stream, err := rpc.Events()
+	stream, err := mon.Events()
 	if err != nil {
 		t.Error(err)
 	}
@@ -472,10 +192,13 @@ func TestEvents(t *testing.T) {
 		if e.Data["device"] != expected {
 			t.Errorf("expected device %q, got %q", expected, e.Data["device"])
 		}
+
+		done <- struct{}{}
 	}()
 
-	// send an event to the listener goroutine; since this will
-	// block, the listener should get scheduled to receive the
-	// value immediately
-	conn.test.Write(append(testEventHeader, testEvent...))
+	// send an event to the listener goroutine
+	conn.Test.Write(testEvent)
+
+	// wait for completion
+	<-done
 }

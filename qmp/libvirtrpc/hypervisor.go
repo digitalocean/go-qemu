@@ -15,11 +15,9 @@
 package libvirtrpc
 
 import (
-	"bytes"
-	"fmt"
 	"net"
 
-	"github.com/davecgh/go-xdr/xdr2"
+	"github.com/digitalocean/go-libvirt"
 )
 
 // Hypervisor represents a running libvirt daemon.
@@ -42,58 +40,26 @@ func (h *Hypervisor) DomainNames() ([]string, error) {
 		return nil, err
 	}
 
-	rpc := setup(conn)
-	if err := rpc.Connect(); err != nil {
+	l := libvirt.New(conn)
+	if err := l.Connect(); err != nil {
 		conn.Close()
 		return nil, err
 	}
 	defer func() {
-		rpc.Disconnect()
-		conn.Close()
+		l.Disconnect()
 	}()
 
-	// these are the flags as passed by `virsh`, defined in:
-	// src/remote/remote_protocol.x # remote_connect_list_all_domains_args
-	req := struct {
-		NeedResults uint32
-		Flags       uint32
-	}{
-		NeedResults: 1,
-		Flags:       3,
-	}
-
-	buf, err := encode(&req)
+	domains, err := l.Domains()
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := rpc.request(procConnectListAllDomains, programRemote, &buf)
-	if err != nil {
-		return nil, err
+	names := make([]string, 0, len(domains))
+	for _, d := range domains {
+		names = append(names, d.Name)
 	}
 
-	r := <-resp
-	if r.Status != StatusOK {
-		return nil, decodeError(r.Payload)
-	}
-
-	result := struct {
-		Domains []domain
-		Count   uint32
-	}{}
-
-	dec := xdr.NewDecoder(bytes.NewReader(r.Payload))
-	_, err = dec.Decode(&result)
-	if err != nil {
-		return nil, err
-	}
-
-	domains := make([]string, 0, result.Count)
-	for _, d := range result.Domains {
-		domains = append(domains, d.Name)
-	}
-
-	return domains, nil
+	return names, nil
 }
 
 // Version returns the version of the libvirt daemon.
@@ -103,46 +69,14 @@ func (h *Hypervisor) Version() (string, error) {
 		return "", err
 	}
 
-	rpc := setup(conn)
-	if err := rpc.Connect(); err != nil {
+	l := libvirt.New(conn)
+	if err := l.Connect(); err != nil {
 		conn.Close()
 		return "", err
 	}
 	defer func() {
-		rpc.Disconnect()
-		conn.Close()
+		l.Disconnect()
 	}()
 
-	resp, err := rpc.request(procConnectGetLibVersion, programRemote, nil)
-	if err != nil {
-		return "", err
-	}
-
-	r := <-resp
-	if r.Status != StatusOK {
-		return "", decodeError(r.Payload)
-	}
-
-	result := struct {
-		Version uint64
-	}{}
-
-	dec := xdr.NewDecoder(bytes.NewReader(r.Payload))
-	_, err = dec.Decode(&result)
-	if err != nil {
-		return "", err
-	}
-
-	// The version is provided as an int following this formula:
-	// version * 1,000,000 + minor * 1000 + micro
-	// See src/libvirt-host.c # virConnectGetLibVersion
-	version := result.Version
-	major := version / 1000000
-	version %= 1000000
-	minor := version / 1000
-	version %= 1000
-	micro := version
-
-	versionString := fmt.Sprintf("%d.%d.%d", major, minor, micro)
-	return versionString, nil
+	return l.Version()
 }

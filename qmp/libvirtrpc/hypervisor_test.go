@@ -18,10 +18,13 @@ import (
 	"fmt"
 	"net"
 	"testing"
+
+	"github.com/digitalocean/go-libvirt/libvirttest"
 )
 
 var hvConn = func() (net.Conn, error) {
-	return setupTest(), nil
+	m := libvirttest.New()
+	return m, nil
 }
 
 func TestDomainNames(t *testing.T) {
