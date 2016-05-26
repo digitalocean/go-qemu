@@ -19,7 +19,7 @@ import (
 )
 
 func TestBlockDevices(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -59,7 +59,7 @@ func TestBlockDevicesMonitorFail(t *testing.T) {
 }
 
 func TestBlockDevicesInvalidJSON(t *testing.T) {
-	m := mockMonitor{invalidJSON: true}
+	m := &mockMonitor{invalidJSON: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -73,7 +73,7 @@ func TestBlockDevicesInvalidJSON(t *testing.T) {
 }
 
 func TestCancelJob(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -112,7 +112,7 @@ func TestCancelJobMonitorFailure(t *testing.T) {
 }
 
 func TestCommit(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -189,7 +189,7 @@ func TestCommitTimeout(t *testing.T) {
 }
 
 func TestJobComplete(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -266,7 +266,7 @@ func TestJobCompleteTimeout(t *testing.T) {
 }
 
 func TestMirror(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -285,7 +285,7 @@ func TestMirror(t *testing.T) {
 }
 
 func TestMirrorRelativePath(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -325,7 +325,7 @@ func TestMirrorMonitorFailure(t *testing.T) {
 }
 
 func TestSnapshot(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {

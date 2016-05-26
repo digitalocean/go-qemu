@@ -33,9 +33,10 @@ type mockMonitor struct {
 	invalidJSON       bool
 	poweredOff        bool
 	eventsUnsupported bool
+	disconnected      bool
 }
 
-func (mm mockMonitor) Connect() error {
+func (mm *mockMonitor) Connect() error {
 	if mm.alwaysFail {
 		return errors.New("fail")
 	}
@@ -43,15 +44,16 @@ func (mm mockMonitor) Connect() error {
 	return nil
 }
 
-func (mm mockMonitor) Disconnect() error {
+func (mm *mockMonitor) Disconnect() error {
 	if mm.alwaysFail {
 		return errors.New("fail")
 	}
 
+	mm.disconnected = true
 	return nil
 }
 
-func (mm mockMonitor) Run(cmd []byte) ([]byte, error) {
+func (mm *mockMonitor) Run(cmd []byte) ([]byte, error) {
 	if mm.alwaysFail {
 		return []byte(""), errors.New("fail")
 	}
@@ -91,7 +93,7 @@ func (mm mockMonitor) Run(cmd []byte) ([]byte, error) {
 	return []byte("{}"), fmt.Errorf("invalid command %q", string(cmd))
 }
 
-func (mm mockMonitor) runBlockCommand(cmd []byte) ([]byte, bool) {
+func (mm *mockMonitor) runBlockCommand(cmd []byte) ([]byte, bool) {
 	switch string(cmd) {
 	case `{"execute":"block-job-complete","arguments":{"device":"drive-virtio-disk0"}}`:
 		return mockSuccessJSON, true
@@ -114,7 +116,7 @@ func (mm mockMonitor) runBlockCommand(cmd []byte) ([]byte, bool) {
 	return nil, false
 }
 
-func (mm mockMonitor) runQueryCommand(cmd []byte) ([]byte, bool) {
+func (mm *mockMonitor) runQueryCommand(cmd []byte) ([]byte, bool) {
 	switch string(cmd) {
 	case `{"execute":"query-commands"}`:
 		return []byte(`{"return":[{"name":"query-rocker-of-dpa-groups"},{"name":"query-rocker-of-dpa-flows"},{"name":"query-rocker-ports"},{"name":"query-rocker"},{"name":"block-set-write-threshold"},{"name":"x-input-send-event"},{"name":"trace-event-set-state"},{"name":"trace-event-get-state"},{"name":"rtc-reset-reinjection"},{"name":"query-acpi-ospm-status"},{"name":"query-memory-devices"},{"name":"query-memdev"},{"name":"blockdev-change-medium"},{"name":"query-named-block-nodes"},{"name":"x-blockdev-insert-medium"},{"name":"x-blockdev-remove-medium"},{"name":"blockdev-close-tray"},{"name":"blockdev-open-tray"},{"name":"x-blockdev-del"},{"name":"blockdev-add"},{"name":"query-rx-filter"},{"name":"chardev-remove"},{"name":"chardev-add"},{"name":"query-tpm-types"},{"name":"query-tpm-models"},{"name":"query-tpm"},{"name":"query-target"},{"name":"query-cpu-definitions"},{"name":"query-machines"},{"name":"device-list-properties"},{"name":"qom-list-types"},{"name":"change-vnc-password"},{"name":"nbd-server-stop"},{"name":"nbd-server-add"},{"name":"nbd-server-start"},{"name":"qom-get"},{"name":"qom-set"},{"name":"qom-list"},{"name":"query-block-jobs"},{"name":"query-balloon"},{"name":"query-migrate-parameters"},{"name":"migrate-set-parameters"},{"name":"query-migrate-capabilities"},{"name":"migrate-set-capabilities"},{"name":"query-migrate"},{"name":"query-command-line-options"},{"name":"query-uuid"},{"name":"query-name"},{"name":"query-spice"},{"name":"query-vnc-servers"},{"name":"query-vnc"},{"name":"query-mice"},{"name":"query-status"},{"name":"query-kvm"},{"name":"query-pci"},{"name":"query-iothreads"},{"name":"query-cpus"},{"name":"query-blockstats"},{"name":"query-block"},{"name":"query-chardev-backends"},{"name":"query-chardev"},{"name":"query-qmp-schema"},{"name":"query-events"},{"name":"query-commands"},{"name":"query-version"},{"name":"human-monitor-command"},{"name":"qmp_capabilities"},{"name":"add_client"},{"name":"expire_password"},{"name":"set_password"},{"name":"block_set_io_throttle"},{"name":"block_passwd"},{"name":"query-fdsets"},{"name":"remove-fd"},{"name":"add-fd"},{"name":"closefd"},{"name":"getfd"},{"name":"set_link"},{"name":"balloon"},{"name":"change-backing-file"},{"name":"drive-mirror"},{"name":"blockdev-snapshot-delete-internal-sync"},{"name":"blockdev-snapshot-internal-sync"},{"name":"blockdev-snapshot"},{"name":"blockdev-snapshot-sync"},{"name":"block-dirty-bitmap-clear"},{"name":"block-dirty-bitmap-remove"},{"name":"block-dirty-bitmap-add"},{"name":"transaction"},{"name":"block-job-complete"},{"name":"block-job-resume"},{"name":"block-job-pause"},{"name":"block-job-cancel"},{"name":"block-job-set-speed"},{"name":"blockdev-backup"},{"name":"drive-backup"},{"name":"block-commit"},{"name":"block-stream"},{"name":"block_resize"},{"name":"object-del"},{"name":"object-add"},{"name":"netdev_del"},{"name":"netdev_add"},{"name":"query-dump-guest-memory-capability"},{"name":"dump-guest-memory"},{"name":"client_migrate_info"},{"name":"migrate_set_downtime"},{"name":"migrate_set_speed"},{"name":"query-migrate-cache-size"},{"name":"migrate-start-postcopy"},{"name":"migrate-set-cache-size"},{"name":"migrate-incoming"},{"name":"migrate_cancel"},{"name":"migrate"},{"name":"xen-set-global-dirty-log"},{"name":"xen-save-devices-state"},{"name":"ringbuf-read"},{"name":"ringbuf-write"},{"name":"inject-nmi"},{"name":"pmemsave"},{"name":"memsave"},{"name":"cpu-add"},{"name":"cpu"},{"name":"send-key"},{"name":"device_del"},{"name":"device_add"},{"name":"system_powerdown"},{"name":"system_reset"},{"name":"system_wakeup"},{"name":"cont"},{"name":"stop"},{"name":"screendump"},{"name":"change"},{"name":"eject"},{"name":"quit"}],"id":"libvirt-36"}`), true
@@ -133,7 +135,7 @@ func (mm mockMonitor) runQueryCommand(cmd []byte) ([]byte, bool) {
 	return nil, false
 }
 
-func (mm mockMonitor) Events() (<-chan qmp.Event, error) {
+func (mm *mockMonitor) Events() (<-chan qmp.Event, error) {
 	if mm.alwaysFail {
 		return nil, errors.New("fail")
 	}

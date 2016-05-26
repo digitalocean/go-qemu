@@ -28,7 +28,7 @@ import (
 const defaultTestTimeout = 5 * time.Second
 
 func TestNew(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	_, err := NewDomain(m, "foo")
 	if err != nil {
@@ -37,7 +37,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewError(t *testing.T) {
-	m := mockMonitor{alwaysFail: true}
+	m := &mockMonitor{alwaysFail: true}
 
 	_, err := NewDomain(m, "foo")
 	if err == nil {
@@ -46,7 +46,7 @@ func TestNewError(t *testing.T) {
 }
 
 func TestBlockDevice(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -65,7 +65,7 @@ func TestBlockDevice(t *testing.T) {
 }
 
 func TestBlockDeviceNotFound(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -98,7 +98,7 @@ func TestBlockDeviceMonitorFailure(t *testing.T) {
 }
 
 func TestBlockJobs(t *testing.T) {
-	m := mockMonitor{activeJobs: true}
+	m := &mockMonitor{activeJobs: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -126,7 +126,7 @@ func TestBlockJobs(t *testing.T) {
 }
 
 func TestBlockStats(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -169,7 +169,7 @@ func TestBlockJobsMonitorFail(t *testing.T) {
 }
 
 func TestBlockJobsInvalidJSON(t *testing.T) {
-	m := mockMonitor{invalidJSON: true}
+	m := &mockMonitor{invalidJSON: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -183,7 +183,7 @@ func TestBlockJobsInvalidJSON(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -198,13 +198,13 @@ func TestClose(t *testing.T) {
 		t.Error("domain should be closed")
 	}
 
-	if err := m.Disconnect(); err != nil {
-		t.Error(err)
+	if !m.disconnected {
+		t.Error("monitor should be disconnected")
 	}
 }
 
 func TestCommands(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -251,7 +251,7 @@ func TestCommandsMonitorFailure(t *testing.T) {
 }
 
 func TestCommandsInvalidJSON(t *testing.T) {
-	m := mockMonitor{invalidJSON: true}
+	m := &mockMonitor{invalidJSON: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -264,7 +264,7 @@ func TestCommandsInvalidJSON(t *testing.T) {
 }
 
 func TestDomainScreenDump(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -306,7 +306,7 @@ func TestDomainScreenDump(t *testing.T) {
 }
 
 func TestPCIDevices(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -334,7 +334,7 @@ func TestPCIDevices(t *testing.T) {
 }
 
 func TestStatusRunning(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -352,7 +352,7 @@ func TestStatusRunning(t *testing.T) {
 }
 
 func TestStatusShutdown(t *testing.T) {
-	m := mockMonitor{poweredOff: true}
+	m := &mockMonitor{poweredOff: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -385,7 +385,7 @@ func TestStatusFail(t *testing.T) {
 }
 
 func TestStatusInvalidJSON(t *testing.T) {
-	m := mockMonitor{invalidJSON: true}
+	m := &mockMonitor{invalidJSON: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -399,7 +399,7 @@ func TestStatusInvalidJSON(t *testing.T) {
 }
 
 func TestRunInvalidCommand(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -413,7 +413,7 @@ func TestRunInvalidCommand(t *testing.T) {
 }
 
 func TestSupported(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -432,7 +432,7 @@ func TestSupported(t *testing.T) {
 }
 
 func TestSupportedFalse(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -465,7 +465,7 @@ func TestSupportedMonitorFailure(t *testing.T) {
 }
 
 func TestSystemPowerdown(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -478,7 +478,7 @@ func TestSystemPowerdown(t *testing.T) {
 }
 
 func TestSystemReset(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
