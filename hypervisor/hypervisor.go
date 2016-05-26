@@ -18,7 +18,6 @@ package hypervisor
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/digitalocean/go-qemu"
 	"github.com/digitalocean/go-qemu/qmp"
@@ -26,10 +25,6 @@ import (
 
 // A Hypervisor enables access to all virtual machines on a QEMU hypervisor.
 type Hypervisor struct {
-	// Currently connected monitor sockets
-	mu        sync.Mutex
-	connected []qmp.Monitor
-
 	// Driver used to communicate with domains
 	driver Driver
 }
@@ -37,8 +32,7 @@ type Hypervisor struct {
 // New creates a new Hypervisor using the input Driver.
 func New(driver Driver) *Hypervisor {
 	return &Hypervisor{
-		connected: make([]qmp.Monitor, 0),
-		driver:    driver,
+		driver: driver,
 	}
 }
 
@@ -60,9 +54,6 @@ type Versioner interface {
 //
 // Each Domain's Close method must be called to clean up its resources when
 // they are no longer needed.
-//
-// The Disconnect method must be called to clean up monitor socket connections
-// once the virtual machines are no longer needed.
 func (hv *Hypervisor) Domains() ([]*qemu.Domain, error) {
 	domains, err := hv.driver.DomainNames()
 	if err != nil {
@@ -88,9 +79,6 @@ func (hv *Hypervisor) Domains() ([]*qemu.Domain, error) {
 //
 // The Domain's Close method must be called to clean up its resources when
 // they are no longer needed.
-//
-// The Disconnect method must be called to clean up the monitor socket
-// connection once the virtual machine is no longer needed.
 func (hv *Hypervisor) Domain(name string) (*qemu.Domain, error) {
 	domains, err := hv.driver.DomainNames()
 	if err != nil {
@@ -113,22 +101,6 @@ func (hv *Hypervisor) DomainNames() ([]string, error) {
 	return hv.driver.DomainNames()
 }
 
-// Disconnect cleans up monitor socket connections for all virtual
-// machines.
-func (hv *Hypervisor) Disconnect() error {
-	hv.mu.Lock()
-	defer hv.mu.Unlock()
-
-	for _, mon := range hv.connected {
-		if err := mon.Disconnect(); err != nil {
-			return err
-		}
-	}
-
-	hv.connected = make([]qmp.Monitor, 0)
-	return nil
-}
-
 // connectDomain opens a monitor socket connection and creates a virtual
 // machine for the machine with the specified name.
 func (hv *Hypervisor) connectDomain(name string) (*qemu.Domain, error) {
@@ -141,14 +113,5 @@ func (hv *Hypervisor) connectDomain(name string) (*qemu.Domain, error) {
 		return nil, err
 	}
 
-	dom, err := qemu.NewDomain(mon, name)
-	if err != nil {
-		return nil, err
-	}
-
-	hv.mu.Lock()
-	hv.connected = append(hv.connected, mon)
-	hv.mu.Unlock()
-
-	return dom, nil
+	return qemu.NewDomain(mon, name)
 }

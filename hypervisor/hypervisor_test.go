@@ -53,11 +53,6 @@ func TestHypervisorDomains(t *testing.T) {
 		t.Fatalf("did not open monitors for all domains:\n- want: %v\n-  got: %v",
 			want, got)
 	}
-
-	if want, got := 3, len(hv.connected); want != got {
-		t.Fatalf("unexpected number of connected domains:\n- want: %v\n-  got: %v",
-			want, got)
-	}
 }
 
 func TestHypervisorDomainOK(t *testing.T) {
@@ -78,12 +73,6 @@ func TestHypervisorDomainOK(t *testing.T) {
 		t.Fatalf("unexpected domain:\n- want: %v\n-  got: %v",
 			want, got)
 	}
-
-	if want, got := 1, len(hv.connected); want != got {
-		t.Fatalf("unexpected number of connected domains:\n- want: %v\n-  got: %v",
-			want, got)
-	}
-
 }
 
 func TestHypervisorDomainNotFound(t *testing.T) {
@@ -116,51 +105,6 @@ func TestHypervisorDomainNames(t *testing.T) {
 
 	if want, got := wantDomains, gotDomains; !reflect.DeepEqual(want, got) {
 		t.Fatalf("unexpected domain names:\n- want: %v\n-  got: %v",
-			want, got)
-	}
-
-	if want, got := 0, len(hv.connected); want != got {
-		t.Fatalf("unexpected number of connected domains:\n- want: %v\n-  got: %v",
-			want, got)
-	}
-}
-
-func TestHypervisorDisconnect(t *testing.T) {
-	mon := &testConnectMonitor{}
-
-	hv := testHypervisor(
-		t,
-		[]string{"ubuntu"},
-		func(_ string) (qmp.Monitor, error) {
-			return mon, nil
-		},
-	)
-
-	if _, err := hv.Domains(); err != nil {
-		t.Fatalf("failed to connect domains: %v", err)
-	}
-
-	if want, got := 1, len(hv.connected); want != got {
-		t.Fatalf("unexpected number of connected domains:\n- want: %v\n-  got: %v",
-			want, got)
-	}
-
-	if want, got := true, mon.connected; want != got {
-		t.Fatalf("unexpected monitor connected value:\n- want: %v\n-  got: %v",
-			want, got)
-	}
-
-	if err := hv.Disconnect(); err != nil {
-		t.Fatalf("failed to disconnect Libvirt: %v", err)
-	}
-
-	if want, got := 0, len(hv.connected); want != got {
-		t.Fatalf("unexpected number of connected domains:\n- want: %v\n-  got: %v",
-			want, got)
-	}
-
-	if want, got := false, mon.connected; want != got {
-		t.Fatalf("unexpected monitor connected value:\n- want: %v\n-  got: %v",
 			want, got)
 	}
 }

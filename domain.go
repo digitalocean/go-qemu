@@ -47,13 +47,12 @@ type Domain struct {
 	tempFileName func(domainName string, method string) string
 }
 
-// Close cleans up internal resources of a Domain.  Close must be called
-// when done with a Domain to avoid leaking resources.
-//
-// Close does not disconnect the underlying qmp.Monitor.
+// Close cleans up internal resources of a Domain and disconnects the underlying
+// qmp.Monitor.  Close must be called when done with a Domain to avoid leaking
+// resources.
 func (d *Domain) Close() error {
 	close(d.done)
-	return nil
+	return d.m.Disconnect()
 }
 
 // Commands returns all QMP commands supported by the domain.
