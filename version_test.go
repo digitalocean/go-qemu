@@ -19,7 +19,7 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	m := mockMonitor{}
+	m := &mockMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -53,7 +53,7 @@ func TestVersionMonitorFail(t *testing.T) {
 }
 
 func TestVersionInvalidJSON(t *testing.T) {
-	m := mockMonitor{invalidJSON: true}
+	m := &mockMonitor{invalidJSON: true}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
