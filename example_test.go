@@ -67,13 +67,9 @@ func ExampleNewDomain() {
 		fmt.Printf("    - %s\n", c)
 	}
 
-	// Close the domain to clean up its resources, and disconnect the
-	// underlying monitor.
+	// Close the domain to clean up its resources and underlying monitor.
 	if err := dom.Close(); err != nil {
 		log.Fatalf("failed to close domain: %v", err)
-	}
-	if err := mon.Disconnect(); err != nil {
-		log.Fatalf("failed to disconnect monitor: %v", err)
 	}
 
 	// Output:
