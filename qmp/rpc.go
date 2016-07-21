@@ -12,34 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package libvirtrpc is a pure Go implementation of the libvirt RPC protocol.
-// For more information on the protocol, see https://libvirt.org/internals/rpc.html
-package libvirtrpc
+package qmp
 
 import (
 	"encoding/json"
 	"net"
 
 	"github.com/digitalocean/go-libvirt"
-	"github.com/digitalocean/go-qemu/qmp"
 )
 
-var _ qmp.Monitor = &Monitor{}
+var _ Monitor = &RPCMonitor{}
 
-// Monitor implements LibVirt's remote procedure call protocol.
-type Monitor struct {
+// RPCMonitor implements LibVirt's remote procedure call protocol.
+type RPCMonitor struct {
 	l *libvirt.Libvirt
 	// Domain name as seen by libvirt, e.g., stage-lb-1
 	Domain string
 }
 
-// New configures a new RPC Monitor connection.
+// NewLibvirtRPC configures a new Libvirt RPC Monitor connection.
 // The provided domain should be the name of the domain as seen
 // by libvirt, e.g., stage-lb-1.
-func New(domain string, conn net.Conn) *Monitor {
+func NewLibvirtRPC(domain string, conn net.Conn) *RPCMonitor {
 	l := libvirt.New(conn)
 
-	return &Monitor{
+	return &RPCMonitor{
 		l:      l,
 		Domain: domain,
 	}
@@ -47,13 +44,13 @@ func New(domain string, conn net.Conn) *Monitor {
 
 // Connect establishes communication with the libvirt server.
 // The underlying libvirt socket connection must be previously established.
-func (rpc *Monitor) Connect() error {
+func (rpc *RPCMonitor) Connect() error {
 	return rpc.l.Connect()
 }
 
 // Disconnect shuts down communication with the libvirt server
 // and closes the underlying net.Conn.
-func (rpc *Monitor) Disconnect() error {
+func (rpc *RPCMonitor) Disconnect() error {
 	return rpc.l.Disconnect()
 }
 
@@ -61,13 +58,13 @@ func (rpc *Monitor) Disconnect() error {
 // If a problem is encountered setting up the event monitor connection
 // an error will be returned. Errors encountered during streaming will
 // cause the returned event channel to be closed.
-func (rpc *Monitor) Events() (<-chan qmp.Event, error) {
+func (rpc *RPCMonitor) Events() (<-chan Event, error) {
 	events, err := rpc.l.Events(rpc.Domain)
 	if err != nil {
 		return nil, err
 	}
 
-	c := make(chan qmp.Event)
+	c := make(chan Event)
 	go func() {
 		// process events
 		for e := range events {
@@ -87,13 +84,13 @@ func (rpc *Monitor) Events() (<-chan qmp.Event, error) {
 // Run executes the given QAPI command against a domain's QEMU instance.
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
-func (rpc *Monitor) Run(cmd []byte) ([]byte, error) {
+func (rpc *RPCMonitor) Run(cmd []byte) ([]byte, error) {
 	return rpc.l.Run(rpc.Domain, cmd)
 }
 
 // qmpEvent takes a libvirt DomainEvent and returns the QMP equivalent.
-func qmpEvent(e *libvirt.DomainEvent) (*qmp.Event, error) {
-	var qe qmp.Event
+func qmpEvent(e *libvirt.DomainEvent) (*Event, error) {
+	var qe Event
 
 	if e.Details != nil {
 		if err := json.Unmarshal(e.Details, &qe.Data); err != nil {
