@@ -17,8 +17,8 @@ package hypervisor
 import (
 	"net"
 
+	"github.com/digitalocean/go-libvirt"
 	"github.com/digitalocean/go-qemu/qmp"
-	"github.com/digitalocean/go-qemu/qmp/libvirtrpc"
 )
 
 var _ Driver = &RPCDriver{}
@@ -27,32 +27,68 @@ var _ Versioner = &RPCDriver{}
 // RPCDriver is a QEMU QMP monitor driver which
 // communicates via libvirt's RPC interface.
 type RPCDriver struct {
-	h       *libvirtrpc.Hypervisor
 	newConn func() (net.Conn, error)
+}
+
+// DomainNames retrieves all hypervisor domain names using libvirt RPC.
+func (d *RPCDriver) DomainNames() ([]string, error) {
+	conn, err := d.newConn()
+	if err != nil {
+		return nil, err
+	}
+
+	l := libvirt.New(conn)
+	if err := l.Connect(); err != nil {
+		conn.Close()
+		return nil, err
+	}
+	defer func() {
+		l.Disconnect()
+	}()
+
+	domains, err := l.Domains()
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0, len(domains))
+	for _, d := range domains {
+		names = append(names, d.Name)
+	}
+
+	return names, nil
 }
 
 // NewMonitor creates a new qmp.Monitor using libvirt RPC.
 func (d *RPCDriver) NewMonitor(domain string) (qmp.Monitor, error) {
 	conn, err := d.newConn()
-	return libvirtrpc.New(domain, conn), err
-}
-
-// DomainNames retrieves all hypervisor domain names using libvirt RPC.
-func (d *RPCDriver) DomainNames() ([]string, error) {
-	return d.h.DomainNames()
+	return qmp.NewLibvirtRPC(domain, conn), err
 }
 
 // Version returns the version string for the libvirt daemon.
 func (d *RPCDriver) Version() (string, error) {
-	return d.h.Version()
+	conn, err := d.newConn()
+	if err != nil {
+		return "", err
+	}
+
+	l := libvirt.New(conn)
+	if err := l.Connect(); err != nil {
+		conn.Close()
+		return "", err
+	}
+	defer func() {
+		l.Disconnect()
+	}()
+
+	return l.Version()
 }
 
-// NewRPCDriver configures a RPCDriver.
+// NewRPCDriver configures a hypervisor driver using Libvirt RPC.
 // The provided newConn function should return an established
 // network connection with the target libvirt daemon.
 func NewRPCDriver(newConn func() (net.Conn, error)) *RPCDriver {
 	return &RPCDriver{
-		h:       libvirtrpc.NewHypervisor(newConn),
 		newConn: newConn,
 	}
 }
