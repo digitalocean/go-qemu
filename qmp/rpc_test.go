@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package libvirtrpc
+package qmp
 
 import (
 	"encoding/json"
@@ -21,7 +21,6 @@ import (
 
 	"github.com/digitalocean/go-libvirt"
 	"github.com/digitalocean/go-libvirt/libvirttest"
-	"github.com/digitalocean/go-qemu/qmp"
 )
 
 var testEvent = []byte{
@@ -69,11 +68,11 @@ var testEvent = []byte{
 	0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x22, 0x7d,
 }
 
-func TestNew(t *testing.T) {
+func TestNewLibvirtRPC(t *testing.T) {
 	conn := libvirttest.New()
 
 	domain := "test-1"
-	rpc := New(domain, conn)
+	rpc := NewLibvirtRPC(domain, conn)
 
 	if rpc.Domain != domain {
 		t.Errorf("expected domain %q, got %q", domain, rpc.Domain)
@@ -118,9 +117,9 @@ func TestQMPEvent(t *testing.T) {
 	}
 }
 
-func TestConnect(t *testing.T) {
+func TestLibvirtRPCConnect(t *testing.T) {
 	conn := libvirttest.New()
-	mon := New("test", conn)
+	mon := NewLibvirtRPC("test", conn)
 
 	err := mon.Connect()
 	if err != nil {
@@ -128,9 +127,9 @@ func TestConnect(t *testing.T) {
 	}
 }
 
-func TestDisconnect(t *testing.T) {
+func TestLibvirtRPCDisconnect(t *testing.T) {
 	conn := libvirttest.New()
-	mon := New("test", conn)
+	mon := NewLibvirtRPC("test", conn)
 
 	err := mon.Disconnect()
 	if err != nil {
@@ -138,9 +137,9 @@ func TestDisconnect(t *testing.T) {
 	}
 }
 
-func TestRun(t *testing.T) {
+func TestLibvirtRPCRun(t *testing.T) {
 	conn := libvirttest.New()
-	mon := New("test", conn)
+	mon := NewLibvirtRPC("test", conn)
 
 	res, err := mon.Run([]byte(`{"query-version"}`))
 	if err != nil {
@@ -170,9 +169,9 @@ func TestRun(t *testing.T) {
 	}
 }
 
-func TestEvents(t *testing.T) {
+func TestLibvirtRPCEvents(t *testing.T) {
 	conn := libvirttest.New()
-	mon := New("test", conn)
+	mon := NewLibvirtRPC("test", conn)
 	done := make(chan struct{})
 
 	stream, err := mon.Events()
@@ -181,7 +180,7 @@ func TestEvents(t *testing.T) {
 	}
 
 	go func() {
-		var e qmp.Event
+		var e Event
 		select {
 		case e = <-stream:
 		case <-time.After(time.Second * 1):

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package libvirtrpc
+package hypervisor
 
 import (
 	"fmt"
@@ -27,8 +27,8 @@ var hvConn = func() (net.Conn, error) {
 	return m, nil
 }
 
-func TestDomainNames(t *testing.T) {
-	h := NewHypervisor(hvConn)
+func TestRPCDriverDomainNames(t *testing.T) {
+	h := NewRPCDriver(hvConn)
 
 	domains, err := h.DomainNames()
 	if err != nil {
@@ -49,8 +49,8 @@ func TestDomainNames(t *testing.T) {
 	}
 }
 
-func TestVersion(t *testing.T) {
-	h := NewHypervisor(hvConn)
+func TestRPCDriverVersion(t *testing.T) {
+	h := NewRPCDriver(hvConn)
 
 	version, err := h.Version()
 	if err != nil {
