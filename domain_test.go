@@ -466,12 +466,15 @@ func TestSupportedMonitorFailure(t *testing.T) {
 }
 
 func TestSystemPowerdown(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "system_powerdown", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		return success{}
+	})
+	defer done()
 
 	if err := d.SystemPowerdown(); err != nil {
 		t.Errorf("error powering down domain: %v", err)
