@@ -466,12 +466,15 @@ func TestSupportedMonitorFailure(t *testing.T) {
 }
 
 func TestSystemPowerdown(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "system_powerdown", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		return success{}, nil
+	})
+	defer done()
 
 	if err := d.SystemPowerdown(); err != nil {
 		t.Errorf("error powering down domain: %v", err)
@@ -479,17 +482,17 @@ func TestSystemPowerdown(t *testing.T) {
 }
 
 type success struct {
-	Return struct{} `json:"return"`
+	Return interface{} `json:"return"`
 }
 
 func TestSystemReset(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
 		if want, got := "system_reset", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}
+		return success{}, nil
 	})
 	defer done()
 
@@ -534,7 +537,7 @@ func TestEventsUnsupported(t *testing.T) {
 	}
 }
 
-func testDomain(t *testing.T, fn func(qmp.Cmd) interface{}) (*Domain, func()) {
+func testDomain(t *testing.T, fn func(qmp.Cmd) (interface{}, error)) (*Domain, func()) {
 	mon := &testMonitor{fn: fn}
 	d, err := NewDomain(mon, "test")
 	if err != nil {
@@ -547,7 +550,7 @@ func testDomain(t *testing.T, fn func(qmp.Cmd) interface{}) (*Domain, func()) {
 }
 
 type testMonitor struct {
-	fn func(qmp.Cmd) interface{}
+	fn func(qmp.Cmd) (interface{}, error)
 	noopMonitor
 }
 
@@ -557,7 +560,12 @@ func (t *testMonitor) Run(raw []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return json.Marshal(t.fn(cmd))
+	result, err := t.fn(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(result)
 }
 
 var _ qmp.Monitor = &noopMonitor{}
