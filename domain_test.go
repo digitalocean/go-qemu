@@ -16,6 +16,7 @@ package qemu
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -477,13 +478,20 @@ func TestSystemPowerdown(t *testing.T) {
 	}
 }
 
-func TestSystemReset(t *testing.T) {
-	m := &mockMonitor{}
+type success struct {
+	Return struct{} `json:"return"`
+}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+func TestSystemReset(t *testing.T) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "system_reset", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{}
+	})
+	defer done()
 
 	if err := d.SystemReset(); err != nil {
 		t.Errorf("error resetting domain: %v", err)
@@ -525,3 +533,38 @@ func TestEventsUnsupported(t *testing.T) {
 		t.Errorf("expected qmp.ErrEventsNotSupported, got %s", err.Error())
 	}
 }
+
+func testDomain(t *testing.T, fn func(qmp.Cmd) interface{}) (*Domain, func()) {
+	mon := &testMonitor{fn: fn}
+	d, err := NewDomain(mon, "test")
+	if err != nil {
+		t.Fatalf("failed to create test domain: %v", err)
+	}
+
+	return d, func() {
+		_ = d.Close()
+	}
+}
+
+type testMonitor struct {
+	fn func(qmp.Cmd) interface{}
+	noopMonitor
+}
+
+func (t *testMonitor) Run(raw []byte) ([]byte, error) {
+	var cmd qmp.Cmd
+	if err := json.Unmarshal(raw, &cmd); err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(t.fn(cmd))
+}
+
+var _ qmp.Monitor = &noopMonitor{}
+
+type noopMonitor struct{}
+
+func (noopMonitor) Connect() error                    { return nil }
+func (noopMonitor) Disconnect() error                 { return nil }
+func (noopMonitor) Run(_ []byte) ([]byte, error)      { return nil, nil }
+func (noopMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
