@@ -15,16 +15,29 @@
 package qemu
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/digitalocean/go-qemu/qmp"
 )
 
 func TestVersion(t *testing.T) {
-	m := &mockMonitor{}
+	result := qmp.Version{}
+	result.QEMU.Major = 2
+	result.QEMU.Minor = 5
+	result.QEMU.Micro = 0
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "query-version", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{
+			Return: result,
+		}, nil
+	})
+	defer done()
 
 	v, err := d.Version()
 	if err != nil {
@@ -38,30 +51,13 @@ func TestVersion(t *testing.T) {
 }
 
 func TestVersionMonitorFail(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		return nil, errors.New("fail")
+	})
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	_, err = d.Version()
+	_, err := d.Version()
 	if err == nil {
 		t.Errorf("expected monitor failure")
-	}
-}
-
-func TestVersionInvalidJSON(t *testing.T) {
-	m := &mockMonitor{invalidJSON: true}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = d.Version()
-	if err == nil {
-		t.Errorf("expected invalid json to cause failure")
 	}
 }
