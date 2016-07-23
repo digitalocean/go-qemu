@@ -17,6 +17,7 @@ package qemu
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -414,12 +415,23 @@ func TestRunInvalidCommand(t *testing.T) {
 }
 
 func TestSupported(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "query-commands", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		type command struct {
+			Name string
+		}
+
+		return success{
+			Return: []command{
+				{"query-block"},
+			},
+		}, nil
+	})
+	defer done()
 
 	cmd := "query-block"
 	supported, err := d.Supported(cmd)
@@ -433,12 +445,24 @@ func TestSupported(t *testing.T) {
 }
 
 func TestSupportedFalse(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "query-commands", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		type command struct {
+			Name string
+		}
+
+		return success{
+			Return: []command{
+				{"query-bar"},
+				{"query-baz"},
+			},
+		}, nil
+	})
+	defer done()
 
 	cmd := "query-foo"
 	supported, err := d.Supported(cmd)
@@ -452,14 +476,11 @@ func TestSupportedFalse(t *testing.T) {
 }
 
 func TestSupportedMonitorFailure(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		return success{}, errors.New("fail")
+	})
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
 	if _, err := d.Supported("foo"); err == nil {
 		t.Error("expected monitor failure")
 	}
@@ -523,15 +544,18 @@ func TestEvents(t *testing.T) {
 }
 
 func TestEventsUnsupported(t *testing.T) {
-	m := &mockMonitor{}
-	m.eventsUnsupported = true
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "system_reset", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		return success{}, nil
+	})
+	defer done()
+	d.eventsUnsupported = true
 
-	_, _, err = d.Events()
+	_, _, err := d.Events()
 	if err != qmp.ErrEventsNotSupported {
 		t.Errorf("expected qmp.ErrEventsNotSupported, got %s", err.Error())
 	}
