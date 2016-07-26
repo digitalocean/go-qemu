@@ -196,7 +196,7 @@ func TestLibvirtRPCEvents(t *testing.T) {
 	}()
 
 	// send an event to the listener goroutine
-	conn.Test.Write(testEvent)
+	_, _ = conn.Test.Write(testEvent)
 
 	// wait for completion
 	<-done
