@@ -32,31 +32,22 @@ type RPCDriver struct {
 
 // DomainNames retrieves all hypervisor domain names using libvirt RPC.
 func (d *RPCDriver) DomainNames() ([]string, error) {
-	conn, err := d.newConn()
-	if err != nil {
-		return nil, err
-	}
+	var names []string
+	err := d.withLibvirt(func(l *libvirt.Libvirt) error {
+		domains, err := l.Domains()
+		if err != nil {
+			return err
+		}
 
-	l := libvirt.New(conn)
-	if err := l.Connect(); err != nil {
-		conn.Close()
-		return nil, err
-	}
-	defer func() {
-		l.Disconnect()
-	}()
+		names = make([]string, 0, len(domains))
+		for _, d := range domains {
+			names = append(names, d.Name)
+		}
 
-	domains, err := l.Domains()
-	if err != nil {
-		return nil, err
-	}
+		return nil
+	})
 
-	names := make([]string, 0, len(domains))
-	for _, d := range domains {
-		names = append(names, d.Name)
-	}
-
-	return names, nil
+	return names, err
 }
 
 // NewMonitor creates a new qmp.Monitor using libvirt RPC.
@@ -67,21 +58,14 @@ func (d *RPCDriver) NewMonitor(domain string) (qmp.Monitor, error) {
 
 // Version returns the version string for the libvirt daemon.
 func (d *RPCDriver) Version() (string, error) {
-	conn, err := d.newConn()
-	if err != nil {
-		return "", err
-	}
+	var version string
+	err := d.withLibvirt(func(l *libvirt.Libvirt) error {
+		v, err := l.Version()
+		version = v
+		return err
+	})
 
-	l := libvirt.New(conn)
-	if err := l.Connect(); err != nil {
-		conn.Close()
-		return "", err
-	}
-	defer func() {
-		l.Disconnect()
-	}()
-
-	return l.Version()
+	return version, err
 }
 
 // NewRPCDriver configures a hypervisor driver using Libvirt RPC.
@@ -91,4 +75,25 @@ func NewRPCDriver(newConn func() (net.Conn, error)) *RPCDriver {
 	return &RPCDriver{
 		newConn: newConn,
 	}
+}
+
+// withLibvirt opens a new RPC connection to Libvirt and invokes the input
+// closure using the RPC connection.  Connections are automatically cleaned
+// up when the close returns.
+func (d *RPCDriver) withLibvirt(fn func(l *libvirt.Libvirt) error) error {
+	conn, err := d.newConn()
+	if err != nil {
+		return err
+	}
+
+	l := libvirt.New(conn)
+	if err := l.Connect(); err != nil {
+		_ = conn.Close()
+		return err
+	}
+	defer func() {
+		_ = l.Disconnect()
+	}()
+
+	return fn(l)
 }
