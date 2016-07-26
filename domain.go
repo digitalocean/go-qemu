@@ -82,6 +82,13 @@ func (d *Domain) Commands() ([]string, error) {
 	return cmds, nil
 }
 
+// queryBlockResponse is the structure returned by QEMU in response to
+// a query-block QMP command.
+type queryBlockResponse struct {
+	ID     string        `json:"id"`
+	Return []BlockDevice `json:"return"`
+}
+
 // BlockDevice searches a domain for the given block device.
 // If found, a BlockDevice is returned. If the device is not found,
 // the returned error will be ErrBlockDeviceNotFound.
@@ -107,11 +114,7 @@ func (d *Domain) BlockDevices() ([]BlockDevice, error) {
 		return []BlockDevice{}, err
 	}
 
-	var response struct {
-		ID     string        `json:"id"`
-		Return []BlockDevice `json:"return"`
-	}
-
+	response := queryBlockResponse{}
 	if err = json.Unmarshal(raw, &response); err != nil {
 		return []BlockDevice{}, err
 	}
