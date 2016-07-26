@@ -83,12 +83,22 @@ func TestBlockDeviceNotFound(t *testing.T) {
 }
 
 func TestBlockJobs(t *testing.T) {
-	m := &mockMonitor{activeJobs: true}
+	const device = "drive-virtio-disk0"
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "query-block-jobs", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{
+			Return: []BlockJob{{
+				Device:   device,
+				IOStatus: "ok",
+			}},
+		}
+	})
+	defer done()
 
 	jobs, err := d.BlockJobs()
 	if err != nil {
@@ -104,7 +114,7 @@ func TestBlockJobs(t *testing.T) {
 		t.Errorf("expected i/o status %q, got %q", expected, jobs[0].IOStatus)
 	}
 
-	expected = "drive-virtio-disk0"
+	expected = device
 	if jobs[0].Device != expected {
 		t.Errorf("expected device %q, got %q", expected, jobs[0].Device)
 	}
@@ -135,35 +145,6 @@ func TestBlockStats(t *testing.T) {
 	expectedBytes := uint64(9786368)
 	if stats[0].WriteBytes != expectedBytes {
 		t.Errorf("expected %d write bytes, got %d", expectedBytes, stats[0].WriteBytes)
-	}
-}
-
-func TestBlockJobsMonitorFail(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	_, err = d.BlockJobs()
-	if err == nil {
-		t.Errorf("expected monitor failure")
-	}
-}
-
-func TestBlockJobsInvalidJSON(t *testing.T) {
-	m := &mockMonitor{invalidJSON: true}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = d.BlockJobs()
-	if err == nil {
-		t.Errorf("expected invalid json to cause failure")
 	}
 }
 
