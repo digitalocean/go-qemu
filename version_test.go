@@ -15,7 +15,6 @@
 package qemu
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/digitalocean/go-qemu/qmp"
@@ -27,7 +26,7 @@ func TestVersion(t *testing.T) {
 	result.QEMU.Minor = 5
 	result.QEMU.Micro = 0
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "query-version", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -35,7 +34,7 @@ func TestVersion(t *testing.T) {
 
 		return success{
 			Return: result,
-		}, nil
+		}
 	})
 	defer done()
 
@@ -47,17 +46,5 @@ func TestVersion(t *testing.T) {
 	expected := "2.5.0"
 	if v != expected {
 		t.Errorf("expected version %q, instead got %q", expected, v)
-	}
-}
-
-func TestVersionMonitorFail(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
-		return nil, errors.New("fail")
-	})
-	defer done()
-
-	_, err := d.Version()
-	if err == nil {
-		t.Errorf("expected monitor failure")
 	}
 }

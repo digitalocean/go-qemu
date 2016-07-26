@@ -17,7 +17,6 @@ package qemu
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -32,7 +31,7 @@ const defaultTestTimeout = 5 * time.Second
 func TestBlockDevice(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -42,7 +41,7 @@ func TestBlockDevice(t *testing.T) {
 			Return: []BlockDevice{{
 				Device: device,
 			}},
-		}, nil
+		}
 	})
 	defer done()
 
@@ -59,7 +58,7 @@ func TestBlockDevice(t *testing.T) {
 func TestBlockDeviceNotFound(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -69,7 +68,7 @@ func TestBlockDeviceNotFound(t *testing.T) {
 			Return: []BlockDevice{{
 				Device: device,
 			}},
-		}, nil
+		}
 	})
 	defer done()
 
@@ -219,20 +218,6 @@ func TestCommands(t *testing.T) {
 
 	if !found {
 		t.Errorf("expected command %q to be returned", search)
-	}
-}
-
-func TestCommandsMonitorFailure(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	if _, err := d.Commands(); err == nil {
-		t.Error("expected monitor failure")
 	}
 }
 
@@ -399,7 +384,7 @@ func TestRunInvalidCommand(t *testing.T) {
 }
 
 func TestSupported(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -413,7 +398,7 @@ func TestSupported(t *testing.T) {
 			Return: []command{
 				{"query-block"},
 			},
-		}, nil
+		}
 	})
 	defer done()
 
@@ -429,7 +414,7 @@ func TestSupported(t *testing.T) {
 }
 
 func TestSupportedFalse(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -444,7 +429,7 @@ func TestSupportedFalse(t *testing.T) {
 				{"query-bar"},
 				{"query-baz"},
 			},
-		}, nil
+		}
 	})
 	defer done()
 
@@ -459,25 +444,14 @@ func TestSupportedFalse(t *testing.T) {
 	}
 }
 
-func TestSupportedMonitorFailure(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
-		return success{}, errors.New("fail")
-	})
-	defer done()
-
-	if _, err := d.Supported("foo"); err == nil {
-		t.Error("expected monitor failure")
-	}
-}
-
 func TestSystemPowerdown(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "system_powerdown", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}, nil
+		return success{}
 	})
 	defer done()
 
@@ -491,13 +465,13 @@ type success struct {
 }
 
 func TestSystemReset(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "system_reset", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}, nil
+		return success{}
 	})
 	defer done()
 
@@ -528,13 +502,13 @@ func TestEvents(t *testing.T) {
 }
 
 func TestEventsUnsupported(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
 		if want, got := "system_reset", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}, nil
+		return success{}
 	})
 	defer done()
 	d.eventsUnsupported = true
@@ -545,7 +519,7 @@ func TestEventsUnsupported(t *testing.T) {
 	}
 }
 
-func testDomain(t *testing.T, fn func(qmp.Cmd) (interface{}, error)) (*Domain, func()) {
+func testDomain(t *testing.T, fn func(qmp.Cmd) interface{}) (*Domain, func()) {
 	mon := &testMonitor{fn: fn}
 	d, err := NewDomain(mon, "test")
 	if err != nil {
@@ -558,7 +532,7 @@ func testDomain(t *testing.T, fn func(qmp.Cmd) (interface{}, error)) (*Domain, f
 }
 
 type testMonitor struct {
-	fn func(qmp.Cmd) (interface{}, error)
+	fn func(qmp.Cmd) interface{}
 	noopMonitor
 }
 
@@ -568,12 +542,7 @@ func (t *testMonitor) Run(raw []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	result, err := t.fn(cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(result)
+	return json.Marshal(t.fn(cmd))
 }
 
 var _ qmp.Monitor = &noopMonitor{}
