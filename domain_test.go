@@ -29,33 +29,23 @@ import (
 
 const defaultTestTimeout = 5 * time.Second
 
-func TestNew(t *testing.T) {
-	m := &mockMonitor{}
-
-	_, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestNewError(t *testing.T) {
-	m := &mockMonitor{alwaysFail: true}
-
-	_, err := NewDomain(m, "foo")
-	if err == nil {
-		t.Errorf("expected monitor failure")
-	}
-}
-
 func TestBlockDevice(t *testing.T) {
-	m := &mockMonitor{}
+	const device = "drive-virtio-disk0"
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "query-block", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	device := "drive-virtio-disk0"
+		return queryBlockResponse{
+			Return: []BlockDevice{{
+				Device: device,
+			}},
+		}, nil
+	})
+	defer done()
+
 	bd, err := d.BlockDevice(device)
 	if err != nil {
 		t.Error(err)
@@ -67,35 +57,29 @@ func TestBlockDevice(t *testing.T) {
 }
 
 func TestBlockDeviceNotFound(t *testing.T) {
-	m := &mockMonitor{}
+	const device = "drive-virtio-disk0"
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+	d, done := testDomain(t, func(cmd qmp.Cmd) (interface{}, error) {
+		if want, got := "query-block", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	device := "foo"
-	_, err = d.BlockDevice(device)
+		return queryBlockResponse{
+			Return: []BlockDevice{{
+				Device: device,
+			}},
+		}, nil
+	})
+	defer done()
+
+	_, err := d.BlockDevice("foo")
 	if err == nil {
 		t.Errorf("expected block device %q to not exist", device)
 	}
 
 	if err != ErrBlockDeviceNotFound {
 		t.Errorf("expected ErrBlockDeviceNotFound")
-	}
-}
-
-func TestBlockDeviceMonitorFailure(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	if _, err = d.BlockDevice("foo"); err == nil {
-		t.Error("expected monitor failure")
 	}
 }
 
