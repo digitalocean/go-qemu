@@ -18,60 +18,6 @@ import (
 	"testing"
 )
 
-func TestBlockDevices(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	expectedLen := 2
-	actualLen := len(disks)
-	if actualLen != expectedLen {
-		t.Errorf("expected %d disks, got %d", expectedLen, actualLen)
-	}
-
-	expected := "drive-virtio-disk0"
-	actual := disks[0].Device
-	if expected != actual {
-		t.Errorf("expected device %q, got %q", expected, actual)
-	}
-}
-
-func TestBlockDevicesMonitorFail(t *testing.T) {
-	m := &mockMonitor{}
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	_, err = d.BlockDevices()
-	if err == nil {
-		t.Errorf("expected monitor failure")
-	}
-}
-
-func TestBlockDevicesInvalidJSON(t *testing.T) {
-	m := &mockMonitor{invalidJSON: true}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = d.BlockDevices()
-	if err == nil {
-		t.Errorf("expected invalid json to cause failure")
-	}
-}
-
 func TestCancelJob(t *testing.T) {
 	m := &mockMonitor{}
 

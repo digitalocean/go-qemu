@@ -82,6 +82,41 @@ func TestBlockDeviceNotFound(t *testing.T) {
 	}
 }
 
+func TestBlockDevices(t *testing.T) {
+	const device = "drive-virtio-disk0"
+
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "query-block", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return queryBlockResponse{
+			Return: []BlockDevice{{
+				Device: device,
+			}},
+		}
+	})
+	defer done()
+
+	disks, err := d.BlockDevices()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedLen := 1
+	actualLen := len(disks)
+	if actualLen != expectedLen {
+		t.Errorf("expected %d disks, got %d", expectedLen, actualLen)
+	}
+
+	expected := "drive-virtio-disk0"
+	actual := disks[0].Device
+	if expected != actual {
+		t.Errorf("expected device %q, got %q", expected, actual)
+	}
+}
+
 func TestBlockJobs(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
@@ -121,25 +156,38 @@ func TestBlockJobs(t *testing.T) {
 }
 
 func TestBlockStats(t *testing.T) {
-	m := &mockMonitor{}
+	const device = "drive-virtio-disk0"
+	const bytes = 9786368
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "query-blockstats", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		type response struct {
+			Device string
+			Stats  BlockStats `json:"stats"`
+		}
+
+		return success{
+			Return: []response{{
+				Device: device,
+				Stats: BlockStats{
+					WriteBytes: bytes,
+				},
+			}},
+		}
+	})
+	defer done()
 
 	stats, err := d.BlockStats()
 	if err != nil {
 		t.Error(err)
 	}
 
-	if len(stats) != 4 {
-		t.Error("expected 4 block stats")
-	}
-
-	expected := "ide0-hd0"
-	if stats[0].Device != expected {
-		t.Errorf("expected device %q, got %q", expected, stats[0].Device)
+	if stats[0].Device != device {
+		t.Errorf("expected device %q, got %q", device, stats[0].Device)
 	}
 
 	expectedBytes := uint64(9786368)
@@ -149,7 +197,7 @@ func TestBlockStats(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	m := &mockMonitor{}
+	m := &testMonitor{}
 
 	d, err := NewDomain(m, "foo")
 	if err != nil {
@@ -163,26 +211,34 @@ func TestClose(t *testing.T) {
 	if _, ok := <-d.done; ok {
 		t.Error("domain should be closed")
 	}
-
-	if !m.disconnected {
-		t.Error("monitor should be disconnected")
-	}
 }
 
 func TestCommands(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "query-commands", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		type command struct {
+			Name string
+		}
+
+		return success{
+			Return: []command{
+				{Name: "query-block"},
+				{Name: "qeury-foo"},
+			},
+		}
+	})
+	defer done()
 
 	cmds, err := d.Commands()
 	if err != nil {
 		t.Error(err)
 	}
 
-	expected := 135
+	expected := 2
 	actual := len(cmds)
 	if actual != expected {
 		t.Errorf("expected number of supported commands to be %d, got %d", expected, actual)
@@ -202,26 +258,16 @@ func TestCommands(t *testing.T) {
 	}
 }
 
-func TestCommandsInvalidJSON(t *testing.T) {
-	m := &mockMonitor{invalidJSON: true}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	if _, err := d.Commands(); err == nil {
-		t.Error("expected invalid json to cause failure")
-	}
-}
-
 func TestDomainScreenDump(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+		if want, got := "screendump", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		return success{}
+	})
+	defer done()
 
 	// Use a fixed file name generation function
 	name := filepath.Join(os.TempDir(), "test-screendump")
@@ -318,35 +364,6 @@ func TestStatusShutdown(t *testing.T) {
 
 	if status != StatusShutdown {
 		t.Error("expected domain to be powered off")
-	}
-}
-
-func TestStatusFail(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	_, err = d.Status()
-	if err == nil {
-		t.Errorf("expected monitor failure")
-	}
-}
-
-func TestStatusInvalidJSON(t *testing.T) {
-	m := &mockMonitor{invalidJSON: true}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = d.Status()
-	if err == nil {
-		t.Errorf("expected invalid json to cause failure")
 	}
 }
 
