@@ -35,7 +35,7 @@ type LibvirtDriver struct {
 
 // NewMonitor creates a new qmp.Monitor using libvirt with 'virsh'.
 func (d *LibvirtDriver) NewMonitor(domain string) (qmp.Monitor, error) {
-	return qmp.NewLibvirtMonitor(d.uri.String(), domain)
+	return qmp.NewLibvirtShellMonitor(d.uri.String(), domain)
 }
 
 // DomainNames retrieves all hypervisor domain names using libvirt with
