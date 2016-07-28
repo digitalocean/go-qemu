@@ -332,12 +332,21 @@ func TestPCIDevices(t *testing.T) {
 }
 
 func TestStatusRunning(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+		if want, got := "query-status", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		type response struct {
+			Status Status
+		}
+
+		return success{
+			Return: response{Status: StatusRunning},
+		}
+	})
+	defer done()
 
 	status, err := d.Status()
 	if err != nil {
@@ -350,12 +359,21 @@ func TestStatusRunning(t *testing.T) {
 }
 
 func TestStatusShutdown(t *testing.T) {
-	m := &mockMonitor{poweredOff: true}
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+		if want, got := "query-status", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		type response struct {
+			Status Status
+		}
+
+		return success{
+			Return: response{Status: StatusShutdown},
+		}
+	})
+	defer done()
 
 	status, err := d.Status()
 	if err != nil {
@@ -479,35 +497,24 @@ func TestSystemReset(t *testing.T) {
 }
 
 func TestEvents(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, nil)
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	events, done, err := d.Events()
+	events, stop, err := d.Events()
 	if err != nil {
 		t.Error(err)
 	}
 
 	select {
 	case <-events:
-		done <- struct{}{}
+		stop <- struct{}{}
 	case <-time.After(time.Second * 2):
 		t.Error("expected event")
 	}
 }
 
 func TestEventsUnsupported(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
-		if want, got := "system_reset", cmd.Execute; want != got {
-			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
-				want, got)
-		}
-
-		return success{}
-	})
+	d, done := testDomain(t, nil)
 	defer done()
 	d.eventsUnsupported = true
 
@@ -541,6 +548,23 @@ func (t *testMonitor) Run(raw []byte) ([]byte, error) {
 	}
 
 	return json.Marshal(t.fn(cmd))
+}
+
+func (t *testMonitor) Events() (<-chan qmp.Event, error) {
+	c := make(chan qmp.Event)
+	go func() {
+		events := []string{blockJobReady, blockJobCompleted}
+
+		i := 0
+		for {
+			c <- qmp.Event{Event: events[i]}
+			<-time.After(1 * time.Second)
+
+			i = (i + 1) % len(events)
+		}
+	}()
+
+	return c, nil
 }
 
 var _ qmp.Monitor = &noopMonitor{}
