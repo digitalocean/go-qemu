@@ -21,22 +21,22 @@ import (
 	"github.com/digitalocean/go-libvirt"
 )
 
-var _ Monitor = &RPCMonitor{}
+var _ Monitor = &LibvirtRPCMonitor{}
 
-// RPCMonitor implements LibVirt's remote procedure call protocol.
-type RPCMonitor struct {
+// A LibvirtRPCMonitor implements LibVirt's remote procedure call protocol.
+type LibvirtRPCMonitor struct {
 	l *libvirt.Libvirt
 	// Domain name as seen by libvirt, e.g., stage-lb-1
 	Domain string
 }
 
-// NewLibvirtRPC configures a new Libvirt RPC Monitor connection.
+// NewLibvirtRPCMonitor configures a new Libvirt RPC Monitor connection.
 // The provided domain should be the name of the domain as seen
 // by libvirt, e.g., stage-lb-1.
-func NewLibvirtRPC(domain string, conn net.Conn) *RPCMonitor {
+func NewLibvirtRPCMonitor(domain string, conn net.Conn) *LibvirtRPCMonitor {
 	l := libvirt.New(conn)
 
-	return &RPCMonitor{
+	return &LibvirtRPCMonitor{
 		l:      l,
 		Domain: domain,
 	}
@@ -44,13 +44,13 @@ func NewLibvirtRPC(domain string, conn net.Conn) *RPCMonitor {
 
 // Connect establishes communication with the libvirt server.
 // The underlying libvirt socket connection must be previously established.
-func (rpc *RPCMonitor) Connect() error {
+func (rpc *LibvirtRPCMonitor) Connect() error {
 	return rpc.l.Connect()
 }
 
 // Disconnect shuts down communication with the libvirt server
 // and closes the underlying net.Conn.
-func (rpc *RPCMonitor) Disconnect() error {
+func (rpc *LibvirtRPCMonitor) Disconnect() error {
 	return rpc.l.Disconnect()
 }
 
@@ -58,7 +58,7 @@ func (rpc *RPCMonitor) Disconnect() error {
 // If a problem is encountered setting up the event monitor connection
 // an error will be returned. Errors encountered during streaming will
 // cause the returned event channel to be closed.
-func (rpc *RPCMonitor) Events() (<-chan Event, error) {
+func (rpc *LibvirtRPCMonitor) Events() (<-chan Event, error) {
 	events, err := rpc.l.Events(rpc.Domain)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (rpc *RPCMonitor) Events() (<-chan Event, error) {
 // Run executes the given QAPI command against a domain's QEMU instance.
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
-func (rpc *RPCMonitor) Run(cmd []byte) ([]byte, error) {
+func (rpc *LibvirtRPCMonitor) Run(cmd []byte) ([]byte, error) {
 	return rpc.l.Run(rpc.Domain, cmd)
 }
 

@@ -26,12 +26,12 @@ import (
 	"testing"
 )
 
-func TestSocketConnectDisconnect(t *testing.T) {
+func TestSocketMonitorConnectDisconnect(t *testing.T) {
 	_, _, done := testSocket(t)
 	done()
 }
 
-func TestSocketEvents(t *testing.T) {
+func TestSocketMonitorEvents(t *testing.T) {
 	mon, w, done := testSocket(t)
 	defer done()
 
@@ -63,8 +63,8 @@ func TestSocketEvents(t *testing.T) {
 	}
 }
 
-func TestSocket_listenEmptyStream(t *testing.T) {
-	mon := &Socket{listeners: new(int32)}
+func TestSocketMonitor_listenEmptyStream(t *testing.T) {
+	mon := &SocketMonitor{listeners: new(int32)}
 
 	r := strings.NewReader("")
 
@@ -82,8 +82,8 @@ func TestSocket_listenEmptyStream(t *testing.T) {
 	}
 }
 
-func TestSocket_listenScannerErr(t *testing.T) {
-	mon := &Socket{listeners: new(int32)}
+func TestSocketMonitor_listenScannerErr(t *testing.T) {
+	mon := &SocketMonitor{listeners: new(int32)}
 
 	errFoo := errors.New("foo")
 	r := &errReader{err: errFoo}
@@ -99,8 +99,8 @@ func TestSocket_listenScannerErr(t *testing.T) {
 	}
 }
 
-func TestSocket_listenInvalidJSON(t *testing.T) {
-	mon := &Socket{listeners: new(int32)}
+func TestSocketMonitor_listenInvalidJSON(t *testing.T) {
+	mon := &SocketMonitor{listeners: new(int32)}
 
 	r := strings.NewReader("<html>")
 
@@ -114,8 +114,8 @@ func TestSocket_listenInvalidJSON(t *testing.T) {
 	}
 }
 
-func TestSocket_listenStreamResponse(t *testing.T) {
-	mon := &Socket{listeners: new(int32)}
+func TestSocketMonitor_listenStreamResponse(t *testing.T) {
+	mon := &SocketMonitor{listeners: new(int32)}
 
 	str := `{"foo": "bar"}`
 	r := strings.NewReader(str)
@@ -135,8 +135,8 @@ func TestSocket_listenStreamResponse(t *testing.T) {
 	}
 }
 
-func TestSocket_listenEventNoListeners(t *testing.T) {
-	mon := &Socket{listeners: new(int32)}
+func TestSocketMonitor_listenEventNoListeners(t *testing.T) {
+	mon := &SocketMonitor{listeners: new(int32)}
 
 	r := strings.NewReader(`{"event":"STOP"}`)
 
@@ -150,9 +150,9 @@ func TestSocket_listenEventNoListeners(t *testing.T) {
 	}
 }
 
-func TestSocket_listenEventOneListener(t *testing.T) {
+func TestSocketMonitor_listenEventOneListener(t *testing.T) {
 	l := int32(1)
-	mon := &Socket{listeners: &l}
+	mon := &SocketMonitor{listeners: &l}
 
 	eventStop := "STOP"
 	r := strings.NewReader(fmt.Sprintf(`{"event":%q}`, eventStop))
@@ -168,10 +168,10 @@ func TestSocket_listenEventOneListener(t *testing.T) {
 	}
 }
 
-func testSocket(t *testing.T) (*Socket, io.Writer, func()) {
+func testSocket(t *testing.T) (*SocketMonitor, io.Writer, func()) {
 	sc, tc := net.Pipe()
 
-	mon := &Socket{
+	mon := &SocketMonitor{
 		c:         sc,
 		listeners: new(int32),
 	}
@@ -189,7 +189,7 @@ func testSocket(t *testing.T) (*Socket, io.Writer, func()) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		var cmd Cmd
+		var cmd Command
 		if err := dec.Decode(&cmd); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

@@ -34,8 +34,8 @@ type Monitor interface {
 	Events() (events <-chan Event, err error)
 }
 
-// Cmd represents a QMP command.
-type Cmd struct {
+// Command represents a QMP command.
+type Command struct {
 	// Name of the command to run
 	Execute string `json:"execute"`
 

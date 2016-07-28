@@ -68,11 +68,11 @@ var testEvent = []byte{
 	0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x22, 0x7d,
 }
 
-func TestNewLibvirtRPC(t *testing.T) {
+func TestNewLibvirtRPCMonitor(t *testing.T) {
 	conn := libvirttest.New()
 
 	domain := "test-1"
-	rpc := NewLibvirtRPC(domain, conn)
+	rpc := NewLibvirtRPCMonitor(domain, conn)
 
 	if rpc.Domain != domain {
 		t.Errorf("expected domain %q, got %q", domain, rpc.Domain)
@@ -117,9 +117,9 @@ func TestQMPEvent(t *testing.T) {
 	}
 }
 
-func TestLibvirtRPCConnect(t *testing.T) {
+func TestLibvirtRPCMonitorConnect(t *testing.T) {
 	conn := libvirttest.New()
-	mon := NewLibvirtRPC("test", conn)
+	mon := NewLibvirtRPCMonitor("test", conn)
 
 	err := mon.Connect()
 	if err != nil {
@@ -127,9 +127,9 @@ func TestLibvirtRPCConnect(t *testing.T) {
 	}
 }
 
-func TestLibvirtRPCDisconnect(t *testing.T) {
+func TestLibvirtRPCMonitorDisconnect(t *testing.T) {
 	conn := libvirttest.New()
-	mon := NewLibvirtRPC("test", conn)
+	mon := NewLibvirtRPCMonitor("test", conn)
 
 	err := mon.Disconnect()
 	if err != nil {
@@ -137,9 +137,9 @@ func TestLibvirtRPCDisconnect(t *testing.T) {
 	}
 }
 
-func TestLibvirtRPCRun(t *testing.T) {
+func TestLibvirtRPCMonitorRun(t *testing.T) {
 	conn := libvirttest.New()
-	mon := NewLibvirtRPC("test", conn)
+	mon := NewLibvirtRPCMonitor("test", conn)
 
 	res, err := mon.Run([]byte(`{"query-version"}`))
 	if err != nil {
@@ -169,9 +169,9 @@ func TestLibvirtRPCRun(t *testing.T) {
 	}
 }
 
-func TestLibvirtRPCEvents(t *testing.T) {
+func TestLibvirtRPCMonitorEvents(t *testing.T) {
 	conn := libvirttest.New()
-	mon := NewLibvirtRPC("test", conn)
+	mon := NewLibvirtRPCMonitor("test", conn)
 	done := make(chan struct{})
 
 	stream, err := mon.Events()

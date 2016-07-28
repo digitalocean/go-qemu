@@ -57,7 +57,7 @@ func (d *Domain) Close() error {
 
 // Commands returns all QMP commands supported by the domain.
 func (d *Domain) Commands() ([]string, error) {
-	raw, err := d.Run(qmp.Cmd{Execute: "query-commands"})
+	raw, err := d.Run(qmp.Command{Execute: "query-commands"})
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (d *Domain) BlockDevice(name string) (BlockDevice, error) {
 
 // BlockDevices returns a domain's block devices.
 func (d *Domain) BlockDevices() ([]BlockDevice, error) {
-	raw, err := d.Run(qmp.Cmd{Execute: "query-block"})
+	raw, err := d.Run(qmp.Command{Execute: "query-block"})
 	if err != nil {
 		return []BlockDevice{}, err
 	}
@@ -125,7 +125,7 @@ func (d *Domain) BlockDevices() ([]BlockDevice, error) {
 // BlockJobs returns active block job operations.
 func (d *Domain) BlockJobs() ([]BlockJob, error) {
 	var jobs []BlockJob
-	raw, err := d.Run(qmp.Cmd{Execute: "query-block-jobs"})
+	raw, err := d.Run(qmp.Command{Execute: "query-block-jobs"})
 	if err != nil {
 		return jobs, err
 	}
@@ -144,7 +144,7 @@ func (d *Domain) BlockJobs() ([]BlockJob, error) {
 
 // BlockStats returns block device statistics for a domain.
 func (d *Domain) BlockStats() ([]BlockStats, error) {
-	raw, err := d.Run(qmp.Cmd{Execute: "query-blockstats"})
+	raw, err := d.Run(qmp.Command{Execute: "query-blockstats"})
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func (d *Domain) BlockStats() ([]BlockStats, error) {
 
 // PCIDevices returns a domain's PCI devices.
 func (d *Domain) PCIDevices() ([]PCIDevice, error) {
-	raw, err := d.Run(qmp.Cmd{Execute: "query-pci"})
+	raw, err := d.Run(qmp.Command{Execute: "query-pci"})
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (d *Domain) PCIDevices() ([]PCIDevice, error) {
 //
 // Run should be used with caution, as it allows the execution of
 // arbitrary QMP commands against the domain.
-func (d *Domain) Run(c qmp.Cmd) ([]byte, error) {
+func (d *Domain) Run(c qmp.Command) ([]byte, error) {
 	cmd, err := json.Marshal(c)
 	if err != nil {
 		return nil, err
@@ -235,7 +235,7 @@ func (d *Domain) ScreenDump() (io.ReadCloser, error) {
 	// io.Reader.
 	name := d.tempFileName(d.Name, "screendump")
 
-	cmd := qmp.Cmd{
+	cmd := qmp.Command{
 		Execute: "screendump",
 		Args: map[string]string{
 			"filename": name,
@@ -272,7 +272,7 @@ const (
 
 // Status returns the current status of the domain.
 func (d *Domain) Status() (Status, error) {
-	raw, err := d.Run(qmp.Cmd{Execute: "query-status"})
+	raw, err := d.Run(qmp.Command{Execute: "query-status"})
 	if err != nil {
 		// libvirt returns an error if the domain is not running
 		if strings.Contains(err.Error(), "not running") {
@@ -316,19 +316,19 @@ func (d *Domain) Supported(cmd string) (bool, error) {
 
 // SystemPowerdown sends a system power down event to the domain.
 func (d *Domain) SystemPowerdown() error {
-	_, err := d.Run(qmp.Cmd{Execute: "system_powerdown"})
+	_, err := d.Run(qmp.Command{Execute: "system_powerdown"})
 	return err
 }
 
 // SystemReset sends a system reset event to the domain.
 func (d *Domain) SystemReset() error {
-	_, err := d.Run(qmp.Cmd{Execute: "system_reset"})
+	_, err := d.Run(qmp.Command{Execute: "system_reset"})
 	return err
 }
 
 // Version returns the domain's QEMU version.
 func (d *Domain) Version() (string, error) {
-	raw, err := d.Run(qmp.Cmd{Execute: "query-version"})
+	raw, err := d.Run(qmp.Command{Execute: "query-version"})
 	if err != nil {
 		return "", err
 	}

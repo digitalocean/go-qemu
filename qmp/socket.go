@@ -24,12 +24,12 @@ import (
 	"time"
 )
 
-// Socket represents a QEMU Machine Protocol (QMP) socket.
-// Communication is performed directly using a QEMU monitor socket, typically
-// using a UNIX socket or TCP connection.  Multiple connections to the same
-// domain are not permitted, and will result in the monitor blocking until
+// A SocketMonitor is a Monitor which speaks directly to a QEMU Machine Protocol
+// (QMP) socket. Communication is performed directly using a QEMU monitor socket,
+// typically using a UNIX socket or TCP connection.  Multiple connections to the
+// same domain are not permitted, and will result in the monitor blocking until
 // the existing connection is closed.
-type Socket struct {
+type SocketMonitor struct {
 	// QEMU version reported by a connected monitor socket.
 	Version *Version
 
@@ -54,13 +54,13 @@ type Socket struct {
 // NewSocketMonitor may dial the QEMU socket using a variety of connection types:
 //	NewSocketMonitor("unix", "/var/lib/qemu/example.monitor", 2 * time.Second)
 //	NewSocketMonitor("tcp", "8.8.8.8:4444", 2 * time.Second)
-func NewSocketMonitor(network, addr string, timeout time.Duration) (*Socket, error) {
+func NewSocketMonitor(network, addr string, timeout time.Duration) (*SocketMonitor, error) {
 	c, err := net.DialTimeout(network, addr, timeout)
 	if err != nil {
 		return nil, err
 	}
 
-	mon := &Socket{
+	mon := &SocketMonitor{
 		c:         c,
 		listeners: new(int32),
 	}
@@ -69,7 +69,7 @@ func NewSocketMonitor(network, addr string, timeout time.Duration) (*Socket, err
 }
 
 // Disconnect closes the QEMU monitor socket connection.
-func (mon *Socket) Disconnect() error {
+func (mon *SocketMonitor) Disconnect() error {
 	atomic.StoreInt32(mon.listeners, 0)
 	err := mon.c.Close()
 
@@ -83,7 +83,7 @@ const qmpCapabilities = "qmp_capabilities"
 // Connect sets up a QEMU QMP connection by connecting directly to the QEMU
 // monitor socket.  An error is returned if the capabilities handshake does
 // not succeed.
-func (mon *Socket) Connect() error {
+func (mon *SocketMonitor) Connect() error {
 	enc := json.NewEncoder(mon.c)
 	dec := json.NewDecoder(mon.c)
 
@@ -95,7 +95,7 @@ func (mon *Socket) Connect() error {
 	mon.Version = &ban.QMP.Version
 
 	// Issue capabilities handshake
-	cmd := Cmd{Execute: qmpCapabilities}
+	cmd := Command{Execute: qmpCapabilities}
 	if err := enc.Encode(cmd); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (mon *Socket) Connect() error {
 // Events streams QEMU QMP Events.
 // Events should only be called once per Socket.  If used with a qemu.Domain,
 // qemu.Domain.Events should be called to retrieve events instead.
-func (mon *Socket) Events() (<-chan Event, error) {
+func (mon *SocketMonitor) Events() (<-chan Event, error) {
 	atomic.AddInt32(mon.listeners, 1)
 	return mon.events, nil
 }
@@ -132,7 +132,7 @@ func (mon *Socket) Events() (<-chan Event, error) {
 // listen listens for incoming data from a QEMU monitor socket.  It determines
 // if the data is an asynchronous event or a response to a command, and returns
 // the data on the appropriate channel.
-func (mon *Socket) listen(r io.Reader, events chan<- Event, stream chan<- streamResponse) {
+func (mon *SocketMonitor) listen(r io.Reader, events chan<- Event, stream chan<- streamResponse) {
 	defer close(events)
 	defer close(stream)
 
@@ -167,7 +167,7 @@ func (mon *Socket) listen(r io.Reader, events chan<- Event, stream chan<- stream
 // Run executes the given QAPI command against a domain's QEMU instance.
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
-func (mon *Socket) Run(command []byte) ([]byte, error) {
+func (mon *SocketMonitor) Run(command []byte) ([]byte, error) {
 	// Only allow a single command to be run at a time to ensure that responses
 	// to a command cannot be mixed with responses from another command
 	mon.mu.Lock()

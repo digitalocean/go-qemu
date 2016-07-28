@@ -31,7 +31,7 @@ const defaultTestTimeout = 5 * time.Second
 func TestBlockDevice(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -58,7 +58,7 @@ func TestBlockDevice(t *testing.T) {
 func TestBlockDeviceNotFound(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -85,7 +85,7 @@ func TestBlockDeviceNotFound(t *testing.T) {
 func TestBlockDevices(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -120,7 +120,7 @@ func TestBlockDevices(t *testing.T) {
 func TestBlockJobs(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-block-jobs", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -159,7 +159,7 @@ func TestBlockStats(t *testing.T) {
 	const device = "drive-virtio-disk0"
 	const bytes = 9786368
 
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-blockstats", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -214,7 +214,7 @@ func TestClose(t *testing.T) {
 }
 
 func TestCommands(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -259,7 +259,7 @@ func TestCommands(t *testing.T) {
 }
 
 func TestDomainScreenDump(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "screendump", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -375,14 +375,14 @@ func TestRunInvalidCommand(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = d.Run(qmp.Cmd{})
+	_, err = d.Run(qmp.Command{})
 	if err == nil {
 		t.Error("expected invalid command to fail")
 	}
 }
 
 func TestSupported(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -412,7 +412,7 @@ func TestSupported(t *testing.T) {
 }
 
 func TestSupportedFalse(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -443,7 +443,7 @@ func TestSupportedFalse(t *testing.T) {
 }
 
 func TestSystemPowerdown(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "system_powerdown", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -463,7 +463,7 @@ type success struct {
 }
 
 func TestSystemReset(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "system_reset", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -500,7 +500,7 @@ func TestEvents(t *testing.T) {
 }
 
 func TestEventsUnsupported(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Cmd) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
 		if want, got := "system_reset", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -517,7 +517,7 @@ func TestEventsUnsupported(t *testing.T) {
 	}
 }
 
-func testDomain(t *testing.T, fn func(qmp.Cmd) interface{}) (*Domain, func()) {
+func testDomain(t *testing.T, fn func(qmp.Command) interface{}) (*Domain, func()) {
 	mon := &testMonitor{fn: fn}
 	d, err := NewDomain(mon, "test")
 	if err != nil {
@@ -530,12 +530,12 @@ func testDomain(t *testing.T, fn func(qmp.Cmd) interface{}) (*Domain, func()) {
 }
 
 type testMonitor struct {
-	fn func(qmp.Cmd) interface{}
+	fn func(qmp.Command) interface{}
 	noopMonitor
 }
 
 func (t *testMonitor) Run(raw []byte) ([]byte, error) {
-	var cmd qmp.Cmd
+	var cmd qmp.Command
 	if err := json.Unmarshal(raw, &cmd); err != nil {
 		return nil, err
 	}
