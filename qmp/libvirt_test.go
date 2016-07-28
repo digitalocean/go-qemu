@@ -24,8 +24,8 @@ const (
 	TestVM         = "domain-00000"
 )
 
-func TestNewLibvirtMonitor(t *testing.T) {
-	monitor, err := NewLibvirtMonitor(TestLibvirtURI, TestVM)
+func TestNewLibvirtShellMonitor(t *testing.T) {
+	monitor, err := NewLibvirtShellMonitor(TestLibvirtURI, TestVM)
 	if err != nil {
 		t.Error(err)
 	}
@@ -36,7 +36,7 @@ func TestNewLibvirtMonitor(t *testing.T) {
 }
 
 func TestDisconnect(t *testing.T) {
-	monitor, err := NewLibvirtMonitor(TestLibvirtURI, TestVM)
+	monitor, err := NewLibvirtShellMonitor(TestLibvirtURI, TestVM)
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +48,7 @@ func TestDisconnect(t *testing.T) {
 }
 
 func TestConnectInvalidURI(t *testing.T) {
-	_, err := NewLibvirtMonitor("%%%%", TestVM)
+	_, err := NewLibvirtShellMonitor("%%%%", TestVM)
 	if err == nil {
 		t.Errorf("expected invalid libvirt uri: %q to fail", err)
 	}

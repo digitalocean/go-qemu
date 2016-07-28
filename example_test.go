@@ -93,7 +93,7 @@ func (mon *exampleMonitor) Disconnect() error                 { return nil }
 func (mon *exampleMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
 
 func (mon *exampleMonitor) Run(command []byte) ([]byte, error) {
-	var cmd qmp.Cmd
+	var cmd qmp.Command
 	if err := json.Unmarshal(command, &cmd); err != nil {
 		return nil, err
 	}

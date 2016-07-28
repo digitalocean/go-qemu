@@ -139,7 +139,7 @@ func (bd BlockDevice) Mirror(d *Domain, dest string, timeout time.Duration) erro
 	}
 
 	return waitForSignal(d, blockJobReady, timeout, func() error {
-		cmd := qmp.Cmd{
+		cmd := qmp.Command{
 			Execute: "drive-mirror",
 			Args: map[string]string{
 				"device": bd.Device,
@@ -160,7 +160,7 @@ func (bd BlockDevice) Mirror(d *Domain, dest string, timeout time.Duration) erro
 // must be called to pivot the domain back to the original backing image.
 func (bd BlockDevice) Commit(d *Domain, overlay string, timeout time.Duration) error {
 	return waitForSignal(d, blockJobReady, timeout, func() error {
-		cmd := qmp.Cmd{
+		cmd := qmp.Command{
 			Execute: "block-commit",
 			Args: map[string]string{
 				"device": bd.Device,
@@ -177,7 +177,7 @@ func (bd BlockDevice) Commit(d *Domain, overlay string, timeout time.Duration) e
 // For block-mirror operations, this completes the block job.
 func (bd BlockDevice) CancelJob(d *Domain, timeout time.Duration) error {
 	return waitForSignal(d, blockJobCompleted, timeout, func() error {
-		cmd := qmp.Cmd{
+		cmd := qmp.Command{
 			Execute: "block-job-cancel",
 			Args: map[string]string{
 				"device": bd.Device,
@@ -194,7 +194,7 @@ func (bd BlockDevice) CancelJob(d *Domain, timeout time.Duration) error {
 // backing image.
 func (bd BlockDevice) CompleteJob(d *Domain, timeout time.Duration) error {
 	return waitForSignal(d, blockJobCompleted, timeout, func() error {
-		cmd := qmp.Cmd{
+		cmd := qmp.Command{
 			Execute: "block-job-complete",
 			Args: map[string]string{
 				"device": bd.Device,
@@ -210,7 +210,7 @@ func (bd BlockDevice) CompleteJob(d *Domain, timeout time.Duration) error {
 // The disk's image is given a new QCOW2 overlay, leaving the underlying image
 // in a state that is considered safe for copying.
 func (bd BlockDevice) Snapshot(d *Domain, overlay string) error {
-	cmd := qmp.Cmd{
+	cmd := qmp.Command{
 		Execute: "blockdev-snapshot-sync",
 		Args: map[string]string{
 			"device":        bd.Device,

@@ -53,7 +53,7 @@ func (d *RPCDriver) DomainNames() ([]string, error) {
 // NewMonitor creates a new qmp.Monitor using libvirt RPC.
 func (d *RPCDriver) NewMonitor(domain string) (qmp.Monitor, error) {
 	conn, err := d.newConn()
-	return qmp.NewLibvirtRPC(domain, conn), err
+	return qmp.NewLibvirtRPCMonitor(domain, conn), err
 }
 
 // Version returns the version string for the libvirt daemon.

@@ -53,10 +53,13 @@ func (r *response) Err() error {
 	return errors.New(r.Error.Desc)
 }
 
-// Libvirt represents a QEMU Machine Protocol (QMP) socket.
+var _ Monitor = &LibvirtShellMonitor{}
+
+// A LibvirtShellMonitor is a Monitor which shells out to virsh to
+// communicate with a QEMU Machine Protocol (QMP) socket.
 // Communication is proxied via the libvirtd daemon. Multiple
 // connections to the same hypervisor and domain are permitted.
-type Libvirt struct {
+type LibvirtShellMonitor struct {
 	domain     string
 	url        *url.URL
 	disconnect chan error
@@ -66,13 +69,13 @@ type Libvirt struct {
 
 // Connect sets up a QEMU QMP connection via libvirt's QEMU monitor socket.
 // An error is returned if the libvirt daemon is unreachable.
-func (mon Libvirt) Connect() error {
+func (mon LibvirtShellMonitor) Connect() error {
 	_, err := virsh.Virsh(mon.prep, mon.url.String(), "connect")
 	return err
 }
 
 // Disconnect tears down open QMP socket connections.
-func (mon *Libvirt) Disconnect() error {
+func (mon *LibvirtShellMonitor) Disconnect() error {
 	mon.disconnect <- nil
 
 	select {
@@ -86,7 +89,7 @@ func (mon *Libvirt) Disconnect() error {
 // Run executes the given QAPI command against a domain's QEMU instance.
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
-func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
+func (mon LibvirtShellMonitor) Run(cmd []byte) ([]byte, error) {
 	raw, err := virsh.Virsh(
 		mon.prep,
 		mon.url.String(),
@@ -114,7 +117,7 @@ func (mon Libvirt) Run(cmd []byte) ([]byte, error) {
 // If a problem is encountered setting up the event monitor connection
 // an error will be returned. Errors encountered during streaming will
 // cause the returned event channel to be closed.
-func (mon *Libvirt) Events() (<-chan Event, error) {
+func (mon *LibvirtShellMonitor) Events() (<-chan Event, error) {
 	stream := make(chan Event)
 	cmd := mon.prep.Prepare(
 		"virsh",
@@ -158,13 +161,13 @@ func (mon *Libvirt) Events() (<-chan Event, error) {
 	return stream, nil
 }
 
-// NewLibvirtMonitor configures a connection to the provided hypervisor and domain.
-// An error is returned in the provided libvirt connection URI is invalid.
+// NewLibvirtShellMonitor configures a connection to the provided hypervisor and domain.
+// An error is returned if the provided libvirt connection URI is invalid.
 //
 // Hypervisor URIs may be local or remote, e.g.,
 //	qemu:///system
 //	qemu+ssh://libvirt@example.com/system
-func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
+func NewLibvirtShellMonitor(uri, domain string) (*LibvirtShellMonitor, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
@@ -173,7 +176,7 @@ func NewLibvirtMonitor(uri, domain string) (*Libvirt, error) {
 	// Shell out to virsh to perform management actions
 	prep := &shellexec.SystemPreparer{}
 
-	monitor := &Libvirt{
+	monitor := &LibvirtShellMonitor{
 		url:        u,
 		domain:     domain,
 		disconnect: make(chan error, 1),
