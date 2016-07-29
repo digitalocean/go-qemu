@@ -26,7 +26,7 @@ func TestVersion(t *testing.T) {
 	result.QEMU.Minor = 5
 	result.QEMU.Micro = 0
 
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-version", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -34,7 +34,7 @@ func TestVersion(t *testing.T) {
 
 		return success{
 			Return: result,
-		}
+		}, nil
 	})
 	defer done()
 
