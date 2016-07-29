@@ -15,295 +15,247 @@
 package qemu
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/digitalocean/go-qemu/qmp"
 )
 
 func TestCancelJob(t *testing.T) {
-	m := &mockMonitor{}
+	const device = "drive-virtio-disk0"
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "block-job-cancel", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
+		args, _ := cmd.Args.(map[string]interface{})
+		if want, got := device, args["device"]; want != got {
+			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{}, nil
+	})
+	defer done()
+
+	disk := BlockDevice{Device: device}
+	err := disk.CancelJob(d, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].CancelJob(d, defaultTestTimeout)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestCancelJobMonitorFailure(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	err = disks[0].CancelJob(d, defaultTestTimeout)
-	if err == nil {
-		t.Error("expected monitor failure")
 	}
 }
 
 func TestCommit(t *testing.T) {
-	m := &mockMonitor{}
+	const (
+		device  = "drive-virtio-disk0"
+		overlay = "/tmp/foo.img"
+	)
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "block-commit", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		args, _ := cmd.Args.(map[string]interface{})
+		if want, got := device, args["device"]; want != got {
+			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+		if want, got := overlay, args["top"]; want != got {
+			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
+		return success{}, nil
+	})
+	defer done()
 
-	err = disks[0].Commit(d, "/tmp/foo", defaultTestTimeout)
+	disk := BlockDevice{Device: device}
+	err := disk.Commit(d, overlay, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestCommitActiveBlockJob(t *testing.T) {
-	m := &mockMonitor{}
+	const device = "drive-virtio-disk0"
+	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
+		return failure{
+			Error: map[string]string{
+				"class": "GenericError",
+			},
+		}, errors.New("fail")
+	})
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.activeJobs = true
-	err = disks[0].Commit(d, "/tmp/foo", defaultTestTimeout)
+	disk := BlockDevice{Device: device}
+	err := disk.Commit(d, "/tmp/foo", defaultTestTimeout)
 	if err == nil {
 		t.Errorf("expected blockcommit with active blockjob to fail")
 	}
 }
 
 func TestCommitBlockJobError(t *testing.T) {
-	m := &mockMonitor{eventErrors: true}
+	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
+		return success{}, nil
+	})
+	d.m.(*testMonitor).eventErrors = true
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].Commit(d, "/tmp/foo", defaultTestTimeout)
+	disk := BlockDevice{Device: "test"}
+	err := disk.Commit(d, "/tmp/foo", defaultTestTimeout)
 	if err == nil {
 		t.Error("expected block job error to cause failure")
 	}
 }
 
 func TestCommitTimeout(t *testing.T) {
-	m := &mockMonitor{eventTimeout: true}
+	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
+		return success{}, nil
+	})
+	d.m.(*testMonitor).eventTimeout = true
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].Commit(d, "/tmp/foo", 0)
+	disk := BlockDevice{Device: "test"}
+	err := disk.Commit(d, "/tmp/foo", 0)
 	if err == nil {
 		t.Error("expected timeout")
 	}
 }
 
 func TestJobComplete(t *testing.T) {
-	m := &mockMonitor{}
+	const device = "drive-virtio-disk0"
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "block-job-complete", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
+		args, _ := cmd.Args.(map[string]interface{})
+		if want, got := device, args["device"]; want != got {
+			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{}, nil
+	})
+	defer done()
+
+	disk := BlockDevice{Device: device}
+	err := disk.CompleteJob(d, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].CompleteJob(d, defaultTestTimeout)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestJobCompleteMonitorFail(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	err = disks[0].CompleteJob(d, defaultTestTimeout)
-	if err == nil {
-		t.Error("expected monitor failure")
 	}
 }
 
 func TestJobCompleteEventError(t *testing.T) {
-	m := &mockMonitor{eventErrors: true}
+	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
+		return success{}, nil
+	})
+	d.m.(*testMonitor).eventErrors = true
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].CompleteJob(d, defaultTestTimeout)
+	disk := BlockDevice{Device: "test"}
+	err := disk.CompleteJob(d, defaultTestTimeout)
 	if err == nil {
 		t.Error("expected block job error to cause failure")
 	}
 }
 
 func TestJobCompleteTimeout(t *testing.T) {
-	m := &mockMonitor{eventTimeout: true}
+	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
+		return success{}, nil
+	})
+	d.m.(*testMonitor).eventTimeout = true
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].CompleteJob(d, 0)
+	disk := BlockDevice{Device: "test"}
+	err := disk.CompleteJob(d, 0)
 	if err == nil {
 		t.Error("expected timeout")
 	}
 }
 
 func TestMirror(t *testing.T) {
-	m := &mockMonitor{}
+	const (
+		device = "drive-virtio-disk0"
+		dest   = "/tmp/foo.img"
+	)
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "drive-mirror", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		args, _ := cmd.Args.(map[string]interface{})
+		if want, got := device, args["device"]; want != got {
+			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
+		if want, got := dest, args["target"]; want != got {
+			t.Fatalf("unexpected target:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	err = disks[0].Mirror(d, "/tmp/foo.img", defaultTestTimeout)
+		return success{}, nil
+	})
+	defer done()
+
+	disk := BlockDevice{Device: device}
+	err := disk.Mirror(d, dest, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestMirrorRelativePath(t *testing.T) {
-	m := &mockMonitor{}
+	const (
+		device = "drive-virtio-disk0"
+		dest   = "relative-path.img"
+	)
+	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
+		return success{}, nil
+	})
+	defer done()
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	dest := "foo.img"
-	err = disks[0].Mirror(d, dest, defaultTestTimeout)
+	disk := BlockDevice{Device: device}
+	err := disk.Mirror(d, dest, defaultTestTimeout)
 	if err == nil {
 		t.Errorf("expected relative path %q to fail", dest)
 	}
 }
 
-func TestMirrorMonitorFailure(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	err = disks[0].Mirror(d, "/tmp/foo.img", defaultTestTimeout)
-	if err == nil {
-		t.Error("expected monitor failure")
-	}
-}
-
 func TestSnapshot(t *testing.T) {
-	m := &mockMonitor{}
+	const (
+		device  = "drive-virtio-disk0"
+		overlay = "/tmp/foo.img"
+	)
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "blockdev-snapshot-sync", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
+		args, _ := cmd.Args.(map[string]interface{})
+		if want, got := device, args["device"]; want != got {
+			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		if want, got := overlay, args["snapshot-file"]; want != got {
+			t.Fatalf("unexpected target:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{}, nil
+	})
+	defer done()
+
+	disk := BlockDevice{Device: device}
+	err := disk.Snapshot(d, overlay)
 	if err != nil {
 		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = disks[0].Snapshot(d, "/tmp/foo.img")
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestSnapshotMonitorFail(t *testing.T) {
-	m := &mockMonitor{}
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	disks, err := d.BlockDevices()
-	if err != nil {
-		t.Error(err)
-	}
-
-	m.alwaysFail = true
-	err = disks[0].Snapshot(d, "/tmp/foo.img")
-	if err == nil {
-		t.Error("expected monitor failure")
 	}
 }

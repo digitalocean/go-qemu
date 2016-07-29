@@ -31,7 +31,7 @@ const defaultTestTimeout = 5 * time.Second
 func TestBlockDevice(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -41,7 +41,7 @@ func TestBlockDevice(t *testing.T) {
 			Return: []BlockDevice{{
 				Device: device,
 			}},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -58,7 +58,7 @@ func TestBlockDevice(t *testing.T) {
 func TestBlockDeviceNotFound(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -68,7 +68,7 @@ func TestBlockDeviceNotFound(t *testing.T) {
 			Return: []BlockDevice{{
 				Device: device,
 			}},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -85,7 +85,7 @@ func TestBlockDeviceNotFound(t *testing.T) {
 func TestBlockDevices(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-block", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -95,7 +95,7 @@ func TestBlockDevices(t *testing.T) {
 			Return: []BlockDevice{{
 				Device: device,
 			}},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -120,7 +120,7 @@ func TestBlockDevices(t *testing.T) {
 func TestBlockJobs(t *testing.T) {
 	const device = "drive-virtio-disk0"
 
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-block-jobs", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -131,7 +131,7 @@ func TestBlockJobs(t *testing.T) {
 				Device:   device,
 				IOStatus: "ok",
 			}},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -159,7 +159,7 @@ func TestBlockStats(t *testing.T) {
 	const device = "drive-virtio-disk0"
 	const bytes = 9786368
 
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-blockstats", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -177,7 +177,7 @@ func TestBlockStats(t *testing.T) {
 					WriteBytes: bytes,
 				},
 			}},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -214,7 +214,7 @@ func TestClose(t *testing.T) {
 }
 
 func TestCommands(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -229,7 +229,7 @@ func TestCommands(t *testing.T) {
 				{Name: "query-block"},
 				{Name: "qeury-foo"},
 			},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -259,13 +259,13 @@ func TestCommands(t *testing.T) {
 }
 
 func TestDomainScreenDump(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "screendump", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}
+		return success{}, nil
 	})
 	defer done()
 
@@ -332,7 +332,7 @@ func TestPCIDevices(t *testing.T) {
 }
 
 func TestStatusRunning(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-status", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -344,7 +344,7 @@ func TestStatusRunning(t *testing.T) {
 
 		return success{
 			Return: response{Status: StatusRunning},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -359,7 +359,7 @@ func TestStatusRunning(t *testing.T) {
 }
 
 func TestStatusShutdown(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-status", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -371,7 +371,7 @@ func TestStatusShutdown(t *testing.T) {
 
 		return success{
 			Return: response{Status: StatusShutdown},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -400,7 +400,7 @@ func TestRunInvalidCommand(t *testing.T) {
 }
 
 func TestSupported(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -414,7 +414,7 @@ func TestSupported(t *testing.T) {
 			Return: []command{
 				{"query-block"},
 			},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -430,7 +430,7 @@ func TestSupported(t *testing.T) {
 }
 
 func TestSupportedFalse(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-commands", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
@@ -445,7 +445,7 @@ func TestSupportedFalse(t *testing.T) {
 				{"query-bar"},
 				{"query-baz"},
 			},
-		}
+		}, nil
 	})
 	defer done()
 
@@ -461,13 +461,13 @@ func TestSupportedFalse(t *testing.T) {
 }
 
 func TestSystemPowerdown(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "system_powerdown", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}
+		return success{}, nil
 	})
 	defer done()
 
@@ -480,14 +480,18 @@ type success struct {
 	Return interface{} `json:"return"`
 }
 
+type failure struct {
+	Error interface{} `json:"error"`
+}
+
 func TestSystemReset(t *testing.T) {
-	d, done := testDomain(t, func(cmd qmp.Command) interface{} {
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "system_reset", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
 				want, got)
 		}
 
-		return success{}
+		return success{}, nil
 	})
 	defer done()
 
@@ -524,7 +528,7 @@ func TestEventsUnsupported(t *testing.T) {
 	}
 }
 
-func testDomain(t *testing.T, fn func(qmp.Command) interface{}) (*Domain, func()) {
+func testDomain(t *testing.T, fn func(qmp.Command) (interface{}, error)) (*Domain, func()) {
 	mon := &testMonitor{fn: fn}
 	d, err := NewDomain(mon, "test")
 	if err != nil {
@@ -536,8 +540,12 @@ func testDomain(t *testing.T, fn func(qmp.Command) interface{}) (*Domain, func()
 	}
 }
 
+var _ qmp.Monitor = &testMonitor{}
+
 type testMonitor struct {
-	fn func(qmp.Command) interface{}
+	eventTimeout bool
+	eventErrors  bool
+	fn           func(qmp.Command) (interface{}, error)
 	noopMonitor
 }
 
@@ -547,7 +555,12 @@ func (t *testMonitor) Run(raw []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return json.Marshal(t.fn(cmd))
+	result, err := t.fn(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(result)
 }
 
 func (t *testMonitor) Events() (<-chan qmp.Event, error) {
@@ -557,6 +570,17 @@ func (t *testMonitor) Events() (<-chan qmp.Event, error) {
 
 		i := 0
 		for {
+			if t.eventTimeout {
+				<-time.After(1 * time.Second)
+				continue
+			}
+
+			if t.eventErrors {
+				c <- qmp.Event{Event: blockJobError}
+				<-time.After(1 * time.Second)
+				continue
+			}
+
 			c <- qmp.Event{Event: events[i]}
 			<-time.After(1 * time.Second)
 
