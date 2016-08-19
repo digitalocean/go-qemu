@@ -304,12 +304,51 @@ func TestDomainScreenDump(t *testing.T) {
 }
 
 func TestPCIDevices(t *testing.T) {
-	m := &mockMonitor{}
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "query-pci", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
+		type classInfo struct {
+			Desc string `json:"desc"`
+		}
+
+		type pciDevice struct {
+			Bus       int       `json:"bus"`
+			ClassInfo classInfo `json:"class_info"`
+		}
+
+		type wrapReturn struct {
+			Bus     int         `json:"bus"`
+			Devices []pciDevice `json:"devices"`
+		}
+
+		response := struct {
+			Return []wrapReturn `json:"return"`
+		}{
+			Return: []wrapReturn{
+				{
+					Bus: 0,
+					Devices: []pciDevice{{
+						Bus: 0,
+					}},
+				},
+				{
+					Bus: 1,
+					Devices: []pciDevice{{
+						Bus: 1,
+						ClassInfo: classInfo{
+							Desc: "Intel Ethernet controller",
+						},
+					}},
+				},
+			},
+		}
+
+		return response, nil
+	})
+	defer done()
 
 	devices, err := d.PCIDevices()
 	if err != nil {
@@ -382,20 +421,6 @@ func TestStatusShutdown(t *testing.T) {
 
 	if status != StatusShutdown {
 		t.Error("expected domain to be powered off")
-	}
-}
-
-func TestRunInvalidCommand(t *testing.T) {
-	m := &mockMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = d.Run(qmp.Command{})
-	if err == nil {
-		t.Error("expected invalid command to fail")
 	}
 }
 
