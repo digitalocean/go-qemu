@@ -1,0 +1,10 @@
+package raw
+
+import (
+       "encoding/json"
+       "fmt"
+)
+
+{{ range . }}
+{{ render . }}
+{{ end }}
