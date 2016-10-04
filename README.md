@@ -3,6 +3,9 @@ qemu [![GoDoc](http://godoc.org/github.com/digitalocean/go-qemu?status.svg)](htt
 
 Package `qemu` provides an interface for interacting with running QEMU instances.
 
+Feel free to join us in [`#go-qemu` on freenode](https://webchat.freenode.net/)
+if you'd like to discuss the project.
+
 Details
 -------
 
