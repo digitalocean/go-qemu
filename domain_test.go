@@ -26,7 +26,7 @@ import (
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
-const defaultTestTimeout = 5 * time.Second
+const defaultTestTimeout = 50 * time.Millisecond
 
 func TestBlockDevice(t *testing.T) {
 	const device = "drive-virtio-disk0"
@@ -537,7 +537,7 @@ func TestEvents(t *testing.T) {
 	select {
 	case <-events:
 		stop <- struct{}{}
-	case <-time.After(time.Second * 2):
+	case <-time.After(time.Millisecond * 20):
 		t.Error("expected event")
 	}
 }
@@ -596,18 +596,18 @@ func (t *testMonitor) Events() (<-chan qmp.Event, error) {
 		i := 0
 		for {
 			if t.eventTimeout {
-				<-time.After(1 * time.Second)
+				<-time.After(10 * time.Millisecond)
 				continue
 			}
 
 			if t.eventErrors {
 				c <- qmp.Event{Event: blockJobError}
-				<-time.After(1 * time.Second)
+				<-time.After(10 * time.Millisecond)
 				continue
 			}
 
 			c <- qmp.Event{Event: events[i]}
-			<-time.After(1 * time.Second)
+			<-time.After(10 * time.Millisecond)
 
 			i = (i + 1) % len(events)
 		}
