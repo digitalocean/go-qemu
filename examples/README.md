@@ -11,7 +11,7 @@ To see the list of posible arguments for each program, use **--help**
 
 #### hypervisor_domain_list
 
-[hypervisor_domain_list](./hypervisor_domain_list) demonstrates how to use the [hypervisor](../hypervisor) package to obtain a list of the domains from the connected hypervisor. The list of domains returned is of type: qemu/Domain.
+[hypervisor_domain_list](./hypervisor_domain_list) demonstrates how to use the [hypervisor](../hypervisor) package to obtain a list of the domains from the connected hypervisor. The list of domains returned is of type: [go-qemu/Domain](../domain.go#L37).
 
 To run:
 ```{r, engine='bash', count_lines}
@@ -37,7 +37,7 @@ debian8
 
 #### domain_details
 
-[domain_details](./domain_details) domanstrates how to use the [qemu](../) to connect to a hypervisor host using [qmp.NewLibvirtRPCMonitor](../qmp/rpc.go#L27) and get the details for a specified domain.
+[domain_details](./domain_details) domanstrates how to use the [go-qemu](../.) to connect to a hypervisor host using [qmp.NewLibvirtRPCMonitor](../qmp/rpc.go#L27) and get the details for a specified domain.
 
 To run:
 ```{r, engine='bash', count_lines}
