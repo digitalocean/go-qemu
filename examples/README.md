@@ -16,7 +16,7 @@ To see the list of posible arguments for each program, use **--help**
 To run:
 ```{r, engine='bash', count_lines}
    $ go get github.com/digitalocean/go-qemu
-   $ go run examples/hypervisor_domain_list/main.go
+   $ go run examples/hypervisor_domain_list/main.go -domainName="ubuntu14.04"
    or
    $ go run examples/hypervisor_domain_list/main.go -network=tcp -address="hypervisorhost:16509"
 ```
@@ -105,5 +105,21 @@ Status: running
 
 #### domain_system_powerdown
 
-[domain_system_powerdown](./domain_system_powerdown)
+[domain_system_powerdown](./domain_system_powerdown) demonstrates how to use the [hypervisor](../hypervisor) package to shut off the specified domain.
+
+To run:
+```{r, engine='bash', count_lines}
+   $ go get github.com/digitalocean/go-qemu
+   $ go run examples/hypervisor_domain_list/main.go -domainName="ubuntu14.04"
+   or
+   $ go run examples/hypervisor_domain_list/main.go -network=tcp -address="hypervisorhost:16509"  -domainName="ubuntu14.04"
+```
+
+
+You should have an output similar to this:
+```{r, engine='bash', count_lines}
+Connecting to unix:///var/run/libvirt/libvirt-sock
+Domain should be Shut off now
+```
+
 
