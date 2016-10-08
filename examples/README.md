@@ -42,9 +42,9 @@ debian8
 To run:
 ```{r, engine='bash', count_lines}
    $ go get github.com/digitalocean/go-qemu
-   $ go run examples/hypervisor_domain_list/main.go
+   $ go run examples/domain_details/main.go
    or
-   $ go run examples/hypervisor_domain_list/main.go -network=tcp -address="hypervisorhost:16509" -domainName="ubuntu14.04"
+   $ go run examples/domain_details/main.go -network=tcp -address="hypervisorhost:16509" -domainName="ubuntu14.04"
 ```
 
 
@@ -110,9 +110,9 @@ Status: running
 To run:
 ```{r, engine='bash', count_lines}
    $ go get github.com/digitalocean/go-qemu
-   $ go run examples/hypervisor_domain_list/main.go -domainName="ubuntu14.04"
+   $ go run examples/domain_system_powerdown/main.go -domainName="ubuntu14.04"
    or
-   $ go run examples/hypervisor_domain_list/main.go -network=tcp -address="hypervisorhost:16509"  -domainName="ubuntu14.04"
+   $ go run examples/domain_system_powerdown/main.go -network=tcp -address="hypervisorhost:16509"  -domainName="ubuntu14.04"
 ```
 
 
