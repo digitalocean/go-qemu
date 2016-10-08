@@ -14,6 +14,44 @@
 
 package main
 
+import (
+	"flag"
+	"fmt"
+	"log"
+	"net"
+	"time"
+
+	hypervisor "github.com/digitalocean/go-qemu/hypervisor"
+)
+
+var (
+	network    = flag.String("network", "unix", `Named network used to connect on. For Unix sockets -network=unix, for TCP connections: -network=tcp`)
+	address    = flag.String("address", "/var/run/libvirt/libvirt-sock", `Address of the hypervisor. This could be in the form of Unix or TCP sockets. For TCP connections: -address="host:16509"`)
+	timeout    = flag.Duration("timeout", 2*time.Second, "Connection timeout. Another valid value could be -timeout=500ms")
+	domainName = flag.String("domainName", "mydomain", "This is the domain to get details for.")
+)
+
 func main() {
+	flag.Parse()
+
+	fmt.Printf("\nConnecting to %s://%s\n", *network, *address)
+	connGenerator := func() (net.Conn, error) {
+		return net.DialTimeout(*network, *address, *timeout)
+	}
+
+	driver := hypervisor.NewRPCDriver(connGenerator)
+	hv := hypervisor.New(driver)
+
+	domain, err := hv.Domain(*domainName)
+	if err != nil {
+		log.Fatalf("Unable to get domain: %v\n", err)
+	}
+
+	err = domain.SystemPowerdown()
+	if err != nil {
+		log.Fatalf("Unable to power down domain: %v\n", err)
+	}
+
+	fmt.Println("Domain should be Shut off now")
 
 }
