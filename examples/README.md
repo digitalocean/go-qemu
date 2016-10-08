@@ -37,7 +37,71 @@ debian8
 
 #### domain_details
 
-[domain_details](./domain_details) 
+[domain_details](./domain_details) domanstrates how to use the [qemu](../qemu) to connect to a hypervisor host using **qmp.NewLibvirtRPCMonitor** and get the details for a specified domain.
+
+To run:
+```{r, engine='bash', count_lines}
+   $ go get github.com/digitalocean/go-qemu
+   $ go run examples/hypervisor_domain_list/main.go
+   or
+   $ go run examples/hypervisor_domain_list/main.go -network=tcp -address="hypervisorhost:16509" -domainName="ubuntu14.04"
+```
+
+
+You should have an output similar to this:
+```{r, engine='bash', count_lines}
+
+Connecting to Connecting to unix:///var/run/libvirt/libvirt-sock
+
+Version: 2.5.0
+
+Status: running
+
+[ PCIDevices ]
+======================================
+      [ID]        [Description]
+======================================
+[          ] [         Host bridge]
+
+[          ] [          ISA bridge]
+
+[          ] [      IDE controller]
+
+[          ] [              Bridge]
+
+[          ] [      VGA controller]
+
+[      net0] [ Ethernet controller]
+
+[    sound0] [    Audio controller]
+
+[virtio-serial0] [                    ]
+
+[          ] [      USB controller]
+
+[          ] [      USB controller]
+
+[          ] [      USB controller]
+
+[       usb] [      USB controller]
+
+[virtio-disk0] [     SCSI controller]
+
+[  balloon0] [                    ]
+
+
+
+[ BlockDevices ]
+========================================================================
+              Device   Driver                           File
+========================================================================
+  drive-virtio-disk0    qcow2 /var/lib/libvirt/images/ubuntu14.04.qcow2
+
+      drive-ide0-0-0                                        
+
+
+
+```
 
 #### domain_system_powerdown
 
