@@ -14,6 +14,94 @@
 
 package main
 
+import (
+	"flag"
+	"fmt"
+	"log"
+	"net"
+	"time"
+
+	qemu "github.com/digitalocean/go-qemu"
+	"github.com/digitalocean/go-qemu/qmp"
+)
+
+var (
+	network    = flag.String("network", "unix", `Named network used to connect on. For Unix sockets -network=unix, for TCP connections: -network=tcp`)
+	address    = flag.String("address", "/var/run/libvirt/libvirt-sock", `Address of the hypervisor. This could be in the form of Unix or TCP sockets. For TCP connections: -address="host:16509"`)
+	timeout    = flag.Duration("timeout", 2*time.Second, "Connection timeout. Another valid value could be -timeout=500ms")
+	domainName = flag.String("domainName", "mydomain", "This is the domain to get details for.")
+)
+
 func main() {
+	flag.Parse()
+
+	fmt.Printf("\nConnecting to %s://%s\n", *network, *address)
+
+	c, err := net.DialTimeout(*network, *address, *timeout)
+	if err != nil {
+		log.Fatalf("failed to connect to hypervisor: %v", err)
+	}
+
+	mon := qmp.NewLibvirtRPCMonitor(*domainName, c)
+
+	if err := mon.Connect(); err != nil {
+		log.Fatalf("failed to connect: %v", err)
+	}
+
+	domainObj, err := qemu.NewDomain(mon, *domainName)
+	if err != nil {
+		log.Fatalf("failed to create domain object: %v", err)
+	}
+	defer domainObj.Close()
+
+	version, err := domainObj.Version()
+	if err != nil {
+		log.Fatalf("Error getting Domain Version: %#v\n", err)
+	}
+	fmt.Printf("\nVersion: %s\n", version)
+
+	status, err := domainObj.Status()
+	if err != nil {
+		log.Fatalf("Error getting Domain Status: %#v\n", err)
+	}
+	fmt.Printf("\nStatus: %s\n", status)
+
+	displayPCIDevices(domainObj)
+
+	displayBlockDevices(domainObj)
+
+}
+
+func displayPCIDevices(domainObj *qemu.Domain) {
+
+	pciDevices, err := domainObj.PCIDevices()
+	if err != nil {
+		log.Fatalf("Error getting PCIDevices: %v\n", pciDevices)
+	}
+	fmt.Printf("\n[ PCIDevices ]\n")
+	fmt.Printf("======================================\n")
+	fmt.Printf("%10s %20s\n", "[ID]", "[Description]")
+	fmt.Printf("======================================\n")
+	for _, pciDevice := range pciDevices {
+		fmt.Printf("[%10s] [%20s]\n\n", pciDevice.QdevID, pciDevice.ClassInfo.Desc)
+	}
+	fmt.Printf("\n\n")
+
+}
+
+func displayBlockDevices(domainObj *qemu.Domain) {
+
+	blockDevices, err := domainObj.BlockDevices()
+	if err != nil {
+		log.Fatalf("Error getting blockDevices: %v\n", blockDevices)
+	}
+	fmt.Printf("\n[ BlockDevices ]\n")
+	fmt.Printf("========================================================================\n")
+	fmt.Printf("%20s %8s %30s\n", "Device", "Driver", "File")
+	fmt.Printf("========================================================================\n")
+	for _, blockDevice := range blockDevices {
+		fmt.Printf("%20s %8s %30s\n\n",
+			blockDevice.Device, blockDevice.Inserted.Driver, blockDevice.Inserted.File)
+	}
 
 }
