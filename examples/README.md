@@ -37,7 +37,7 @@ debian8
 
 #### domain_details
 
-[domain_details](./domain_details) domanstrates how to use the [qemu](../qemu) to connect to a hypervisor host using **qmp.NewLibvirtRPCMonitor** and get the details for a specified domain.
+[domain_details](./domain_details) domanstrates how to use the [qemu](../) to connect to a hypervisor host using [qmp.NewLibvirtRPCMonitor](../qmp/rpc.go#L27) and get the details for a specified domain.
 
 To run:
 ```{r, engine='bash', count_lines}
