@@ -33,7 +33,7 @@ var (
 func main() {
 	flag.Parse()
 
-	fmt.Printf("Connecting to %s/%s\n", *network, *address)
+	fmt.Printf("\nConnecting to %s://%s\n", *network, *address)
 	connGenerator := func() (net.Conn, error) {
 		return net.DialTimeout(*network, *address, *timeout)
 	}
@@ -49,5 +49,6 @@ func main() {
 	for _, dom := range domains {
 		fmt.Printf("%s\n", dom.Name)
 	}
+	fmt.Printf("\n***************************\n")
 
 }
