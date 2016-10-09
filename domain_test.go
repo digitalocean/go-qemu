@@ -23,8 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"fmt"
-
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
@@ -373,7 +371,6 @@ func TestPCIDevices(t *testing.T) {
 }
 
 func TestCPUHalted(t *testing.T) {
-	fmt.Println("here")
 	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "query-cpus", cmd.Execute; want != got {
 			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
