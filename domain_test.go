@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"fmt"
+
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
@@ -368,6 +370,45 @@ func TestPCIDevices(t *testing.T) {
 	if devices[1].ClassInfo.Desc != expectedDesc {
 		t.Errorf("expected device %q, got %q", expectedDesc, devices[1].ClassInfo.Desc)
 	}
+}
+
+func TestCPUHalted(t *testing.T) {
+	fmt.Println("here")
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "query-cpus", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		response := struct {
+			Return []CPU `json:"return"`
+		}{
+			Return: []CPU{
+				{
+					CPU:     0,
+					Current: true,
+					Halted:  true,
+					PC:      -2130295322,
+				},
+			},
+		}
+		return response, nil
+	})
+	defer done()
+
+	cpu, err := d.CPU()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(cpu) != 1 {
+		t.Error("expected one CPU")
+	}
+
+	if !cpu[0].Halted {
+		t.Error("expected CPU to be halted")
+	}
+
 }
 
 func TestStatusRunning(t *testing.T) {
