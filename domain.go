@@ -208,6 +208,24 @@ func (d *Domain) PCIDevices() ([]PCIDevice, error) {
 	return devices, nil
 }
 
+// CPUs returns a domain's CPUs.
+func (d *Domain) CPUs() ([]CPU, error) {
+	raw, err := d.Run(qmp.Command{Execute: "query-cpus"})
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Return []CPU `json:"return"`
+	}
+
+	if err = json.Unmarshal(raw, &response); err != nil {
+		return nil, err
+	}
+
+	return response.Return, nil
+}
+
 // Run executes the given QMP command against the domain.
 // The returned []byte is the raw output from the QMP monitor.
 //
