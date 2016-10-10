@@ -208,8 +208,8 @@ func (d *Domain) PCIDevices() ([]PCIDevice, error) {
 	return devices, nil
 }
 
-// CPU returns a domain's CPU(s).
-func (d *Domain) CPU() ([]CPU, error) {
+// CPUs returns a domain's CPUs.
+func (d *Domain) CPUs() ([]CPU, error) {
 	raw, err := d.Run(qmp.Command{Execute: "query-cpus"})
 	if err != nil {
 		return nil, err

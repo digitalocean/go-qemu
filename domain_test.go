@@ -393,7 +393,7 @@ func TestCPUHalted(t *testing.T) {
 	})
 	defer done()
 
-	cpu, err := d.CPU()
+	cpu, err := d.CPUs()
 	if err != nil {
 		t.Error(err)
 	}
