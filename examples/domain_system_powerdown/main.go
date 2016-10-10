@@ -35,11 +35,11 @@ func main() {
 	flag.Parse()
 
 	fmt.Printf("\nConnecting to %s://%s\n", *network, *address)
-	connGenerator := func() (net.Conn, error) {
+	newConn := func() (net.Conn, error) {
 		return net.DialTimeout(*network, *address, *timeout)
 	}
 
-	driver := hypervisor.NewRPCDriver(connGenerator)
+	driver := hypervisor.NewRPCDriver(newConn)
 	hv := hypervisor.New(driver)
 
 	domain, err := hv.Domain(*domainName)
@@ -52,6 +52,5 @@ func main() {
 		log.Fatalf("Unable to power down domain: %v\n", err)
 	}
 
-	fmt.Println("Domain should be Shut off now")
-
+	fmt.Println("Domain should be shut off now")
 }

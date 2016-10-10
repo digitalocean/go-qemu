@@ -48,33 +48,31 @@ func main() {
 		log.Fatalf("failed to connect: %v", err)
 	}
 
-	domainObj, err := qemu.NewDomain(mon, *domainName)
+	domain, err := qemu.NewDomain(mon, *domainName)
 	if err != nil {
 		log.Fatalf("failed to create domain object: %v", err)
 	}
-	defer domainObj.Close()
+	defer domain.Close()
 
-	version, err := domainObj.Version()
+	version, err := domain.Version()
 	if err != nil {
-		log.Fatalf("Error getting Domain Version: %#v\n", err)
+		log.Fatalf("Error getting Domain Version: %v\n", err)
 	}
 	fmt.Printf("\nVersion: %s\n", version)
 
-	status, err := domainObj.Status()
+	status, err := domain.Status()
 	if err != nil {
-		log.Fatalf("Error getting Domain Status: %#v\n", err)
+		log.Fatalf("Error getting Domain Status: %v\n", err)
 	}
 	fmt.Printf("\nStatus: %s\n", status)
 
-	displayPCIDevices(domainObj)
+	displayPCIDevices(domain)
 
-	displayBlockDevices(domainObj)
-
+	displayBlockDevices(domain)
 }
 
-func displayPCIDevices(domainObj *qemu.Domain) {
-
-	pciDevices, err := domainObj.PCIDevices()
+func displayPCIDevices(domain *qemu.Domain) {
+	pciDevices, err := domain.PCIDevices()
 	if err != nil {
 		log.Fatalf("Error getting PCIDevices: %v\n", pciDevices)
 	}
@@ -83,15 +81,12 @@ func displayPCIDevices(domainObj *qemu.Domain) {
 	fmt.Printf("%10s %20s\n", "[ID]", "[Description]")
 	fmt.Printf("======================================\n")
 	for _, pciDevice := range pciDevices {
-		fmt.Printf("[%10s] [%20s]\n\n", pciDevice.QdevID, pciDevice.ClassInfo.Desc)
+		fmt.Printf("[%10s] [%20s]\n", pciDevice.QdevID, pciDevice.ClassInfo.Desc)
 	}
-	fmt.Printf("\n\n")
-
 }
 
-func displayBlockDevices(domainObj *qemu.Domain) {
-
-	blockDevices, err := domainObj.BlockDevices()
+func displayBlockDevices(domain *qemu.Domain) {
+	blockDevices, err := domain.BlockDevices()
 	if err != nil {
 		log.Fatalf("Error getting blockDevices: %v\n", blockDevices)
 	}
@@ -100,8 +95,7 @@ func displayBlockDevices(domainObj *qemu.Domain) {
 	fmt.Printf("%20s %8s %30s\n", "Device", "Driver", "File")
 	fmt.Printf("========================================================================\n")
 	for _, blockDevice := range blockDevices {
-		fmt.Printf("%20s %8s %30s\n\n",
+		fmt.Printf("%20s %8s %30s\n",
 			blockDevice.Device, blockDevice.Inserted.Driver, blockDevice.Inserted.File)
 	}
-
 }

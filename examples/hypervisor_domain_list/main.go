@@ -34,11 +34,11 @@ func main() {
 	flag.Parse()
 
 	fmt.Printf("\nConnecting to %s://%s\n", *network, *address)
-	connGenerator := func() (net.Conn, error) {
+	newConn := func() (net.Conn, error) {
 		return net.DialTimeout(*network, *address, *timeout)
 	}
 
-	driver := hypervisor.NewRPCDriver(connGenerator)
+	driver := hypervisor.NewRPCDriver(newConn)
 	hv := hypervisor.New(driver)
 
 	fmt.Printf("\n**********Domains**********\n")
@@ -50,5 +50,4 @@ func main() {
 		fmt.Printf("%s\n", dom.Name)
 	}
 	fmt.Printf("\n***************************\n")
-
 }
