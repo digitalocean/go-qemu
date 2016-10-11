@@ -15,12 +15,12 @@
 package qemu_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
 	"github.com/digitalocean/go-qemu"
 	"github.com/digitalocean/go-qemu/qmp"
+	"github.com/digitalocean/go-qemu/qmp/qmptest"
 )
 
 // ExampleStub exists to prevent godoc from treating this as a "whole-file"
@@ -31,11 +31,17 @@ func ExampleStub() {}
 // perform actions on a Domain.
 //
 // Typically, these actions would be performed using an actual monitor of type
-// qmp.Libvirt or qmp.Socket, instead of using newExampleMonitor.
+// qmp.LibvirtRPCMonitor or qmp.SocketMonitor, instead of using
+// qmptest.NewMonitor.
 func ExampleNewDomain() {
-	// Create a new "example" qmp.Monitor.  Normally, qmp.NewLibvirtMonitor
-	// or qmp.NewSocketMonitor would be used here instead.
-	mon := newExampleMonitor()
+	// Use qmptest.NewMonitor to create an "example" qmp.Monitor, that returns
+	// mock data from another function.
+	//
+	// Normally, qmp.NewLibvirtRPCMonitor or qmp.NewSocketMonitor would be used
+	// here instead.
+	mon := qmptest.NewMonitor(func(cmd qmp.Command) (interface{}, error) {
+		return exampleRun(cmd)
+	})
 
 	// Monitor must be connected before it can be used.
 	if err := mon.Connect(); err != nil {
@@ -80,35 +86,18 @@ func ExampleNewDomain() {
 	//     - query-version
 }
 
-func newExampleMonitor() qmp.Monitor {
-	return &exampleMonitor{}
-}
-
-var _ qmp.Monitor = &exampleMonitor{}
-
-type exampleMonitor struct{}
-
-func (mon *exampleMonitor) Connect() error                    { return nil }
-func (mon *exampleMonitor) Disconnect() error                 { return nil }
-func (mon *exampleMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
-
-func (mon *exampleMonitor) Run(command []byte) ([]byte, error) {
-	var cmd qmp.Command
-	if err := json.Unmarshal(command, &cmd); err != nil {
-		return nil, err
-	}
-
+func exampleRun(cmd qmp.Command) (interface{}, error) {
 	switch cmd.Execute {
 	case "query-commands":
-		return mon.runQueryCommands()
+		return runQueryCommands(), nil
 	case "query-version":
-		return mon.runQueryVersion()
+		return runQueryVersion(), nil
 	}
 
 	return nil, fmt.Errorf("unknown command: %q", cmd.Execute)
 }
 
-func (mon *exampleMonitor) runQueryCommands() ([]byte, error) {
+func runQueryCommands() interface{} {
 	var response struct {
 		ID     string        `json:"id"`
 		Return []nameWrapper `json:"return"`
@@ -127,17 +116,17 @@ func (mon *exampleMonitor) runQueryCommands() ([]byte, error) {
 		})
 	}
 
-	return json.Marshal(response)
+	return response
 }
 
-func (mon *exampleMonitor) runQueryVersion() ([]byte, error) {
+func runQueryVersion() interface{} {
 	var response struct {
 		ID     string      `json:"id"`
 		Return qmp.Version `json:"return"`
 	}
 	response.Return.QEMU.Major = 2
 
-	return json.Marshal(response)
+	return response
 }
 
 type nameWrapper struct {
