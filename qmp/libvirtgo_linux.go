@@ -18,6 +18,8 @@ import libvirt "github.com/rgbkrk/libvirt-go"
 
 type libvirtGoMonitorLinux struct {
 	LibvirtGoMonitor
+	domain  string
+	uri     string
 	virConn *libvirt.VirConnection
 }
 

@@ -20,6 +20,4 @@ package qmp
 // connections to the same hypervisor and domain are permitted.
 type LibvirtGoMonitor struct {
 	Monitor
-	domain string
-	uri    string
 }
