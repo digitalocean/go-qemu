@@ -21,7 +21,10 @@ type libvirtGoMonitorLinux struct {
 	virConn *libvirt.VirConnection
 }
 
-func (mon libvirtGoMonitorLinux) connect() error {
+// Connect  sets up QEMU QMP connection via libvirt using
+// the libvirt-go package.
+// An error is returned if the libvirtd daemon is unreachable.
+func (mon libvirtGoMonitorLinux) Connect() error {
 	virConn, err := libvirt.NewVirConnection(mon.uri)
 	if err == nil {
 		mon.virConn = &virConn
@@ -29,7 +32,8 @@ func (mon libvirtGoMonitorLinux) connect() error {
 	return err
 }
 
-func (mon *libvirtGoMonitorLinux) disconnect() error {
+// Disconnect tears down open QMP socket connections.
+func (mon *libvirtGoMonitorLinux) Disconnect() error {
 	var err error
 	if mon.virConn != nil {
 		_, err = mon.virConn.CloseConnection()
@@ -38,7 +42,10 @@ func (mon *libvirtGoMonitorLinux) disconnect() error {
 	return err
 }
 
-func (mon libvirtGoMonitorLinux) run(cmd []byte) ([]byte, error) {
+// Run executes the given QAPI command against a domain's QEMU instance.
+// For a list of available QAPI commands, see:
+//	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
+func (mon libvirtGoMonitorLinux) Run(cmd []byte) ([]byte, error) {
 	domain, err := mon.virConn.LookupDomainByName(mon.domain)
 	if err != nil {
 		return nil, err
@@ -54,11 +61,22 @@ func (mon libvirtGoMonitorLinux) run(cmd []byte) ([]byte, error) {
 	return []byte(result), nil
 }
 
-func (mon *libvirtGoMonitorLinux) events() (<-chan Event, error) {
+// Events streams QEMU QMP Events.
+// If a problem is encountered setting up the event monitor connection
+// an error will be returned. Errors encountered during streaming will
+// cause the returned event channel to be closed.
+func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 	return nil, nil
 }
 
-func newLibvirtGoMonitor(uri, domain string) Monitor {
+// NewLibvirtGoMonitor configures a connection to the provided hypervisor
+// and domain.
+// An error is returned if the provided libvirt connection URI is invalid.
+//
+// Hypervisor URIs may be local or remote, e.g.,
+//	qemu:///system
+//	qemu+ssh://libvirt@example.com/system
+func NewLibvirtGoMonitor(uri, domain string) Monitor {
 	return &libvirtGoMonitorLinux{
 		uri:    uri,
 		domain: domain,

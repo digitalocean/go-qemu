@@ -18,23 +18,23 @@ package qmp
 
 import "fmt"
 
-func (mon LibvirtGoMonitor) connect() error {
+func (mon LibvirtGoMonitor) Connect() error {
 	return notSupportedError()
 }
 
-func (mon *LibvirtGoMonitor) disconnect() error {
+func (mon *LibvirtGoMonitor) Disconnect() error {
 	return notSupportedError()
 }
 
-func (mon LibvirtGoMonitor) run(cmd []byte) ([]byte, error) {
+func (mon LibvirtGoMonitor) Run(cmd []byte) ([]byte, error) {
 	return nil, notSupportedError()
 }
 
-func (mon *LibvirtGoMonitor) events() (<-chan Event, error) {
+func (mon *LibvirtGoMonitor) Events() (<-chan Event, error) {
 	return nil, notSupportedError()
 }
 
-func newLibvirtGoMonitor(uri, domain string) Monitor {
+func NewLibvirtGoMonitor(uri, domain string) Monitor {
 	return &LibvirtGoMonitor{}
 }
 
