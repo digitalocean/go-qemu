@@ -14,17 +14,14 @@
 
 package qmp
 
-import libvirt "github.com/rgbkrk/libvirt-go"
-
-// LibvirtGoMonitor is a monitor that wraps the libvirt-go package to
+// LibvirtGoMonitor is a Monitor that wraps the libvirt-go package to
 // communicate with a QEMU Machine Protocol (QMP) socket.
-// Communication is proxied via the libvirtd daemon. Multiple
+// Communication is provied via the libvirtd daemon. Multiple
 // connections to the same hypervisor and domain are permitted.
 type LibvirtGoMonitor struct {
 	Monitor
-	domain  string
-	uri     string
-	virConn *libvirt.VirConnection
+	domain string
+	uri    string
 }
 
 // Connect  sets up QEMU QMP connection via libvirt using
@@ -61,6 +58,6 @@ func (mon *LibvirtGoMonitor) Events() (<-chan Event, error) {
 // Hypervisor URIs may be local or remote, e.g.,
 //	qemu:///system
 //	qemu+ssh://libvirt@example.com/system
-func NewLibvirtGoMonitor(uri, domain string) *Monitor {
+func NewLibvirtGoMonitor(uri, domain string) Monitor {
 	return newLibvirtGoMonitor(uri, domain)
 }

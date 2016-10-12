@@ -18,24 +18,26 @@ package qmp
 
 import "fmt"
 
-var errorNotSupported = fmt.Errorf("libvirt-go is only supported on Linux")
-
 func (mon LibvirtGoMonitor) connect() error {
-	return notSupportedError
+	return notSupportedError()
 }
 
 func (mon *LibvirtGoMonitor) disconnect() error {
-	return notSupportedError
+	return notSupportedError()
 }
 
 func (mon LibvirtGoMonitor) run(cmd []byte) ([]byte, error) {
-	return nil, notSupportedError
+	return nil, notSupportedError()
 }
 
 func (mon *LibvirtGoMonitor) events() (<-chan Event, error) {
-	return nil, notSupportedError
+	return nil, notSupportedError()
 }
 
-func newLibvirtGoMonitor(uri, domain string) *Monitor {
+func newLibvirtGoMonitor(uri, domain string) Monitor {
 	return &LibvirtGoMonitor{}
+}
+
+func notSupportedError() error {
+	return fmt.Errorf("libvirt-go is only supported on Linux")
 }

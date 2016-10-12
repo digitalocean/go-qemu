@@ -16,7 +16,12 @@ package qmp
 
 import libvirt "github.com/rgbkrk/libvirt-go"
 
-func (mon LibvirtGoMonitor) connect() error {
+type libvirtGoMonitorLinux struct {
+	LibvirtGoMonitor
+	virConn *libvirt.VirConnection
+}
+
+func (mon libvirtGoMonitorLinux) connect() error {
 	virConn, err := libvirt.NewVirConnection(mon.uri)
 	if err == nil {
 		mon.virConn = &virConn
@@ -24,7 +29,7 @@ func (mon LibvirtGoMonitor) connect() error {
 	return err
 }
 
-func (mon *LibvirtGoMonitor) disconnect() error {
+func (mon *libvirtGoMonitorLinux) disconnect() error {
 	var err error
 	if mon.virConn != nil {
 		_, err = mon.virConn.CloseConnection()
@@ -33,7 +38,7 @@ func (mon *LibvirtGoMonitor) disconnect() error {
 	return err
 }
 
-func (mon LibvirtGoMonitor) run(cmd []byte) ([]byte, error) {
+func (mon libvirtGoMonitorLinux) run(cmd []byte) ([]byte, error) {
 	domain, err := mon.virConn.LookupDomainByName(mon.domain)
 	if err != nil {
 		return nil, err
@@ -49,12 +54,12 @@ func (mon LibvirtGoMonitor) run(cmd []byte) ([]byte, error) {
 	return []byte(result), nil
 }
 
-func (mon *LibvirtGoMonitor) events() (<-chan Event, error) {
+func (mon *libvirtGoMonitorLinux) events() (<-chan Event, error) {
 	return nil, nil
 }
 
-func newLibvirtGoMonitor(uri, domain string) *Monitor {
-	return &LibvirtGoMonitor{
+func newLibvirtGoMonitor(uri, domain string) Monitor {
+	return &libvirtGoMonitorLinux{
 		uri:    uri,
 		domain: domain,
 	}
