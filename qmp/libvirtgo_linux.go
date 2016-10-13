@@ -26,7 +26,7 @@ type libvirtGoMonitorLinux struct {
 // Connect  sets up QEMU QMP connection via libvirt using
 // the libvirt-go package.
 // An error is returned if the libvirtd daemon is unreachable.
-func (mon libvirtGoMonitorLinux) Connect() error {
+func (mon *libvirtGoMonitorLinux) Connect() error {
 	virConn, err := libvirt.NewVirConnection(mon.uri)
 	if err == nil {
 		mon.virConn = &virConn
@@ -47,7 +47,7 @@ func (mon *libvirtGoMonitorLinux) Disconnect() error {
 // Run executes the given QAPI command against a domain's QEMU instance.
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
-func (mon libvirtGoMonitorLinux) Run(cmd []byte) ([]byte, error) {
+func (mon *libvirtGoMonitorLinux) Run(cmd []byte) ([]byte, error) {
 	domain, err := mon.virConn.LookupDomainByName(mon.domain)
 	if err != nil {
 		return nil, err
