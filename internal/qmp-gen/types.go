@@ -1,3 +1,17 @@
+// Copyright 2016 The go-qemu Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package gen
 
 import (
@@ -80,7 +94,7 @@ func parse(defs []definition) (map[name]interface{}, error) {
 		}
 		switch {
 		case m["struct"] != nil:
-			v := struct_{}
+			v := structType{}
 			if err := json.Unmarshal(def.JSON, &v); err != nil {
 				return nil, err
 			}
@@ -216,26 +230,26 @@ type simpleUnion struct {
 	Options map[name]name
 }
 
-type struct_ struct {
+type structType struct {
 	Name   name   `json:"struct"`
 	Fields fields `json:"data"`
 	Base   name   `json:"base"`
 }
 
-func (s struct_) AllFields(api map[name]interface{}) fields {
+func (s structType) AllFields(api map[name]interface{}) fields {
 	var ret fields
 	if s.Base != "" {
-		ret = append(ret, api[s.Base].(struct_).Fields...)
+		ret = append(ret, api[s.Base].(structType).Fields...)
 	}
 	ret = append(ret, s.Fields...)
 	return ret
 }
 
-func (s struct_) HasInterfaceField(api map[name]interface{}) bool {
+func (s structType) HasInterfaceField(api map[name]interface{}) bool {
 	if s.Fields.HasInterfaceField(api) {
 		return true
 	}
-	if s.Base != "" && api[s.Base].(struct_).Fields.HasInterfaceField(api) {
+	if s.Base != "" && api[s.Base].(structType).Fields.HasInterfaceField(api) {
 		return true
 	}
 	return false
@@ -274,7 +288,7 @@ func (f fieldsOrRef) Fields(api map[name]interface{}) fields {
 		return f.AnonFields
 	}
 	if f.Ref != "" {
-		return api[f.Ref].(struct_).Fields
+		return api[f.Ref].(structType).Fields
 	}
 	return nil
 }
