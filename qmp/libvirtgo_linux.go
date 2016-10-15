@@ -93,14 +93,14 @@ func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 	}
 
 	// doneChan will allow us to stop receiving events from libvirt
-	doneChan, err := domainEventRegistration(mon.virConn, &domain, eventsChan)
+	doneChan, callbackID, err := domainEventRegistration(mon.virConn, &domain, eventsChan)
 	if err != nil {
 		return nil, err
 	}
 
 	go eventRunDefaultImplLoop(doneChan)
 
-	go domainEventDeregister(mon.virConn, doneChan)
+	go domainEventDeregister(mon.virConn, callbackID, doneChan)
 
 	return eventsChan, nil
 }
@@ -113,11 +113,11 @@ func initialEventSetup() {
 }
 
 func onceEventRegisterDefaultImpl() {
-	eventRegisterId := libvirt.EventRegisterDefaultImpl()
-	if eventRegisterId == -1 {
+	eventRegisterID := libvirt.EventRegisterDefaultImpl()
+	if eventRegisterID == -1 {
 		fmt.Printf(
 			"got %d on libvirt.EventRegisterDefaultImpl instead of 0\n",
-			ret)
+			eventRegisterID)
 		//TODO: panic or what???
 	}
 }
@@ -133,14 +133,14 @@ func populateEventTable() {
 }
 
 func domainEventRegistration(virConn *libvirt.VirConnection, domain *libvirt.VirDomain,
-	eventsChan chan Event) (chan bool, error) {
+	eventsChan chan Event) (chan bool, int, error) {
 	// doneChan will allow us to stop receiving events from libvirt
 	doneChan := make(chan bool)
 	callback :=
 		libvirt.DomainEventCallback(newEventCallback(eventsChan, doneChan))
 
 	//TODO: add ability to register for more event types
-	callbackId := virConn.DomainEventRegister(
+	callbackID := virConn.DomainEventRegister(
 		*domain,
 		libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE,
 		&callback,
@@ -148,29 +148,29 @@ func domainEventRegistration(virConn *libvirt.VirConnection, domain *libvirt.Vir
 			//fmt.Printf("VIR_DOMAIN_EVENT_ID_LIFECYCLE called\n")
 		},
 	)
-	if callback == -1 {
+	if callbackID == -1 {
 		close(doneChan)
-		return nil, fmt.Errorf("Domain event registration failed!")
+		return nil, -1, fmt.Errorf("Domain event registration failed!")
 	}
 
-	return doneChan, nil
+	return doneChan, callbackID, nil
 }
 
-func domainEventDeregister(virConn, doneChan chan bool) {
+func domainEventDeregister(virConn *libvirt.VirConnection, callbackID int, doneChan chan bool) {
 	<-doneChan
-	ret := virConn.DomainEventDeregister(callbackId)
+	ret := virConn.DomainEventDeregister(callbackID)
 	if ret != 0 {
 		fmt.Printf("got %d on DomainEventDeregister instead of 0\n", ret)
 	}
 }
 
-func newEventCallback(eventChan <-chan Event,
+func newEventCallback(eventChan chan Event,
 	doneChan chan bool) libvirt.DomainEventCallback {
 	return func(c *libvirt.VirConnection,
 		d *libvirt.VirDomain,
 		eventDetails interface{}, f func()) int {
 
-		//TODO: Probably need to check 
+		//TODO: Probably need to check
 		//      if eventChan is closed so we stop processing
 
 		// We only support lifecycleEvents for now
@@ -183,6 +183,8 @@ func newEventCallback(eventChan <-chan Event,
 			close(eventChan)
 			doneChan <- true
 		}
+
+		return 0
 	}
 }
 
@@ -207,22 +209,22 @@ func eventRunDefaultImplLoop(doneChan chan bool) {
 	}
 }
 
-func constructEvent(eventDetails libvirt.DomainLifecycleEvent) *Event {
+func constructEvent(eventDetails libvirt.DomainLifecycleEvent) Event {
 	// Technically, the timestamp is not accurate
-	// as events might occur before 
+	// as events might occur before
 	// the next libvirt.EventRunDefaultImpl() execution
 	// at which point the notification is received.
 	now := time.Now()
-	var timestamp struct {
-		Seconds      int64
-		Microseconds int64
-	} = {
-		now.Second(),
-		now.Nanosecond(),
+	type TimeStamp struct {
+		Seconds      int64 `json:"seconds"`
+		Microseconds int64 `json:"microseconds"`
 	}
-	return &Event{
-		Event: eventsTable[eventDetails.Event],
-		Data:  eventDetails,
+	timestamp := TimeStamp{
+		int64(now.Second()),
+		int64(now.Nanosecond()),
+	}
+	return Event{
+		Event:     eventsTable[eventDetails.Event],
 		Timestamp: timestamp,
 	}
 }
