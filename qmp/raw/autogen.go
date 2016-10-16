@@ -1603,7 +1603,7 @@ type BlockdevOptionsNullAio struct {
 	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	uint64       *int64                       `json:"size,omitempty"`
+	Size         *int64                       `json:"size,omitempty"`
 	LatencyNs    *uint64                      `json:"latency-ns,omitempty"`
 }
 
@@ -1629,7 +1629,7 @@ type BlockdevOptionsNullCo struct {
 	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	uint64       *int64                       `json:"size,omitempty"`
+	Size         *int64                       `json:"size,omitempty"`
 	LatencyNs    *uint64                      `json:"latency-ns,omitempty"`
 }
 
@@ -2821,7 +2821,7 @@ type ChardevReturn struct {
 type ChardevRingbuf struct {
 	Logfile   *string `json:"logfile,omitempty"`
 	Logappend *bool   `json:"logappend,omitempty"`
-	uint64    *int64  `json:"size,omitempty"`
+	Size      *int64  `json:"size,omitempty"`
 }
 
 // ChardevSocket -> ChardevSocket (struct)
@@ -4571,7 +4571,7 @@ type MachineInfo struct {
 
 // Memdev implements the "Memdev" QMP API type.
 type Memdev struct {
-	uint64    uint64        `json:"size"`
+	Size      uint64        `json:"size"`
 	Merge     bool          `json:"merge"`
 	Dump      bool          `json:"dump"`
 	Prealloc  bool          `json:"prealloc"`
@@ -4992,7 +4992,7 @@ type ObjectTypeInfo struct {
 type PcdimmDeviceInfo struct {
 	ID           *string `json:"id,omitempty"`
 	Addr         int64   `json:"addr"`
-	uint64       int64   `json:"size"`
+	Size         int64   `json:"size"`
 	Slot         int64   `json:"slot"`
 	Node         int64   `json:"node"`
 	Memdev       string  `json:"memdev"`
@@ -5014,7 +5014,7 @@ type PCIBridgeInfo struct {
 
 // PCIBusInfo implements the "PciBusInfo" QMP API type.
 type PCIBusInfo struct {
-	float64           int64          `json:"number"`
+	Number            int64          `json:"number"`
 	Secondary         int64          `json:"secondary"`
 	Subordinate       int64          `json:"subordinate"`
 	IORange           PCIMemoryRange `json:"io_range"`
@@ -5076,7 +5076,7 @@ type PCIMemoryRegion struct {
 	Bar       int64  `json:"bar"`
 	Type      string `json:"type"`
 	Address   int64  `json:"address"`
-	uint64    int64  `json:"size"`
+	Size      int64  `json:"size"`
 	Prefetch  *bool  `json:"prefetch,omitempty"`
 	MemType64 *bool  `json:"mem_type_64,omitempty"`
 }
@@ -7110,7 +7110,7 @@ type StatusInfo struct {
 
 // String implements the "String" QMP API type.
 type String struct {
-	string string `json:"str"`
+	Str string `json:"str"`
 }
 
 // TPMInfo -> TPMInfo (struct)

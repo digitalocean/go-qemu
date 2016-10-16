@@ -391,6 +391,10 @@ func (n name) Go() string {
 		return v
 	}
 
+	return n.FieldName()
+}
+
+func (n name) FieldName() string {
 	out := []string{}
 	for _, p := range camelcase.Split(string(n)) {
 		if p == "-" || p == "_" {

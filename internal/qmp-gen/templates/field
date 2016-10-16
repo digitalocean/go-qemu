@@ -1,9 +1,9 @@
 {{- if .List -}}
-  {{ .Name.Go }} []{{ .Type.Go }}
+  {{ .Name.FieldName }} []{{ .Type.Go }}
 {{- else if and .Optional (not (.Type.InterfaceType API)) -}}
-  {{ .Name.Go }} *{{ .Type.Go }}
+  {{ .Name.FieldName }} *{{ .Type.Go }}
 {{- else -}}
-  {{ .Name.Go }} {{ .Type.Go }}
+  {{ .Name.FieldName }} {{ .Type.Go }}
 {{- end -}}
 
 {{- if .Optional }} `json:"{{ .Name }},omitempty"`
