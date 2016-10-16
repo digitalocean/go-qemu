@@ -2,8 +2,10 @@
 
 // {{ .Name }} -> {{ .Name.Go }} (enum)
 
+// {{ .Name.Go }} implements the "{{ .Name }}" QMP API type.
 type {{ $enum.Name.Go }} int
 
+// Known values of {{ .Name.Go }}.
 const (
 {{- range $i, $v := $enum.Values }}
   {{- if eq $i 0 }}
@@ -14,6 +16,7 @@ const (
 {{- end }}
 )
 
+// MarshalJSON implements json.Marshaler.
 func (e {{ $enum.Name.Go }}) MarshalJSON() ([]byte, error) {
      switch e {
      {{- range $enum.Values }}
@@ -25,6 +28,7 @@ func (e {{ $enum.Name.Go }}) MarshalJSON() ([]byte, error) {
      }
 }
 
+// UnmarshalJSON implements json.Unmarshaler.
 func (e *{{ $enum.Name.Go }}) UnmarshalJSON(bs []byte) error {
      var s string
      if err := json.Unmarshal(bs, &s); err != nil {
