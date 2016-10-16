@@ -16,6 +16,12 @@ redefinition, but still tack on all the marshaling logic.
 
 // {{ .Name }} -> {{ $basename }} (simple union)
 
+// {{ $basename }} implements the "{{ .Name }}" QMP API type.
+//
+// Can be one of:
+{{- range $suffix, $type := .Options }}
+//   - {{ $basename }}{{ $suffix.Go }}
+{{- end }}
 type {{ $basename }} interface {
      is{{ $basename }}()
 }
@@ -23,11 +29,13 @@ type {{ $basename }} interface {
 {{- range $suffix, $type := .Options }}
 {{ $subname := printf "%s%s" $basename $suffix.Go }}
 {{- if ne $subname $type.Go }}
+// {{ $subname }} is an implementation of {{ $basename }}.
 type {{ $subname }} {{ $type.Go }}
 {{- end }}
 
 func ({{ $subname }}) is{{ $basename }}() {}
 
+// MarshalJSON implements json.Marshaler.
 func (s {{ $subname }}) MarshalJSON() ([]byte, error) {
      v := map[string]interface{}{
           "type": "{{ $suffix }}",

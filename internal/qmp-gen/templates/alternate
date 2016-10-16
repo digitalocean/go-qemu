@@ -11,6 +11,12 @@ supporting flat unions as implementations of an alternate.
 
 // {{ .Name }} -> {{ $basename }} (alternate)
 
+// {{ $basename }} implements the "{{ .Name }}" QMP API type.
+//
+// Can be one of:
+{{- range $suffix, $type := .Options }}
+//   - {{ $basename }}{{ $suffix.Go }}
+{{- end }}
 type {{ $basename }} interface {
   is{{ $basename }}()
 }
@@ -18,6 +24,7 @@ type {{ $basename }} interface {
 {{- range $suffix, $type := .Options }}
   {{ $subname := printf "%s%s" $basename $suffix.Go }}
 
+  // {{ $subname }} is an implementation of {{ $basename }}
   type {{ $subname }} {{ $type.Go }}
 
   {{- if eq (typeOf (index API $type)) "flatunion" }}

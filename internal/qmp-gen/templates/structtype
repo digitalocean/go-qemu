@@ -1,5 +1,6 @@
 // {{ .Name }} -> {{ .Name.Go }} (struct)
 
+// {{ .Name.Go }} implements the "{{ .Name }}" QMP API type.
 type {{ .Name.Go }} struct {
 {{- range .AllFields API }}
   {{ render . }}
@@ -7,6 +8,7 @@ type {{ .Name.Go }} struct {
 }
 
 {{- if .HasInterfaceField API }}
+// UnmarshalJSON implements json.Unmarshaler.
 func (s *{{ .Name.Go }}) UnmarshalJSON(bs []byte) error {
   v := struct{
   {{- range .AllFields API }}

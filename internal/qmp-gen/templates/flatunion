@@ -4,6 +4,12 @@
 
 // {{ $u.Name }} -> {{ $basename }} (flat union)
 
+// {{ $basename }} implements the "{{ .Name }}" QMP API type.
+//
+// Can be one of:
+{{- range $suffix, $type := $u.Options }}
+//   - {{ $basename }}{{ $suffix.Go }}
+{{- end }}
 type {{ $basename }} interface {
      is{{ $basename }}()
 }
@@ -12,6 +18,7 @@ type {{ $basename }} interface {
 {{ $subname := printf "%s%s" $basename $suffix.Go }}
 {{ $subtype := (index API $type) }}
 
+// {{ $subname }} is an implementation of {{ $basename }}.
 type {{ $subname }} struct {
 {{- range $u.Base.Fields API }}
   {{- if ne .Name $u.Discriminator }}
@@ -25,6 +32,7 @@ type {{ $subname }} struct {
 
 func ({{ $subname }}) is{{ $basename }}() {}
 
+// MarshalJSON implements json.Marshaler.
 func (s {{ $subname }}) MarshalJSON() ([]byte, error) {
      v := struct{
           {{- range $u.Base.Fields API }}
