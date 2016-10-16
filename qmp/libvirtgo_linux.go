@@ -147,7 +147,7 @@ func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDoma
 		},
 	)
 	if callbackID == -1 {
-		return nil, -1, fmt.Errorf("Domain event registration failed!")
+		return -1, fmt.Errorf("Domain event registration failed!")
 	}
 
 	return callbackID, nil
