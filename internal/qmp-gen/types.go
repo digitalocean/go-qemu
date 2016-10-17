@@ -46,6 +46,12 @@ func readDefinitions(path string) ([]definition, error) {
 		return nil, err
 	}
 
+	// Most of the spec has a regular form with "\n\n" between each
+	// definition. However, there are a few places with a single
+	// newline between definitions. This replacement regularizes the
+	// input so that we can process it with less gymnastics.
+	bs = bytes.Replace(bs, []byte("}\n##"), []byte("}\n\n##"), -1)
+
 	for _, part := range bytes.Split(bs, []byte("\n\n")) {
 		fs := bytes.SplitN(part, []byte("\n{"), 2)
 		switch len(fs) {

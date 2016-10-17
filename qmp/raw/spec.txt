@@ -2862,17 +2862,18 @@
 ##
 # @BlockdevOptionsFile
 #
-# Driver specific block device options for the file backend and similar
-# protocols.
+# Driver specific block device options for the file backend.
 #
 # @filename:    path to the image file
+# @aio:         #optional AIO backend (default: threads) (since: 2.8)
 #
 # Since: 1.7
 ##
 {
   "struct": "BlockdevOptionsFile",
   "data": {
-    "filename": "str"
+    "filename": "str",
+    "*aio": "BlockdevAioOptions"
   }
 }
 
@@ -3496,6 +3497,22 @@
 }
 
 ##
+# @BlockdevOptionsCurl
+#
+# Driver specific block device options for the curl backend.
+#
+# @filename:    path to the image file
+#
+# Since: 1.7
+##
+{
+  "struct": "BlockdevOptionsCurl",
+  "data": {
+    "filename": "str"
+  }
+}
+
+##
 # @BlockdevOptions
 #
 # Options for creating a block device.  Many options are available for all
@@ -3506,7 +3523,6 @@
 #                 This option is required on the top level of blockdev-add.
 # @discard:       #optional discard-related options (default: ignore)
 # @cache:         #optional cache-related options
-# @aio:           #optional AIO backend (default: threads)
 # @read-only:     #optional whether the block device should be read-only
 #                 (default: false)
 # @detect-zeroes: #optional detect and optimize zero writes (Since 2.1)
@@ -3523,7 +3539,6 @@
     "*node-name": "str",
     "*discard": "BlockdevDiscardOptions",
     "*cache": "BlockdevCacheOptions",
-    "*aio": "BlockdevAioOptions",
     "*read-only": "bool",
     "*detect-zeroes": "BlockdevDetectZeroesOptions"
   },
@@ -3536,13 +3551,13 @@
     "cloop": "BlockdevOptionsGenericFormat",
     "dmg": "BlockdevOptionsGenericFormat",
     "file": "BlockdevOptionsFile",
-    "ftp": "BlockdevOptionsFile",
-    "ftps": "BlockdevOptionsFile",
+    "ftp": "BlockdevOptionsCurl",
+    "ftps": "BlockdevOptionsCurl",
     "gluster": "BlockdevOptionsGluster",
     "host_cdrom": "BlockdevOptionsFile",
     "host_device": "BlockdevOptionsFile",
-    "http": "BlockdevOptionsFile",
-    "https": "BlockdevOptionsFile",
+    "http": "BlockdevOptionsCurl",
+    "https": "BlockdevOptionsCurl",
     "luks": "BlockdevOptionsLUKS",
     "null-aio": "BlockdevOptionsNull",
     "null-co": "BlockdevOptionsNull",
@@ -3553,7 +3568,7 @@
     "quorum": "BlockdevOptionsQuorum",
     "raw": "BlockdevOptionsGenericFormat",
     "replication": "BlockdevOptionsReplication",
-    "tftp": "BlockdevOptionsFile",
+    "tftp": "BlockdevOptionsCurl",
     "vdi": "BlockdevOptionsGenericFormat",
     "vhdx": "BlockdevOptionsGenericFormat",
     "vmdk": "BlockdevOptionsGenericCOWFormat",
@@ -3867,7 +3882,13 @@
 #
 # Emitted when a disk I/O error occurs
 #
-# @device: device name
+# @device: device name. This is always present for compatibility
+#          reasons, but it can be empty ("") if the image does not
+#          have a device name associated.
+#
+# @node-name: node name. Note that errors may be reported for the root node
+#             that is directly attached to a guest device rather than for the
+#             node where the error occurred. (Since: 2.8)
 #
 # @operation: I/O operation
 #
@@ -3891,6 +3912,7 @@
   "event": "BLOCK_IO_ERROR",
   "data": {
     "device": "str",
+    "node-name": "str",
     "operation": "IoOperationType",
     "action": "BlockErrorAction",
     "*nospace": "bool",
@@ -4366,7 +4388,11 @@
 # Emitted whenever the tray of a removable device is moved by the guest or by
 # HMP/QMP commands
 #
-# @device: device name
+# @device: Block device name. This is always present for compatibility
+#          reasons, but it can be empty ("") if the image does not
+#          have a device name associated.
+#
+# @id: The name or QOM path of the guest device
 #
 # @tray-open: true if the tray has been opened or false if it has been closed
 #
@@ -4376,6 +4402,7 @@
   "event": "DEVICE_TRAY_MOVED",
   "data": {
     "device": "str",
+    "id": "str",
     "tray-open": "bool"
   }
 }
@@ -6170,6 +6197,12 @@
 #                hostname must be provided so that the server's x509
 #                certificate identity can be validated. (Since 2.7)
 #
+# @max-bandwidth: to set maximum speed for migration. maximum speed in
+#                 bytes per second. (Since 2.8)
+#
+# @downtime-limit: set maximum tolerated downtime for migration. maximum
+#                  downtime in milliseconds (Since 2.8)
+#
 # Since: 2.4
 ##
 {
@@ -6181,48 +6214,72 @@
     "cpu-throttle-initial",
     "cpu-throttle-increment",
     "tls-creds",
-    "tls-hostname"
+    "tls-hostname",
+    "max-bandwidth",
+    "downtime-limit"
   ]
 }
 
 #
 # @migrate-set-parameters
 #
-# Set the following migration parameters
-#
-# @compress-level: compression level
-#
-# @compress-threads: compression thread count
-#
-# @decompress-threads: decompression thread count
-#
-# @cpu-throttle-initial: Initial percentage of time guest cpus are throttled
-#                        when migration auto-converge is activated. The
-#                        default value is 20. (Since 2.7)
-#
-# @cpu-throttle-increment: throttle percentage increase each time
-#                          auto-converge detects that migration is not making
-#                          progress. The default value is 10. (Since 2.7)
-#
-# @tls-creds: ID of the 'tls-creds' object that provides credentials for
-#             establishing a TLS connection over the migration data channel.
-#             On the outgoing side of the migration, the credentials must
-#             be for a 'client' endpoint, while for the incoming side the
-#             credentials must be for a 'server' endpoint. Setting this
-#             will enable TLS for all migrations. The default is unset,
-#             resulting in unsecured migration at the QEMU level. (Since 2.7)
-#
-# @tls-hostname: hostname of the target host for the migration. This is
-#                required when using x509 based TLS credentials and the
-#                migration URI does not already include a hostname. For
-#                example if using fd: or exec: based migration, the
-#                hostname must be provided so that the server's x509
-#                certificate identity can be validated. (Since 2.7)
+# Set various migration parameters.  See MigrationParameters for details.
 #
 # Since: 2.4
 ##
 {
   "command": "migrate-set-parameters",
+  "boxed": true,
+  "data": "MigrationParameters"
+}
+
+#
+# @MigrationParameters
+#
+# Optional members can be omitted on input ('migrate-set-parameters')
+# but most members will always be present on output
+# ('query-migrate-parameters'), with the exception of tls-creds and
+# tls-hostname.
+#
+# @compress-level: #optional compression level
+#
+# @compress-threads: #optional compression thread count
+#
+# @decompress-threads: #optional decompression thread count
+#
+# @cpu-throttle-initial: #optional Initial percentage of time guest cpus are
+#                        throttledwhen migration auto-converge is activated.
+#                        The default value is 20. (Since 2.7)
+#
+# @cpu-throttle-increment: #optional throttle percentage increase each time
+#                          auto-converge detects that migration is not making
+#                          progress. The default value is 10. (Since 2.7)
+#
+# @tls-creds: #optional ID of the 'tls-creds' object that provides credentials
+#             for establishing a TLS connection over the migration data
+#             channel. On the outgoing side of the migration, the credentials
+#             must be for a 'client' endpoint, while for the incoming side the
+#             credentials must be for a 'server' endpoint. Setting this
+#             will enable TLS for all migrations. The default is unset,
+#             resulting in unsecured migration at the QEMU level. (Since 2.7)
+#
+# @tls-hostname: #optional hostname of the target host for the migration. This
+#                is required when using x509 based TLS credentials and the
+#                migration URI does not already include a hostname. For
+#                example if using fd: or exec: based migration, the
+#                hostname must be provided so that the server's x509
+#                certificate identity can be validated. (Since 2.7)
+#
+# @max-bandwidth: to set maximum speed for migration. maximum speed in
+#                 bytes per second. (Since 2.8)
+#
+# @downtime-limit: set maximum tolerated downtime for migration. maximum
+#                  downtime in milliseconds (Since 2.8)
+#
+# Since: 2.4
+##
+{
+  "struct": "MigrationParameters",
   "data": {
     "*compress-level": "int",
     "*compress-threads": "int",
@@ -6230,54 +6287,9 @@
     "*cpu-throttle-initial": "int",
     "*cpu-throttle-increment": "int",
     "*tls-creds": "str",
-    "*tls-hostname": "str"
-  }
-}
-
-#
-# @MigrationParameters
-#
-# @compress-level: compression level
-#
-# @compress-threads: compression thread count
-#
-# @decompress-threads: decompression thread count
-#
-# @cpu-throttle-initial: Initial percentage of time guest cpus are throttled
-#                        when migration auto-converge is activated. The
-#                        default value is 20. (Since 2.7)
-#
-# @cpu-throttle-increment: throttle percentage increase each time
-#                          auto-converge detects that migration is not making
-#                          progress. The default value is 10. (Since 2.7)
-#
-# @tls-creds: ID of the 'tls-creds' object that provides credentials for
-#             establishing a TLS connection over the migration data channel.
-#             On the outgoing side of the migration, the credentials must
-#             be for a 'client' endpoint, while for the incoming side the
-#             credentials must be for a 'server' endpoint. Setting this
-#             will enable TLS for all migrations. The default is unset,
-#             resulting in unsecured migration at the QEMU level. (Since 2.7)
-#
-# @tls-hostname: hostname of the target host for the migration. This is
-#                required when using x509 based TLS credentials and the
-#                migration URI does not already include a hostname. For
-#                example if using fd: or exec: based migration, the
-#                hostname must be provided so that the server's x509
-#                certificate identity can be validated. (Since 2.7)
-#
-# Since: 2.4
-##
-{
-  "struct": "MigrationParameters",
-  "data": {
-    "compress-level": "int",
-    "compress-threads": "int",
-    "decompress-threads": "int",
-    "cpu-throttle-initial": "int",
-    "cpu-throttle-increment": "int",
-    "tls-creds": "str",
-    "tls-hostname": "str"
+    "*tls-hostname": "str",
+    "*max-bandwidth": "int",
+    "*downtime-limit": "int"
   }
 }
 
@@ -7684,6 +7696,8 @@
 #
 # Returns: nothing on success
 #
+# Notes: This command is deprecated in favor of 'migrate-set-parameters'
+#
 # Since: 0.14.0
 ##
 {
@@ -7702,7 +7716,7 @@
 #
 # Returns: nothing on success
 #
-# Notes: A value lesser than zero will be automatically round up to zero.
+# Notes: This command is deprecated in favor of 'migrate-set-parameters'
 #
 # Since: 0.14.0
 ##
@@ -8682,6 +8696,8 @@
 #
 # @downscript: #optional script to shut down the interface
 #
+# @br: #optional bridge name (since 2.8)
+#
 # @helper: #optional command to execute to configure bridge
 #
 # @sndbuf: #optional send buffer limit. Understands [TGMKkb] suffixes.
@@ -8712,6 +8728,7 @@
     "*fds": "str",
     "*script": "str",
     "*downscript": "str",
+    "*br": "str",
     "*helper": "str",
     "*sndbuf": "size",
     "*vnet_hdr": "bool",
