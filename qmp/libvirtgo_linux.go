@@ -244,10 +244,9 @@ func getPollInterval() time.Duration {
 // constructEvent helper function to map DomainLifecycleEvent
 // into Event.
 func constructEvent(eventDetails libvirt.DomainLifecycleEvent) Event {
-	// Technically, the timestamp is not accurate
-	// as events might occur before
-	// the next libvirt.EventRunDefaultImpl() execution
-	// at which point the notification is received.
+	// This timestamp represents the moment in time when
+	// the event was received on this end and not when it
+	// actually occurred.
 	now := time.Now()
 	type TimeStamp struct {
 		Seconds      int64 `json:"seconds"`
@@ -255,13 +254,12 @@ func constructEvent(eventDetails libvirt.DomainLifecycleEvent) Event {
 	}
 	timestamp := TimeStamp{
 		int64(now.Second()),
-		int64(now.Nanosecond()),
+		int64(now.Second() / time.Microsecond),
 	}
-	eventDescription := eventsTable[eventDetails.Event]
 	data := make(map[string]interface{})
-	data[eventDescription] = eventDetails
+	data["details"] = eventDetails
 	return Event{
-		Event:     eventDescription,
+		Event:     eventDetails.String(),
 		Data:      data,
 		Timestamp: timestamp,
 	}
