@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 )
 
-const specURL = `https://raw.githubusercontent.com/danderson/qemu/master/qapi-schema.json`
+const specURL = `https://raw.githubusercontent.com/qemu/qemu/master/qapi-schema.json`
 
 var (
 	inputSpec  = flag.String("input", specURL, "Input spec")
@@ -51,7 +51,6 @@ func Generate() error {
 	if err = ioutil.WriteFile(*outputSpec, spec.Bytes(), 0640); err != nil {
 		return err
 	}
-
 	// Generate and write out the code.
 	symbols, err := parse(defs)
 	if err != nil {

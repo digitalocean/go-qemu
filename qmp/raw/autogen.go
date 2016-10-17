@@ -1215,7 +1215,6 @@ type BlockdevOptionsArchipelago struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Volume       string                       `json:"volume"`
@@ -1243,7 +1242,6 @@ type BlockdevOptionsBlkdebug struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Image        BlockdevRef                  `json:"image"`
@@ -1272,7 +1270,6 @@ type BlockdevOptionsBlkverify struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Test         BlockdevRef                  `json:"test"`
@@ -1298,7 +1295,6 @@ type BlockdevOptionsBochs struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1323,7 +1319,6 @@ type BlockdevOptionsCloop struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1348,7 +1343,6 @@ type BlockdevOptionsDmg struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1373,10 +1367,10 @@ type BlockdevOptionsFile struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 }
 
 func (BlockdevOptionsFile) isBlockdevOptions() {}
@@ -1398,7 +1392,6 @@ type BlockdevOptionsFTP struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
@@ -1423,7 +1416,6 @@ type BlockdevOptionsFTPS struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
@@ -1448,7 +1440,6 @@ type BlockdevOptionsGluster struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Volume       string                       `json:"volume"`
@@ -1477,10 +1468,10 @@ type BlockdevOptionsHostCdrom struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 }
 
 func (BlockdevOptionsHostCdrom) isBlockdevOptions() {}
@@ -1502,10 +1493,10 @@ type BlockdevOptionsHostDevice struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 }
 
 func (BlockdevOptionsHostDevice) isBlockdevOptions() {}
@@ -1527,7 +1518,6 @@ type BlockdevOptionsHTTP struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
@@ -1552,7 +1542,6 @@ type BlockdevOptionsHTTPS struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
@@ -1577,7 +1566,6 @@ type BlockdevOptionsLUKS struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	KeySecret    *string                      `json:"key-secret,omitempty"`
@@ -1602,7 +1590,6 @@ type BlockdevOptionsNullAio struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Size         *int64                       `json:"size,omitempty"`
@@ -1628,7 +1615,6 @@ type BlockdevOptionsNullCo struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Size         *int64                       `json:"size,omitempty"`
@@ -1654,7 +1640,6 @@ type BlockdevOptionsParallels struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1679,7 +1664,6 @@ type BlockdevOptionsQcow struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Backing      BlockdevRef                  `json:"backing,omitempty"`
@@ -1704,7 +1688,6 @@ type BlockdevOptionsQcow2 struct {
 	NodeName            *string                      `json:"node-name,omitempty"`
 	Discard             *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache               *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio                 *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly            *bool                        `json:"read-only,omitempty"`
 	DetectZeroes        *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	LazyRefcounts       *bool                        `json:"lazy-refcounts,omitempty"`
@@ -1737,7 +1720,6 @@ type BlockdevOptionsQed struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Backing      BlockdevRef                  `json:"backing,omitempty"`
@@ -1762,7 +1744,6 @@ type BlockdevOptionsQuorum struct {
 	NodeName         *string                      `json:"node-name,omitempty"`
 	Discard          *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache            *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio              *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly         *bool                        `json:"read-only,omitempty"`
 	DetectZeroes     *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Blkverify        *bool                        `json:"blkverify,omitempty"`
@@ -1791,7 +1772,6 @@ type BlockdevOptionsRaw struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1816,7 +1796,6 @@ type BlockdevOptionsReplication struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Mode         ReplicationMode              `json:"mode"`
@@ -1842,7 +1821,6 @@ type BlockdevOptionsTftp struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
@@ -1867,7 +1845,6 @@ type BlockdevOptionsVdi struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1892,7 +1869,6 @@ type BlockdevOptionsVhdx struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1917,7 +1893,6 @@ type BlockdevOptionsVMDK struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Backing      BlockdevRef                  `json:"backing,omitempty"`
@@ -1942,7 +1917,6 @@ type BlockdevOptionsVpc struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1967,7 +1941,6 @@ type BlockdevOptionsVvfat struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Dir          string                       `json:"dir"`
@@ -4718,13 +4691,15 @@ type MigrationInfo struct {
 
 // MigrationParameters implements the "MigrationParameters" QMP API type.
 type MigrationParameters struct {
-	CompressLevel        int64  `json:"compress-level"`
-	CompressThreads      int64  `json:"compress-threads"`
-	DecompressThreads    int64  `json:"decompress-threads"`
-	CPUThrottleInitial   int64  `json:"cpu-throttle-initial"`
-	CPUThrottleIncrement int64  `json:"cpu-throttle-increment"`
-	TLSCreds             string `json:"tls-creds"`
-	TLSHostname          string `json:"tls-hostname"`
+	CompressLevel        *int64  `json:"compress-level,omitempty"`
+	CompressThreads      *int64  `json:"compress-threads,omitempty"`
+	DecompressThreads    *int64  `json:"decompress-threads,omitempty"`
+	CPUThrottleInitial   *int64  `json:"cpu-throttle-initial,omitempty"`
+	CPUThrottleIncrement *int64  `json:"cpu-throttle-increment,omitempty"`
+	TLSCreds             *string `json:"tls-creds,omitempty"`
+	TLSHostname          *string `json:"tls-hostname,omitempty"`
+	MaxBandwidth         *int64  `json:"max-bandwidth,omitempty"`
+	DowntimeLimit        *int64  `json:"downtime-limit,omitempty"`
 }
 
 // MigrationStats -> MigrationStats (struct)
