@@ -446,6 +446,7 @@ var builtinTypes = map[string]string{
 }
 
 var upperWords = map[string]bool{
+	"acpi":  true,
 	"cpu":   true,
 	"http":  true,
 	"https": true,
