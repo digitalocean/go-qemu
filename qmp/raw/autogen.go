@@ -25,47 +25,47 @@ import (
 type AcpiostInfo struct {
 	Device   *string      `json:"device,omitempty"`
 	Slot     string       `json:"slot"`
-	SlotType AcpiSlotType `json:"slot-type"`
+	SlotType ACPISlotType `json:"slot-type"`
 	Source   int64        `json:"source"`
 	Status   int64        `json:"status"`
 }
 
-// ACPISlotType -> AcpiSlotType (enum)
+// ACPISlotType -> ACPISlotType (enum)
 
-// AcpiSlotType implements the "ACPISlotType" QMP API type.
-type AcpiSlotType int
+// ACPISlotType implements the "ACPISlotType" QMP API type.
+type ACPISlotType int
 
-// Known values of AcpiSlotType.
+// Known values of ACPISlotType.
 const (
-	AcpiSlotTypeDimm AcpiSlotType = iota
-	AcpiSlotTypeCPU
+	ACPISlotTypeDimm ACPISlotType = iota
+	ACPISlotTypeCPU
 )
 
 // MarshalJSON implements json.Marshaler.
-func (e AcpiSlotType) MarshalJSON() ([]byte, error) {
+func (e ACPISlotType) MarshalJSON() ([]byte, error) {
 	switch e {
-	case AcpiSlotTypeDimm:
+	case ACPISlotTypeDimm:
 		return json.Marshal("DIMM")
-	case AcpiSlotTypeCPU:
+	case ACPISlotTypeCPU:
 		return json.Marshal("CPU")
 	default:
-		return nil, fmt.Errorf("unknown enum value %q for AcpiSlotType", e)
+		return nil, fmt.Errorf("unknown enum value %q for ACPISlotType", e)
 	}
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (e *AcpiSlotType) UnmarshalJSON(bs []byte) error {
+func (e *ACPISlotType) UnmarshalJSON(bs []byte) error {
 	var s string
 	if err := json.Unmarshal(bs, &s); err != nil {
 		return err
 	}
 	switch s {
 	case "DIMM":
-		*e = AcpiSlotTypeDimm
+		*e = ACPISlotTypeDimm
 	case "CPU":
-		*e = AcpiSlotTypeCPU
+		*e = ACPISlotTypeCPU
 	default:
-		return fmt.Errorf("unknown enum value %q for AcpiSlotType", s)
+		return fmt.Errorf("unknown enum value %q for ACPISlotType", s)
 	}
 	return nil
 }
