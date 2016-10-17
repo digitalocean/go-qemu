@@ -254,7 +254,7 @@ func constructEvent(eventDetails libvirt.DomainLifecycleEvent) Event {
 	}
 	timestamp := TimeStamp{
 		int64(now.Second()),
-		int64(now.Second() / time.Microsecond),
+		int64(now.Second() / int(time.Microsecond)),
 	}
 	data := make(map[string]interface{})
 	data["details"] = eventDetails
