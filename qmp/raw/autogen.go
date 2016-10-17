@@ -14,6 +14,8 @@
 
 package raw
 
+// Generated using `go generate`, do not edit by hand!
+
 import (
 	"encoding/json"
 	"fmt"
