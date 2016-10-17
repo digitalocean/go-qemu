@@ -27,16 +27,43 @@ type libvirtGoMonitorLinux struct {
 	domain  string
 	uri     string
 	virConn *libvirt.VirConnection
+	once    sync.Once
 }
 
-var once sync.Once
+var eventsTable = map[int]string{
+	libvirt.VIR_DOMAIN_EVENT_STARTED:   "VIR_DOMAIN_EVENT_STARTED",
+	libvirt.VIR_DOMAIN_EVENT_SUSPENDED: "VIR_DOMAIN_EVENT_SUSPENDED",
+	libvirt.VIR_DOMAIN_EVENT_RESUMED:   "VIR_DOMAIN_EVENT_RESUMED",
+	libvirt.VIR_DOMAIN_EVENT_STOPPED:   "VIR_DOMAIN_EVENT_STOPPED",
+	libvirt.VIR_DOMAIN_EVENT_SHUTDOWN:  "VIR_DOMAIN_EVENT_SHUTDOWN",
+}
 
-var eventsTable map[int]string
+// NewLibvirtGoMonitor configures a connection to the provided hypervisor
+// and domain.
+// An error is returned if the provided libvirt connection URI is invalid.
+//
+// Hypervisor URIs may be local or remote, e.g.,
+//	qemu:///system
+//	qemu+ssh://libvirt@example.com/system
+func NewLibvirtGoMonitor(uri, domain string) Monitor {
+	return &libvirtGoMonitorLinux{
+		uri:    uri,
+		domain: domain,
+	}
+}
 
 // Connect  sets up QEMU QMP connection via libvirt using
 // the libvirt-go package.
 // An error is returned if the libvirtd daemon is unreachable.
 func (mon *libvirtGoMonitorLinux) Connect() error {
+
+	// As per the libvirt core library:
+	// For proper event handling, it is important
+	// that the event implementation is registered
+	// before a connection to the Hypervisor is opened.
+	// We only do this once the first a Connect is called.
+	mon.once.Do(eventRegisterDefaultImpl)
+
 	virConn, err := libvirt.NewVirConnection(mon.uri)
 	if err == nil {
 		mon.virConn = &virConn
@@ -85,8 +112,6 @@ func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 
 	eventsChan := make(chan Event, 1)
 
-	initialEventSetup()
-
 	domain, err := mon.virConn.LookupDomainByName(mon.domain)
 	if err != nil {
 		return nil, err
@@ -97,7 +122,12 @@ func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 		return nil, err
 	}
 
+	//TODO: need a way to trigger doneChan.
+	//      Maybe we need to return another type of Object
+	//      instead of the Event channel so the caller has the
+	//      ability to stop processing events.
 	doneChan := make(chan bool)
+
 	go pollEventsLoop(doneChan)
 
 	go domainEventDeregister(mon.virConn, callbackID, doneChan)
@@ -105,14 +135,8 @@ func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 	return eventsChan, nil
 }
 
-// Initial setup to receive events.
-// It's only done once.
-func initialEventSetup() {
-	once.Do(onceEventRegisterDefaultImpl)
-	once.Do(populateEventTable)
-}
-
-func onceEventRegisterDefaultImpl() {
+// eventRegisterDefaultImpl registers a default event implementation.
+func eventRegisterDefaultImpl() {
 	eventRegisterID := libvirt.EventRegisterDefaultImpl()
 	if eventRegisterID == -1 {
 		fmt.Printf(
@@ -122,16 +146,8 @@ func onceEventRegisterDefaultImpl() {
 	}
 }
 
-func populateEventTable() {
-	eventsTable = map[int]string{
-		libvirt.VIR_DOMAIN_EVENT_STARTED:   "VIR_DOMAIN_EVENT_STARTED",
-		libvirt.VIR_DOMAIN_EVENT_SUSPENDED: "VIR_DOMAIN_EVENT_SUSPENDED",
-		libvirt.VIR_DOMAIN_EVENT_RESUMED:   "VIR_DOMAIN_EVENT_RESUMED",
-		libvirt.VIR_DOMAIN_EVENT_STOPPED:   "VIR_DOMAIN_EVENT_STOPPED",
-		libvirt.VIR_DOMAIN_EVENT_SHUTDOWN:  "VIR_DOMAIN_EVENT_SHUTDOWN",
-	}
-}
-
+// domainEventRegister register with libvirt to receive events for the
+// specified domain.
 func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDomain,
 	eventsChan chan Event) (int, error) {
 	callback :=
@@ -143,7 +159,8 @@ func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDoma
 		libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE,
 		&callback,
 		func() {
-			//fmt.Printf("VIR_DOMAIN_EVENT_ID_LIFECYCLE called\n")
+			// empty on purpose until it's decided
+			// what to do here.
 		},
 	)
 	if callbackID == -1 {
@@ -153,6 +170,8 @@ func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDoma
 	return callbackID, nil
 }
 
+// domainEventDeregister stops the registration with libvirt from receiving
+// events for the specified domain.
 func domainEventDeregister(virConn *libvirt.VirConnection, callbackID int, doneChan chan bool) {
 	<-doneChan
 	ret := virConn.DomainEventDeregister(callbackID)
@@ -161,6 +180,8 @@ func domainEventDeregister(virConn *libvirt.VirConnection, callbackID int, doneC
 	}
 }
 
+// newEventCallback convenient function to provide access
+// to the eventChan to the returned closure/callback.
 func newEventCallback(eventChan chan Event) libvirt.DomainEventCallback {
 	return func(c *libvirt.VirConnection,
 		d *libvirt.VirDomain,
@@ -200,6 +221,8 @@ func pollEventsLoop(doneChan chan bool) {
 	}
 }
 
+// constructEvent helper function to map DomainLifecycleEvent
+// into Event.
 func constructEvent(eventDetails libvirt.DomainLifecycleEvent) Event {
 	// Technically, the timestamp is not accurate
 	// as events might occur before
@@ -214,22 +237,12 @@ func constructEvent(eventDetails libvirt.DomainLifecycleEvent) Event {
 		int64(now.Second()),
 		int64(now.Nanosecond()),
 	}
+	eventDescription := eventsTable[eventDetails.Event]
+	data := make(map[string]interface{})
+	data[eventDescription] = eventDetails
 	return Event{
-		Event:     eventsTable[eventDetails.Event],
+		Event:     eventDescription,
+		Data:      data,
 		Timestamp: timestamp,
-	}
-}
-
-// NewLibvirtGoMonitor configures a connection to the provided hypervisor
-// and domain.
-// An error is returned if the provided libvirt connection URI is invalid.
-//
-// Hypervisor URIs may be local or remote, e.g.,
-//	qemu:///system
-//	qemu+ssh://libvirt@example.com/system
-func NewLibvirtGoMonitor(uri, domain string) Monitor {
-	return &libvirtGoMonitorLinux{
-		uri:    uri,
-		domain: domain,
 	}
 }
