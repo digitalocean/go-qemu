@@ -1,0 +1,52 @@
+// {{ .Name }} -> {{ .Name.Go }} (struct)
+
+// {{ .Name.Go }} implements the "{{ .Name }}" QMP API type.
+type {{ .Name.Go }} struct {
+{{- range .AllFields API }}
+  {{ render . }}
+{{- end }}
+}
+
+{{- if .HasInterfaceField API }}
+// UnmarshalJSON implements json.Unmarshaler.
+func (s *{{ .Name.Go }}) UnmarshalJSON(bs []byte) error {
+  v := struct{
+  {{- range .AllFields API }}
+    {{- if .Type.InterfaceType API }}
+      {{- if .List }}
+        {{ abort "rendering of list of union/alternate not supported" }}
+      {{- else }}
+        {{ .Name.Go }} json.RawMessage `json:"{{ .Name }}"`
+      {{- end }}
+    {{- else }}
+      {{ render . }}
+    {{- end }}
+  {{- end }}
+  }{}
+  err := json.Unmarshal(bs, &v)
+  if err != nil {
+    return err
+  }
+
+  {{- range .AllFields API }}
+    {{- if .Type.InterfaceType API }}
+      {{- if .Optional }}
+        if len(v.{{ .Name.Go }}) > 0 {
+      {{- end }}
+      s.{{ .Name.Go }}, err = decode{{ .Type.Go }}(v.{{ .Name.Go }})
+      if err != nil {
+        return err
+      }
+      {{- if .Optional }}
+      } else {
+        s.{{ .Name.Go }} = nil
+      }
+      {{- end }}
+    {{- else }}
+      s.{{ .Name.Go }} = v.{{ .Name.Go }}
+    {{- end }}
+  {{- end }}
+  
+  return nil
+}
+{{- end }}
