@@ -49,7 +49,7 @@ func readDefinitions(path string) ([]definition, error) {
 		fs := bytes.SplitN(part, []byte("\n{"), 2)
 		switch len(fs) {
 		default:
-			return nil, fmt.Errorf("Unexpected part of spec file %q: %s", path, string(part))
+			return nil, fmt.Errorf("unexpected part of spec file %q: %s", path, string(part))
 		case 1:
 			if len(fs) == 1 && part[0] == '{' {
 				return nil, fmt.Errorf("found type definition without a docstring in %q: %s", path, string(part))
@@ -184,7 +184,7 @@ func parse(defs []definition) (map[name]interface{}, error) {
 			}
 			ret[v.Name] = v
 		default:
-			return nil, fmt.Errorf("Unknown definition kind: %q", string(def.JSON))
+			return nil, fmt.Errorf("unknown definition kind: %q", string(def.JSON))
 		}
 	}
 
