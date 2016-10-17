@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -537,7 +536,11 @@ func resolvePath(orig, new string) (string, error) {
 
 // getQAPI reads a QMP API spec file, from local disk or over HTTP(S).
 func getQAPI(path string) ([]byte, error) {
-	if path[0] == os.PathSeparator {
+	u, err := url.Parse(path)
+	if err != nil {
+		return nil, err
+	}
+	if u.Scheme == "" {
 		return ioutil.ReadFile(path)
 	}
 	resp, err := http.Get(path)
