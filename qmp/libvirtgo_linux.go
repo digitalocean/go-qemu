@@ -15,7 +15,9 @@
 package qmp
 
 import (
-	"fmt"
+	"errors"
+	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -107,7 +109,7 @@ func (mon *libvirtGoMonitorLinux) Run(cmd []byte) ([]byte, error) {
 func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 
 	if mon.virConn == nil {
-		return nil, fmt.Errorf("Events() need a established connection to proceed.")
+		return nil, errors.New("Events() need a established connection to proceed.")
 	}
 
 	eventsChan := make(chan Event, 1)
@@ -139,7 +141,7 @@ func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 func eventRegisterDefaultImpl() {
 	eventRegisterID := libvirt.EventRegisterDefaultImpl()
 	if eventRegisterID == -1 {
-		fmt.Printf(
+		log.Printf(
 			"EventRegisterDefaultImpl returned an unexpected value %d\n",
 			eventRegisterID)
 		//TODO: panic or what???
@@ -164,7 +166,7 @@ func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDoma
 		},
 	)
 	if callbackID == -1 {
-		return -1, fmt.Errorf("Domain event registration failed!")
+		return -1, errors.New("Domain event registration failed!")
 	}
 
 	return callbackID, nil
@@ -176,7 +178,7 @@ func domainEventDeregister(virConn *libvirt.VirConnection, callbackID int, doneC
 	<-doneChan
 	ret := virConn.DomainEventDeregister(callbackID)
 	if ret != 0 {
-		fmt.Printf("DomainEventDeregister returned an unexpected value: %d\n", ret)
+		log.Printf("DomainEventDeregister returned an unexpected value: %d\n", ret)
 	}
 }
 
@@ -204,7 +206,7 @@ func newEventCallback(eventChan chan Event) libvirt.DomainEventCallback {
 func pollEventsLoop(doneChan chan bool) {
 	//TODO: Maybe interval should come
 	//      from an ENV variable
-	checkInterval := time.Tick(1 * time.Second)
+	checkInterval := time.Tick(getPollInterval())
 	for {
 		select {
 		case <-doneChan: // stop polling for events
@@ -219,6 +221,24 @@ func pollEventsLoop(doneChan chan bool) {
 			}()
 		}
 	}
+}
+
+// getPollInterval retreives the events poll interval from the
+// LIBVIRTGO_EVENTS_INTERVAL environment variable. Defaults to 1s.
+func getPollInterval() time.Duration {
+	intervalStr := os.Getenv("LIBVIRTGO_EVENTS_INTERVAL")
+	interval, _ := time.ParseDuration("1s")
+	if intervalStr != "" {
+		desiredInterval, err := time.ParseDuration(intervalStr)
+		if err != nil {
+			log.Printf(
+				"Unable value specified in 'LIBVIRTGO_EVENTS_INTERVAL': %v\n",
+				err)
+			return interval
+		}
+		interval = desiredInterval
+	}
+	return interval
 }
 
 // constructEvent helper function to map DomainLifecycleEvent
