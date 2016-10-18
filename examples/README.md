@@ -126,14 +126,33 @@ Domain should be shut off now
 #### libvirtgo_run_command
 
 [libvirtgo_run_command](./libvirtgo_run_command) demonstrates how to use 
- the [libvirtgo Monitor](https://godoc.org/github.com/digitalocean/go-qemu/hypervisor) 
+ the [libvirtGoMonitorLinux](https://godoc.org/github.com/digitalocean/go-qemu/libvirtGoMonitorLinux) 
  package to send a QMP command to the specified domain.
 
 To run:
 ```{r, engine='bash', count_lines}
    $ go get github.com/digitalocean/go-qemu
+   $ go run examples/libvirtgo_run_command/main.go -uri="qemu:///system" -domainName="centos7"
+```
+
+
+You should see an output similar to this:
+```{r, engine='bash', count_lines}
+query-cpus: {"return":[{"current":true,"CPU":0,"qom_path":"/machine/unattached/device[0]","pc":-2130342250,"halted":true,"thread_id":2462}],"id":"libvirt-36"}
+```
+
+#### libvirtgo_events
+
+[libvirtgo_events](./libvirtgo_events) demonstrates how to use 
+ the [libvirtGoMonitorLinux](https://godoc.org/github.com/digitalocean/go-qemu/libvirtGoMonitorLinux) 
+ package to wait for lifecycle events from the specified domain.
+
+To run:
+```{r, engine='bash', count_lines}
+   $ go get github.com/digitalocean/go-qemu
+   
    Terminal 1:
-   $ go run examples/libvirtgo_run_command/main.go -uri="qemu:///system" -domainName="ubuntu14.04"
+   $ go run examples/libvirtgo_events/main.go -uri="qemu:///system" -domainName="ubuntu14.04"
 
    Terminal 2:
    virsh -c qemu:///system
