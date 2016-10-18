@@ -2274,184 +2274,124 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 	switch v.Driver {
 	case BlockdevDriverArchipelago:
 		var ret BlockdevOptionsArchipelago
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverBlkdebug:
 		var ret BlockdevOptionsBlkdebug
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverBlkverify:
 		var ret BlockdevOptionsBlkverify
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverBochs:
 		var ret BlockdevOptionsBochs
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverCloop:
 		var ret BlockdevOptionsCloop
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverDmg:
 		var ret BlockdevOptionsDmg
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverFile:
 		var ret BlockdevOptionsFile
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverFTP:
 		var ret BlockdevOptionsFTP
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverFTPS:
 		var ret BlockdevOptionsFTPS
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverGluster:
 		var ret BlockdevOptionsGluster
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverHostCdrom:
 		var ret BlockdevOptionsHostCdrom
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverHostDevice:
 		var ret BlockdevOptionsHostDevice
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverHTTP:
 		var ret BlockdevOptionsHTTP
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverHTTPS:
 		var ret BlockdevOptionsHTTPS
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverLUKS:
 		var ret BlockdevOptionsLUKS
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverNullAio:
 		var ret BlockdevOptionsNullAio
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverNullCo:
 		var ret BlockdevOptionsNullCo
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverParallels:
 		var ret BlockdevOptionsParallels
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverQcow:
 		var ret BlockdevOptionsQcow
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverQcow2:
 		var ret BlockdevOptionsQcow2
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverQed:
 		var ret BlockdevOptionsQed
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverQuorum:
 		var ret BlockdevOptionsQuorum
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverRaw:
 		var ret BlockdevOptionsRaw
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverReplication:
 		var ret BlockdevOptionsReplication
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverTftp:
 		var ret BlockdevOptionsTftp
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverVdi:
 		var ret BlockdevOptionsVdi
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverVhdx:
 		var ret BlockdevOptionsVhdx
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverVMDK:
 		var ret BlockdevOptionsVMDK
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverVpc:
 		var ret BlockdevOptionsVpc
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverVvfat:
 		var ret BlockdevOptionsVvfat
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
 		return nil, fmt.Errorf("unknown flat union subtype %q for flat union BlockdevOptions", v.Driver)
 	}
@@ -3495,40 +3435,28 @@ func decodeCPUInfo(bs json.RawMessage) (CPUInfo, error) {
 	switch v.Arch {
 	case CPUInfoArchMIPS:
 		var ret CPUInfoMIPS
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case CPUInfoArchOther:
 		var ret CPUInfoOther
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case CPUInfoArchPPC:
 		var ret CPUInfoPPC
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case CPUInfoArchSPARC:
 		var ret CPUInfoSPARC
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case CPUInfoArchTricore:
 		var ret CPUInfoTricore
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case CPUInfoArchX86:
 		var ret CPUInfoX86
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
 		return nil, fmt.Errorf("unknown flat union subtype %q for flat union CPUInfo", v.Arch)
 	}
@@ -4180,16 +4108,12 @@ func decodeGlusterServer(bs json.RawMessage) (GlusterServer, error) {
 	switch v.Type {
 	case GlusterTransportTCP:
 		var ret GlusterServerTCP
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case GlusterTransportUnix:
 		var ret GlusterServerUnix
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
 		return nil, fmt.Errorf("unknown flat union subtype %q for flat union GlusterServer", v.Type)
 	}
@@ -7837,46 +7761,32 @@ func decodeSchemaInfo(bs json.RawMessage) (SchemaInfo, error) {
 	switch v.MetaType {
 	case SchemaMetaTypeAlternate:
 		var ret SchemaInfoAlternate
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case SchemaMetaTypeArray:
 		var ret SchemaInfoArray
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case SchemaMetaTypeBuiltin:
 		var ret SchemaInfoBuiltin
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case SchemaMetaTypeCommand:
 		var ret SchemaInfoCommand
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case SchemaMetaTypeEnum:
 		var ret SchemaInfoEnum
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case SchemaMetaTypeEvent:
 		var ret SchemaInfoEvent
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case SchemaMetaTypeObject:
 		var ret SchemaInfoObject
-		if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
 		return nil, fmt.Errorf("unknown flat union subtype %q for flat union SchemaInfo", v.MetaType)
 	}
