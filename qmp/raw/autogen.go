@@ -3261,9 +3261,10 @@ func (e *CommandLineParameterType) UnmarshalJSON(bs []byte) error {
 
 // CPUDefinitionInfo implements the "CpuDefinitionInfo" QMP API type.
 type CPUDefinitionInfo struct {
-	Name          string `json:"name"`
-	MigrationSafe *bool  `json:"migration-safe,omitempty"`
-	Static        bool   `json:"static"`
+	Name                string   `json:"name"`
+	MigrationSafe       *bool    `json:"migration-safe,omitempty"`
+	Static              bool     `json:"static"`
+	UnavailableFeatures []string `json:"unavailable-features,omitempty"`
 }
 
 // CpuInfo -> CPUInfo (flat union)
