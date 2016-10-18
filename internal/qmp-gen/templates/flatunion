@@ -60,10 +60,8 @@ func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
      {{- range $suffix, $type := $u.Options }}
      case {{ $discriminatorField.Type.Go }}{{ $suffix.Go }}:
           var ret {{ $basename }}{{ $suffix.Go }}
-          if err := json.Unmarshal([]byte(bs), &ret); err != nil {
-             return nil, err
-          }
-          return ret, nil
+          err := json.Unmarshal([]byte(bs), &ret)
+          return ret, err
      {{- end }}
      default:
           return nil, fmt.Errorf("unknown flat union subtype %q for flat union {{ $basename }}", v.{{ $discriminatorField.Name.Go }})
