@@ -16,6 +16,18 @@ const (
 {{- end }}
 )
 
+// String implements fmt.Stringer.
+func (e {{ $enum.Name.Go }}) String() string {
+     switch e {
+     {{- range $enum.Values }}
+     case {{ $enum.Name.Go }}{{ .Go }}:
+          return "{{ . }}"
+     {{- end }}
+     default:
+          return fmt.Sprintf("{{ $enum.Name.Go }}(%d)", e)
+     }
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e {{ $enum.Name.Go }}) MarshalJSON() ([]byte, error) {
      switch e {
