@@ -15,6 +15,8 @@
 // Package qemu provides an interface for interacting with running QEMU instances.
 package qemu
 
+//go:generate stringer -type=Status -output=string.gen.go
+
 import (
 	"encoding/json"
 	"errors"
@@ -26,6 +28,7 @@ import (
 	"time"
 
 	"github.com/digitalocean/go-qemu/qmp"
+	"github.com/digitalocean/go-qemu/qmp/raw"
 )
 
 var (
@@ -269,48 +272,46 @@ func (d *Domain) ScreenDump() (io.ReadCloser, error) {
 }
 
 // Status represents the current status of the domain.
-type Status string
+type Status int
 
 // Status constants which indicate the status of a domain.
 const (
-	StatusDebug         Status = "debug"
-	StatusFinishMigrate Status = "finish-migrate"
-	StatusIOError       Status = "io-error"
-	StatusInMigrate     Status = "inmigrate"
-	StatusInternalError Status = "internal-error"
-	StatusPaused        Status = "paused"
-	StatusPostMigrate   Status = "postmigrate"
-	StatusPreLaunch     Status = "prelaunch"
-	StatusRestoreVM     Status = "restore-vm"
-	StatusRunning       Status = "running"
-	StatusSaveVM        Status = "save-vm"
-	StatusShutdown      Status = "shutdown"
-	StatusWatchdog      Status = "watchdog"
+	StatusDebug         Status = Status(raw.RunStateDebug)
+	StatusFinishMigrate Status = Status(raw.RunStateFinishMigrate)
+	StatusGuestPanicked Status = Status(raw.RunStateGuestPanicked)
+	StatusIOError       Status = Status(raw.RunStateIOError)
+	StatusInMigrate     Status = Status(raw.RunStateInmigrate)
+	StatusInternalError Status = Status(raw.RunStateInternalError)
+	StatusPaused        Status = Status(raw.RunStatePaused)
+	StatusPostMigrate   Status = Status(raw.RunStatePostmigrate)
+	StatusPreLaunch     Status = Status(raw.RunStatePrelaunch)
+	StatusRestoreVM     Status = Status(raw.RunStateRestoreVM)
+	StatusRunning       Status = Status(raw.RunStateRunning)
+	StatusSaveVM        Status = Status(raw.RunStateSaveVM)
+	StatusShutdown      Status = Status(raw.RunStateShutdown)
+	StatusSuspended     Status = Status(raw.RunStateSuspended)
+	StatusWatchdog      Status = Status(raw.RunStateWatchdog)
 )
 
 // Status returns the current status of the domain.
 func (d *Domain) Status() (Status, error) {
-	raw, err := d.Run(qmp.Command{Execute: "query-status"})
+	out, err := d.Run(qmp.Command{Execute: "query-status"})
 	if err != nil {
 		// libvirt returns an error if the domain is not running
 		if strings.Contains(err.Error(), "not running") {
 			return StatusShutdown, nil
 		}
 
-		return "", err
+		return 0, err
 	}
 
 	var response struct {
-		ID     string `json:"id"`
-		Return struct {
-			Running    bool   `json:"running"`
-			Singlestep bool   `json:"singlestep"`
-			Status     string `json:"status"`
-		} `json:"return"`
+		ID     string         `json:"id"`
+		Return raw.StatusInfo `json:"return"`
 	}
 
-	if err = json.Unmarshal(raw, &response); err != nil {
-		return "", err
+	if err = json.Unmarshal(out, &response); err != nil {
+		return 0, err
 	}
 
 	return Status(response.Return.Status), nil
