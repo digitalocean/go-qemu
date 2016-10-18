@@ -43,6 +43,18 @@ const (
 	ACPISlotTypeCPU
 )
 
+// String implements fmt.Stringer.
+func (e ACPISlotType) String() string {
+	switch e {
+	case ACPISlotTypeDimm:
+		return "DIMM"
+	case ACPISlotTypeCPU:
+		return "CPU"
+	default:
+		return fmt.Sprintf("ACPISlotType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e ACPISlotType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -90,6 +102,18 @@ const (
 	ActionCompletionModeIndividual ActionCompletionMode = iota
 	ActionCompletionModeGrouped
 )
+
+// String implements fmt.Stringer.
+func (e ActionCompletionMode) String() string {
+	switch e {
+	case ActionCompletionModeIndividual:
+		return "individual"
+	case ActionCompletionModeGrouped:
+		return "grouped"
+	default:
+		return fmt.Sprintf("ActionCompletionMode(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e ActionCompletionMode) MarshalJSON() ([]byte, error) {
@@ -202,6 +226,100 @@ const (
 	BlkdebugEventPwritevDone
 	BlkdebugEventEmptyImagePrepare
 )
+
+// String implements fmt.Stringer.
+func (e BlkdebugEvent) String() string {
+	switch e {
+	case BlkdebugEventL1Update:
+		return "l1_update"
+	case BlkdebugEventL1GrowAllocTable:
+		return "l1_grow_alloc_table"
+	case BlkdebugEventL1GrowWriteTable:
+		return "l1_grow_write_table"
+	case BlkdebugEventL1GrowActivateTable:
+		return "l1_grow_activate_table"
+	case BlkdebugEventL2Load:
+		return "l2_load"
+	case BlkdebugEventL2Update:
+		return "l2_update"
+	case BlkdebugEventL2UpdateCompressed:
+		return "l2_update_compressed"
+	case BlkdebugEventL2AllocCowRead:
+		return "l2_alloc_cow_read"
+	case BlkdebugEventL2AllocWrite:
+		return "l2_alloc_write"
+	case BlkdebugEventReadAio:
+		return "read_aio"
+	case BlkdebugEventReadBackingAio:
+		return "read_backing_aio"
+	case BlkdebugEventReadCompressed:
+		return "read_compressed"
+	case BlkdebugEventWriteAio:
+		return "write_aio"
+	case BlkdebugEventWriteCompressed:
+		return "write_compressed"
+	case BlkdebugEventVmstateLoad:
+		return "vmstate_load"
+	case BlkdebugEventVmstateSave:
+		return "vmstate_save"
+	case BlkdebugEventCowRead:
+		return "cow_read"
+	case BlkdebugEventCowWrite:
+		return "cow_write"
+	case BlkdebugEventReftableLoad:
+		return "reftable_load"
+	case BlkdebugEventReftableGrow:
+		return "reftable_grow"
+	case BlkdebugEventReftableUpdate:
+		return "reftable_update"
+	case BlkdebugEventRefblockLoad:
+		return "refblock_load"
+	case BlkdebugEventRefblockUpdate:
+		return "refblock_update"
+	case BlkdebugEventRefblockUpdatePart:
+		return "refblock_update_part"
+	case BlkdebugEventRefblockAlloc:
+		return "refblock_alloc"
+	case BlkdebugEventRefblockAllocHookup:
+		return "refblock_alloc_hookup"
+	case BlkdebugEventRefblockAllocWrite:
+		return "refblock_alloc_write"
+	case BlkdebugEventRefblockAllocWriteBlocks:
+		return "refblock_alloc_write_blocks"
+	case BlkdebugEventRefblockAllocWriteTable:
+		return "refblock_alloc_write_table"
+	case BlkdebugEventRefblockAllocSwitchTable:
+		return "refblock_alloc_switch_table"
+	case BlkdebugEventClusterAlloc:
+		return "cluster_alloc"
+	case BlkdebugEventClusterAllocBytes:
+		return "cluster_alloc_bytes"
+	case BlkdebugEventClusterFree:
+		return "cluster_free"
+	case BlkdebugEventFlushToOs:
+		return "flush_to_os"
+	case BlkdebugEventFlushToDisk:
+		return "flush_to_disk"
+	case BlkdebugEventPwritevRmwHead:
+		return "pwritev_rmw_head"
+	case BlkdebugEventPwritevRmwAfterHead:
+		return "pwritev_rmw_after_head"
+	case BlkdebugEventPwritevRmwTail:
+		return "pwritev_rmw_tail"
+	case BlkdebugEventPwritevRmwAfterTail:
+		return "pwritev_rmw_after_tail"
+	case BlkdebugEventPwritev:
+		return "pwritev"
+	case BlkdebugEventPwritevZero:
+		return "pwritev_zero"
+	case BlkdebugEventPwritevDone:
+		return "pwritev_done"
+	case BlkdebugEventEmptyImagePrepare:
+		return "empty_image_prepare"
+	default:
+		return fmt.Sprintf("BlkdebugEvent(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e BlkdebugEvent) MarshalJSON() ([]byte, error) {
@@ -467,6 +585,20 @@ const (
 	BlockDeviceIOStatusNospace
 )
 
+// String implements fmt.Stringer.
+func (e BlockDeviceIOStatus) String() string {
+	switch e {
+	case BlockDeviceIOStatusOK:
+		return "ok"
+	case BlockDeviceIOStatusFailed:
+		return "failed"
+	case BlockDeviceIOStatusNospace:
+		return "nospace"
+	default:
+		return fmt.Sprintf("BlockDeviceIOStatus(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e BlockDeviceIOStatus) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -584,6 +716,20 @@ const (
 	BlockErrorActionStop
 )
 
+// String implements fmt.Stringer.
+func (e BlockErrorAction) String() string {
+	switch e {
+	case BlockErrorActionIgnore:
+		return "ignore"
+	case BlockErrorActionReport:
+		return "report"
+	case BlockErrorActionStop:
+		return "stop"
+	default:
+		return fmt.Sprintf("BlockErrorAction(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e BlockErrorAction) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -687,6 +833,22 @@ const (
 	BlockJobTypeBackup
 )
 
+// String implements fmt.Stringer.
+func (e BlockJobType) String() string {
+	switch e {
+	case BlockJobTypeCommit:
+		return "commit"
+	case BlockJobTypeStream:
+		return "stream"
+	case BlockJobTypeMirror:
+		return "mirror"
+	case BlockJobTypeBackup:
+		return "backup"
+	default:
+		return fmt.Sprintf("BlockJobType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e BlockJobType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -745,6 +907,18 @@ const (
 	BlockdevAioOptionsThreads BlockdevAioOptions = iota
 	BlockdevAioOptionsNative
 )
+
+// String implements fmt.Stringer.
+func (e BlockdevAioOptions) String() string {
+	switch e {
+	case BlockdevAioOptionsThreads:
+		return "threads"
+	case BlockdevAioOptionsNative:
+		return "native"
+	default:
+		return fmt.Sprintf("BlockdevAioOptions(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e BlockdevAioOptions) MarshalJSON() ([]byte, error) {
@@ -818,6 +992,20 @@ const (
 	BlockdevChangeReadOnlyModeReadWrite
 )
 
+// String implements fmt.Stringer.
+func (e BlockdevChangeReadOnlyMode) String() string {
+	switch e {
+	case BlockdevChangeReadOnlyModeRetain:
+		return "retain"
+	case BlockdevChangeReadOnlyModeReadOnly:
+		return "read-only"
+	case BlockdevChangeReadOnlyModeReadWrite:
+		return "read-write"
+	default:
+		return fmt.Sprintf("BlockdevChangeReadOnlyMode(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e BlockdevChangeReadOnlyMode) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -863,6 +1051,20 @@ const (
 	BlockdevDetectZeroesOptionsUnmap
 )
 
+// String implements fmt.Stringer.
+func (e BlockdevDetectZeroesOptions) String() string {
+	switch e {
+	case BlockdevDetectZeroesOptionsOff:
+		return "off"
+	case BlockdevDetectZeroesOptionsOn:
+		return "on"
+	case BlockdevDetectZeroesOptionsUnmap:
+		return "unmap"
+	default:
+		return fmt.Sprintf("BlockdevDetectZeroesOptions(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e BlockdevDetectZeroesOptions) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -906,6 +1108,18 @@ const (
 	BlockdevDiscardOptionsIgnore BlockdevDiscardOptions = iota
 	BlockdevDiscardOptionsUnmap
 )
+
+// String implements fmt.Stringer.
+func (e BlockdevDiscardOptions) String() string {
+	switch e {
+	case BlockdevDiscardOptionsIgnore:
+		return "ignore"
+	case BlockdevDiscardOptionsUnmap:
+		return "unmap"
+	default:
+		return fmt.Sprintf("BlockdevDiscardOptions(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e BlockdevDiscardOptions) MarshalJSON() ([]byte, error) {
@@ -974,6 +1188,74 @@ const (
 	BlockdevDriverVpc
 	BlockdevDriverVvfat
 )
+
+// String implements fmt.Stringer.
+func (e BlockdevDriver) String() string {
+	switch e {
+	case BlockdevDriverArchipelago:
+		return "archipelago"
+	case BlockdevDriverBlkdebug:
+		return "blkdebug"
+	case BlockdevDriverBlkverify:
+		return "blkverify"
+	case BlockdevDriverBochs:
+		return "bochs"
+	case BlockdevDriverCloop:
+		return "cloop"
+	case BlockdevDriverDmg:
+		return "dmg"
+	case BlockdevDriverFile:
+		return "file"
+	case BlockdevDriverFTP:
+		return "ftp"
+	case BlockdevDriverFTPS:
+		return "ftps"
+	case BlockdevDriverGluster:
+		return "gluster"
+	case BlockdevDriverHostCdrom:
+		return "host_cdrom"
+	case BlockdevDriverHostDevice:
+		return "host_device"
+	case BlockdevDriverHTTP:
+		return "http"
+	case BlockdevDriverHTTPS:
+		return "https"
+	case BlockdevDriverLUKS:
+		return "luks"
+	case BlockdevDriverNullAio:
+		return "null-aio"
+	case BlockdevDriverNullCo:
+		return "null-co"
+	case BlockdevDriverParallels:
+		return "parallels"
+	case BlockdevDriverQcow:
+		return "qcow"
+	case BlockdevDriverQcow2:
+		return "qcow2"
+	case BlockdevDriverQed:
+		return "qed"
+	case BlockdevDriverQuorum:
+		return "quorum"
+	case BlockdevDriverRaw:
+		return "raw"
+	case BlockdevDriverReplication:
+		return "replication"
+	case BlockdevDriverTftp:
+		return "tftp"
+	case BlockdevDriverVdi:
+		return "vdi"
+	case BlockdevDriverVhdx:
+		return "vhdx"
+	case BlockdevDriverVMDK:
+		return "vmdk"
+	case BlockdevDriverVpc:
+		return "vpc"
+	case BlockdevDriverVvfat:
+		return "vvfat"
+	default:
+		return fmt.Sprintf("BlockdevDriver(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
@@ -1129,6 +1411,24 @@ const (
 	BlockdevOnErrorStop
 	BlockdevOnErrorAuto
 )
+
+// String implements fmt.Stringer.
+func (e BlockdevOnError) String() string {
+	switch e {
+	case BlockdevOnErrorReport:
+		return "report"
+	case BlockdevOnErrorIgnore:
+		return "ignore"
+	case BlockdevOnErrorEnospc:
+		return "enospc"
+	case BlockdevOnErrorStop:
+		return "stop"
+	case BlockdevOnErrorAuto:
+		return "auto"
+	default:
+		return fmt.Sprintf("BlockdevOnError(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e BlockdevOnError) MarshalJSON() ([]byte, error) {
@@ -2964,6 +3264,22 @@ const (
 	CommandLineParameterTypeuint64
 )
 
+// String implements fmt.Stringer.
+func (e CommandLineParameterType) String() string {
+	switch e {
+	case CommandLineParameterTypeString:
+		return "string"
+	case CommandLineParameterTypeBoolean:
+		return "boolean"
+	case CommandLineParameterTypefloat64:
+		return "number"
+	case CommandLineParameterTypeuint64:
+		return "size"
+	default:
+		return fmt.Sprintf("CommandLineParameterType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e CommandLineParameterType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3233,6 +3549,26 @@ const (
 	CPUInfoArchOther
 )
 
+// String implements fmt.Stringer.
+func (e CPUInfoArch) String() string {
+	switch e {
+	case CPUInfoArchX86:
+		return "x86"
+	case CPUInfoArchSPARC:
+		return "sparc"
+	case CPUInfoArchPPC:
+		return "ppc"
+	case CPUInfoArchMIPS:
+		return "mips"
+	case CPUInfoArchTricore:
+		return "tricore"
+	case CPUInfoArchOther:
+		return "other"
+	default:
+		return fmt.Sprintf("CPUInfoArch(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e CPUInfoArch) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3316,6 +3652,22 @@ const (
 	CPUModelCompareResultSubset
 )
 
+// String implements fmt.Stringer.
+func (e CPUModelCompareResult) String() string {
+	switch e {
+	case CPUModelCompareResultIncompatible:
+		return "incompatible"
+	case CPUModelCompareResultIdentical:
+		return "identical"
+	case CPUModelCompareResultSuperset:
+		return "superset"
+	case CPUModelCompareResultSubset:
+		return "subset"
+	default:
+		return fmt.Sprintf("CPUModelCompareResult(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e CPUModelCompareResult) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3371,6 +3723,18 @@ const (
 	CPUModelExpansionTypeFull
 )
 
+// String implements fmt.Stringer.
+func (e CPUModelExpansionType) String() string {
+	switch e {
+	case CPUModelExpansionTypeStatic:
+		return "static"
+	case CPUModelExpansionTypeFull:
+		return "full"
+	default:
+		return fmt.Sprintf("CPUModelExpansionType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e CPUModelExpansionType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3425,6 +3789,18 @@ const (
 	DataFormatBase64
 )
 
+// String implements fmt.Stringer.
+func (e DataFormat) String() string {
+	switch e {
+	case DataFormatUtf8:
+		return "utf8"
+	case DataFormatBase64:
+		return "base64"
+	default:
+		return fmt.Sprintf("DataFormat(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e DataFormat) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3474,6 +3850,20 @@ const (
 	DirtyBitmapStatusDisabled
 	DirtyBitmapStatusFrozen
 )
+
+// String implements fmt.Stringer.
+func (e DirtyBitmapStatus) String() string {
+	switch e {
+	case DirtyBitmapStatusActive:
+		return "active"
+	case DirtyBitmapStatusDisabled:
+		return "disabled"
+	case DirtyBitmapStatusFrozen:
+		return "frozen"
+	default:
+		return fmt.Sprintf("DirtyBitmapStatus(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e DirtyBitmapStatus) MarshalJSON() ([]byte, error) {
@@ -3565,6 +3955,22 @@ const (
 	DumpGuestMemoryFormatKdumpSnappy
 )
 
+// String implements fmt.Stringer.
+func (e DumpGuestMemoryFormat) String() string {
+	switch e {
+	case DumpGuestMemoryFormatElf:
+		return "elf"
+	case DumpGuestMemoryFormatKdumpZlib:
+		return "kdump-zlib"
+	case DumpGuestMemoryFormatKdumpLzo:
+		return "kdump-lzo"
+	case DumpGuestMemoryFormatKdumpSnappy:
+		return "kdump-snappy"
+	default:
+		return fmt.Sprintf("DumpGuestMemoryFormat(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e DumpGuestMemoryFormat) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3623,6 +4029,22 @@ const (
 	DumpStatusCompleted
 	DumpStatusFailed
 )
+
+// String implements fmt.Stringer.
+func (e DumpStatus) String() string {
+	switch e {
+	case DumpStatusNone:
+		return "none"
+	case DumpStatusActive:
+		return "active"
+	case DumpStatusCompleted:
+		return "completed"
+	case DumpStatusFailed:
+		return "failed"
+	default:
+		return fmt.Sprintf("DumpStatus(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e DumpStatus) MarshalJSON() ([]byte, error) {
@@ -3784,6 +4206,18 @@ const (
 	GlusterTransportTCP
 )
 
+// String implements fmt.Stringer.
+func (e GlusterTransport) String() string {
+	switch e {
+	case GlusterTransportUnix:
+		return "unix"
+	case GlusterTransportTCP:
+		return "tcp"
+	default:
+		return fmt.Sprintf("GlusterTransport(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e GlusterTransport) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3823,6 +4257,16 @@ const (
 	GuestPanicActionPause GuestPanicAction = iota
 )
 
+// String implements fmt.Stringer.
+func (e GuestPanicAction) String() string {
+	switch e {
+	case GuestPanicActionPause:
+		return "pause"
+	default:
+		return fmt.Sprintf("GuestPanicAction(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e GuestPanicAction) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -3860,6 +4304,22 @@ const (
 	HostMemPolicyBind
 	HostMemPolicyInterleave
 )
+
+// String implements fmt.Stringer.
+func (e HostMemPolicy) String() string {
+	switch e {
+	case HostMemPolicyDefault:
+		return "default"
+	case HostMemPolicyPreferred:
+		return "preferred"
+	case HostMemPolicyBind:
+		return "bind"
+	case HostMemPolicyInterleave:
+		return "interleave"
+	default:
+		return fmt.Sprintf("HostMemPolicy(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e HostMemPolicy) MarshalJSON() ([]byte, error) {
@@ -4108,6 +4568,18 @@ const (
 	InputAxisY
 )
 
+// String implements fmt.Stringer.
+func (e InputAxis) String() string {
+	switch e {
+	case InputAxisX:
+		return "x"
+	case InputAxisY:
+		return "y"
+	default:
+		return fmt.Sprintf("InputAxis(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e InputAxis) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -4158,6 +4630,24 @@ const (
 	InputButtonWheelUp
 	InputButtonWheelDown
 )
+
+// String implements fmt.Stringer.
+func (e InputButton) String() string {
+	switch e {
+	case InputButtonLeft:
+		return "left"
+	case InputButtonMiddle:
+		return "middle"
+	case InputButtonRight:
+		return "right"
+	case InputButtonWheelUp:
+		return "wheel-up"
+	case InputButtonWheelDown:
+		return "wheel-down"
+	default:
+		return fmt.Sprintf("InputButton(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e InputButton) MarshalJSON() ([]byte, error) {
@@ -4353,6 +4843,18 @@ const (
 	IOOperationTypeWrite
 )
 
+// String implements fmt.Stringer.
+func (e IOOperationType) String() string {
+	switch e {
+	case IOOperationTypeRead:
+		return "read"
+	case IOOperationTypeWrite:
+		return "write"
+	default:
+		return fmt.Sprintf("IOOperationType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e IOOperationType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -4398,6 +4900,30 @@ const (
 	JSONTypeArray
 	JSONTypeValue
 )
+
+// String implements fmt.Stringer.
+func (e JSONType) String() string {
+	switch e {
+	case JSONTypeString:
+		return "string"
+	case JSONTypefloat64:
+		return "number"
+	case JSONTypeint64:
+		return "int"
+	case JSONTypeBoolean:
+		return "boolean"
+	case JSONTypeNull:
+		return "null"
+	case JSONTypeObject:
+		return "object"
+	case JSONTypeArray:
+		return "array"
+	case JSONTypeValue:
+		return "value"
+	default:
+		return fmt.Sprintf("JSONType(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e JSONType) MarshalJSON() ([]byte, error) {
@@ -4614,6 +5140,28 @@ const (
 	MigrationCapabilityPostcopyRAM
 )
 
+// String implements fmt.Stringer.
+func (e MigrationCapability) String() string {
+	switch e {
+	case MigrationCapabilityXbzrle:
+		return "xbzrle"
+	case MigrationCapabilityRdmaPinAll:
+		return "rdma-pin-all"
+	case MigrationCapabilityAutoConverge:
+		return "auto-converge"
+	case MigrationCapabilityZeroBlocks:
+		return "zero-blocks"
+	case MigrationCapabilityCompress:
+		return "compress"
+	case MigrationCapabilityEvents:
+		return "events"
+	case MigrationCapabilityPostcopyRAM:
+		return "postcopy-ram"
+	default:
+		return fmt.Sprintf("MigrationCapability(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e MigrationCapability) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -4736,6 +5284,30 @@ const (
 	MigrationStatusFailed
 )
 
+// String implements fmt.Stringer.
+func (e MigrationStatus) String() string {
+	switch e {
+	case MigrationStatusNone:
+		return "none"
+	case MigrationStatusSetup:
+		return "setup"
+	case MigrationStatusCancelling:
+		return "cancelling"
+	case MigrationStatusCancelled:
+		return "cancelled"
+	case MigrationStatusActive:
+		return "active"
+	case MigrationStatusPostcopyActive:
+		return "postcopy-active"
+	case MigrationStatusCompleted:
+		return "completed"
+	case MigrationStatusFailed:
+		return "failed"
+	default:
+		return fmt.Sprintf("MigrationStatus(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e MigrationStatus) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -4801,6 +5373,22 @@ const (
 	MirrorSyncModeNone
 	MirrorSyncModeIncremental
 )
+
+// String implements fmt.Stringer.
+func (e MirrorSyncMode) String() string {
+	switch e {
+	case MirrorSyncModeTop:
+		return "top"
+	case MirrorSyncModeFull:
+		return "full"
+	case MirrorSyncModeNone:
+		return "none"
+	case MirrorSyncModeIncremental:
+		return "incremental"
+	default:
+		return fmt.Sprintf("MirrorSyncMode(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e MirrorSyncMode) MarshalJSON() ([]byte, error) {
@@ -4871,6 +5459,22 @@ const (
 	NetworkAddressFamilyUnknown
 )
 
+// String implements fmt.Stringer.
+func (e NetworkAddressFamily) String() string {
+	switch e {
+	case NetworkAddressFamilyIpv4:
+		return "ipv4"
+	case NetworkAddressFamilyIpv6:
+		return "ipv6"
+	case NetworkAddressFamilyUnix:
+		return "unix"
+	case NetworkAddressFamilyUnknown:
+		return "unknown"
+	default:
+		return fmt.Sprintf("NetworkAddressFamily(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e NetworkAddressFamily) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -4918,6 +5522,18 @@ const (
 	NewImageModeExisting NewImageMode = iota
 	NewImageModeAbsolutePaths
 )
+
+// String implements fmt.Stringer.
+func (e NewImageMode) String() string {
+	switch e {
+	case NewImageModeExisting:
+		return "existing"
+	case NewImageModeAbsolutePaths:
+		return "absolute-paths"
+	default:
+		return fmt.Sprintf("NewImageMode(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e NewImageMode) MarshalJSON() ([]byte, error) {
@@ -5103,6 +5719,36 @@ const (
 	QCryptoCipherAlgorithmTwofish256
 )
 
+// String implements fmt.Stringer.
+func (e QCryptoCipherAlgorithm) String() string {
+	switch e {
+	case QCryptoCipherAlgorithmAes128:
+		return "aes-128"
+	case QCryptoCipherAlgorithmAes192:
+		return "aes-192"
+	case QCryptoCipherAlgorithmAes256:
+		return "aes-256"
+	case QCryptoCipherAlgorithmDesRfb:
+		return "des-rfb"
+	case QCryptoCipherAlgorithmCast5128:
+		return "cast5-128"
+	case QCryptoCipherAlgorithmSerpent128:
+		return "serpent-128"
+	case QCryptoCipherAlgorithmSerpent192:
+		return "serpent-192"
+	case QCryptoCipherAlgorithmSerpent256:
+		return "serpent-256"
+	case QCryptoCipherAlgorithmTwofish128:
+		return "twofish-128"
+	case QCryptoCipherAlgorithmTwofish192:
+		return "twofish-192"
+	case QCryptoCipherAlgorithmTwofish256:
+		return "twofish-256"
+	default:
+		return fmt.Sprintf("QCryptoCipherAlgorithm(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e QCryptoCipherAlgorithm) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -5180,6 +5826,20 @@ const (
 	QCryptoCipherModeXts
 )
 
+// String implements fmt.Stringer.
+func (e QCryptoCipherMode) String() string {
+	switch e {
+	case QCryptoCipherModeEcb:
+		return "ecb"
+	case QCryptoCipherModeCbc:
+		return "cbc"
+	case QCryptoCipherModeXts:
+		return "xts"
+	default:
+		return fmt.Sprintf("QCryptoCipherMode(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e QCryptoCipherMode) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -5228,6 +5888,28 @@ const (
 	QCryptoHashAlgorithmSha512
 	QCryptoHashAlgorithmRipemd160
 )
+
+// String implements fmt.Stringer.
+func (e QCryptoHashAlgorithm) String() string {
+	switch e {
+	case QCryptoHashAlgorithmMd5:
+		return "md5"
+	case QCryptoHashAlgorithmSha1:
+		return "sha1"
+	case QCryptoHashAlgorithmSha224:
+		return "sha224"
+	case QCryptoHashAlgorithmSha256:
+		return "sha256"
+	case QCryptoHashAlgorithmSha384:
+		return "sha384"
+	case QCryptoHashAlgorithmSha512:
+		return "sha512"
+	case QCryptoHashAlgorithmRipemd160:
+		return "ripemd160"
+	default:
+		return fmt.Sprintf("QCryptoHashAlgorithm(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e QCryptoHashAlgorithm) MarshalJSON() ([]byte, error) {
@@ -5289,6 +5971,20 @@ const (
 	QCryptoIvGenAlgorithmPlain64
 	QCryptoIvGenAlgorithmEssiv
 )
+
+// String implements fmt.Stringer.
+func (e QCryptoIvGenAlgorithm) String() string {
+	switch e {
+	case QCryptoIvGenAlgorithmPlain:
+		return "plain"
+	case QCryptoIvGenAlgorithmPlain64:
+		return "plain64"
+	case QCryptoIvGenAlgorithmEssiv:
+		return "essiv"
+	default:
+		return fmt.Sprintf("QCryptoIvGenAlgorithm(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e QCryptoIvGenAlgorithm) MarshalJSON() ([]byte, error) {
@@ -5458,6 +6154,268 @@ const (
 	QKeyCodeKpEquals
 	QKeyCodePower
 )
+
+// String implements fmt.Stringer.
+func (e QKeyCode) String() string {
+	switch e {
+	case QKeyCodeUnmapped:
+		return "unmapped"
+	case QKeyCodeShift:
+		return "shift"
+	case QKeyCodeShiftR:
+		return "shift_r"
+	case QKeyCodeAlt:
+		return "alt"
+	case QKeyCodeAltR:
+		return "alt_r"
+	case QKeyCodeAltgr:
+		return "altgr"
+	case QKeyCodeAltgrR:
+		return "altgr_r"
+	case QKeyCodeCtrl:
+		return "ctrl"
+	case QKeyCodeCtrlR:
+		return "ctrl_r"
+	case QKeyCodeMenu:
+		return "menu"
+	case QKeyCodeEsc:
+		return "esc"
+	case QKeyCode1:
+		return "1"
+	case QKeyCode2:
+		return "2"
+	case QKeyCode3:
+		return "3"
+	case QKeyCode4:
+		return "4"
+	case QKeyCode5:
+		return "5"
+	case QKeyCode6:
+		return "6"
+	case QKeyCode7:
+		return "7"
+	case QKeyCode8:
+		return "8"
+	case QKeyCode9:
+		return "9"
+	case QKeyCode0:
+		return "0"
+	case QKeyCodeMinus:
+		return "minus"
+	case QKeyCodeEqual:
+		return "equal"
+	case QKeyCodeBackspace:
+		return "backspace"
+	case QKeyCodeTab:
+		return "tab"
+	case QKeyCodeQ:
+		return "q"
+	case QKeyCodeW:
+		return "w"
+	case QKeyCodeE:
+		return "e"
+	case QKeyCodeR:
+		return "r"
+	case QKeyCodeT:
+		return "t"
+	case QKeyCodeY:
+		return "y"
+	case QKeyCodeU:
+		return "u"
+	case QKeyCodeI:
+		return "i"
+	case QKeyCodeO:
+		return "o"
+	case QKeyCodeP:
+		return "p"
+	case QKeyCodeBracketLeft:
+		return "bracket_left"
+	case QKeyCodeBracketRight:
+		return "bracket_right"
+	case QKeyCodeRet:
+		return "ret"
+	case QKeyCodeA:
+		return "a"
+	case QKeyCodeS:
+		return "s"
+	case QKeyCodeD:
+		return "d"
+	case QKeyCodeF:
+		return "f"
+	case QKeyCodeG:
+		return "g"
+	case QKeyCodeH:
+		return "h"
+	case QKeyCodeJ:
+		return "j"
+	case QKeyCodeK:
+		return "k"
+	case QKeyCodeL:
+		return "l"
+	case QKeyCodeSemicolon:
+		return "semicolon"
+	case QKeyCodeApostrophe:
+		return "apostrophe"
+	case QKeyCodeGraveAccent:
+		return "grave_accent"
+	case QKeyCodeBackslash:
+		return "backslash"
+	case QKeyCodeZ:
+		return "z"
+	case QKeyCodeX:
+		return "x"
+	case QKeyCodeC:
+		return "c"
+	case QKeyCodeV:
+		return "v"
+	case QKeyCodeB:
+		return "b"
+	case QKeyCodeN:
+		return "n"
+	case QKeyCodeM:
+		return "m"
+	case QKeyCodeComma:
+		return "comma"
+	case QKeyCodeDot:
+		return "dot"
+	case QKeyCodeSlash:
+		return "slash"
+	case QKeyCodeAsterisk:
+		return "asterisk"
+	case QKeyCodeSpc:
+		return "spc"
+	case QKeyCodeCapsLock:
+		return "caps_lock"
+	case QKeyCodeF1:
+		return "f1"
+	case QKeyCodeF2:
+		return "f2"
+	case QKeyCodeF3:
+		return "f3"
+	case QKeyCodeF4:
+		return "f4"
+	case QKeyCodeF5:
+		return "f5"
+	case QKeyCodeF6:
+		return "f6"
+	case QKeyCodeF7:
+		return "f7"
+	case QKeyCodeF8:
+		return "f8"
+	case QKeyCodeF9:
+		return "f9"
+	case QKeyCodeF10:
+		return "f10"
+	case QKeyCodeNumLock:
+		return "num_lock"
+	case QKeyCodeScrollLock:
+		return "scroll_lock"
+	case QKeyCodeKpDivide:
+		return "kp_divide"
+	case QKeyCodeKpMultiply:
+		return "kp_multiply"
+	case QKeyCodeKpSubtract:
+		return "kp_subtract"
+	case QKeyCodeKpAdd:
+		return "kp_add"
+	case QKeyCodeKpEnter:
+		return "kp_enter"
+	case QKeyCodeKpDecimal:
+		return "kp_decimal"
+	case QKeyCodeSysrq:
+		return "sysrq"
+	case QKeyCodeKp0:
+		return "kp_0"
+	case QKeyCodeKp1:
+		return "kp_1"
+	case QKeyCodeKp2:
+		return "kp_2"
+	case QKeyCodeKp3:
+		return "kp_3"
+	case QKeyCodeKp4:
+		return "kp_4"
+	case QKeyCodeKp5:
+		return "kp_5"
+	case QKeyCodeKp6:
+		return "kp_6"
+	case QKeyCodeKp7:
+		return "kp_7"
+	case QKeyCodeKp8:
+		return "kp_8"
+	case QKeyCodeKp9:
+		return "kp_9"
+	case QKeyCodeLess:
+		return "less"
+	case QKeyCodeF11:
+		return "f11"
+	case QKeyCodeF12:
+		return "f12"
+	case QKeyCodePrint:
+		return "print"
+	case QKeyCodeHome:
+		return "home"
+	case QKeyCodePgup:
+		return "pgup"
+	case QKeyCodePgdn:
+		return "pgdn"
+	case QKeyCodeEnd:
+		return "end"
+	case QKeyCodeLeft:
+		return "left"
+	case QKeyCodeUp:
+		return "up"
+	case QKeyCodeDown:
+		return "down"
+	case QKeyCodeRight:
+		return "right"
+	case QKeyCodeInsert:
+		return "insert"
+	case QKeyCodeDelete:
+		return "delete"
+	case QKeyCodeStop:
+		return "stop"
+	case QKeyCodeAgain:
+		return "again"
+	case QKeyCodeProps:
+		return "props"
+	case QKeyCodeUndo:
+		return "undo"
+	case QKeyCodeFront:
+		return "front"
+	case QKeyCodeCopy:
+		return "copy"
+	case QKeyCodeOpen:
+		return "open"
+	case QKeyCodePaste:
+		return "paste"
+	case QKeyCodeFind:
+		return "find"
+	case QKeyCodeCut:
+		return "cut"
+	case QKeyCodeLf:
+		return "lf"
+	case QKeyCodeHelp:
+		return "help"
+	case QKeyCodeMetaL:
+		return "meta_l"
+	case QKeyCodeMetaR:
+		return "meta_r"
+	case QKeyCodeCompose:
+		return "compose"
+	case QKeyCodePause:
+		return "pause"
+	case QKeyCodeRo:
+		return "ro"
+	case QKeyCodeKpComma:
+		return "kp_comma"
+	case QKeyCodeKpEquals:
+		return "kp_equals"
+	case QKeyCodePower:
+		return "power"
+	default:
+		return fmt.Sprintf("QKeyCode(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e QKeyCode) MarshalJSON() ([]byte, error) {
@@ -6020,6 +6978,22 @@ const (
 	Qcow2OverlapCheckModeAll
 )
 
+// String implements fmt.Stringer.
+func (e Qcow2OverlapCheckMode) String() string {
+	switch e {
+	case Qcow2OverlapCheckModeNone:
+		return "none"
+	case Qcow2OverlapCheckModeConstant:
+		return "constant"
+	case Qcow2OverlapCheckModeCached:
+		return "cached"
+	case Qcow2OverlapCheckModeAll:
+		return "all"
+	default:
+		return fmt.Sprintf("Qcow2OverlapCheckMode(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e Qcow2OverlapCheckMode) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -6104,6 +7078,20 @@ const (
 	QuorumOpTypeFlush
 )
 
+// String implements fmt.Stringer.
+func (e QuorumOpType) String() string {
+	switch e {
+	case QuorumOpTypeRead:
+		return "read"
+	case QuorumOpTypeWrite:
+		return "write"
+	case QuorumOpTypeFlush:
+		return "flush"
+	default:
+		return fmt.Sprintf("QuorumOpType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e QuorumOpType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -6147,6 +7135,18 @@ const (
 	QuorumReadPatternQuorum QuorumReadPattern = iota
 	QuorumReadPatternFifo
 )
+
+// String implements fmt.Stringer.
+func (e QuorumReadPattern) String() string {
+	switch e {
+	case QuorumReadPatternQuorum:
+		return "quorum"
+	case QuorumReadPatternFifo:
+		return "fifo"
+	default:
+		return fmt.Sprintf("QuorumReadPattern(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e QuorumReadPattern) MarshalJSON() ([]byte, error) {
@@ -6193,6 +7193,18 @@ const (
 	ReplicationModePrimary ReplicationMode = iota
 	ReplicationModeSecondary
 )
+
+// String implements fmt.Stringer.
+func (e ReplicationMode) String() string {
+	switch e {
+	case ReplicationModePrimary:
+		return "primary"
+	case ReplicationModeSecondary:
+		return "secondary"
+	default:
+		return fmt.Sprintf("ReplicationMode(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e ReplicationMode) MarshalJSON() ([]byte, error) {
@@ -6318,6 +7330,18 @@ const (
 	RockerPortAutonegOn
 )
 
+// String implements fmt.Stringer.
+func (e RockerPortAutoneg) String() string {
+	switch e {
+	case RockerPortAutonegOff:
+		return "off"
+	case RockerPortAutonegOn:
+		return "on"
+	default:
+		return fmt.Sprintf("RockerPortAutoneg(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e RockerPortAutoneg) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -6357,6 +7381,18 @@ const (
 	RockerPortDuplexHalf RockerPortDuplex = iota
 	RockerPortDuplexFull
 )
+
+// String implements fmt.Stringer.
+func (e RockerPortDuplex) String() string {
+	switch e {
+	case RockerPortDuplexHalf:
+		return "half"
+	case RockerPortDuplexFull:
+		return "full"
+	default:
+		return fmt.Sprintf("RockerPortDuplex(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e RockerPortDuplex) MarshalJSON() ([]byte, error) {
@@ -6419,6 +7455,44 @@ const (
 	RunStateWatchdog
 	RunStateGuestPanicked
 )
+
+// String implements fmt.Stringer.
+func (e RunState) String() string {
+	switch e {
+	case RunStateDebug:
+		return "debug"
+	case RunStateInmigrate:
+		return "inmigrate"
+	case RunStateInternalError:
+		return "internal-error"
+	case RunStateIOError:
+		return "io-error"
+	case RunStatePaused:
+		return "paused"
+	case RunStatePostmigrate:
+		return "postmigrate"
+	case RunStatePrelaunch:
+		return "prelaunch"
+	case RunStateFinishMigrate:
+		return "finish-migrate"
+	case RunStateRestoreVM:
+		return "restore-vm"
+	case RunStateRunning:
+		return "running"
+	case RunStateSaveVM:
+		return "save-vm"
+	case RunStateShutdown:
+		return "shutdown"
+	case RunStateSuspended:
+		return "suspended"
+	case RunStateWatchdog:
+		return "watchdog"
+	case RunStateGuestPanicked:
+		return "guest-panicked"
+	default:
+		return fmt.Sprintf("RunState(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e RunState) MarshalJSON() ([]byte, error) {
@@ -6530,6 +7604,20 @@ const (
 	RxStateNone
 	RxStateAll
 )
+
+// String implements fmt.Stringer.
+func (e RxState) String() string {
+	switch e {
+	case RxStateNormal:
+		return "normal"
+	case RxStateNone:
+		return "none"
+	case RxStateAll:
+		return "all"
+	default:
+		return fmt.Sprintf("RxState(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e RxState) MarshalJSON() ([]byte, error) {
@@ -6834,6 +7922,28 @@ const (
 	SchemaMetaTypeEvent
 )
 
+// String implements fmt.Stringer.
+func (e SchemaMetaType) String() string {
+	switch e {
+	case SchemaMetaTypeBuiltin:
+		return "builtin"
+	case SchemaMetaTypeEnum:
+		return "enum"
+	case SchemaMetaTypeArray:
+		return "array"
+	case SchemaMetaTypeObject:
+		return "object"
+	case SchemaMetaTypeAlternate:
+		return "alternate"
+	case SchemaMetaTypeCommand:
+		return "command"
+	case SchemaMetaTypeEvent:
+		return "event"
+	default:
+		return fmt.Sprintf("SchemaMetaType(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e SchemaMetaType) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -7031,6 +8141,20 @@ const (
 	SpiceQueryMouseModeUnknown
 )
 
+// String implements fmt.Stringer.
+func (e SpiceQueryMouseMode) String() string {
+	switch e {
+	case SpiceQueryMouseModeClient:
+		return "client"
+	case SpiceQueryMouseModeServer:
+		return "server"
+	case SpiceQueryMouseModeUnknown:
+		return "unknown"
+	default:
+		return fmt.Sprintf("SpiceQueryMouseMode(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e SpiceQueryMouseMode) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -7145,6 +8269,16 @@ const (
 	TPMModelTPMTis TPMModel = iota
 )
 
+// String implements fmt.Stringer.
+func (e TPMModel) String() string {
+	switch e {
+	case TPMModelTPMTis:
+		return "tpm-tis"
+	default:
+		return fmt.Sprintf("TPMModel(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e TPMModel) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -7179,6 +8313,16 @@ type TPMType int
 const (
 	TPMTypePassthrough TPMType = iota
 )
+
+// String implements fmt.Stringer.
+func (e TPMType) String() string {
+	switch e {
+	case TPMTypePassthrough:
+		return "passthrough"
+	default:
+		return fmt.Sprintf("TPMType(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e TPMType) MarshalJSON() ([]byte, error) {
@@ -7269,6 +8413,20 @@ const (
 	TraceEventStateDisabled
 	TraceEventStateEnabled
 )
+
+// String implements fmt.Stringer.
+func (e TraceEventState) String() string {
+	switch e {
+	case TraceEventStateUnavailable:
+		return "unavailable"
+	case TraceEventStateDisabled:
+		return "disabled"
+	case TraceEventStateEnabled:
+		return "enabled"
+	default:
+		return fmt.Sprintf("TraceEventState(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e TraceEventState) MarshalJSON() ([]byte, error) {
@@ -7604,6 +8762,32 @@ const (
 	VNCPrimaryAuthSasl
 )
 
+// String implements fmt.Stringer.
+func (e VNCPrimaryAuth) String() string {
+	switch e {
+	case VNCPrimaryAuthNone:
+		return "none"
+	case VNCPrimaryAuthVNC:
+		return "vnc"
+	case VNCPrimaryAuthRa2:
+		return "ra2"
+	case VNCPrimaryAuthRa2Ne:
+		return "ra2ne"
+	case VNCPrimaryAuthTight:
+		return "tight"
+	case VNCPrimaryAuthUltra:
+		return "ultra"
+	case VNCPrimaryAuthTLS:
+		return "tls"
+	case VNCPrimaryAuthVencrypt:
+		return "vencrypt"
+	case VNCPrimaryAuthSasl:
+		return "sasl"
+	default:
+		return fmt.Sprintf("VNCPrimaryAuth(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e VNCPrimaryAuth) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -7690,6 +8874,32 @@ const (
 	VNCVencryptSubAuthX509Sasl
 )
 
+// String implements fmt.Stringer.
+func (e VNCVencryptSubAuth) String() string {
+	switch e {
+	case VNCVencryptSubAuthPlain:
+		return "plain"
+	case VNCVencryptSubAuthTLSNone:
+		return "tls-none"
+	case VNCVencryptSubAuthX509None:
+		return "x509-none"
+	case VNCVencryptSubAuthTLSVNC:
+		return "tls-vnc"
+	case VNCVencryptSubAuthX509VNC:
+		return "x509-vnc"
+	case VNCVencryptSubAuthTLSPlain:
+		return "tls-plain"
+	case VNCVencryptSubAuthX509Plain:
+		return "x509-plain"
+	case VNCVencryptSubAuthTLSSasl:
+		return "tls-sasl"
+	case VNCVencryptSubAuthX509Sasl:
+		return "x509-sasl"
+	default:
+		return fmt.Sprintf("VNCVencryptSubAuth(%d)", e)
+	}
+}
+
 // MarshalJSON implements json.Marshaler.
 func (e VNCVencryptSubAuth) MarshalJSON() ([]byte, error) {
 	switch e {
@@ -7766,6 +8976,28 @@ const (
 	WatchdogExpirationActionNone
 	WatchdogExpirationActionInjectNmi
 )
+
+// String implements fmt.Stringer.
+func (e WatchdogExpirationAction) String() string {
+	switch e {
+	case WatchdogExpirationActionReset:
+		return "reset"
+	case WatchdogExpirationActionShutdown:
+		return "shutdown"
+	case WatchdogExpirationActionPoweroff:
+		return "poweroff"
+	case WatchdogExpirationActionPause:
+		return "pause"
+	case WatchdogExpirationActionDebug:
+		return "debug"
+	case WatchdogExpirationActionNone:
+		return "none"
+	case WatchdogExpirationActionInjectNmi:
+		return "inject-nmi"
+	default:
+		return fmt.Sprintf("WatchdogExpirationAction(%d)", e)
+	}
+}
 
 // MarshalJSON implements json.Marshaler.
 func (e WatchdogExpirationAction) MarshalJSON() ([]byte, error) {
