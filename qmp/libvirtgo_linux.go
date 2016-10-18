@@ -26,18 +26,13 @@ import (
 
 type libvirtGoMonitorLinux struct {
 	LibvirtGoMonitor
-	domain  string
-	uri     string
-	virConn *libvirt.VirConnection
-	once    sync.Once
-}
-
-var eventsTable = map[int]string{
-	libvirt.VIR_DOMAIN_EVENT_STARTED:   "VIR_DOMAIN_EVENT_STARTED",
-	libvirt.VIR_DOMAIN_EVENT_SUSPENDED: "VIR_DOMAIN_EVENT_SUSPENDED",
-	libvirt.VIR_DOMAIN_EVENT_RESUMED:   "VIR_DOMAIN_EVENT_RESUMED",
-	libvirt.VIR_DOMAIN_EVENT_STOPPED:   "VIR_DOMAIN_EVENT_STOPPED",
-	libvirt.VIR_DOMAIN_EVENT_SHUTDOWN:  "VIR_DOMAIN_EVENT_SHUTDOWN",
+	domainName    string
+	domain        *libvirt.VirDomain
+	uri           string
+	virConn       *libvirt.VirConnection
+	once          sync.Once
+	doneChan      chan bool
+	eventsChan    chan Event
 }
 
 // NewLibvirtGoMonitor configures a connection to the provided hypervisor
@@ -66,40 +61,76 @@ func (mon *libvirtGoMonitorLinux) Connect() error {
 	// We only do this once the first a Connect is called.
 	mon.once.Do(eventRegisterDefaultImpl)
 
-	virConn, err := libvirt.NewVirConnection(mon.uri)
-	if err == nil {
-		mon.virConn = &virConn
+    // Already connected?
+	if mon.virConn != nil {
+		return nil
 	}
+
+	virConn, err := NewVirConnectionInternal(mon.uri)
+	if err != nil {
+		return err
+	}
+
+	mon.domain, err := &lookupDomainByName(virConn, mon.domainName)
+	if err != nil {
+		CloseConnectionInternal(virConn)
+		return err
+	}
+
+	mon.virConn    = &virConn
+	mon.eventsChan := make(chan Event)
+	mon.doneChan   := make(chan bool)
+	
 	return err
 }
+
+var NewVirConnectionInternal = func(uri string) (*libvirt.VirConnection, error) {
+	return libvirt.NewVirConnection(uri)
+} 
 
 // Disconnect tears down open QMP socket connections.
 func (mon *libvirtGoMonitorLinux) Disconnect() error {
 	var err error
-	if mon.virConn != nil {
-		_, err = mon.virConn.CloseConnection()
-		mon.virConn = nil
+	if mon.domain != nil {
+		mon.domain.Free()
+		mon.domain = nil
 	}
+
+	if mon.virConn != nil {
+		_, err = CloseConnectionInternal(mon.virConn)
+		mon.virConn = nil
+		close(mon.doneChan)   // stop listenning to events
+		close(mon.eventsChan) // stop sending events to clients
+	}
+	
 	return err
+}
+
+var CloseConnectionInternal = func(virConn *libvirt.VirConnection) (int, error) {
+	return virConn.CloseConnection()
 }
 
 // Run executes the given QAPI command against a domain's QEMU instance.
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
 func (mon *libvirtGoMonitorLinux) Run(cmd []byte) ([]byte, error) {
-	domain, err := mon.virConn.LookupDomainByName(mon.domain)
-	if err != nil {
-		return nil, err
+	if mon.virConn == nil {
+		return nil, errors.New("Run() need a established connection to proceed.")
 	}
 
-	result, err := domain.QemuMonitorCommand(
-		libvirt.VIR_DOMAIN_QEMU_MONITOR_COMMAND_DEFAULT,
-		string(cmd))
+	result, err := QemuMonitorCommandInternal(mon.domain,string(cmd))
 	if err != nil {
 		return nil, err
 	}
 
 	return []byte(result), nil
+}
+
+var QemuMonitorCommandInternal = func(
+	domain *libvirt.VirDomain, cmd string) (string, error) {
+	return domain.QemuMonitorCommand(
+		libvirt.VIR_DOMAIN_QEMU_MONITOR_COMMAND_DEFAULT,
+		cmd)
 }
 
 // Events streams QEMU QMP Events.
@@ -111,35 +142,26 @@ func (mon *libvirtGoMonitorLinux) Events() (<-chan Event, error) {
 	if mon.virConn == nil {
 		return nil, errors.New("Events() need a established connection to proceed.")
 	}
-
-	eventsChan := make(chan Event, 1)
-
-	domain, err := mon.virConn.LookupDomainByName(mon.domain)
+	
+	callbackID, err := domainEventRegister(mon)
 	if err != nil {
 		return nil, err
 	}
 
-	callbackID, err := domainEventRegister(mon.virConn, &domain, eventsChan)
-	if err != nil {
-		return nil, err
-	}
+	go pollEventsLoop(mon.doneChan)
 
-	//TODO: need a way to trigger doneChan.
-	//      Maybe we need to return another type of Object
-	//      instead of the Event channel so the caller has the
-	//      ability to stop processing events.
-	doneChan := make(chan bool)
+	go domainEventDeregister(mon.virConn, callbackID)
 
-	go pollEventsLoop(doneChan)
+	return mon.eventsChan, nil
+}
 
-	go domainEventDeregister(mon.virConn, callbackID, doneChan)
-
-	return eventsChan, nil
+var lookupDomainByName = func(virConn *libvirt.VirConnection, domainName string) (VirDomain, error) {
+	return virConn.LookupDomainByName(mon.domain)
 }
 
 // eventRegisterDefaultImpl registers a default event implementation.
 func eventRegisterDefaultImpl() {
-	eventRegisterID := libvirt.EventRegisterDefaultImpl()
+	eventRegisterID := eventRegisterDefaultImplInternal()
 	if eventRegisterID == -1 {
 		log.Printf(
 			"EventRegisterDefaultImpl returned an unexpected value %d\n",
@@ -148,17 +170,19 @@ func eventRegisterDefaultImpl() {
 	}
 }
 
+var eventRegisterDefaultImplInternal = func() int {
+	return libvirt.EventRegisterDefaultImpl()
+}
+
 // domainEventRegister register with libvirt to receive events for the
 // specified domain.
-func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDomain,
-	eventsChan chan Event) (int, error) {
+func domainEventRegister(mon *libvirtGoMonitorLinux) (int, error) {
 	callback :=
-		libvirt.DomainEventCallback(newEventCallback(eventsChan))
+		libvirt.DomainEventCallback(newEventCallback(mon))
 
 	//TODO: add ability to register for more event types
-	callbackID := virConn.DomainEventRegister(
-		*domain,
-		libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE,
+	callbackID := domainEventRegisterInternal(
+		mon,
 		&callback,
 		func() {
 			// empty on purpose until it's decided
@@ -172,27 +196,54 @@ func domainEventRegister(virConn *libvirt.VirConnection, domain *libvirt.VirDoma
 	return callbackID, nil
 }
 
+var domainEventRegisterInternal = func(
+	mon *libvirtGoMonitorLinux,
+	callback *libvirt.DomainEventCallback, 
+	fn func(){}) {
+	return mon.virConn.DomainEventRegister(
+		mon.domain,
+		libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE,
+		callback,
+		fn
+	)
+}
+
 // domainEventDeregister stops the registration with libvirt from receiving
 // events for the specified domain.
-func domainEventDeregister(virConn *libvirt.VirConnection, callbackID int, doneChan chan bool) {
-	<-doneChan
-	ret := virConn.DomainEventDeregister(callbackID)
+func domainEventDeregister(
+	mon *libvirtGoMonitorLinux,
+	callbackID int) {
+	<-mon.doneChan
+	ret := domainEventDeregisterInternal(mon.virConn, callbackID)
 	if ret != 0 {
-		log.Printf("DomainEventDeregister returned an unexpected value: %d\n", ret)
+		log.Printf("DomainEventDeregister returned an unexpected value: %d\n",
+			ret)
 	}
+}
+
+var domainEventDeregisterInternal = func(virConn *libvirt.VirConnection,
+	callbackID int) {
+	return virConn.DomainEventDeregister(callbackID)
 }
 
 // newEventCallback convenient function to provide access
 // to the eventChan to the returned closure/callback.
-func newEventCallback(eventChan chan Event) libvirt.DomainEventCallback {
+func newEventCallback(mon *libvirtGoMonitorLinux) libvirt.DomainEventCallback {
 	return func(c *libvirt.VirConnection,
 		d *libvirt.VirDomain,
 		eventDetails interface{}, f func()) int {
 
+        // if monitor is not connected, 
+		// we should not continue processing messages
+		// as the mon.eventsChan will be closed. 
+		if mon.virConn == nil {
+			return
+		}
+
 		// We only support lifecycleEvents for now
 		if lifecycleEvent, ok :=
 			eventDetails.(libvirt.DomainLifecycleEvent); ok {
-			eventChan <- constructEvent(lifecycleEvent)
+			mon.eventChan <- constructEvent(lifecycleEvent)
 			f()
 		}
 
@@ -204,23 +255,23 @@ func newEventCallback(eventChan chan Event) libvirt.DomainEventCallback {
 
 // pollEventsLoop keeps polling libvirt for new domain events
 func pollEventsLoop(doneChan chan bool) {
-	//TODO: Maybe interval should come
-	//      from an ENV variable
 	checkInterval := time.Tick(getPollInterval())
 	for {
 		select {
 		case <-doneChan: // stop polling for events
 			return
 		case <-checkInterval:
-			go func() {
-				ret := libvirt.EventRunDefaultImpl()
-				if ret == -1 {
-					doneChan <- true
-					return
-				}
-			}()
+			ret := eventRunDefaultImplInternal()
+			if ret == -1 {
+				doneChan <- true
+				return
+			}
 		}
 	}
+}
+
+var eventRunDefaultImplInternal = func() int {
+	return libvirt.EventRunDefaultImpl()
 }
 
 // getPollInterval retreives the events poll interval from the
