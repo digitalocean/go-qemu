@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/digitalocean/go-qemu/qmp"
+	"github.com/digitalocean/go-qemu/qmp/raw"
 )
 
 const defaultTestTimeout = 50 * time.Millisecond
@@ -415,12 +416,10 @@ func TestStatusRunning(t *testing.T) {
 				want, got)
 		}
 
-		type response struct {
-			Status Status
-		}
-
 		return success{
-			Return: response{Status: StatusRunning},
+			Return: raw.StatusInfo{
+				Status: raw.RunStateRunning,
+			},
 		}, nil
 	})
 	defer done()
@@ -442,12 +441,10 @@ func TestStatusShutdown(t *testing.T) {
 				want, got)
 		}
 
-		type response struct {
-			Status Status
-		}
-
 		return success{
-			Return: response{Status: StatusShutdown},
+			Return: raw.StatusInfo{
+				Status: raw.RunStateShutdown,
+			},
 		}, nil
 	})
 	defer done()
