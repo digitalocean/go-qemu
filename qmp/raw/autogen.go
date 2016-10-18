@@ -191,10 +191,10 @@ const (
 	BlkdebugEventL2UpdateCompressed
 	BlkdebugEventL2AllocCowRead
 	BlkdebugEventL2AllocWrite
-	BlkdebugEventReadAio
-	BlkdebugEventReadBackingAio
+	BlkdebugEventReadAIO
+	BlkdebugEventReadBackingAIO
 	BlkdebugEventReadCompressed
-	BlkdebugEventWriteAio
+	BlkdebugEventWriteAIO
 	BlkdebugEventWriteCompressed
 	BlkdebugEventVmstateLoad
 	BlkdebugEventVmstateSave
@@ -248,13 +248,13 @@ func (e BlkdebugEvent) String() string {
 		return "l2_alloc_cow_read"
 	case BlkdebugEventL2AllocWrite:
 		return "l2_alloc_write"
-	case BlkdebugEventReadAio:
+	case BlkdebugEventReadAIO:
 		return "read_aio"
-	case BlkdebugEventReadBackingAio:
+	case BlkdebugEventReadBackingAIO:
 		return "read_backing_aio"
 	case BlkdebugEventReadCompressed:
 		return "read_compressed"
-	case BlkdebugEventWriteAio:
+	case BlkdebugEventWriteAIO:
 		return "write_aio"
 	case BlkdebugEventWriteCompressed:
 		return "write_compressed"
@@ -342,13 +342,13 @@ func (e BlkdebugEvent) MarshalJSON() ([]byte, error) {
 		return json.Marshal("l2_alloc_cow_read")
 	case BlkdebugEventL2AllocWrite:
 		return json.Marshal("l2_alloc_write")
-	case BlkdebugEventReadAio:
+	case BlkdebugEventReadAIO:
 		return json.Marshal("read_aio")
-	case BlkdebugEventReadBackingAio:
+	case BlkdebugEventReadBackingAIO:
 		return json.Marshal("read_backing_aio")
 	case BlkdebugEventReadCompressed:
 		return json.Marshal("read_compressed")
-	case BlkdebugEventWriteAio:
+	case BlkdebugEventWriteAIO:
 		return json.Marshal("write_aio")
 	case BlkdebugEventWriteCompressed:
 		return json.Marshal("write_compressed")
@@ -441,13 +441,13 @@ func (e *BlkdebugEvent) UnmarshalJSON(bs []byte) error {
 	case "l2_alloc_write":
 		*e = BlkdebugEventL2AllocWrite
 	case "read_aio":
-		*e = BlkdebugEventReadAio
+		*e = BlkdebugEventReadAIO
 	case "read_backing_aio":
-		*e = BlkdebugEventReadBackingAio
+		*e = BlkdebugEventReadBackingAIO
 	case "read_compressed":
 		*e = BlkdebugEventReadCompressed
 	case "write_aio":
-		*e = BlkdebugEventWriteAio
+		*e = BlkdebugEventWriteAIO
 	case "write_compressed":
 		*e = BlkdebugEventWriteCompressed
 	case "vmstate_load":
@@ -897,54 +897,54 @@ type BlockStats struct {
 	Backing  *BlockStats      `json:"backing,omitempty"`
 }
 
-// BlockdevAioOptions -> BlockdevAioOptions (enum)
+// BlockdevAioOptions -> BlockdevAIOOptions (enum)
 
-// BlockdevAioOptions implements the "BlockdevAioOptions" QMP API type.
-type BlockdevAioOptions int
+// BlockdevAIOOptions implements the "BlockdevAioOptions" QMP API type.
+type BlockdevAIOOptions int
 
-// Known values of BlockdevAioOptions.
+// Known values of BlockdevAIOOptions.
 const (
-	BlockdevAioOptionsThreads BlockdevAioOptions = iota
-	BlockdevAioOptionsNative
+	BlockdevAIOOptionsThreads BlockdevAIOOptions = iota
+	BlockdevAIOOptionsNative
 )
 
 // String implements fmt.Stringer.
-func (e BlockdevAioOptions) String() string {
+func (e BlockdevAIOOptions) String() string {
 	switch e {
-	case BlockdevAioOptionsThreads:
+	case BlockdevAIOOptionsThreads:
 		return "threads"
-	case BlockdevAioOptionsNative:
+	case BlockdevAIOOptionsNative:
 		return "native"
 	default:
-		return fmt.Sprintf("BlockdevAioOptions(%d)", e)
+		return fmt.Sprintf("BlockdevAIOOptions(%d)", e)
 	}
 }
 
 // MarshalJSON implements json.Marshaler.
-func (e BlockdevAioOptions) MarshalJSON() ([]byte, error) {
+func (e BlockdevAIOOptions) MarshalJSON() ([]byte, error) {
 	switch e {
-	case BlockdevAioOptionsThreads:
+	case BlockdevAIOOptionsThreads:
 		return json.Marshal("threads")
-	case BlockdevAioOptionsNative:
+	case BlockdevAIOOptionsNative:
 		return json.Marshal("native")
 	default:
-		return nil, fmt.Errorf("unknown enum value %q for BlockdevAioOptions", e)
+		return nil, fmt.Errorf("unknown enum value %q for BlockdevAIOOptions", e)
 	}
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (e *BlockdevAioOptions) UnmarshalJSON(bs []byte) error {
+func (e *BlockdevAIOOptions) UnmarshalJSON(bs []byte) error {
 	var s string
 	if err := json.Unmarshal(bs, &s); err != nil {
 		return err
 	}
 	switch s {
 	case "threads":
-		*e = BlockdevAioOptionsThreads
+		*e = BlockdevAIOOptionsThreads
 	case "native":
-		*e = BlockdevAioOptionsNative
+		*e = BlockdevAIOOptionsNative
 	default:
-		return fmt.Errorf("unknown enum value %q for BlockdevAioOptions", s)
+		return fmt.Errorf("unknown enum value %q for BlockdevAIOOptions", s)
 	}
 	return nil
 }
@@ -1172,7 +1172,7 @@ const (
 	BlockdevDriverHTTP
 	BlockdevDriverHTTPS
 	BlockdevDriverLUKS
-	BlockdevDriverNullAio
+	BlockdevDriverNullAIO
 	BlockdevDriverNullCo
 	BlockdevDriverParallels
 	BlockdevDriverQcow
@@ -1222,7 +1222,7 @@ func (e BlockdevDriver) String() string {
 		return "https"
 	case BlockdevDriverLUKS:
 		return "luks"
-	case BlockdevDriverNullAio:
+	case BlockdevDriverNullAIO:
 		return "null-aio"
 	case BlockdevDriverNullCo:
 		return "null-co"
@@ -1290,7 +1290,7 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("https")
 	case BlockdevDriverLUKS:
 		return json.Marshal("luks")
-	case BlockdevDriverNullAio:
+	case BlockdevDriverNullAIO:
 		return json.Marshal("null-aio")
 	case BlockdevDriverNullCo:
 		return json.Marshal("null-co")
@@ -1363,7 +1363,7 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 	case "luks":
 		*e = BlockdevDriverLUKS
 	case "null-aio":
-		*e = BlockdevDriverNullAio
+		*e = BlockdevDriverNullAIO
 	case "null-co":
 		*e = BlockdevDriverNullCo
 	case "parallels":
@@ -1491,7 +1491,7 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsHTTP
 //   - BlockdevOptionsHTTPS
 //   - BlockdevOptionsLUKS
-//   - BlockdevOptionsNullAio
+//   - BlockdevOptionsNullAIO
 //   - BlockdevOptionsNullCo
 //   - BlockdevOptionsParallels
 //   - BlockdevOptionsQcow
@@ -1670,7 +1670,7 @@ type BlockdevOptionsFile struct {
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
+	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
 
 func (BlockdevOptionsFile) isBlockdevOptions() {}
@@ -1771,7 +1771,7 @@ type BlockdevOptionsHostCdrom struct {
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
+	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
 
 func (BlockdevOptionsHostCdrom) isBlockdevOptions() {}
@@ -1796,7 +1796,7 @@ type BlockdevOptionsHostDevice struct {
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
-	Aio          *BlockdevAioOptions          `json:"aio,omitempty"`
+	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
 
 func (BlockdevOptionsHostDevice) isBlockdevOptions() {}
@@ -1885,8 +1885,8 @@ func (s BlockdevOptionsLUKS) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// BlockdevOptionsNullAio is an implementation of BlockdevOptions.
-type BlockdevOptionsNullAio struct {
+// BlockdevOptionsNullAIO is an implementation of BlockdevOptions.
+type BlockdevOptionsNullAIO struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
@@ -1896,15 +1896,15 @@ type BlockdevOptionsNullAio struct {
 	LatencyNs    *uint64                      `json:"latency-ns,omitempty"`
 }
 
-func (BlockdevOptionsNullAio) isBlockdevOptions() {}
+func (BlockdevOptionsNullAIO) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
-func (s BlockdevOptionsNullAio) MarshalJSON() ([]byte, error) {
+func (s BlockdevOptionsNullAIO) MarshalJSON() ([]byte, error) {
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsNullAio
+		BlockdevOptionsNullAIO
 	}{
-		BlockdevDriverNullAio,
+		BlockdevDriverNullAIO,
 		s,
 	}
 	return json.Marshal(v)
@@ -2332,8 +2332,8 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsLUKS
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
-	case BlockdevDriverNullAio:
-		var ret BlockdevOptionsNullAio
+	case BlockdevDriverNullAIO:
+		var ret BlockdevOptionsNullAIO
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverNullCo:
@@ -2426,7 +2426,7 @@ func (BlockdevOptionsHostDevice) isBlockdevRef()  {}
 func (BlockdevOptionsHTTP) isBlockdevRef()        {}
 func (BlockdevOptionsHTTPS) isBlockdevRef()       {}
 func (BlockdevOptionsLUKS) isBlockdevRef()        {}
-func (BlockdevOptionsNullAio) isBlockdevRef()     {}
+func (BlockdevOptionsNullAIO) isBlockdevRef()     {}
 func (BlockdevOptionsNullCo) isBlockdevRef()      {}
 func (BlockdevOptionsParallels) isBlockdevRef()   {}
 func (BlockdevOptionsQcow) isBlockdevRef()        {}
@@ -2485,7 +2485,7 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsLUKS:
 			return impl, nil
-		case BlockdevOptionsNullAio:
+		case BlockdevOptionsNullAIO:
 			return impl, nil
 		case BlockdevOptionsNullCo:
 			return impl, nil
