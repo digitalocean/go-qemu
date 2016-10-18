@@ -16,6 +16,7 @@
 package qemu
 
 //go:generate stringer -type=Status -output=string.gen.go
+//go:generate ./scripts/prependlicense.sh string.gen.go
 
 import (
 	"encoding/json"
