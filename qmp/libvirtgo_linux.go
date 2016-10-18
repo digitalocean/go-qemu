@@ -24,6 +24,10 @@ import (
 	libvirt "github.com/rgbkrk/libvirt-go"
 )
 
+// LibvirtGoEventsInterval constant used for getPollInterval
+// method
+const LibvirtGoEventsInterval = "LIBVIRTGO_EVENTS_INTERVAL"
+
 type libvirtGoMonitorLinux struct {
 	LibvirtGoMonitor
 	domainName string
@@ -283,7 +287,7 @@ var eventRunDefaultImplInternal = func() int {
 // getPollInterval retreives the events poll interval from the
 // LIBVIRTGO_EVENTS_INTERVAL environment variable. Defaults to 1s.
 func getPollInterval() time.Duration {
-	intervalStr := os.Getenv("LIBVIRTGO_EVENTS_INTERVAL")
+	intervalStr := os.Getenv(LibvirtGoEventsInterval)
 	interval, _ := time.ParseDuration("1s")
 	if intervalStr != "" {
 		desiredInterval, err := time.ParseDuration(intervalStr)

@@ -16,7 +16,9 @@ package qmp
 
 import (
 	"errors"
+	"os"
 	"testing"
+	"time"
 
 	libvirt "github.com/rgbkrk/libvirt-go"
 )
@@ -166,7 +168,7 @@ func TestLibvirtGoRunOK(t *testing.T) {
 	}
 
 	if expectedOutput != string(result) {
-		t.Fatalf("expected %s and got %s\n", expectedOutput, string(result))
+		t.Fatalf("Unexpected value. Expected %s and got %s\n", expectedOutput, string(result))
 	}
 }
 
@@ -232,5 +234,42 @@ func TestLibvirtGoEventsDomainEventRegisterFailed(t *testing.T) {
 	_, err = libvirtGoMonitor.Events()
 	if err == nil {
 		t.Fatalf("domain register error expected")
+	}
+}
+
+func TestLibvirtGoGetPollIntervalDefault(t *testing.T) {
+
+	interval := getPollInterval()
+	expectedInterval, _ := time.ParseDuration("1s")
+
+	if expectedInterval != interval {
+		t.Errorf("Unexpected value. Expected [%s] and got [%s]\n", expectedInterval, interval)
+	}
+}
+
+func TestLibvirtGoGetPollIntervalDefaultInvalid(t *testing.T) {
+	os.Setenv(LibvirtGoEventsInterval, "invalid")
+	defer func() {
+		os.Unsetenv(LibvirtGoEventsInterval)
+	}()
+	interval := getPollInterval()
+	expectedInterval, _ := time.ParseDuration("1s")
+
+	if expectedInterval != interval {
+		t.Errorf("Unexpected value. Expected [%s] and got [%s]\n", expectedInterval, interval)
+	}
+
+}
+
+func TestLibvirtGoGetPollIntervalDefault5Second(t *testing.T) {
+	os.Setenv(LibvirtGoEventsInterval, "5s")
+	defer func() {
+		os.Unsetenv(LibvirtGoEventsInterval)
+	}()
+	interval := getPollInterval()
+	expectedInterval, _ := time.ParseDuration("5s")
+
+	if expectedInterval != interval {
+		t.Errorf("Unexpected value. Expected [%s] and got [%s]\n", expectedInterval, interval)
 	}
 }
