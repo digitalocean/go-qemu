@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package raw provides automatically generated QMP types based on the
+// QMP schema.
 package raw
 
 //go:generate go run gen-api.go -output autogen.go -spec spec.txt -templates ../../internal/qmp-gen/templates
