@@ -122,3 +122,29 @@ You should have an output similar to this:
 Connecting to unix:///var/run/libvirt/libvirt-sock
 Domain should be shut off now
 ```
+
+#### libvirtgo_run_command
+
+[libvirtgo_run_command](./libvirtgo_run_command) demonstrates how to use 
+ the [libvirtgo Monitor](https://godoc.org/github.com/digitalocean/go-qemu/hypervisor) 
+ package to send a QMP command to the specified domain.
+
+To run:
+```{r, engine='bash', count_lines}
+   $ go get github.com/digitalocean/go-qemu
+   Terminal 1:
+   $ go run examples/libvirtgo_run_command/main.go -uri="qemu:///system" -domainName="ubuntu14.04"
+
+   Terminal 2:
+   virsh -c qemu:///system
+   virsh # start ubuntu14.04
+```
+
+
+You should see an output similar to this on Terminal 1:
+```{r, engine='bash', count_lines}
+Waiting for Domain events...
+Press the Enter key to stop
+Event: qmp.Event{Event:"Domain event=\"resumed\" detail=\"unpaused\"", Data:map[string]interface {}{"details":libvirt.DomainLifecycleEvent{Event:4, Detail:0}}, Timestamp:struct { Seconds int64 "json:\"seconds\""; Microseconds int64 "json:\"microseconds\"" }{Seconds:11, Microseconds:0}}
+Event: qmp.Event{Event:"Domain event=\"started\" detail=\"booted\"", Data:map[string]interface {}{"details":libvirt.DomainLifecycleEvent{Event:2, Detail:0}}, Timestamp:struct { Seconds int64 "json:\"seconds\""; Microseconds int64 "json:\"microseconds\"" }{Seconds:12, Microseconds:0}}
+```
