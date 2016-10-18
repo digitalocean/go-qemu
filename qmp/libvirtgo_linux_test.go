@@ -17,6 +17,7 @@ package qmp
 import (
 	"errors"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -177,6 +178,87 @@ func TestLibvirtGoRunNoConnection(t *testing.T) {
 	_, err := libvirtGoMonitor.Run([]byte("{\"execute\" : \"query-cpus\"}"))
 	if err == nil {
 		t.Fatalf("no connection error expected")
+	}
+}
+
+func TestLibvirtGoEventsDomainEventRegisterOK(t *testing.T) {
+	eventRegisterDefaultImplInternalOrg := eventRegisterDefaultImplInternal
+	eventRegisterDefaultImplInternal = func() int {
+		return 0
+	}
+	defer func() {
+		eventRegisterDefaultImplInternal = eventRegisterDefaultImplInternalOrg
+	}()
+
+	newVirConnectionInternalOrg := newVirConnectionInternal
+	newVirConnectionInternal = func(uri string) (libvirt.VirConnection, error) {
+		return libvirt.VirConnection{}, nil
+	}
+	defer func() {
+		newVirConnectionInternal = newVirConnectionInternalOrg
+	}()
+
+	lookupDomainByNameOrg := lookupDomainByName
+	lookupDomainByName = func(virConn *libvirt.VirConnection,
+		domainName string) (libvirt.VirDomain, error) {
+		return libvirt.VirDomain{}, nil
+	}
+	defer func() {
+		lookupDomainByName = lookupDomainByNameOrg
+	}()
+
+	libvirtGoMonitor := NewLibvirtGoMonitor("testURI", "testDomain")
+	err := libvirtGoMonitor.Connect()
+	if err != nil {
+		t.Errorf("unexpected error: %v\n", err)
+	}
+
+	var wg sync.WaitGroup
+	expectedEvent := libvirt.DomainLifecycleEvent{
+		Event:  libvirt.VIR_DOMAIN_EVENT_STARTED,
+		Detail: 0,
+	}
+	simulateSendingEvents := func(callback libvirt.DomainEventCallback) {
+		callback(nil, nil, expectedEvent, func() {})
+		wg.Done()
+	}
+
+	domainEventRegisterInternalOrg := domainEventRegisterInternal
+	domainEventRegisterInternal = func(
+		mon *libvirtGoMonitorLinux,
+		callback *libvirt.DomainEventCallback,
+		fn func()) int {
+		wg.Add(1)
+		go simulateSendingEvents(*callback)
+
+		return 0
+	}
+	defer func() {
+		domainEventRegisterInternal = domainEventRegisterInternalOrg
+	}()
+
+	events, err := libvirtGoMonitor.Events()
+	if err != nil {
+		t.Errorf("unexpected error: %v\n", err)
+	}
+	var resultEvent Event
+	go func() {
+		wg.Add(1)
+		for event := range events {
+			resultEvent = event
+			wg.Done()
+			break
+		}
+	}()
+
+	wg.Wait()
+
+	detailsEvent, found := resultEvent.Data["details"]
+	if !found {
+		t.Errorf("Expected at least one Event")
+	}
+	if expectedEvent != detailsEvent {
+		t.Errorf("Unexpected event. Expected %#v and got %#v\n", expectedEvent, detailsEvent)
 	}
 }
 

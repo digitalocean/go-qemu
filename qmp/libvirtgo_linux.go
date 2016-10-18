@@ -24,8 +24,8 @@ import (
 	libvirt "github.com/rgbkrk/libvirt-go"
 )
 
-// LibvirtGoEventsInterval constant used for getPollInterval
-// method
+// LibvirtGoEventsInterval constant used by the getPollInterval
+// method.
 const LibvirtGoEventsInterval = "LIBVIRTGO_EVENTS_INTERVAL"
 
 type libvirtGoMonitorLinux struct {
