@@ -8971,292 +8971,3938 @@ type XbzrleCacheStats struct {
 	Overflow      int64   `json:"overflow"`
 }
 
-// COMMAND add-fd
-
-// COMMAND add_client
-
-// COMMAND balloon
-
-// COMMAND block-commit
-
-// COMMAND block-dirty-bitmap-add
-
-// COMMAND block-dirty-bitmap-clear
-
-// COMMAND block-dirty-bitmap-remove
-
-// COMMAND block-job-cancel
-
-// COMMAND block-job-complete
-
-// COMMAND block-job-pause
-
-// COMMAND block-job-resume
-
-// COMMAND block-job-set-speed
-
-// COMMAND block-set-write-threshold
-
-// COMMAND block-stream
-
-// COMMAND block_passwd
-
-// COMMAND block_resize
-
-// COMMAND block_set_io_throttle
-
-// COMMAND blockdev-add
-
-// COMMAND blockdev-backup
-
-// COMMAND blockdev-change-medium
-
-// COMMAND blockdev-close-tray
-
-// COMMAND blockdev-mirror
-
-// COMMAND blockdev-open-tray
-
-// COMMAND blockdev-snapshot
-
-// COMMAND blockdev-snapshot-delete-internal-sync
-
-// COMMAND blockdev-snapshot-internal-sync
-
-// COMMAND blockdev-snapshot-sync
-
-// COMMAND change
-
-// COMMAND change-backing-file
-
-// COMMAND change-vnc-password
-
-// COMMAND chardev-add
-
-// COMMAND chardev-remove
-
-// COMMAND client_migrate_info
-
-// COMMAND closefd
-
-// COMMAND cont
-
-// COMMAND cpu
-
-// COMMAND cpu-add
-
-// COMMAND device-list-properties
-
-// COMMAND device_add
-
-// COMMAND device_del
-
-// COMMAND drive-backup
-
-// COMMAND drive-mirror
-
-// COMMAND dump-guest-memory
-
-// COMMAND dump-skeys
-
-// COMMAND eject
-
-// COMMAND expire_password
-
-// COMMAND getfd
-
-// COMMAND human-monitor-command
-
-// COMMAND inject-nmi
-
-// COMMAND input-send-event
-
-// COMMAND memsave
-
-// COMMAND migrate
-
-// COMMAND migrate-incoming
-
-// COMMAND migrate-set-cache-size
-
-// COMMAND migrate-set-capabilities
-
-// COMMAND migrate-set-parameters
-
-// COMMAND migrate-start-postcopy
-
-// COMMAND migrate_cancel
-
-// COMMAND migrate_set_downtime
-
-// COMMAND migrate_set_speed
-
-// COMMAND nbd-server-add
-
-// COMMAND nbd-server-start
-
-// COMMAND nbd-server-stop
-
-// COMMAND netdev_add
-
-// COMMAND netdev_del
-
-// COMMAND object-add
-
-// COMMAND object-del
-
-// COMMAND pmemsave
-
-// COMMAND qmp_capabilities
-
-// COMMAND qom-get
-
-// COMMAND qom-list
-
-// COMMAND qom-list-types
-
-// COMMAND qom-set
-
-// COMMAND query-acpi-ospm-status
-
-// COMMAND query-balloon
-
-// COMMAND query-block
-
-// COMMAND query-block-jobs
-
-// COMMAND query-blockstats
-
-// COMMAND query-chardev
-
-// COMMAND query-chardev-backends
-
-// COMMAND query-command-line-options
-
-// COMMAND query-commands
-
-// COMMAND query-cpu-definitions
-
-// COMMAND query-cpu-model-baseline
-
-// COMMAND query-cpu-model-comparison
-
-// COMMAND query-cpu-model-expansion
-
-// COMMAND query-cpus
-
-// COMMAND query-dump
-
-// COMMAND query-dump-guest-memory-capability
-
-// COMMAND query-events
-
-// COMMAND query-fdsets
-
-// COMMAND query-gic-capabilities
-
-// COMMAND query-hotpluggable-cpus
-
-// COMMAND query-iothreads
-
-// COMMAND query-kvm
-
-// COMMAND query-machines
-
-// COMMAND query-memdev
-
-// COMMAND query-memory-devices
-
-// COMMAND query-mice
-
-// COMMAND query-migrate
-
-// COMMAND query-migrate-cache-size
-
-// COMMAND query-migrate-capabilities
-
-// COMMAND query-migrate-parameters
-
-// COMMAND query-name
-
-// COMMAND query-named-block-nodes
-
-// COMMAND query-pci
-
-// COMMAND query-qmp-schema
-
-// COMMAND query-rocker
-
-// COMMAND query-rocker-of-dpa-flows
-
-// COMMAND query-rocker-of-dpa-groups
-
-// COMMAND query-rocker-ports
-
-// COMMAND query-rx-filter
-
-// COMMAND query-spice
-
-// COMMAND query-status
-
-// COMMAND query-target
-
-// COMMAND query-tpm
-
-// COMMAND query-tpm-models
-
-// COMMAND query-tpm-types
-
-// COMMAND query-uuid
-
-// COMMAND query-version
-
-// COMMAND query-vnc
-
-// COMMAND query-vnc-servers
-
-// COMMAND quit
-
-// COMMAND remove-fd
-
-// COMMAND ringbuf-read
-
-// COMMAND ringbuf-write
-
-// COMMAND rtc-reset-reinjection
-
-// COMMAND screendump
-
-// COMMAND send-key
-
-// COMMAND set_link
-
-// COMMAND set_password
-
-// COMMAND stop
-
-// COMMAND system_powerdown
-
-// COMMAND system_reset
-
-// COMMAND system_wakeup
-
-// COMMAND trace-event-get-state
-
-// COMMAND trace-event-set-state
-
-// COMMAND transaction
-
-// COMMAND x-blockdev-change
-
-// COMMAND x-blockdev-del
-
-// COMMAND x-blockdev-insert-medium
-
-// COMMAND x-blockdev-remove-medium
-
-// COMMAND xen-load-devices-state
-
-// COMMAND xen-save-devices-state
-
-// COMMAND xen-set-global-dirty-log
+// add-fd -> AddFD (command)
+
+// AddFD implements the "add-fd" QMP API call.
+func (m *Monitor) AddFD(fdsetID *int64, opaque *string) (ret AddfdInfo, err error) {
+	cmd := struct {
+		FdsetID *int64  `json:"fdset-id,omitempty"`
+		Opaque  *string `json:"opaque,omitempty"`
+	}{
+		fdsetID,
+		opaque,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "add-fd",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// add_client -> AddClient (command)
+
+// AddClient implements the "add_client" QMP API call.
+func (m *Monitor) AddClient(protocol string, fdname string, skipauth *bool, tLS *bool) (err error) {
+	cmd := struct {
+		Protocol string `json:"protocol"`
+		Fdname   string `json:"fdname"`
+		Skipauth *bool  `json:"skipauth,omitempty"`
+		TLS      *bool  `json:"tls,omitempty"`
+	}{
+		protocol,
+		fdname,
+		skipauth,
+		tLS,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "add_client",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// balloon -> Balloon (command)
+
+// Balloon implements the "balloon" QMP API call.
+func (m *Monitor) Balloon(value int64) (err error) {
+	cmd := struct {
+		Value int64 `json:"value"`
+	}{
+		value,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "balloon",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-commit -> BlockCommit (command)
+
+// BlockCommit implements the "block-commit" QMP API call.
+func (m *Monitor) BlockCommit(jobID *string, device string, base *string, top *string, backingFile *string, speed *int64) (err error) {
+	cmd := struct {
+		JobID       *string `json:"job-id,omitempty"`
+		Device      string  `json:"device"`
+		Base        *string `json:"base,omitempty"`
+		Top         *string `json:"top,omitempty"`
+		BackingFile *string `json:"backing-file,omitempty"`
+		Speed       *int64  `json:"speed,omitempty"`
+	}{
+		jobID,
+		device,
+		base,
+		top,
+		backingFile,
+		speed,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-commit",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-dirty-bitmap-add -> BlockDirtyBitmapAdd (command)
+
+// BlockDirtyBitmapAdd implements the "block-dirty-bitmap-add" QMP API call.
+func (m *Monitor) BlockDirtyBitmapAdd(node string, name string, granularity *uint32) (err error) {
+	cmd := struct {
+		Node        string  `json:"node"`
+		Name        string  `json:"name"`
+		Granularity *uint32 `json:"granularity,omitempty"`
+	}{
+		node,
+		name,
+		granularity,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-dirty-bitmap-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-dirty-bitmap-clear -> BlockDirtyBitmapClear (command)
+
+// BlockDirtyBitmapClear implements the "block-dirty-bitmap-clear" QMP API call.
+func (m *Monitor) BlockDirtyBitmapClear(node string, name string) (err error) {
+	cmd := struct {
+		Node string `json:"node"`
+		Name string `json:"name"`
+	}{
+		node,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-dirty-bitmap-clear",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-dirty-bitmap-remove -> BlockDirtyBitmapRemove (command)
+
+// BlockDirtyBitmapRemove implements the "block-dirty-bitmap-remove" QMP API call.
+func (m *Monitor) BlockDirtyBitmapRemove(node string, name string) (err error) {
+	cmd := struct {
+		Node string `json:"node"`
+		Name string `json:"name"`
+	}{
+		node,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-dirty-bitmap-remove",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-cancel -> BlockJobCancel (command)
+
+// BlockJobCancel implements the "block-job-cancel" QMP API call.
+func (m *Monitor) BlockJobCancel(device string, force *bool) (err error) {
+	cmd := struct {
+		Device string `json:"device"`
+		Force  *bool  `json:"force,omitempty"`
+	}{
+		device,
+		force,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-cancel",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-complete -> BlockJobComplete (command)
+
+// BlockJobComplete implements the "block-job-complete" QMP API call.
+func (m *Monitor) BlockJobComplete(device string) (err error) {
+	cmd := struct {
+		Device string `json:"device"`
+	}{
+		device,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-complete",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-pause -> BlockJobPause (command)
+
+// BlockJobPause implements the "block-job-pause" QMP API call.
+func (m *Monitor) BlockJobPause(device string) (err error) {
+	cmd := struct {
+		Device string `json:"device"`
+	}{
+		device,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-pause",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-resume -> BlockJobResume (command)
+
+// BlockJobResume implements the "block-job-resume" QMP API call.
+func (m *Monitor) BlockJobResume(device string) (err error) {
+	cmd := struct {
+		Device string `json:"device"`
+	}{
+		device,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-resume",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-set-speed -> BlockJobSetSpeed (command)
+
+// BlockJobSetSpeed implements the "block-job-set-speed" QMP API call.
+func (m *Monitor) BlockJobSetSpeed(device string, speed int64) (err error) {
+	cmd := struct {
+		Device string `json:"device"`
+		Speed  int64  `json:"speed"`
+	}{
+		device,
+		speed,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-set-speed",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-set-write-threshold -> BlockSetWriteThreshold (command)
+
+// BlockSetWriteThreshold implements the "block-set-write-threshold" QMP API call.
+func (m *Monitor) BlockSetWriteThreshold(nodeName string, writeThreshold uint64) (err error) {
+	cmd := struct {
+		NodeName       string `json:"node-name"`
+		WriteThreshold uint64 `json:"write-threshold"`
+	}{
+		nodeName,
+		writeThreshold,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-set-write-threshold",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-stream -> BlockStream (command)
+
+// BlockStream implements the "block-stream" QMP API call.
+func (m *Monitor) BlockStream(jobID *string, device string, base *string, backingFile *string, speed *int64, onError *BlockdevOnError) (err error) {
+	cmd := struct {
+		JobID       *string          `json:"job-id,omitempty"`
+		Device      string           `json:"device"`
+		Base        *string          `json:"base,omitempty"`
+		BackingFile *string          `json:"backing-file,omitempty"`
+		Speed       *int64           `json:"speed,omitempty"`
+		OnError     *BlockdevOnError `json:"on-error,omitempty"`
+	}{
+		jobID,
+		device,
+		base,
+		backingFile,
+		speed,
+		onError,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-stream",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block_passwd -> BlockPasswd (command)
+
+// BlockPasswd implements the "block_passwd" QMP API call.
+func (m *Monitor) BlockPasswd(device *string, nodeName *string, password string) (err error) {
+	cmd := struct {
+		Device   *string `json:"device,omitempty"`
+		NodeName *string `json:"node-name,omitempty"`
+		Password string  `json:"password"`
+	}{
+		device,
+		nodeName,
+		password,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block_passwd",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block_resize -> BlockResize (command)
+
+// BlockResize implements the "block_resize" QMP API call.
+func (m *Monitor) BlockResize(device *string, nodeName *string, size int64) (err error) {
+	cmd := struct {
+		Device   *string `json:"device,omitempty"`
+		NodeName *string `json:"node-name,omitempty"`
+		Size     int64   `json:"size"`
+	}{
+		device,
+		nodeName,
+		size,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block_resize",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block_set_io_throttle -> BlockSetIOThrottle (command)
+
+// BlockSetIOThrottle implements the "block_set_io_throttle" QMP API call.
+func (m *Monitor) BlockSetIOThrottle(cmd *BlockIOThrottle) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block_set_io_throttle",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-add -> BlockdevAdd (command)
+
+// BlockdevAdd implements the "blockdev-add" QMP API call.
+func (m *Monitor) BlockdevAdd(options BlockdevOptions) (err error) {
+	cmd := struct {
+		Options BlockdevOptions `json:"options"`
+	}{
+		options,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-backup -> BlockdevBackup (command)
+
+// BlockdevBackup implements the "blockdev-backup" QMP API call.
+func (m *Monitor) BlockdevBackup(cmd *BlockdevBackup) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-backup",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-change-medium -> BlockdevChangeMedium (command)
+
+// BlockdevChangeMedium implements the "blockdev-change-medium" QMP API call.
+func (m *Monitor) BlockdevChangeMedium(device *string, iD *string, filename string, format *string, readOnlyMode *BlockdevChangeReadOnlyMode) (err error) {
+	cmd := struct {
+		Device       *string                     `json:"device,omitempty"`
+		ID           *string                     `json:"id,omitempty"`
+		Filename     string                      `json:"filename"`
+		Format       *string                     `json:"format,omitempty"`
+		ReadOnlyMode *BlockdevChangeReadOnlyMode `json:"read-only-mode,omitempty"`
+	}{
+		device,
+		iD,
+		filename,
+		format,
+		readOnlyMode,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-change-medium",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-close-tray -> BlockdevCloseTray (command)
+
+// BlockdevCloseTray implements the "blockdev-close-tray" QMP API call.
+func (m *Monitor) BlockdevCloseTray(device *string, iD *string) (err error) {
+	cmd := struct {
+		Device *string `json:"device,omitempty"`
+		ID     *string `json:"id,omitempty"`
+	}{
+		device,
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-close-tray",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-mirror -> BlockdevMirror (command)
+
+// BlockdevMirror implements the "blockdev-mirror" QMP API call.
+func (m *Monitor) BlockdevMirror(jobID *string, device string, target string, replaces *string, sync MirrorSyncMode, speed *int64, granularity *uint32, bufSize *int64, onSourceError *BlockdevOnError, onTargetError *BlockdevOnError) (err error) {
+	cmd := struct {
+		JobID         *string          `json:"job-id,omitempty"`
+		Device        string           `json:"device"`
+		Target        string           `json:"target"`
+		Replaces      *string          `json:"replaces,omitempty"`
+		Sync          MirrorSyncMode   `json:"sync"`
+		Speed         *int64           `json:"speed,omitempty"`
+		Granularity   *uint32          `json:"granularity,omitempty"`
+		BufSize       *int64           `json:"buf-size,omitempty"`
+		OnSourceError *BlockdevOnError `json:"on-source-error,omitempty"`
+		OnTargetError *BlockdevOnError `json:"on-target-error,omitempty"`
+	}{
+		jobID,
+		device,
+		target,
+		replaces,
+		sync,
+		speed,
+		granularity,
+		bufSize,
+		onSourceError,
+		onTargetError,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-mirror",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-open-tray -> BlockdevOpenTray (command)
+
+// BlockdevOpenTray implements the "blockdev-open-tray" QMP API call.
+func (m *Monitor) BlockdevOpenTray(device *string, iD *string, force *bool) (err error) {
+	cmd := struct {
+		Device *string `json:"device,omitempty"`
+		ID     *string `json:"id,omitempty"`
+		Force  *bool   `json:"force,omitempty"`
+	}{
+		device,
+		iD,
+		force,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-open-tray",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-snapshot -> BlockdevSnapshot (command)
+
+// BlockdevSnapshot implements the "blockdev-snapshot" QMP API call.
+func (m *Monitor) BlockdevSnapshot(node string, overlay string) (err error) {
+	cmd := struct {
+		Node    string `json:"node"`
+		Overlay string `json:"overlay"`
+	}{
+		node,
+		overlay,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-snapshot",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-snapshot-delete-internal-sync -> BlockdevSnapshotDeleteInternalSync (command)
+
+// BlockdevSnapshotDeleteInternalSync implements the "blockdev-snapshot-delete-internal-sync" QMP API call.
+func (m *Monitor) BlockdevSnapshotDeleteInternalSync(device string, iD *string, name *string) (ret SnapshotInfo, err error) {
+	cmd := struct {
+		Device string  `json:"device"`
+		ID     *string `json:"id,omitempty"`
+		Name   *string `json:"name,omitempty"`
+	}{
+		device,
+		iD,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-snapshot-delete-internal-sync",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-snapshot-internal-sync -> BlockdevSnapshotInternalSync (command)
+
+// BlockdevSnapshotInternalSync implements the "blockdev-snapshot-internal-sync" QMP API call.
+func (m *Monitor) BlockdevSnapshotInternalSync(device string, name string) (err error) {
+	cmd := struct {
+		Device string `json:"device"`
+		Name   string `json:"name"`
+	}{
+		device,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-snapshot-internal-sync",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-snapshot-sync -> BlockdevSnapshotSync (command)
+
+// BlockdevSnapshotSync implements the "blockdev-snapshot-sync" QMP API call.
+func (m *Monitor) BlockdevSnapshotSync(device *string, nodeName *string, snapshotFile string, snapshotNodeName *string, format *string, mode *NewImageMode) (err error) {
+	cmd := struct {
+		Device           *string       `json:"device,omitempty"`
+		NodeName         *string       `json:"node-name,omitempty"`
+		SnapshotFile     string        `json:"snapshot-file"`
+		SnapshotNodeName *string       `json:"snapshot-node-name,omitempty"`
+		Format           *string       `json:"format,omitempty"`
+		Mode             *NewImageMode `json:"mode,omitempty"`
+	}{
+		device,
+		nodeName,
+		snapshotFile,
+		snapshotNodeName,
+		format,
+		mode,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-snapshot-sync",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// change -> Change (command)
+
+// Change implements the "change" QMP API call.
+func (m *Monitor) Change(device string, target string, arg *string) (err error) {
+	cmd := struct {
+		Device string  `json:"device"`
+		Target string  `json:"target"`
+		Arg    *string `json:"arg,omitempty"`
+	}{
+		device,
+		target,
+		arg,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "change",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// change-backing-file -> ChangeBackingFile (command)
+
+// ChangeBackingFile implements the "change-backing-file" QMP API call.
+func (m *Monitor) ChangeBackingFile(device string, imageNodeName string, backingFile string) (err error) {
+	cmd := struct {
+		Device        string `json:"device"`
+		ImageNodeName string `json:"image-node-name"`
+		BackingFile   string `json:"backing-file"`
+	}{
+		device,
+		imageNodeName,
+		backingFile,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "change-backing-file",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// change-vnc-password -> ChangeVNCPassword (command)
+
+// ChangeVNCPassword implements the "change-vnc-password" QMP API call.
+func (m *Monitor) ChangeVNCPassword(password string) (err error) {
+	cmd := struct {
+		Password string `json:"password"`
+	}{
+		password,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "change-vnc-password",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// chardev-add -> ChardevAdd (command)
+
+// ChardevAdd implements the "chardev-add" QMP API call.
+func (m *Monitor) ChardevAdd(iD string, backend ChardevBackend) (ret ChardevReturn, err error) {
+	cmd := struct {
+		ID      string         `json:"id"`
+		Backend ChardevBackend `json:"backend"`
+	}{
+		iD,
+		backend,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "chardev-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// chardev-remove -> ChardevRemove (command)
+
+// ChardevRemove implements the "chardev-remove" QMP API call.
+func (m *Monitor) ChardevRemove(iD string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "chardev-remove",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// client_migrate_info -> ClientMigrateInfo (command)
+
+// ClientMigrateInfo implements the "client_migrate_info" QMP API call.
+func (m *Monitor) ClientMigrateInfo(protocol string, hostname string, port *int64, tLSPort *int64, certSubject *string) (err error) {
+	cmd := struct {
+		Protocol    string  `json:"protocol"`
+		Hostname    string  `json:"hostname"`
+		Port        *int64  `json:"port,omitempty"`
+		TLSPort     *int64  `json:"tls-port,omitempty"`
+		CertSubject *string `json:"cert-subject,omitempty"`
+	}{
+		protocol,
+		hostname,
+		port,
+		tLSPort,
+		certSubject,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "client_migrate_info",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// closefd -> Closefd (command)
+
+// Closefd implements the "closefd" QMP API call.
+func (m *Monitor) Closefd(fdname string) (err error) {
+	cmd := struct {
+		Fdname string `json:"fdname"`
+	}{
+		fdname,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "closefd",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// cont -> Cont (command)
+
+// Cont implements the "cont" QMP API call.
+func (m *Monitor) Cont() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "cont",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// cpu -> CPU (command)
+
+// CPU implements the "cpu" QMP API call.
+func (m *Monitor) CPU(index int64) (err error) {
+	cmd := struct {
+		Index int64 `json:"index"`
+	}{
+		index,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "cpu",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// cpu-add -> CPUAdd (command)
+
+// CPUAdd implements the "cpu-add" QMP API call.
+func (m *Monitor) CPUAdd(iD int64) (err error) {
+	cmd := struct {
+		ID int64 `json:"id"`
+	}{
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "cpu-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// device-list-properties -> DeviceListProperties (command)
+
+// DeviceListProperties implements the "device-list-properties" QMP API call.
+func (m *Monitor) DeviceListProperties(typename string) (ret []DevicePropertyInfo, err error) {
+	cmd := struct {
+		Typename string `json:"typename"`
+	}{
+		typename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "device-list-properties",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// device_add -> DeviceAdd (command)
+
+// DeviceAdd implements the "device_add" QMP API call.
+func (m *Monitor) DeviceAdd(driver string, iD string) (err error) {
+	cmd := struct {
+		Driver string `json:"driver"`
+		ID     string `json:"id"`
+	}{
+		driver,
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "device_add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// device_del -> DeviceDel (command)
+
+// DeviceDel implements the "device_del" QMP API call.
+func (m *Monitor) DeviceDel(iD string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "device_del",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// drive-backup -> DriveBackup (command)
+
+// DriveBackup implements the "drive-backup" QMP API call.
+func (m *Monitor) DriveBackup(cmd *DriveBackup) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "drive-backup",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// drive-mirror -> DriveMirror (command)
+
+// DriveMirror implements the "drive-mirror" QMP API call.
+func (m *Monitor) DriveMirror(cmd *DriveMirror) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "drive-mirror",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// dump-guest-memory -> DumpGuestMemory (command)
+
+// DumpGuestMemory implements the "dump-guest-memory" QMP API call.
+func (m *Monitor) DumpGuestMemory(paging bool, protocol string, detach *bool, begin *int64, length *int64, format *DumpGuestMemoryFormat) (err error) {
+	cmd := struct {
+		Paging   bool                   `json:"paging"`
+		Protocol string                 `json:"protocol"`
+		Detach   *bool                  `json:"detach,omitempty"`
+		Begin    *int64                 `json:"begin,omitempty"`
+		Length   *int64                 `json:"length,omitempty"`
+		Format   *DumpGuestMemoryFormat `json:"format,omitempty"`
+	}{
+		paging,
+		protocol,
+		detach,
+		begin,
+		length,
+		format,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "dump-guest-memory",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// dump-skeys -> DumpSkeys (command)
+
+// DumpSkeys implements the "dump-skeys" QMP API call.
+func (m *Monitor) DumpSkeys(filename string) (err error) {
+	cmd := struct {
+		Filename string `json:"filename"`
+	}{
+		filename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "dump-skeys",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// eject -> Eject (command)
+
+// Eject implements the "eject" QMP API call.
+func (m *Monitor) Eject(device *string, iD *string, force *bool) (err error) {
+	cmd := struct {
+		Device *string `json:"device,omitempty"`
+		ID     *string `json:"id,omitempty"`
+		Force  *bool   `json:"force,omitempty"`
+	}{
+		device,
+		iD,
+		force,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "eject",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// expire_password -> ExpirePassword (command)
+
+// ExpirePassword implements the "expire_password" QMP API call.
+func (m *Monitor) ExpirePassword(protocol string, time string) (err error) {
+	cmd := struct {
+		Protocol string `json:"protocol"`
+		Time     string `json:"time"`
+	}{
+		protocol,
+		time,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "expire_password",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// getfd -> Getfd (command)
+
+// Getfd implements the "getfd" QMP API call.
+func (m *Monitor) Getfd(fdname string) (err error) {
+	cmd := struct {
+		Fdname string `json:"fdname"`
+	}{
+		fdname,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "getfd",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// human-monitor-command -> HumanMonitorCommand (command)
+
+// HumanMonitorCommand implements the "human-monitor-command" QMP API call.
+func (m *Monitor) HumanMonitorCommand(commandLine string, cPUIndex *int64) (ret string, err error) {
+	cmd := struct {
+		CommandLine string `json:"command-line"`
+		CPUIndex    *int64 `json:"cpu-index,omitempty"`
+	}{
+		commandLine,
+		cPUIndex,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "human-monitor-command",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// inject-nmi -> InjectNmi (command)
+
+// InjectNmi implements the "inject-nmi" QMP API call.
+func (m *Monitor) InjectNmi() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "inject-nmi",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// input-send-event -> InputSendEvent (command)
+
+// InputSendEvent implements the "input-send-event" QMP API call.
+func (m *Monitor) InputSendEvent(device *string, head *int64, events []InputEvent) (err error) {
+	cmd := struct {
+		Device *string      `json:"device,omitempty"`
+		Head   *int64       `json:"head,omitempty"`
+		Events []InputEvent `json:"events"`
+	}{
+		device,
+		head,
+		events,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "input-send-event",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// memsave -> Memsave (command)
+
+// Memsave implements the "memsave" QMP API call.
+func (m *Monitor) Memsave(val int64, size int64, filename string, cPUIndex *int64) (err error) {
+	cmd := struct {
+		Val      int64  `json:"val"`
+		Size     int64  `json:"size"`
+		Filename string `json:"filename"`
+		CPUIndex *int64 `json:"cpu-index,omitempty"`
+	}{
+		val,
+		size,
+		filename,
+		cPUIndex,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "memsave",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate -> Migrate (command)
+
+// Migrate implements the "migrate" QMP API call.
+func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err error) {
+	cmd := struct {
+		Uri    string `json:"uri"`
+		Blk    *bool  `json:"blk,omitempty"`
+		Inc    *bool  `json:"inc,omitempty"`
+		Detach *bool  `json:"detach,omitempty"`
+	}{
+		uri,
+		blk,
+		inc,
+		detach,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate-incoming -> MigrateIncoming (command)
+
+// MigrateIncoming implements the "migrate-incoming" QMP API call.
+func (m *Monitor) MigrateIncoming(uri string) (err error) {
+	cmd := struct {
+		Uri string `json:"uri"`
+	}{
+		uri,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-incoming",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate-set-cache-size -> MigrateSetCacheSize (command)
+
+// MigrateSetCacheSize implements the "migrate-set-cache-size" QMP API call.
+func (m *Monitor) MigrateSetCacheSize(value int64) (err error) {
+	cmd := struct {
+		Value int64 `json:"value"`
+	}{
+		value,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-set-cache-size",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate-set-capabilities -> MigrateSetCapabilities (command)
+
+// MigrateSetCapabilities implements the "migrate-set-capabilities" QMP API call.
+func (m *Monitor) MigrateSetCapabilities(capabilities []MigrationCapabilityStatus) (err error) {
+	cmd := struct {
+		Capabilities []MigrationCapabilityStatus `json:"capabilities"`
+	}{
+		capabilities,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-set-capabilities",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate-set-parameters -> MigrateSetParameters (command)
+
+// MigrateSetParameters implements the "migrate-set-parameters" QMP API call.
+func (m *Monitor) MigrateSetParameters(cmd *MigrationParameters) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-set-parameters",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate-start-postcopy -> MigrateStartPostcopy (command)
+
+// MigrateStartPostcopy implements the "migrate-start-postcopy" QMP API call.
+func (m *Monitor) MigrateStartPostcopy() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-start-postcopy",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate_cancel -> MigrateCancel (command)
+
+// MigrateCancel implements the "migrate_cancel" QMP API call.
+func (m *Monitor) MigrateCancel() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate_cancel",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate_set_downtime -> MigrateSetDowntime (command)
+
+// MigrateSetDowntime implements the "migrate_set_downtime" QMP API call.
+func (m *Monitor) MigrateSetDowntime(value float64) (err error) {
+	cmd := struct {
+		Value float64 `json:"value"`
+	}{
+		value,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate_set_downtime",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate_set_speed -> MigrateSetSpeed (command)
+
+// MigrateSetSpeed implements the "migrate_set_speed" QMP API call.
+func (m *Monitor) MigrateSetSpeed(value int64) (err error) {
+	cmd := struct {
+		Value int64 `json:"value"`
+	}{
+		value,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate_set_speed",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// nbd-server-add -> NBDServerAdd (command)
+
+// NBDServerAdd implements the "nbd-server-add" QMP API call.
+func (m *Monitor) NBDServerAdd(device string, writable *bool) (err error) {
+	cmd := struct {
+		Device   string `json:"device"`
+		Writable *bool  `json:"writable,omitempty"`
+	}{
+		device,
+		writable,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "nbd-server-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// nbd-server-start -> NBDServerStart (command)
+
+// NBDServerStart implements the "nbd-server-start" QMP API call.
+func (m *Monitor) NBDServerStart(addr SocketAddress, tLSCreds *string) (err error) {
+	cmd := struct {
+		Addr     SocketAddress `json:"addr"`
+		TLSCreds *string       `json:"tls-creds,omitempty"`
+	}{
+		addr,
+		tLSCreds,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "nbd-server-start",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// nbd-server-stop -> NBDServerStop (command)
+
+// NBDServerStop implements the "nbd-server-stop" QMP API call.
+func (m *Monitor) NBDServerStop() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "nbd-server-stop",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// netdev_add -> NetdevAdd (command)
+
+// NetdevAdd implements the "netdev_add" QMP API call.
+func (m *Monitor) NetdevAdd(typ string, iD string) (err error) {
+	cmd := struct {
+		Type string `json:"type"`
+		ID   string `json:"id"`
+	}{
+		typ,
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "netdev_add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// netdev_del -> NetdevDel (command)
+
+// NetdevDel implements the "netdev_del" QMP API call.
+func (m *Monitor) NetdevDel(iD string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "netdev_del",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// object-add -> ObjectAdd (command)
+
+// ObjectAdd implements the "object-add" QMP API call.
+func (m *Monitor) ObjectAdd(qomType string, iD string, props *interface{}) (err error) {
+	cmd := struct {
+		QomType string       `json:"qom-type"`
+		ID      string       `json:"id"`
+		Props   *interface{} `json:"props,omitempty"`
+	}{
+		qomType,
+		iD,
+		props,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "object-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// object-del -> ObjectDel (command)
+
+// ObjectDel implements the "object-del" QMP API call.
+func (m *Monitor) ObjectDel(iD string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "object-del",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// pmemsave -> Pmemsave (command)
+
+// Pmemsave implements the "pmemsave" QMP API call.
+func (m *Monitor) Pmemsave(val int64, size int64, filename string) (err error) {
+	cmd := struct {
+		Val      int64  `json:"val"`
+		Size     int64  `json:"size"`
+		Filename string `json:"filename"`
+	}{
+		val,
+		size,
+		filename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "pmemsave",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// qmp_capabilities -> QMPCapabilities (command)
+
+// QMPCapabilities implements the "qmp_capabilities" QMP API call.
+func (m *Monitor) QMPCapabilities() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "qmp_capabilities",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// qom-get -> QomGet (command)
+
+// QomGet implements the "qom-get" QMP API call.
+func (m *Monitor) QomGet(path string, property string) (ret interface{}, err error) {
+	cmd := struct {
+		Path     string `json:"path"`
+		Property string `json:"property"`
+	}{
+		path,
+		property,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "qom-get",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// qom-list -> QomList (command)
+
+// QomList implements the "qom-list" QMP API call.
+func (m *Monitor) QomList(path string) (ret []ObjectPropertyInfo, err error) {
+	cmd := struct {
+		Path string `json:"path"`
+	}{
+		path,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "qom-list",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// qom-list-types -> QomListTypes (command)
+
+// QomListTypes implements the "qom-list-types" QMP API call.
+func (m *Monitor) QomListTypes(implements *string, abstract *bool) (ret []ObjectTypeInfo, err error) {
+	cmd := struct {
+		Implements *string `json:"implements,omitempty"`
+		Abstract   *bool   `json:"abstract,omitempty"`
+	}{
+		implements,
+		abstract,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "qom-list-types",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// qom-set -> QomSet (command)
+
+// QomSet implements the "qom-set" QMP API call.
+func (m *Monitor) QomSet(path string, property string, value interface{}) (err error) {
+	cmd := struct {
+		Path     string      `json:"path"`
+		Property string      `json:"property"`
+		Value    interface{} `json:"value"`
+	}{
+		path,
+		property,
+		value,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "qom-set",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// query-acpi-ospm-status -> QueryACPIOspmStatus (command)
+
+// QueryACPIOspmStatus implements the "query-acpi-ospm-status" QMP API call.
+func (m *Monitor) QueryACPIOspmStatus() (ret []ACPIOSTInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-acpi-ospm-status",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-balloon -> QueryBalloon (command)
+
+// QueryBalloon implements the "query-balloon" QMP API call.
+func (m *Monitor) QueryBalloon() (ret BalloonInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-balloon",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-block -> QueryBlock (command)
+
+// QueryBlock implements the "query-block" QMP API call.
+func (m *Monitor) QueryBlock() (ret []BlockInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-block",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-block-jobs -> QueryBlockJobs (command)
+
+// QueryBlockJobs implements the "query-block-jobs" QMP API call.
+func (m *Monitor) QueryBlockJobs() (ret []BlockJobInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-block-jobs",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-blockstats -> QueryBlockstats (command)
+
+// QueryBlockstats implements the "query-blockstats" QMP API call.
+func (m *Monitor) QueryBlockstats(queryNodes *bool) (ret []BlockStats, err error) {
+	cmd := struct {
+		QueryNodes *bool `json:"query-nodes,omitempty"`
+	}{
+		queryNodes,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-blockstats",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-chardev -> QueryChardev (command)
+
+// QueryChardev implements the "query-chardev" QMP API call.
+func (m *Monitor) QueryChardev() (ret []ChardevInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-chardev",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-chardev-backends -> QueryChardevBackends (command)
+
+// QueryChardevBackends implements the "query-chardev-backends" QMP API call.
+func (m *Monitor) QueryChardevBackends() (ret []ChardevBackendInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-chardev-backends",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-command-line-options -> QueryCommandLineOptions (command)
+
+// QueryCommandLineOptions implements the "query-command-line-options" QMP API call.
+func (m *Monitor) QueryCommandLineOptions(option *string) (ret []CommandLineOptionInfo, err error) {
+	cmd := struct {
+		Option *string `json:"option,omitempty"`
+	}{
+		option,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-command-line-options",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-commands -> QueryCommands (command)
+
+// QueryCommands implements the "query-commands" QMP API call.
+func (m *Monitor) QueryCommands() (ret []CommandInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-commands",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-cpu-definitions -> QueryCPUDefinitions (command)
+
+// QueryCPUDefinitions implements the "query-cpu-definitions" QMP API call.
+func (m *Monitor) QueryCPUDefinitions() (ret []CPUDefinitionInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-cpu-definitions",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-cpu-model-baseline -> QueryCPUModelBaseline (command)
+
+// QueryCPUModelBaseline implements the "query-cpu-model-baseline" QMP API call.
+func (m *Monitor) QueryCPUModelBaseline(modela CPUModelInfo, modelb CPUModelInfo) (ret CPUModelBaselineInfo, err error) {
+	cmd := struct {
+		Modela CPUModelInfo `json:"modela"`
+		Modelb CPUModelInfo `json:"modelb"`
+	}{
+		modela,
+		modelb,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-cpu-model-baseline",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-cpu-model-comparison -> QueryCPUModelComparison (command)
+
+// QueryCPUModelComparison implements the "query-cpu-model-comparison" QMP API call.
+func (m *Monitor) QueryCPUModelComparison(modela CPUModelInfo, modelb CPUModelInfo) (ret CPUModelCompareInfo, err error) {
+	cmd := struct {
+		Modela CPUModelInfo `json:"modela"`
+		Modelb CPUModelInfo `json:"modelb"`
+	}{
+		modela,
+		modelb,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-cpu-model-comparison",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-cpu-model-expansion -> QueryCPUModelExpansion (command)
+
+// QueryCPUModelExpansion implements the "query-cpu-model-expansion" QMP API call.
+func (m *Monitor) QueryCPUModelExpansion(typ CPUModelExpansionType, model CPUModelInfo) (ret CPUModelExpansionInfo, err error) {
+	cmd := struct {
+		Type  CPUModelExpansionType `json:"type"`
+		Model CPUModelInfo          `json:"model"`
+	}{
+		typ,
+		model,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-cpu-model-expansion",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-cpus -> QueryCpus (command)
+
+// QueryCpus implements the "query-cpus" QMP API call.
+func (m *Monitor) QueryCpus() (ret []CPUInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-cpus",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	var reslist []json.RawMessage
+	if err = json.Unmarshal([]byte(res.Res), &reslist); err != nil {
+		return
+	}
+	for _, r := range reslist {
+		v, err := decodeCPUInfo(r)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, v)
+	}
+	return
+}
+
+// query-dump -> QueryDump (command)
+
+// QueryDump implements the "query-dump" QMP API call.
+func (m *Monitor) QueryDump() (ret DumpQueryResult, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-dump",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-dump-guest-memory-capability -> QueryDumpGuestMemoryCapability (command)
+
+// QueryDumpGuestMemoryCapability implements the "query-dump-guest-memory-capability" QMP API call.
+func (m *Monitor) QueryDumpGuestMemoryCapability() (ret DumpGuestMemoryCapability, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-dump-guest-memory-capability",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-events -> QueryEvents (command)
+
+// QueryEvents implements the "query-events" QMP API call.
+func (m *Monitor) QueryEvents() (ret []EventInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-events",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-fdsets -> QueryFdsets (command)
+
+// QueryFdsets implements the "query-fdsets" QMP API call.
+func (m *Monitor) QueryFdsets() (ret []FdsetInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-fdsets",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-gic-capabilities -> QueryGicCapabilities (command)
+
+// QueryGicCapabilities implements the "query-gic-capabilities" QMP API call.
+func (m *Monitor) QueryGicCapabilities() (ret []GicCapability, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-gic-capabilities",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-hotpluggable-cpus -> QueryHotpluggableCpus (command)
+
+// QueryHotpluggableCpus implements the "query-hotpluggable-cpus" QMP API call.
+func (m *Monitor) QueryHotpluggableCpus() (ret []HotpluggableCPU, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-hotpluggable-cpus",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-iothreads -> QueryIothreads (command)
+
+// QueryIothreads implements the "query-iothreads" QMP API call.
+func (m *Monitor) QueryIothreads() (ret []IOThreadInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-iothreads",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-kvm -> QueryKVM (command)
+
+// QueryKVM implements the "query-kvm" QMP API call.
+func (m *Monitor) QueryKVM() (ret KVMInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-kvm",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-machines -> QueryMachines (command)
+
+// QueryMachines implements the "query-machines" QMP API call.
+func (m *Monitor) QueryMachines() (ret []MachineInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-machines",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-memdev -> QueryMemdev (command)
+
+// QueryMemdev implements the "query-memdev" QMP API call.
+func (m *Monitor) QueryMemdev() (ret []Memdev, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-memdev",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-memory-devices -> QueryMemoryDevices (command)
+
+// QueryMemoryDevices implements the "query-memory-devices" QMP API call.
+func (m *Monitor) QueryMemoryDevices() (ret []MemoryDeviceInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-memory-devices",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	var reslist []json.RawMessage
+	if err = json.Unmarshal([]byte(res.Res), &reslist); err != nil {
+		return
+	}
+	for _, r := range reslist {
+		v, err := decodeMemoryDeviceInfo(r)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, v)
+	}
+	return
+}
+
+// query-mice -> QueryMice (command)
+
+// QueryMice implements the "query-mice" QMP API call.
+func (m *Monitor) QueryMice() (ret []MouseInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-mice",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-migrate -> QueryMigrate (command)
+
+// QueryMigrate implements the "query-migrate" QMP API call.
+func (m *Monitor) QueryMigrate() (ret MigrationInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-migrate",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-migrate-cache-size -> QueryMigrateCacheSize (command)
+
+// QueryMigrateCacheSize implements the "query-migrate-cache-size" QMP API call.
+func (m *Monitor) QueryMigrateCacheSize() (ret int64, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-migrate-cache-size",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-migrate-capabilities -> QueryMigrateCapabilities (command)
+
+// QueryMigrateCapabilities implements the "query-migrate-capabilities" QMP API call.
+func (m *Monitor) QueryMigrateCapabilities() (ret []MigrationCapabilityStatus, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-migrate-capabilities",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-migrate-parameters -> QueryMigrateParameters (command)
+
+// QueryMigrateParameters implements the "query-migrate-parameters" QMP API call.
+func (m *Monitor) QueryMigrateParameters() (ret MigrationParameters, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-migrate-parameters",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-name -> QueryName (command)
+
+// QueryName implements the "query-name" QMP API call.
+func (m *Monitor) QueryName() (ret NameInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-name",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-named-block-nodes -> QueryNamedBlockNodes (command)
+
+// QueryNamedBlockNodes implements the "query-named-block-nodes" QMP API call.
+func (m *Monitor) QueryNamedBlockNodes() (ret []BlockDeviceInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-named-block-nodes",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-pci -> QueryPCI (command)
+
+// QueryPCI implements the "query-pci" QMP API call.
+func (m *Monitor) QueryPCI() (ret []PCIInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-pci",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-qmp-schema -> QueryQMPSchema (command)
+
+// QueryQMPSchema implements the "query-qmp-schema" QMP API call.
+func (m *Monitor) QueryQMPSchema() (ret []SchemaInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-qmp-schema",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	var reslist []json.RawMessage
+	if err = json.Unmarshal([]byte(res.Res), &reslist); err != nil {
+		return
+	}
+	for _, r := range reslist {
+		v, err := decodeSchemaInfo(r)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, v)
+	}
+	return
+}
+
+// query-rocker -> QueryRocker (command)
+
+// QueryRocker implements the "query-rocker" QMP API call.
+func (m *Monitor) QueryRocker(name string) (ret RockerSwitch, err error) {
+	cmd := struct {
+		Name string `json:"name"`
+	}{
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-rocker",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-rocker-of-dpa-flows -> QueryRockerOfDpaFlows (command)
+
+// QueryRockerOfDpaFlows implements the "query-rocker-of-dpa-flows" QMP API call.
+func (m *Monitor) QueryRockerOfDpaFlows(name string, tblID *uint32) (ret []RockerOfDpaFlow, err error) {
+	cmd := struct {
+		Name  string  `json:"name"`
+		TblID *uint32 `json:"tbl-id,omitempty"`
+	}{
+		name,
+		tblID,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-rocker-of-dpa-flows",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-rocker-of-dpa-groups -> QueryRockerOfDpaGroups (command)
+
+// QueryRockerOfDpaGroups implements the "query-rocker-of-dpa-groups" QMP API call.
+func (m *Monitor) QueryRockerOfDpaGroups(name string, typ *uint8) (ret []RockerOfDpaGroup, err error) {
+	cmd := struct {
+		Name string `json:"name"`
+		Type *uint8 `json:"type,omitempty"`
+	}{
+		name,
+		typ,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-rocker-of-dpa-groups",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-rocker-ports -> QueryRockerPorts (command)
+
+// QueryRockerPorts implements the "query-rocker-ports" QMP API call.
+func (m *Monitor) QueryRockerPorts(name string) (ret []RockerPort, err error) {
+	cmd := struct {
+		Name string `json:"name"`
+	}{
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-rocker-ports",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-rx-filter -> QueryRxFilter (command)
+
+// QueryRxFilter implements the "query-rx-filter" QMP API call.
+func (m *Monitor) QueryRxFilter(name *string) (ret []RxFilterInfo, err error) {
+	cmd := struct {
+		Name *string `json:"name,omitempty"`
+	}{
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-rx-filter",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-spice -> QuerySpice (command)
+
+// QuerySpice implements the "query-spice" QMP API call.
+func (m *Monitor) QuerySpice() (ret SpiceInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-spice",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-status -> QueryStatus (command)
+
+// QueryStatus implements the "query-status" QMP API call.
+func (m *Monitor) QueryStatus() (ret StatusInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-status",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-target -> QueryTarget (command)
+
+// QueryTarget implements the "query-target" QMP API call.
+func (m *Monitor) QueryTarget() (ret TargetInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-target",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-tpm -> QueryTPM (command)
+
+// QueryTPM implements the "query-tpm" QMP API call.
+func (m *Monitor) QueryTPM() (ret []TPMInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-tpm",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-tpm-models -> QueryTPMModels (command)
+
+// QueryTPMModels implements the "query-tpm-models" QMP API call.
+func (m *Monitor) QueryTPMModels() (ret []TPMModel, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-tpm-models",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-tpm-types -> QueryTPMTypes (command)
+
+// QueryTPMTypes implements the "query-tpm-types" QMP API call.
+func (m *Monitor) QueryTPMTypes() (ret []TPMType, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-tpm-types",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-uuid -> QueryUUID (command)
+
+// QueryUUID implements the "query-uuid" QMP API call.
+func (m *Monitor) QueryUUID() (ret UUIDInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-uuid",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-version -> QueryVersion (command)
+
+// QueryVersion implements the "query-version" QMP API call.
+func (m *Monitor) QueryVersion() (ret VersionInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-version",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-vnc -> QueryVNC (command)
+
+// QueryVNC implements the "query-vnc" QMP API call.
+func (m *Monitor) QueryVNC() (ret VNCInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-vnc",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-vnc-servers -> QueryVNCServers (command)
+
+// QueryVNCServers implements the "query-vnc-servers" QMP API call.
+func (m *Monitor) QueryVNCServers() (ret []VNCInfo2, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-vnc-servers",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// quit -> Quit (command)
+
+// Quit implements the "quit" QMP API call.
+func (m *Monitor) Quit() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "quit",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// remove-fd -> RemoveFD (command)
+
+// RemoveFD implements the "remove-fd" QMP API call.
+func (m *Monitor) RemoveFD(fdsetID int64, fD *int64) (err error) {
+	cmd := struct {
+		FdsetID int64  `json:"fdset-id"`
+		FD      *int64 `json:"fd,omitempty"`
+	}{
+		fdsetID,
+		fD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "remove-fd",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// ringbuf-read -> RingbufRead (command)
+
+// RingbufRead implements the "ringbuf-read" QMP API call.
+func (m *Monitor) RingbufRead(device string, size int64, format *DataFormat) (ret string, err error) {
+	cmd := struct {
+		Device string      `json:"device"`
+		Size   int64       `json:"size"`
+		Format *DataFormat `json:"format,omitempty"`
+	}{
+		device,
+		size,
+		format,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "ringbuf-read",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// ringbuf-write -> RingbufWrite (command)
+
+// RingbufWrite implements the "ringbuf-write" QMP API call.
+func (m *Monitor) RingbufWrite(device string, data string, format *DataFormat) (err error) {
+	cmd := struct {
+		Device string      `json:"device"`
+		Data   string      `json:"data"`
+		Format *DataFormat `json:"format,omitempty"`
+	}{
+		device,
+		data,
+		format,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "ringbuf-write",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// rtc-reset-reinjection -> RtcResetReinjection (command)
+
+// RtcResetReinjection implements the "rtc-reset-reinjection" QMP API call.
+func (m *Monitor) RtcResetReinjection() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "rtc-reset-reinjection",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// screendump -> Screendump (command)
+
+// Screendump implements the "screendump" QMP API call.
+func (m *Monitor) Screendump(filename string) (err error) {
+	cmd := struct {
+		Filename string `json:"filename"`
+	}{
+		filename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "screendump",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// send-key -> SendKey (command)
+
+// SendKey implements the "send-key" QMP API call.
+func (m *Monitor) SendKey(keys []KeyValue, holdTime *int64) (err error) {
+	cmd := struct {
+		Keys     []KeyValue `json:"keys"`
+		HoldTime *int64     `json:"hold-time,omitempty"`
+	}{
+		keys,
+		holdTime,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "send-key",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// set_link -> SetLink (command)
+
+// SetLink implements the "set_link" QMP API call.
+func (m *Monitor) SetLink(name string, up bool) (err error) {
+	cmd := struct {
+		Name string `json:"name"`
+		Up   bool   `json:"up"`
+	}{
+		name,
+		up,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "set_link",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// set_password -> SetPassword (command)
+
+// SetPassword implements the "set_password" QMP API call.
+func (m *Monitor) SetPassword(protocol string, password string, connected *string) (err error) {
+	cmd := struct {
+		Protocol  string  `json:"protocol"`
+		Password  string  `json:"password"`
+		Connected *string `json:"connected,omitempty"`
+	}{
+		protocol,
+		password,
+		connected,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "set_password",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// stop -> Stop (command)
+
+// Stop implements the "stop" QMP API call.
+func (m *Monitor) Stop() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "stop",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// system_powerdown -> SystemPowerdown (command)
+
+// SystemPowerdown implements the "system_powerdown" QMP API call.
+func (m *Monitor) SystemPowerdown() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "system_powerdown",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// system_reset -> SystemReset (command)
+
+// SystemReset implements the "system_reset" QMP API call.
+func (m *Monitor) SystemReset() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "system_reset",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// system_wakeup -> SystemWakeup (command)
+
+// SystemWakeup implements the "system_wakeup" QMP API call.
+func (m *Monitor) SystemWakeup() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "system_wakeup",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// trace-event-get-state -> TraceEventGetState (command)
+
+// TraceEventGetState implements the "trace-event-get-state" QMP API call.
+func (m *Monitor) TraceEventGetState(name string, vcpu *int64) (ret []TraceEventInfo, err error) {
+	cmd := struct {
+		Name string `json:"name"`
+		Vcpu *int64 `json:"vcpu,omitempty"`
+	}{
+		name,
+		vcpu,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "trace-event-get-state",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// trace-event-set-state -> TraceEventSetState (command)
+
+// TraceEventSetState implements the "trace-event-set-state" QMP API call.
+func (m *Monitor) TraceEventSetState(name string, enable bool, ignoreUnavailable *bool, vcpu *int64) (err error) {
+	cmd := struct {
+		Name              string `json:"name"`
+		Enable            bool   `json:"enable"`
+		IgnoreUnavailable *bool  `json:"ignore-unavailable,omitempty"`
+		Vcpu              *int64 `json:"vcpu,omitempty"`
+	}{
+		name,
+		enable,
+		ignoreUnavailable,
+		vcpu,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "trace-event-set-state",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// transaction -> Transaction (command)
+
+// Transaction implements the "transaction" QMP API call.
+func (m *Monitor) Transaction(actions []TransactionAction, properties *TransactionProperties) (err error) {
+	cmd := struct {
+		Actions    []TransactionAction    `json:"actions"`
+		Properties *TransactionProperties `json:"properties,omitempty"`
+	}{
+		actions,
+		properties,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "transaction",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// x-blockdev-change -> XBlockdevChange (command)
+
+// XBlockdevChange implements the "x-blockdev-change" QMP API call.
+func (m *Monitor) XBlockdevChange(parent string, child *string, node *string) (err error) {
+	cmd := struct {
+		Parent string  `json:"parent"`
+		Child  *string `json:"child,omitempty"`
+		Node   *string `json:"node,omitempty"`
+	}{
+		parent,
+		child,
+		node,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-blockdev-change",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// x-blockdev-del -> XBlockdevDel (command)
+
+// XBlockdevDel implements the "x-blockdev-del" QMP API call.
+func (m *Monitor) XBlockdevDel(nodeName string) (err error) {
+	cmd := struct {
+		NodeName string `json:"node-name"`
+	}{
+		nodeName,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-blockdev-del",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// x-blockdev-insert-medium -> XBlockdevInsertMedium (command)
+
+// XBlockdevInsertMedium implements the "x-blockdev-insert-medium" QMP API call.
+func (m *Monitor) XBlockdevInsertMedium(device *string, iD *string, nodeName string) (err error) {
+	cmd := struct {
+		Device   *string `json:"device,omitempty"`
+		ID       *string `json:"id,omitempty"`
+		NodeName string  `json:"node-name"`
+	}{
+		device,
+		iD,
+		nodeName,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-blockdev-insert-medium",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// x-blockdev-remove-medium -> XBlockdevRemoveMedium (command)
+
+// XBlockdevRemoveMedium implements the "x-blockdev-remove-medium" QMP API call.
+func (m *Monitor) XBlockdevRemoveMedium(device *string, iD *string) (err error) {
+	cmd := struct {
+		Device *string `json:"device,omitempty"`
+		ID     *string `json:"id,omitempty"`
+	}{
+		device,
+		iD,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-blockdev-remove-medium",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// xen-load-devices-state -> XenLoadDevicesState (command)
+
+// XenLoadDevicesState implements the "xen-load-devices-state" QMP API call.
+func (m *Monitor) XenLoadDevicesState(filename string) (err error) {
+	cmd := struct {
+		Filename string `json:"filename"`
+	}{
+		filename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "xen-load-devices-state",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// xen-save-devices-state -> XenSaveDevicesState (command)
+
+// XenSaveDevicesState implements the "xen-save-devices-state" QMP API call.
+func (m *Monitor) XenSaveDevicesState(filename string) (err error) {
+	cmd := struct {
+		Filename string `json:"filename"`
+	}{
+		filename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "xen-save-devices-state",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// xen-set-global-dirty-log -> XenSetGlobalDirtyLog (command)
+
+// XenSetGlobalDirtyLog implements the "xen-set-global-dirty-log" QMP API call.
+func (m *Monitor) XenSetGlobalDirtyLog(enable bool) (err error) {
+	cmd := struct {
+		Enable bool `json:"enable"`
+	}{
+		enable,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "xen-set-global-dirty-log",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
