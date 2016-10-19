@@ -41,6 +41,7 @@ var (
 type Domain struct {
 	Name       string
 	m          qmp.Monitor
+	rm         *raw.Monitor
 	done       chan struct{}
 	connect    chan chan qmp.Event
 	disconnect chan chan qmp.Event
@@ -296,7 +297,7 @@ const (
 
 // Status returns the current status of the domain.
 func (d *Domain) Status() (Status, error) {
-	out, err := d.Run(qmp.Command{Execute: "query-status"})
+	status, err := d.rm.QueryStatus()
 	if err != nil {
 		// libvirt returns an error if the domain is not running
 		if strings.Contains(err.Error(), "not running") {
@@ -306,16 +307,7 @@ func (d *Domain) Status() (Status, error) {
 		return 0, err
 	}
 
-	var response struct {
-		ID     string         `json:"id"`
-		Return raw.StatusInfo `json:"return"`
-	}
-
-	if err = json.Unmarshal(out, &response); err != nil {
-		return 0, err
-	}
-
-	return Status(response.Return.Status), nil
+	return Status(status.Status), nil
 }
 
 // Supported returns true if the provided command is supported by the domain.
@@ -449,6 +441,7 @@ func NewDomain(m qmp.Monitor, name string) (*Domain, error) {
 	d := &Domain{
 		Name:       name,
 		m:          m,
+		rm:         raw.NewMonitor(m),
 		done:       make(chan struct{}),
 		connect:    make(chan chan qmp.Event),
 		disconnect: make(chan chan qmp.Event),
