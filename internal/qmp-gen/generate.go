@@ -150,6 +150,7 @@ func renderAPI(templateDir string, api, need map[name]interface{}) ([]byte, erro
 			return b.String(), err
 		},
 		"abort": func(s string) (string, error) { return "", errors.New(s) },
+		"last":  func(fs fields, i int) bool { return i == len(fs)-1 },
 	})
 	tmpl, err := tmpl.ParseGlob(filepath.Join(templateDir, "*"))
 	if err != nil {

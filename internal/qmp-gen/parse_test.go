@@ -150,8 +150,34 @@ type StatusInfo struct {
 	Status     RunState 'json:"status"'
 }
 
-// COMMAND query-status
-			`),
+// query-status -> QueryStatus (command)
+
+// QueryStatus implements the "query-status" QMP API call.
+func (m *Monitor) QueryStatus() (ret StatusInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-status",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage 'json:"return"'
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}`),
 		},
 	}
 
