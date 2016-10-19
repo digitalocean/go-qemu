@@ -19,6 +19,8 @@ package raw
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/digitalocean/go-qemu/qmp"
 )
 
 // ACPIOSTInfo -> ACPIOSTInfo (struct)
@@ -84,7 +86,14 @@ func (e *ACPISlotType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// EVENT ACPI_DEVICE_OST
+// ACPI_DEVICE_OST -> ACPIDeviceOst (event)
+
+// ACPIDeviceOst implements the "ACPI_DEVICE_OST" event.
+type ACPIDeviceOst struct {
+	Info ACPIOSTInfo `json:"info"`
+}
+
+func (ACPIDeviceOst) isEvent() {}
 
 // Abort -> Abort (struct)
 
@@ -152,21 +161,104 @@ type AddfdInfo struct {
 	FD      int64 `json:"fd"`
 }
 
-// EVENT BALLOON_CHANGE
+// BALLOON_CHANGE -> BalloonChange (event)
 
-// EVENT BLOCK_IMAGE_CORRUPTED
+// BalloonChange implements the "BALLOON_CHANGE" event.
+type BalloonChange struct {
+	Actual int64 `json:"actual"`
+}
 
-// EVENT BLOCK_IO_ERROR
+func (BalloonChange) isEvent() {}
 
-// EVENT BLOCK_JOB_CANCELLED
+// BLOCK_IMAGE_CORRUPTED -> BlockImageCorrupted (event)
 
-// EVENT BLOCK_JOB_COMPLETED
+// BlockImageCorrupted implements the "BLOCK_IMAGE_CORRUPTED" event.
+type BlockImageCorrupted struct {
+	Device   string  `json:"device"`
+	NodeName *string `json:"node-name,omitempty"`
+	Msg      string  `json:"msg"`
+	Offset   *int64  `json:"offset,omitempty"`
+	Size     *int64  `json:"size,omitempty"`
+	Fatal    bool    `json:"fatal"`
+}
 
-// EVENT BLOCK_JOB_ERROR
+func (BlockImageCorrupted) isEvent() {}
 
-// EVENT BLOCK_JOB_READY
+// BLOCK_IO_ERROR -> BlockIOError (event)
 
-// EVENT BLOCK_WRITE_THRESHOLD
+// BlockIOError implements the "BLOCK_IO_ERROR" event.
+type BlockIOError struct {
+	Device    string           `json:"device"`
+	NodeName  string           `json:"node-name"`
+	Operation IOOperationType  `json:"operation"`
+	Action    BlockErrorAction `json:"action"`
+	Nospace   *bool            `json:"nospace,omitempty"`
+	Reason    string           `json:"reason"`
+}
+
+func (BlockIOError) isEvent() {}
+
+// BLOCK_JOB_CANCELLED -> BlockJobCancelled (event)
+
+// BlockJobCancelled implements the "BLOCK_JOB_CANCELLED" event.
+type BlockJobCancelled struct {
+	Type   BlockJobType `json:"type"`
+	Device string       `json:"device"`
+	Len    int64        `json:"len"`
+	Offset int64        `json:"offset"`
+	Speed  int64        `json:"speed"`
+}
+
+func (BlockJobCancelled) isEvent() {}
+
+// BLOCK_JOB_COMPLETED -> BlockJobCompleted (event)
+
+// BlockJobCompleted implements the "BLOCK_JOB_COMPLETED" event.
+type BlockJobCompleted struct {
+	Type   BlockJobType `json:"type"`
+	Device string       `json:"device"`
+	Len    int64        `json:"len"`
+	Offset int64        `json:"offset"`
+	Speed  int64        `json:"speed"`
+	Error  *string      `json:"error,omitempty"`
+}
+
+func (BlockJobCompleted) isEvent() {}
+
+// BLOCK_JOB_ERROR -> BlockJobError (event)
+
+// BlockJobError implements the "BLOCK_JOB_ERROR" event.
+type BlockJobError struct {
+	Device    string           `json:"device"`
+	Operation IOOperationType  `json:"operation"`
+	Action    BlockErrorAction `json:"action"`
+}
+
+func (BlockJobError) isEvent() {}
+
+// BLOCK_JOB_READY -> BlockJobReady (event)
+
+// BlockJobReady implements the "BLOCK_JOB_READY" event.
+type BlockJobReady struct {
+	Type   BlockJobType `json:"type"`
+	Device string       `json:"device"`
+	Len    int64        `json:"len"`
+	Offset int64        `json:"offset"`
+	Speed  int64        `json:"speed"`
+}
+
+func (BlockJobReady) isEvent() {}
+
+// BLOCK_WRITE_THRESHOLD -> BlockWriteThreshold (event)
+
+// BlockWriteThreshold implements the "BLOCK_WRITE_THRESHOLD" event.
+type BlockWriteThreshold struct {
+	NodeName       string `json:"node-name"`
+	AmountExceeded uint64 `json:"amount-exceeded"`
+	WriteThreshold uint64 `json:"write-threshold"`
+}
+
+func (BlockWriteThreshold) isEvent() {}
 
 // BalloonInfo -> BalloonInfo (struct)
 
@@ -3904,11 +3996,36 @@ type CPUModelInfo struct {
 	Props *interface{} `json:"props,omitempty"`
 }
 
-// EVENT DEVICE_DELETED
+// DEVICE_DELETED -> DeviceDeleted (event)
 
-// EVENT DEVICE_TRAY_MOVED
+// DeviceDeleted implements the "DEVICE_DELETED" event.
+type DeviceDeleted struct {
+	Device *string `json:"device,omitempty"`
+	Path   string  `json:"path"`
+}
 
-// EVENT DUMP_COMPLETED
+func (DeviceDeleted) isEvent() {}
+
+// DEVICE_TRAY_MOVED -> DeviceTrayMoved (event)
+
+// DeviceTrayMoved implements the "DEVICE_TRAY_MOVED" event.
+type DeviceTrayMoved struct {
+	Device   string `json:"device"`
+	ID       string `json:"id"`
+	TrayOpen bool   `json:"tray-open"`
+}
+
+func (DeviceTrayMoved) isEvent() {}
+
+// DUMP_COMPLETED -> DumpCompleted (event)
+
+// DumpCompleted implements the "DUMP_COMPLETED" event.
+type DumpCompleted struct {
+	Result DumpQueryResult `json:"result"`
+	Error  *string         `json:"error,omitempty"`
+}
+
+func (DumpCompleted) isEvent() {}
 
 // DataFormat -> DataFormat (enum)
 
@@ -4247,7 +4364,38 @@ type GicCapability struct {
 	Kernel   bool  `json:"kernel"`
 }
 
-// EVENT GUEST_PANICKED
+// GUEST_PANICKED -> GuestPanicked (event)
+
+// GuestPanicked implements the "GUEST_PANICKED" event.
+type GuestPanicked struct {
+	Action GuestPanicAction      `json:"action"`
+	Info   GuestPanicInformation `json:"info,omitempty"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (s *GuestPanicked) UnmarshalJSON(bs []byte) error {
+	v := struct {
+		Action GuestPanicAction `json:"action"`
+		Info   json.RawMessage  `json:"info"`
+	}{}
+	err := json.Unmarshal(bs, &v)
+	if err != nil {
+		return err
+	}
+	s.Action = v.Action
+	if len(v.Info) > 0 {
+		s.Info, err = decodeGuestPanicInformation(v.Info)
+		if err != nil {
+			return err
+		}
+	} else {
+		s.Info = nil
+	}
+
+	return nil
+}
+
+func (GuestPanicked) isEvent() {}
 
 // GuestPanicAction -> GuestPanicAction (enum)
 
@@ -5306,11 +5454,33 @@ type KVMInfo struct {
 	Present bool `json:"present"`
 }
 
-// EVENT MEM_UNPLUG_ERROR
+// MEM_UNPLUG_ERROR -> MemUnplugError (event)
 
-// EVENT MIGRATION
+// MemUnplugError implements the "MEM_UNPLUG_ERROR" event.
+type MemUnplugError struct {
+	Device string `json:"device"`
+	Msg    string `json:"msg"`
+}
 
-// EVENT MIGRATION_PASS
+func (MemUnplugError) isEvent() {}
+
+// MIGRATION -> Migration (event)
+
+// Migration implements the "MIGRATION" event.
+type Migration struct {
+	Status MigrationStatus `json:"status"`
+}
+
+func (Migration) isEvent() {}
+
+// MIGRATION_PASS -> MigrationPass (event)
+
+// MigrationPass implements the "MIGRATION_PASS" event.
+type MigrationPass struct {
+	Pass int64 `json:"pass"`
+}
+
+func (MigrationPass) isEvent() {}
 
 // MachineInfo -> MachineInfo (struct)
 
@@ -5768,7 +5938,15 @@ func (e *NfsTransport) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// EVENT NIC_RX_FILTER_CHANGED
+// NIC_RX_FILTER_CHANGED -> NicRxFilterChanged (event)
+
+// NicRxFilterChanged implements the "NIC_RX_FILTER_CHANGED" event.
+type NicRxFilterChanged struct {
+	Name *string `json:"name,omitempty"`
+	Path string  `json:"path"`
+}
+
+func (NicRxFilterChanged) isEvent() {}
 
 // NameInfo -> NameInfo (struct)
 
@@ -5931,7 +6109,13 @@ type PcdimmDeviceInfo struct {
 	Hotpluggable bool    `json:"hotpluggable"`
 }
 
-// EVENT POWERDOWN
+// POWERDOWN -> Powerdown (event)
+
+// Powerdown implements the "POWERDOWN" event.
+type Powerdown struct {
+}
+
+func (Powerdown) isEvent() {}
 
 // PciBridgeInfo -> PCIBridgeInfo (struct)
 
@@ -7319,9 +7503,29 @@ func (e *QKeyCode) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// EVENT QUORUM_FAILURE
+// QUORUM_FAILURE -> QuorumFailure (event)
 
-// EVENT QUORUM_REPORT_BAD
+// QuorumFailure implements the "QUORUM_FAILURE" event.
+type QuorumFailure struct {
+	Reference    string `json:"reference"`
+	SectorNum    int64  `json:"sector-num"`
+	SectorsCount int64  `json:"sectors-count"`
+}
+
+func (QuorumFailure) isEvent() {}
+
+// QUORUM_REPORT_BAD -> QuorumReportBad (event)
+
+// QuorumReportBad implements the "QUORUM_REPORT_BAD" event.
+type QuorumReportBad struct {
+	Type         QuorumOpType `json:"type"`
+	Error        *string      `json:"error,omitempty"`
+	NodeName     string       `json:"node-name"`
+	SectorNum    int64        `json:"sector-num"`
+	SectorsCount int64        `json:"sectors-count"`
+}
+
+func (QuorumReportBad) isEvent() {}
 
 // Qcow2OverlapCheckFlags -> Qcow2OverlapCheckFlags (struct)
 
@@ -7550,11 +7754,30 @@ func (e *QuorumReadPattern) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// EVENT RESET
+// RESET -> Reset (event)
 
-// EVENT RESUME
+// Reset implements the "RESET" event.
+type Reset struct {
+}
 
-// EVENT RTC_CHANGE
+func (Reset) isEvent() {}
+
+// RESUME -> Resume (event)
+
+// Resume implements the "RESUME" event.
+type Resume struct {
+}
+
+func (Resume) isEvent() {}
+
+// RTC_CHANGE -> RtcChange (event)
+
+// RtcChange implements the "RTC_CHANGE" event.
+type RtcChange struct {
+	Offset int64 `json:"offset"`
+}
+
+func (RtcChange) isEvent() {}
 
 // ReplicationMode -> ReplicationMode (enum)
 
@@ -8040,21 +8263,75 @@ func (e *RxState) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// EVENT SHUTDOWN
+// SHUTDOWN -> Shutdown (event)
 
-// EVENT SPICE_CONNECTED
+// Shutdown implements the "SHUTDOWN" event.
+type Shutdown struct {
+}
 
-// EVENT SPICE_DISCONNECTED
+func (Shutdown) isEvent() {}
 
-// EVENT SPICE_INITIALIZED
+// SPICE_CONNECTED -> SpiceConnected (event)
 
-// EVENT SPICE_MIGRATE_COMPLETED
+// SpiceConnected implements the "SPICE_CONNECTED" event.
+type SpiceConnected struct {
+	Server SpiceBasicInfo `json:"server"`
+	Client SpiceBasicInfo `json:"client"`
+}
 
-// EVENT STOP
+func (SpiceConnected) isEvent() {}
 
-// EVENT SUSPEND
+// SPICE_DISCONNECTED -> SpiceDisconnected (event)
 
-// EVENT SUSPEND_DISK
+// SpiceDisconnected implements the "SPICE_DISCONNECTED" event.
+type SpiceDisconnected struct {
+	Server SpiceBasicInfo `json:"server"`
+	Client SpiceBasicInfo `json:"client"`
+}
+
+func (SpiceDisconnected) isEvent() {}
+
+// SPICE_INITIALIZED -> SpiceInitialized (event)
+
+// SpiceInitialized implements the "SPICE_INITIALIZED" event.
+type SpiceInitialized struct {
+	Server SpiceServerInfo `json:"server"`
+	Client SpiceChannel    `json:"client"`
+}
+
+func (SpiceInitialized) isEvent() {}
+
+// SPICE_MIGRATE_COMPLETED -> SpiceMigrateCompleted (event)
+
+// SpiceMigrateCompleted implements the "SPICE_MIGRATE_COMPLETED" event.
+type SpiceMigrateCompleted struct {
+}
+
+func (SpiceMigrateCompleted) isEvent() {}
+
+// STOP -> Stop (event)
+
+// Stop implements the "STOP" event.
+type Stop struct {
+}
+
+func (Stop) isEvent() {}
+
+// SUSPEND -> Suspend (event)
+
+// Suspend implements the "SUSPEND" event.
+type Suspend struct {
+}
+
+func (Suspend) isEvent() {}
+
+// SUSPEND_DISK -> SuspendDisk (event)
+
+// SuspendDisk implements the "SUSPEND_DISK" event.
+type SuspendDisk struct {
+}
+
+func (SuspendDisk) isEvent() {}
 
 // SchemaInfo -> SchemaInfo (flat union)
 
@@ -9193,13 +9470,45 @@ type UUIDInfo struct {
 	UUID string `json:"UUID"`
 }
 
-// EVENT VNC_CONNECTED
+// VNC_CONNECTED -> VNCConnected (event)
 
-// EVENT VNC_DISCONNECTED
+// VNCConnected implements the "VNC_CONNECTED" event.
+type VNCConnected struct {
+	Server VNCServerInfo `json:"server"`
+	Client VNCBasicInfo  `json:"client"`
+}
 
-// EVENT VNC_INITIALIZED
+func (VNCConnected) isEvent() {}
 
-// EVENT VSERPORT_CHANGE
+// VNC_DISCONNECTED -> VNCDisconnected (event)
+
+// VNCDisconnected implements the "VNC_DISCONNECTED" event.
+type VNCDisconnected struct {
+	Server VNCServerInfo `json:"server"`
+	Client VNCClientInfo `json:"client"`
+}
+
+func (VNCDisconnected) isEvent() {}
+
+// VNC_INITIALIZED -> VNCInitialized (event)
+
+// VNCInitialized implements the "VNC_INITIALIZED" event.
+type VNCInitialized struct {
+	Server VNCServerInfo `json:"server"`
+	Client VNCClientInfo `json:"client"`
+}
+
+func (VNCInitialized) isEvent() {}
+
+// VSERPORT_CHANGE -> VserportChange (event)
+
+// VserportChange implements the "VSERPORT_CHANGE" event.
+type VserportChange struct {
+	ID   string `json:"id"`
+	Open bool   `json:"open"`
+}
+
+func (VserportChange) isEvent() {}
 
 // VersionInfo -> VersionInfo (struct)
 
@@ -9497,9 +9806,22 @@ type VsockSocketAddress struct {
 	Port string `json:"port"`
 }
 
-// EVENT WAKEUP
+// WAKEUP -> Wakeup (event)
 
-// EVENT WATCHDOG
+// Wakeup implements the "WAKEUP" event.
+type Wakeup struct {
+}
+
+func (Wakeup) isEvent() {}
+
+// WATCHDOG -> Watchdog (event)
+
+// Watchdog implements the "WATCHDOG" event.
+type Watchdog struct {
+	Action WatchdogExpirationAction `json:"action"`
+}
+
+func (Watchdog) isEvent() {}
 
 // WatchdogExpirationAction -> WatchdogExpirationAction (enum)
 
@@ -13662,4 +13984,237 @@ func (m *Monitor) XenSetReplication(enable bool, primary bool, failover *bool) (
 		return
 	}
 	return
+}
+
+func UnmarshalEvent(evt qmp.Event) (Event, error) {
+	raw, err := json.Marshal(evt.Data)
+	if err != nil {
+		return nil, err
+	}
+	switch evt.Event {
+	case "ACPI_DEVICE_OST":
+		var ret ACPIDeviceOst
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BALLOON_CHANGE":
+		var ret BalloonChange
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_IMAGE_CORRUPTED":
+		var ret BlockImageCorrupted
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_IO_ERROR":
+		var ret BlockIOError
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_JOB_CANCELLED":
+		var ret BlockJobCancelled
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_JOB_COMPLETED":
+		var ret BlockJobCompleted
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_JOB_ERROR":
+		var ret BlockJobError
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_JOB_READY":
+		var ret BlockJobReady
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "BLOCK_WRITE_THRESHOLD":
+		var ret BlockWriteThreshold
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "DEVICE_DELETED":
+		var ret DeviceDeleted
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "DEVICE_TRAY_MOVED":
+		var ret DeviceTrayMoved
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "DUMP_COMPLETED":
+		var ret DumpCompleted
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "GUEST_PANICKED":
+		var ret GuestPanicked
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "MEM_UNPLUG_ERROR":
+		var ret MemUnplugError
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "MIGRATION":
+		var ret Migration
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "MIGRATION_PASS":
+		var ret MigrationPass
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "NIC_RX_FILTER_CHANGED":
+		var ret NicRxFilterChanged
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "POWERDOWN":
+		var ret Powerdown
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "QUORUM_FAILURE":
+		var ret QuorumFailure
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "QUORUM_REPORT_BAD":
+		var ret QuorumReportBad
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "RESET":
+		var ret Reset
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "RESUME":
+		var ret Resume
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "RTC_CHANGE":
+		var ret RtcChange
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SHUTDOWN":
+		var ret Shutdown
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SPICE_CONNECTED":
+		var ret SpiceConnected
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SPICE_DISCONNECTED":
+		var ret SpiceDisconnected
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SPICE_INITIALIZED":
+		var ret SpiceInitialized
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SPICE_MIGRATE_COMPLETED":
+		var ret SpiceMigrateCompleted
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "STOP":
+		var ret Stop
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SUSPEND":
+		var ret Suspend
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "SUSPEND_DISK":
+		var ret SuspendDisk
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "VNC_CONNECTED":
+		var ret VNCConnected
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "VNC_DISCONNECTED":
+		var ret VNCDisconnected
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "VNC_INITIALIZED":
+		var ret VNCInitialized
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "VSERPORT_CHANGE":
+		var ret VserportChange
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "WAKEUP":
+		var ret Wakeup
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "WATCHDOG":
+		var ret Watchdog
+		if err = json.Unmarshal(raw, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	default:
+		return nil, fmt.Errorf("unknown event kind %q", evt.Event)
+	}
 }

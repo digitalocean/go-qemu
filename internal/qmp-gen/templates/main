@@ -17,10 +17,33 @@ package raw
 // Generated using `go generate`, do not edit by hand!
 
 import (
-       "encoding/json"
-       "fmt"
+  "encoding/json"
+  "fmt"
+
+  "github.com/digitalocean/go-qemu/qmp"
 )
 
 {{ range . }}
 {{ render . }}
 {{ end }}
+
+func UnmarshalEvent(evt qmp.Event) (Event, error) {
+  raw, err := json.Marshal(evt.Data)
+  if err != nil {
+    return nil, err
+  }
+  switch evt.Event {
+  {{- range . }}
+  {{- if eq (typeOf .) "event" }}
+  case "{{ .Name }}":
+    var ret {{ .Name.Go }}
+    if err = json.Unmarshal(raw, &ret); err != nil {
+      return nil, err
+    }
+    return ret, nil
+  {{- end }}
+  {{- end }}
+  default:
+    return nil, fmt.Errorf("unknown event kind %q", evt.Event)
+  }
+}

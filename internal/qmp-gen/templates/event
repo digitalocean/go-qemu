@@ -1,1 +1,54 @@
-// EVENT {{ .Name }}
+// {{ .Name }} -> {{ .Name.Go }} (event)
+
+// {{ .Name.Go }} implements the "{{ .Name }}" event.
+type {{ .Name.Go }} struct {
+  {{- range .Data.Fields API }}
+    {{ render . }}
+  {{- end }}
+}
+
+{{- if (.Data.Fields API).HasInterfaceField API }}
+// UnmarshalJSON implements json.Unmarshaler.
+func (s *{{ .Name.Go }}) UnmarshalJSON(bs []byte) error {
+  v := struct{
+  {{- range .Data.Fields API }}
+    {{- if .Type.InterfaceType API }}
+      {{- if .List }}
+        {{ abort "rendering of list of union/alternate not supported" }}
+      {{- else }}
+        {{ .Name.Go }} json.RawMessage `json:"{{ .Name }}"`
+      {{- end }}
+    {{- else }}
+      {{ render . }}
+    {{- end }}
+  {{- end }}
+  }{}
+  err := json.Unmarshal(bs, &v)
+  if err != nil {
+    return err
+  }
+
+  {{- range .Data.Fields API }}
+    {{- if .Type.InterfaceType API }}
+      {{- if .Optional }}
+        if len(v.{{ .Name.Go }}) > 0 {
+      {{- end }}
+      s.{{ .Name.Go }}, err = decode{{ .Type.Go }}(v.{{ .Name.Go }})
+      if err != nil {
+        return err
+      }
+      {{- if .Optional }}
+      } else {
+        s.{{ .Name.Go }} = nil
+      }
+      {{- end }}
+    {{- else }}
+      s.{{ .Name.Go }} = v.{{ .Name.Go }}
+    {{- end }}
+  {{- end }}
+  
+  return nil
+}
+{{- end }}
+
+func ({{ .Name.Go }}) isEvent() {}

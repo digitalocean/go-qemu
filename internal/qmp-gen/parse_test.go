@@ -61,6 +61,36 @@ type StatusInfo struct {
 }
 			`),
 		},
+		{
+			name: "MEM_UNPLUG_ERROR",
+			in: []byte(`##
+# @MEM_UNPLUG_ERROR
+#
+# Emitted when memory hot unplug error occurs.
+#
+# @device: device name
+#
+# @msg: Informative message
+#
+# Since: 2.4
+##
+{
+  "event": "MEM_UNPLUG_ERROR",
+  "data": {
+    "device": "str",
+    "msg": "str"
+  }
+}`),
+			out: []byte(`// MEM_UNPLUG_ERROR -> MemUnplugError (event)
+
+// MemUnplugError implements the "MEM_UNPLUG_ERROR" event.
+type MemUnplugError struct {
+	Device string 'json:"device"'
+	Msg    string 'json:"msg"'
+}
+
+func (MemUnplugError) isEvent() {}`),
+		},
 	}
 
 	for _, tt := range tests {

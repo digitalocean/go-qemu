@@ -25,3 +25,8 @@ type Monitor struct {
 func NewMonitor(mon qmp.Monitor) *Monitor {
 	return &Monitor{mon}
 }
+
+// Event is a QMP event.
+type Event interface {
+	isEvent()
+}
