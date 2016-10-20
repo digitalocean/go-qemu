@@ -9008,7 +9008,7 @@ func (m *Monitor) AddFD(fdsetID *int64, opaque *string) (ret AddfdInfo, err erro
 // add_client -> AddClient (command)
 
 // AddClient implements the "add_client" QMP API call.
-func (m *Monitor) AddClient(protocol string, fdname string, skipauth *bool, tLS *bool) (err error) {
+func (m *Monitor) AddClient(protocol string, fdname string, skipauth *bool, tls *bool) (err error) {
 	cmd := struct {
 		Protocol string `json:"protocol"`
 		Fdname   string `json:"fdname"`
@@ -9018,7 +9018,7 @@ func (m *Monitor) AddClient(protocol string, fdname string, skipauth *bool, tLS 
 		protocol,
 		fdname,
 		skipauth,
-		tLS,
+		tls,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "add_client",
@@ -9460,7 +9460,7 @@ func (m *Monitor) BlockdevBackup(cmd *BlockdevBackup) (err error) {
 // blockdev-change-medium -> BlockdevChangeMedium (command)
 
 // BlockdevChangeMedium implements the "blockdev-change-medium" QMP API call.
-func (m *Monitor) BlockdevChangeMedium(device *string, iD *string, filename string, format *string, readOnlyMode *BlockdevChangeReadOnlyMode) (err error) {
+func (m *Monitor) BlockdevChangeMedium(device *string, id *string, filename string, format *string, readOnlyMode *BlockdevChangeReadOnlyMode) (err error) {
 	cmd := struct {
 		Device       *string                     `json:"device,omitempty"`
 		ID           *string                     `json:"id,omitempty"`
@@ -9469,7 +9469,7 @@ func (m *Monitor) BlockdevChangeMedium(device *string, iD *string, filename stri
 		ReadOnlyMode *BlockdevChangeReadOnlyMode `json:"read-only-mode,omitempty"`
 	}{
 		device,
-		iD,
+		id,
 		filename,
 		format,
 		readOnlyMode,
@@ -9491,13 +9491,13 @@ func (m *Monitor) BlockdevChangeMedium(device *string, iD *string, filename stri
 // blockdev-close-tray -> BlockdevCloseTray (command)
 
 // BlockdevCloseTray implements the "blockdev-close-tray" QMP API call.
-func (m *Monitor) BlockdevCloseTray(device *string, iD *string) (err error) {
+func (m *Monitor) BlockdevCloseTray(device *string, id *string) (err error) {
 	cmd := struct {
 		Device *string `json:"device,omitempty"`
 		ID     *string `json:"id,omitempty"`
 	}{
 		device,
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "blockdev-close-tray",
@@ -9557,14 +9557,14 @@ func (m *Monitor) BlockdevMirror(jobID *string, device string, target string, re
 // blockdev-open-tray -> BlockdevOpenTray (command)
 
 // BlockdevOpenTray implements the "blockdev-open-tray" QMP API call.
-func (m *Monitor) BlockdevOpenTray(device *string, iD *string, force *bool) (err error) {
+func (m *Monitor) BlockdevOpenTray(device *string, id *string, force *bool) (err error) {
 	cmd := struct {
 		Device *string `json:"device,omitempty"`
 		ID     *string `json:"id,omitempty"`
 		Force  *bool   `json:"force,omitempty"`
 	}{
 		device,
-		iD,
+		id,
 		force,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -9609,14 +9609,14 @@ func (m *Monitor) BlockdevSnapshot(node string, overlay string) (err error) {
 // blockdev-snapshot-delete-internal-sync -> BlockdevSnapshotDeleteInternalSync (command)
 
 // BlockdevSnapshotDeleteInternalSync implements the "blockdev-snapshot-delete-internal-sync" QMP API call.
-func (m *Monitor) BlockdevSnapshotDeleteInternalSync(device string, iD *string, name *string) (ret SnapshotInfo, err error) {
+func (m *Monitor) BlockdevSnapshotDeleteInternalSync(device string, id *string, name *string) (ret SnapshotInfo, err error) {
 	cmd := struct {
 		Device string  `json:"device"`
 		ID     *string `json:"id,omitempty"`
 		Name   *string `json:"name,omitempty"`
 	}{
 		device,
-		iD,
+		id,
 		name,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -9780,12 +9780,12 @@ func (m *Monitor) ChangeVNCPassword(password string) (err error) {
 // chardev-add -> ChardevAdd (command)
 
 // ChardevAdd implements the "chardev-add" QMP API call.
-func (m *Monitor) ChardevAdd(iD string, backend ChardevBackend) (ret ChardevReturn, err error) {
+func (m *Monitor) ChardevAdd(id string, backend ChardevBackend) (ret ChardevReturn, err error) {
 	cmd := struct {
 		ID      string         `json:"id"`
 		Backend ChardevBackend `json:"backend"`
 	}{
-		iD,
+		id,
 		backend,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -9814,11 +9814,11 @@ func (m *Monitor) ChardevAdd(iD string, backend ChardevBackend) (ret ChardevRetu
 // chardev-remove -> ChardevRemove (command)
 
 // ChardevRemove implements the "chardev-remove" QMP API call.
-func (m *Monitor) ChardevRemove(iD string) (err error) {
+func (m *Monitor) ChardevRemove(id string) (err error) {
 	cmd := struct {
 		ID string `json:"id"`
 	}{
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "chardev-remove",
@@ -9837,7 +9837,7 @@ func (m *Monitor) ChardevRemove(iD string) (err error) {
 // client_migrate_info -> ClientMigrateInfo (command)
 
 // ClientMigrateInfo implements the "client_migrate_info" QMP API call.
-func (m *Monitor) ClientMigrateInfo(protocol string, hostname string, port *int64, tLSPort *int64, certSubject *string) (err error) {
+func (m *Monitor) ClientMigrateInfo(protocol string, hostname string, port *int64, tlsPort *int64, certSubject *string) (err error) {
 	cmd := struct {
 		Protocol    string  `json:"protocol"`
 		Hostname    string  `json:"hostname"`
@@ -9848,7 +9848,7 @@ func (m *Monitor) ClientMigrateInfo(protocol string, hostname string, port *int6
 		protocol,
 		hostname,
 		port,
-		tLSPort,
+		tlsPort,
 		certSubject,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -9934,11 +9934,11 @@ func (m *Monitor) CPU(index int64) (err error) {
 // cpu-add -> CPUAdd (command)
 
 // CPUAdd implements the "cpu-add" QMP API call.
-func (m *Monitor) CPUAdd(iD int64) (err error) {
+func (m *Monitor) CPUAdd(id int64) (err error) {
 	cmd := struct {
 		ID int64 `json:"id"`
 	}{
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "cpu-add",
@@ -9989,13 +9989,13 @@ func (m *Monitor) DeviceListProperties(typename string) (ret []DevicePropertyInf
 // device_add -> DeviceAdd (command)
 
 // DeviceAdd implements the "device_add" QMP API call.
-func (m *Monitor) DeviceAdd(driver string, iD string) (err error) {
+func (m *Monitor) DeviceAdd(driver string, id string) (err error) {
 	cmd := struct {
 		Driver string `json:"driver"`
 		ID     string `json:"id"`
 	}{
 		driver,
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "device_add",
@@ -10014,11 +10014,11 @@ func (m *Monitor) DeviceAdd(driver string, iD string) (err error) {
 // device_del -> DeviceDel (command)
 
 // DeviceDel implements the "device_del" QMP API call.
-func (m *Monitor) DeviceDel(iD string) (err error) {
+func (m *Monitor) DeviceDel(id string) (err error) {
 	cmd := struct {
 		ID string `json:"id"`
 	}{
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "device_del",
@@ -10129,14 +10129,14 @@ func (m *Monitor) DumpSkeys(filename string) (err error) {
 // eject -> Eject (command)
 
 // Eject implements the "eject" QMP API call.
-func (m *Monitor) Eject(device *string, iD *string, force *bool) (err error) {
+func (m *Monitor) Eject(device *string, id *string, force *bool) (err error) {
 	cmd := struct {
 		Device *string `json:"device,omitempty"`
 		ID     *string `json:"id,omitempty"`
 		Force  *bool   `json:"force,omitempty"`
 	}{
 		device,
-		iD,
+		id,
 		force,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -10204,13 +10204,13 @@ func (m *Monitor) Getfd(fdname string) (err error) {
 // human-monitor-command -> HumanMonitorCommand (command)
 
 // HumanMonitorCommand implements the "human-monitor-command" QMP API call.
-func (m *Monitor) HumanMonitorCommand(commandLine string, cPUIndex *int64) (ret string, err error) {
+func (m *Monitor) HumanMonitorCommand(commandLine string, cpuIndex *int64) (ret string, err error) {
 	cmd := struct {
 		CommandLine string `json:"command-line"`
 		CPUIndex    *int64 `json:"cpu-index,omitempty"`
 	}{
 		commandLine,
-		cPUIndex,
+		cpuIndex,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "human-monitor-command",
@@ -10285,7 +10285,7 @@ func (m *Monitor) InputSendEvent(device *string, head *int64, events []InputEven
 // memsave -> Memsave (command)
 
 // Memsave implements the "memsave" QMP API call.
-func (m *Monitor) Memsave(val int64, size int64, filename string, cPUIndex *int64) (err error) {
+func (m *Monitor) Memsave(val int64, size int64, filename string, cpuIndex *int64) (err error) {
 	cmd := struct {
 		Val      int64  `json:"val"`
 		Size     int64  `json:"size"`
@@ -10295,7 +10295,7 @@ func (m *Monitor) Memsave(val int64, size int64, filename string, cPUIndex *int6
 		val,
 		size,
 		filename,
-		cPUIndex,
+		cpuIndex,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "memsave",
@@ -10541,13 +10541,13 @@ func (m *Monitor) NBDServerAdd(device string, writable *bool) (err error) {
 // nbd-server-start -> NBDServerStart (command)
 
 // NBDServerStart implements the "nbd-server-start" QMP API call.
-func (m *Monitor) NBDServerStart(addr SocketAddress, tLSCreds *string) (err error) {
+func (m *Monitor) NBDServerStart(addr SocketAddress, tlsCreds *string) (err error) {
 	cmd := struct {
 		Addr     SocketAddress `json:"addr"`
 		TLSCreds *string       `json:"tls-creds,omitempty"`
 	}{
 		addr,
-		tLSCreds,
+		tlsCreds,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "nbd-server-start",
@@ -10586,13 +10586,13 @@ func (m *Monitor) NBDServerStop() (err error) {
 // netdev_add -> NetdevAdd (command)
 
 // NetdevAdd implements the "netdev_add" QMP API call.
-func (m *Monitor) NetdevAdd(typ string, iD string) (err error) {
+func (m *Monitor) NetdevAdd(typ string, id string) (err error) {
 	cmd := struct {
 		Type string `json:"type"`
 		ID   string `json:"id"`
 	}{
 		typ,
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "netdev_add",
@@ -10611,11 +10611,11 @@ func (m *Monitor) NetdevAdd(typ string, iD string) (err error) {
 // netdev_del -> NetdevDel (command)
 
 // NetdevDel implements the "netdev_del" QMP API call.
-func (m *Monitor) NetdevDel(iD string) (err error) {
+func (m *Monitor) NetdevDel(id string) (err error) {
 	cmd := struct {
 		ID string `json:"id"`
 	}{
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "netdev_del",
@@ -10634,14 +10634,14 @@ func (m *Monitor) NetdevDel(iD string) (err error) {
 // object-add -> ObjectAdd (command)
 
 // ObjectAdd implements the "object-add" QMP API call.
-func (m *Monitor) ObjectAdd(qomType string, iD string, props *interface{}) (err error) {
+func (m *Monitor) ObjectAdd(qomType string, id string, props *interface{}) (err error) {
 	cmd := struct {
 		QomType string       `json:"qom-type"`
 		ID      string       `json:"id"`
 		Props   *interface{} `json:"props,omitempty"`
 	}{
 		qomType,
-		iD,
+		id,
 		props,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -10661,11 +10661,11 @@ func (m *Monitor) ObjectAdd(qomType string, iD string, props *interface{}) (err 
 // object-del -> ObjectDel (command)
 
 // ObjectDel implements the "object-del" QMP API call.
-func (m *Monitor) ObjectDel(iD string) (err error) {
+func (m *Monitor) ObjectDel(id string) (err error) {
 	cmd := struct {
 		ID string `json:"id"`
 	}{
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "object-del",
@@ -12363,13 +12363,13 @@ func (m *Monitor) Quit() (err error) {
 // remove-fd -> RemoveFD (command)
 
 // RemoveFD implements the "remove-fd" QMP API call.
-func (m *Monitor) RemoveFD(fdsetID int64, fD *int64) (err error) {
+func (m *Monitor) RemoveFD(fdsetID int64, fd *int64) (err error) {
 	cmd := struct {
 		FdsetID int64  `json:"fdset-id"`
 		FD      *int64 `json:"fd,omitempty"`
 	}{
 		fdsetID,
-		fD,
+		fd,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "remove-fd",
@@ -12789,14 +12789,14 @@ func (m *Monitor) XBlockdevDel(nodeName string) (err error) {
 // x-blockdev-insert-medium -> XBlockdevInsertMedium (command)
 
 // XBlockdevInsertMedium implements the "x-blockdev-insert-medium" QMP API call.
-func (m *Monitor) XBlockdevInsertMedium(device *string, iD *string, nodeName string) (err error) {
+func (m *Monitor) XBlockdevInsertMedium(device *string, id *string, nodeName string) (err error) {
 	cmd := struct {
 		Device   *string `json:"device,omitempty"`
 		ID       *string `json:"id,omitempty"`
 		NodeName string  `json:"node-name"`
 	}{
 		device,
-		iD,
+		id,
 		nodeName,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -12816,13 +12816,13 @@ func (m *Monitor) XBlockdevInsertMedium(device *string, iD *string, nodeName str
 // x-blockdev-remove-medium -> XBlockdevRemoveMedium (command)
 
 // XBlockdevRemoveMedium implements the "x-blockdev-remove-medium" QMP API call.
-func (m *Monitor) XBlockdevRemoveMedium(device *string, iD *string) (err error) {
+func (m *Monitor) XBlockdevRemoveMedium(device *string, id *string) (err error) {
 	cmd := struct {
 		Device *string `json:"device,omitempty"`
 		ID     *string `json:"id,omitempty"`
 	}{
 		device,
-		iD,
+		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "x-blockdev-remove-medium",

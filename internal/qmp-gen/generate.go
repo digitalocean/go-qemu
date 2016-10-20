@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+
+	"github.com/fatih/camelcase"
 )
 
 // neededTypes returns the subset of API that should be rendered to file.
@@ -137,7 +139,13 @@ func renderAPI(templateDir string, api, need map[name]interface{}) ([]byte, erro
 			return strings.ToLower(reflect.TypeOf(v).Name())
 		},
 		"unexport": func(s string) string {
-			ret := strings.ToLower(s[:1]) + s[1:]
+			ws := camelcase.Split(s)
+			if upperWords[strings.ToLower(ws[0])] {
+				ws[0] = strings.ToLower(ws[0])
+			} else {
+				ws[0] = strings.ToLower(ws[0][:1]) + ws[0][1:]
+			}
+			ret := strings.Join(ws, "")
 			if ret == "type" {
 				return "typ"
 			}
