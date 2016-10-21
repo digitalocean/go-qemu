@@ -16,6 +16,7 @@ package qmp
 
 import (
 	"errors"
+	"sync"
 	"testing"
 
 	libvirt "github.com/rgbkrk/libvirt-go"
@@ -81,53 +82,46 @@ func TestLibvirtGoRunNoConnection(t *testing.T) {
 	}
 }
 
-// func TestLibvirtGoEventsDomainEventRegisterOK(t *testing.T) {
-// 	libvirtGoMonitor := NewLibvirtGoMonitor("testURI", "testDomain")
-// 	libvirtGoMonitor.eventDefaultImplProvider = &fakeEventDefaultImplProviderOK{}
-// 	libvirtGoMonitor.connectionProvider = &fakeConnectionProvider{fail: false}
-// 	libvirtGoMonitor.domainFinder = &fakeDomainFinder{fail: false}
-// 	err := libvirtGoMonitor.Connect()
-// 	if err != nil {
-// 		t.Errorf("unexpected error: %v\n", err)
-// 	}
+func TestLibvirtGoEventsOK(t *testing.T) {
+	libvirtGoMonitor := NewLibvirtGoMonitor("testURI", "testDomain")
+	var wg sync.WaitGroup
+	expectedEvent := libvirt.DomainLifecycleEvent{
+		Event:  libvirt.VIR_DOMAIN_EVENT_STARTED,
+		Detail: 0,
+	}
+	libvirtGoMonitor.libvirtGoMonitorInternal = &fakeLibvirtGoMonitorInternal{
+		expectedEvent: expectedEvent,
+	}
 
-// 	var wg sync.WaitGroup
-// 	expectedEvent := libvirt.DomainLifecycleEvent{
-// 		Event:  libvirt.VIR_DOMAIN_EVENT_STARTED,
-// 		Detail: 0,
-// 	}
+	err := libvirtGoMonitor.Connect()
+	if err != nil {
+		t.Errorf("unexpected error: %v\n", err)
+	}
 
-// 	libvirtGoMonitor.domainRegister = &fakeDomainRegisterOK{
-// 		wg:            &wg,
-// 		expectedEvent: &expectedEvent,
-// 	}
+	events, err := libvirtGoMonitor.Events()
+	if err != nil {
+		t.Errorf("unexpected error: %v\n", err)
+	}
+	var resultEvent Event
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		for event := range events {
+			resultEvent = event
+			wg.Done()
+			break
+		}
+	}(&wg)
 
-// 	events, err := libvirtGoMonitor.Events()
-// 	if err != nil {
-// 		t.Errorf("unexpected error: %v\n", err)
-// 	}
-// 	var resultEvent Event
-// 	go func(wg *sync.WaitGroup) {
-// 		wg.Add(1)
-// 		fmt.Println("Waiting for event....")
-// 		for event := range events {
-// 			resultEvent = event
-// 			wg.Done()
-// 			break
-// 		}
-// 		fmt.Println("done waiting....")
-// 	}(&wg)
+	wg.Wait()
 
-// 	wg.Wait()
-
-// 	detailsEvent, found := resultEvent.Data["details"]
-// 	if !found {
-// 		t.Errorf("Expected at least one Event")
-// 	}
-// 	if expectedEvent != detailsEvent {
-// 		t.Errorf("Unexpected event. Expected %#v and got %#v\n", expectedEvent, detailsEvent)
-// 	}
-// }
+	detailsEvent, found := resultEvent.Data["details"]
+	if !found {
+		t.Errorf("Expected at least one Event")
+	}
+	if expectedEvent != detailsEvent {
+		t.Errorf("Unexpected event. Expected %#v and got %#v\n", expectedEvent, detailsEvent)
+	}
+}
 
 func TestLibvirtGoEventsNoConnection(t *testing.T) {
 	libvirtGoMonitor := NewLibvirtGoMonitor("testURI", "testDomain")
@@ -164,6 +158,8 @@ type fakeLibvirtGoMonitorInternal struct {
 	retCode            int
 	domainEventRetCode int
 	expectedResult     string
+	wg                 *sync.WaitGroup
+	expectedEvent      libvirt.DomainLifecycleEvent
 }
 
 func (fake *fakeLibvirtGoMonitorInternal) newVirConnectionInternal(uri string) (libvirt.VirConnection, error) {
@@ -179,6 +175,9 @@ func (fake *fakeLibvirtGoMonitorInternal) qemuMonitorCommandInternal(domain *lib
 }
 
 func (fake *fakeLibvirtGoMonitorInternal) domainEventRegisterInternal(virConn *libvirt.VirConnection, domain *libvirt.VirDomain, callback *libvirt.DomainEventCallback, fn func()) int {
+	if fake.domainEventRetCode != -1 {
+		go fake.simulateSendingEvents(*callback)
+	}
 	return fake.domainEventRetCode
 }
 
@@ -198,20 +197,6 @@ func (fake *fakeLibvirtGoMonitorInternal) eventRunDefaultImplInternal() int {
 	return fake.retCode
 }
 
-// type fakeDomainRegisterOK struct {
-// 	wg            *sync.WaitGroup
-// 	expectedEvent *libvirt.DomainLifecycleEvent
-// }
-
-// func (fake *fakeDomainRegisterOK) domainEventRegisterInternal(
-// 	callback *libvirt.DomainEventCallback, fn func()) int {
-// 	fake.wg.Add(1)
-// 	go fake.simulateSendingEvents(*callback)
-// 	return 0
-// }
-
-// func (fake *fakeDomainRegisterOK) simulateSendingEvents(callback libvirt.DomainEventCallback) {
-// 	fmt.Println("Sending event...")
-// 	callback(nil, nil, fake.expectedEvent, func() {})
-// 	fake.wg.Done()
-// }
+func (fake *fakeLibvirtGoMonitorInternal) simulateSendingEvents(callback libvirt.DomainEventCallback) {
+	callback(nil, nil, fake.expectedEvent, func() {})
+}
