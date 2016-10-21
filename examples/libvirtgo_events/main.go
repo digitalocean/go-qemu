@@ -23,33 +23,33 @@ import (
 )
 
 var (
-	uri        = flag.String("uri", "qemu:///system", `URI to connect to the libvirtd host.`)
-	domainName = flag.String("domainName", "mydomain", "This is the domain to run commands against.")
+	uri        = flag.String("uri", "qemu:///system", "URI to connect to the libvirtd host.")
+	domainName = flag.String("domainName", "mydomain", "The domain to run commands against.")
 )
 
 func main() {
 	flag.Parse()
 
-	libvirtGoMonitor := qmp.NewLibvirtGoMonitor(*uri, *domainName)
+	mon := qmp.NewLibvirtGoMonitor(*uri, *domainName)
 
-	err := libvirtGoMonitor.Connect()
+	err := mon.Connect()
 	if err != nil {
 		log.Fatalf("Unable to connect: %v\n", err)
 	}
 
-	eventsChans, err := libvirtGoMonitor.Events()
+	events, err := mon.Events()
 	if err != nil {
 		log.Fatalf("Unable to register for events: %v\n", err)
 	}
 
 	fmt.Println("Waiting for Domain events...")
 	go func() {
-		for event := range eventsChans {
+		for event := range events {
 			fmt.Printf("Event: %#v\n", event)
 		}
 	}()
 
 	fmt.Println("Press the Enter key to stop")
 	fmt.Scanln()
-	libvirtGoMonitor.Disconnect()
+	mon.Disconnect()
 }

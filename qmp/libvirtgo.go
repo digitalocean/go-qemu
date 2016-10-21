@@ -16,7 +16,7 @@ package qmp
 
 // LibvirtGoMonitor is a Monitor that wraps the libvirt-go package to
 // communicate with a QEMU Machine Protocol (QMP) socket.
-// Communication is provied via the libvirtd daemon. Multiple
+// Communication is proxied via the libvirtd daemon. Multiple
 // connections to the same hypervisor and domain are permitted.
 type LibvirtGoMonitor struct {
 	Monitor

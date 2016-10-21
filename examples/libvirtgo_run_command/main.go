@@ -19,32 +19,39 @@ import (
 	"fmt"
 	"log"
 
+	qemu "github.com/digitalocean/go-qemu"
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
 var (
-	uri        = flag.String("uri", "qemu:///system", `URI to connect to the libvirtd host.`)
-	domainName = flag.String("domainName", "mydomain", "This is the domain to run commands against.")
+	uri        = flag.String("uri", "qemu:///system", "URI to connect to the libvirtd host.")
+	domainName = flag.String("domainName", "mydomain", "The domain to run commands against.")
 )
 
 func main() {
 	flag.Parse()
 
-	libvirtGoMonitor := qmp.NewLibvirtGoMonitor(*uri, *domainName)
+	mon := qmp.NewLibvirtGoMonitor(*uri, *domainName)
 
-	err := libvirtGoMonitor.Connect()
-	if err != nil {
-		log.Fatalf("Unable to connect: %v\n", err)
+	if err := mon.Connect(); err != nil {
+		log.Fatalf("failed to connect: %v", err)
 	}
 
-	command := []byte("{\"execute\" : \"query-cpus\"}")
-	cpus, err := libvirtGoMonitor.Run(command)
+	domain, err := qemu.NewDomain(mon, *domainName)
 	if err != nil {
-		log.Fatalf("Unable to run command: %v\n", err)
+		log.Fatalf("failed to create domain object: %v", err)
 	}
-	fmt.Printf("query-cpus: %s\n", string(cpus))
+	defer domain.Close()
 
-	if err = libvirtGoMonitor.Disconnect(); err != nil {
+	// domain.CPUs will forward QMP commands to the monitor
+	cpus, err := domain.CPUs()
+	if err != nil {
+		log.Fatalf("failed to get cpus: %v", err)
+	}
+
+	fmt.Printf("CPUs: %v\n", cpus)
+
+	if err = mon.Disconnect(); err != nil {
 		log.Fatalf("Unable to disconnect: %v\n", err)
 	}
 }
