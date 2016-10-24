@@ -44,6 +44,8 @@ type LibvirtGoMonitorLinux struct {
 
 var errNoLibvirtConnection = errors.New("need a established connection to proceed")
 
+const eventsLoopIntervalDefault = 1 * time.Second
+
 type libvirtGoMonitorInternal interface {
 	lookupDomainByNameInternal(virConn *libvirt.VirConnection, domainName string) (libvirt.VirDomain, error)
 	newVirConnectionInternal(uri string) (libvirt.VirConnection, error)
@@ -60,18 +62,29 @@ type libvirtGoMonitorInternalImpl struct {
 }
 
 // NewLibvirtGoMonitor configures a connection to the provided hypervisor
-// and domain.
+// and domain. Defaults events loop interval to 1 second.
 // An error is returned if the provided libvirt connection URI is invalid.
 //
 // Hypervisor URIs may be local or remote, e.g.,
 //	qemu:///system
 //	qemu+ssh://libvirt@example.com/system
 func NewLibvirtGoMonitor(uri, domain string) *LibvirtGoMonitorLinux {
+	return NewLibvirtGoMonitorEventsLoopInterval(uri, domain, eventsLoopIntervalDefault)
+}
+
+// NewLibvirtGoMonitorEventsLoopInterval configures a connection to the provided hypervisor
+// and domain. Sets events loop interval to the Duration provided.
+// An error is returned if the provided libvirt connection URI is invalid.
+//
+// Hypervisor URIs may be local or remote, e.g.,
+//	qemu:///system
+//	qemu+ssh://libvirt@example.com/system
+func NewLibvirtGoMonitorEventsLoopInterval(uri, domain string, eventsLoopInterval time.Duration) *LibvirtGoMonitorLinux {
 	return &LibvirtGoMonitorLinux{
 		uri:                      uri,
 		domainName:               domain,
 		libvirtGoMonitorInternal: &libvirtGoMonitorInternalImpl{},
-		eventsLoopInterval:       1 * time.Second,
+		eventsLoopInterval:       eventsLoopIntervalDefault,
 	}
 }
 
@@ -143,19 +156,12 @@ func (mon *LibvirtGoMonitorLinux) Run(cmd []byte) ([]byte, error) {
 		return nil, errNoLibvirtConnection
 	}
 
-	result, err := mon.qemuMonitorCommandInternal(mon.domain, string(cmd))
+	result, err := mon.libvirtGoMonitorInternal.qemuMonitorCommandInternal(mon.domain, string(cmd))
 	if err != nil {
 		return nil, err
 	}
 
 	return []byte(result), nil
-}
-
-var qemuMonitorCommandInternal = func(
-	domain *libvirt.VirDomain, cmd string) (string, error) {
-	return domain.QemuMonitorCommand(
-		libvirt.VIR_DOMAIN_QEMU_MONITOR_COMMAND_DEFAULT,
-		cmd)
 }
 
 // Events streams QEMU QMP Events.
