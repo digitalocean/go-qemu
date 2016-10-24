@@ -1,0 +1,58 @@
+{{- $enum := . -}}
+
+// {{ .Name }} -> {{ .Name.Go }} (enum)
+
+// {{ .Name.Go }} implements the "{{ .Name }}" QMP API type.
+type {{ $enum.Name.Go }} int
+
+// Known values of {{ .Name.Go }}.
+const (
+{{- range $i, $v := $enum.Values }}
+  {{- if eq $i 0 }}
+    {{ $enum.Name.Go }}{{ $v.Go }} {{ $enum.Name.Go }} = iota
+  {{- else }}
+    {{ $enum.Name.Go }}{{ $v.Go }}
+  {{- end }}
+{{- end }}
+)
+
+// String implements fmt.Stringer.
+func (e {{ $enum.Name.Go }}) String() string {
+     switch e {
+     {{- range $enum.Values }}
+     case {{ $enum.Name.Go }}{{ .Go }}:
+          return "{{ . }}"
+     {{- end }}
+     default:
+          return fmt.Sprintf("{{ $enum.Name.Go }}(%d)", e)
+     }
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e {{ $enum.Name.Go }}) MarshalJSON() ([]byte, error) {
+     switch e {
+     {{- range $enum.Values }}
+     case {{ $enum.Name.Go }}{{ .Go }}:
+          return json.Marshal("{{ . }}")
+     {{- end }}
+     default:
+          return nil, fmt.Errorf("unknown enum value %q for {{ $enum.Name.Go }}", e)
+     }
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *{{ $enum.Name.Go }}) UnmarshalJSON(bs []byte) error {
+     var s string
+     if err := json.Unmarshal(bs, &s); err != nil {
+          return err
+     }
+     switch s {
+     {{- range $enum.Values }}
+     case "{{ . }}":
+          *e = {{ $enum.Name.Go }}{{ .Go }}
+     {{- end }}
+     default:
+          return fmt.Errorf("unknown enum value %q for {{ $enum.Name.Go }}", s)
+     }
+     return nil
+}

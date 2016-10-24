@@ -1,0 +1,69 @@
+{{ $u := . }}
+{{ $basename := $u.Name.Go }}
+{{ $discriminatorField := $u.DiscriminatorField API }}
+
+// {{ $u.Name }} -> {{ $basename }} (flat union)
+
+// {{ $basename }} implements the "{{ .Name }}" QMP API type.
+//
+// Can be one of:
+{{- range $suffix, $type := $u.Options }}
+//   - {{ $basename }}{{ $suffix.Go }}
+{{- end }}
+type {{ $basename }} interface {
+     is{{ $basename }}()
+}
+
+{{- range $suffix, $type := $u.Options }}
+{{ $subname := printf "%s%s" $basename $suffix.Go }}
+{{ $subtype := (index API $type) }}
+
+// {{ $subname }} is an implementation of {{ $basename }}.
+type {{ $subname }} struct {
+{{- range $u.Base.Fields API }}
+  {{- if ne .Name $u.Discriminator }}
+    {{ render . }}
+  {{- end }}
+{{- end }}
+{{- range $subtype.Fields }}
+{{ render . }}
+{{- end }}
+}
+
+func ({{ $subname }}) is{{ $basename }}() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s {{ $subname }}) MarshalJSON() ([]byte, error) {
+     v := struct{
+          {{- range $u.Base.Fields API }}
+          {{- if eq .Name $u.Discriminator }}
+          {{ render . }}
+          {{- end }}
+          {{- end }}
+          {{ $subname }}
+     }{
+          {{ $discriminatorField.Type.Go }}{{ $suffix.Go }},
+          s,
+     }
+     return json.Marshal(v)
+}
+{{- end }}
+
+func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
+     v := struct{
+       {{ render $discriminatorField }}
+     }{}
+     if err := json.Unmarshal([]byte(bs), &v); err != nil {
+        return nil, err
+     }
+     switch v.{{ $discriminatorField.Name.Go }} {
+     {{- range $suffix, $type := $u.Options }}
+     case {{ $discriminatorField.Type.Go }}{{ $suffix.Go }}:
+          var ret {{ $basename }}{{ $suffix.Go }}
+          err := json.Unmarshal([]byte(bs), &ret)
+          return ret, err
+     {{- end }}
+     default:
+          return nil, fmt.Errorf("unknown flat union subtype %q for flat union {{ $basename }}", v.{{ $discriminatorField.Name.Go }})
+     }
+}

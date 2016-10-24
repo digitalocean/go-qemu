@@ -1,0 +1,11 @@
+{{- if .List -}}
+  {{ .Name.FieldName }} []{{ .Type.Go }}
+{{- else if and .Optional (not (.Type.InterfaceType API)) -}}
+  {{ .Name.FieldName }} *{{ .Type.Go }}
+{{- else -}}
+  {{ .Name.FieldName }} {{ .Type.Go }}
+{{- end -}}
+
+{{- if .Optional }} `json:"{{ .Name }},omitempty"`
+{{- else }} `json:"{{ .Name }}"`
+{{- end -}}

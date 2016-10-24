@@ -1,0 +1,70 @@
+{{/*
+
+There are very few alternates in the API, but one of them
+(BlockDevRef) is quite tricky, because it references a flat union as
+one of its implementations. So, a lot of this logic is specific to
+supporting flat unions as implementations of an alternate.
+
+*/}}
+
+{{ $basename := .Name.Go }}
+
+// {{ .Name }} -> {{ $basename }} (alternate)
+
+// {{ $basename }} implements the "{{ .Name }}" QMP API type.
+//
+// Can be one of:
+{{- range $suffix, $type := .Options }}
+//   - {{ $basename }}{{ $suffix.Go }}
+{{- end }}
+type {{ $basename }} interface {
+  is{{ $basename }}()
+}
+
+{{- range $suffix, $type := .Options }}
+  {{ $subname := printf "%s%s" $basename $suffix.Go }}
+
+  // {{ $subname }} is an implementation of {{ $basename }}
+  type {{ $subname }} {{ $type.Go }}
+
+  {{- if eq (typeOf (index API $type)) "flatunion" }}
+    {{ $u := index API $type }}
+    {{- range $suffix, $type := $u.Options }}
+      func ({{ $u.Name.Go }}{{ $suffix.Go }}) is{{ $basename }}() {}
+    {{- end }}
+  {{- else }}
+    func ({{ $subname }}) is{{ $basename }}() {}
+  {{- end }}
+{{- end }}
+
+func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
+  {{- range $suffix, $type := .Options }}
+    {{- if $type.SimpleType }}
+      var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
+      if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
+        return {{ $suffix }}, nil
+       }
+    {{- end }}
+  {{- end }}
+  {{- range $suffix, $type := .Options }}
+    {{- if not $type.SimpleType }}
+      {{ $subtype := index API $type }}
+      {{- if eq (typeOf $subtype) "flatunion" }}
+        if {{ $suffix }}, err := decode{{ $type.Go }}([]byte(bs)); err == nil {
+          switch impl := {{ $suffix }}.(type) {
+          {{- range $suffix, $type := $subtype.Options }}
+          case {{ $subtype.Name.Go }}{{ $suffix.Go }}:
+            return impl, nil
+          {{- end }}
+          }
+        }
+      {{- else }}
+        var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
+        if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
+          return {{ $suffix }}, nil
+        }
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  return nil, fmt.Errorf("unable to decode %q as a {{ $basename }}", string(bs))
+}

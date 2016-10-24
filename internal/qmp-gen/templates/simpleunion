@@ -1,0 +1,68 @@
+{{/*
+
+It's important to note that union implementations are always a basic
+type or a struct, never another union. This means that we can safely
+decode union implementations with json.Unmarshal, so we don't have to
+handle recursively calling decodeFoo functions to unmarshal unions.
+
+Also, there is one simple union type whose name clashes with the
+underlying struct type: ImageInfoSpecificVmdk. The struct type is not
+used anywhere outside the simple union, so we just skip the
+redefinition, but still tack on all the marshaling logic.
+
+*/}}
+
+{{ $basename := .Name.Go }}
+
+// {{ .Name }} -> {{ $basename }} (simple union)
+
+// {{ $basename }} implements the "{{ .Name }}" QMP API type.
+//
+// Can be one of:
+{{- range $suffix, $type := .Options }}
+//   - {{ $basename }}{{ $suffix.Go }}
+{{- end }}
+type {{ $basename }} interface {
+     is{{ $basename }}()
+}
+
+{{- range $suffix, $type := .Options }}
+{{ $subname := printf "%s%s" $basename $suffix.Go }}
+{{- if ne $subname $type.Go }}
+// {{ $subname }} is an implementation of {{ $basename }}.
+type {{ $subname }} {{ $type.Go }}
+{{- end }}
+
+func ({{ $subname }}) is{{ $basename }}() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s {{ $subname }}) MarshalJSON() ([]byte, error) {
+     v := map[string]interface{}{
+          "type": "{{ $suffix }}",
+          "data": s,
+     }
+     return json.Marshal(v)
+}
+{{- end }}
+
+func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
+     v := struct{
+          T string `json:"type"`
+          V json.RawMessage `json:"data"`
+     }{}
+     if err := json.Unmarshal([]byte(bs), &v); err != nil {
+          return nil, err
+     }
+     switch v.T {
+     {{- range $suffix, $type := .Options }}
+     case "{{ $suffix }}":
+          var ret {{ $basename }}{{ $suffix.Go }}
+          if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
+               return nil, err
+          }
+          return ret, nil
+     {{- end }}
+     default:
+          return nil, fmt.Errorf("unknown subtype %q for union {{ $basename }}", v.T)
+     }
+}

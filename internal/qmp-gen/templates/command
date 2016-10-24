@@ -1,0 +1,92 @@
+// {{ .Name }} -> {{ .Name.Go }} (command)
+
+{{ define "funcArg" -}}
+  {{- if .List -}}
+    {{ unexport .Name.FieldName }} []{{ .Type.Go }}
+  {{- else if and .Optional (not (.Type.InterfaceType API)) -}}
+    {{ unexport .Name.FieldName }} *{{ .Type.Go }}
+  {{- else -}}
+    {{ unexport .Name.FieldName }} {{ .Type.Go }}
+  {{- end -}}
+{{- end }}
+
+{{ define "funcArgs" -}}
+{{- if .BoxedInput -}}
+  cmd *{{ .Inputs.Ref.Go }}
+{{- else -}}
+  {{- $inputs := .Inputs.Fields API -}}
+  {{- range $i, $f := $inputs -}}
+    {{- template "funcArg" $f -}}
+    {{- if not (last $inputs $i) -}},{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end }}
+
+{{ define "retVal" -}}
+  {{- if eq .Type "" -}}
+    (err error)
+  {{- else if .List -}}
+    (ret []{{ .Type.Go }}, err error)
+  {{- else if and .Optional (not (.Type.InterfaceType API)) -}}
+    (ret *{{ .Type.Go }}, err error)
+  {{- else -}}
+    (ret {{ .Type.Go }}, err error)
+  {{- end -}}
+{{- end }}
+
+// {{ .Name.Go }} implements the "{{ .Name }}" QMP API call.
+func (m *Monitor) {{ .Name.Go }}({{ template "funcArgs" . }}) {{ template "retVal" .Output }} {
+  {{- if not .BoxedInput }}
+  cmd := struct{
+  {{- range .Inputs.Fields API }}
+    {{ render . }}
+  {{- end }}
+  }{
+  {{- range .Inputs.Fields API }}
+    {{ unexport .Name.FieldName }},
+  {{- end }}
+  }
+  {{- end }}
+  bs, err := json.Marshal(map[string]interface{}{
+    "execute": "{{ .Name }}",
+    "arguments": cmd,
+  })
+  if err != nil {
+    return
+  }
+  bs, err = m.mon.Run(bs)
+  if err != nil {
+    return
+  }
+
+  {{- if ne .Output.Type "" }}
+    res := struct{
+      Res json.RawMessage `json:"return"`
+    }{}
+    if err = json.Unmarshal(bs, &res); err != nil {
+      return
+    }
+    {{- if .Output.Type.InterfaceType API }}
+      {{- if .Output.List }}
+        var reslist []json.RawMessage
+        if err = json.Unmarshal([]byte(res.Res), &reslist); err != nil {
+          return
+        }
+        for _, r := range reslist {
+          v, err := decode{{ .Output.Type.Go }}(r)
+          if err != nil {
+            return nil, err
+          }
+          ret = append(ret, v)
+        }
+      {{- else }}
+        return decode{{ .Output.Type.Go }}(res.Res)
+      {{- end }}
+    {{- else }}
+      if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+        return
+      }
+    {{- end }}
+  {{- end }}
+  return
+}
