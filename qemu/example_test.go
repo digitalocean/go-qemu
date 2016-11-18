@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/digitalocean/go-qemu"
+	"github.com/digitalocean/go-qemu/qemu"
 	"github.com/digitalocean/go-qemu/qmp"
 	"github.com/digitalocean/go-qemu/qmp/qmptest"
 )

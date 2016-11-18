@@ -1,10 +1,28 @@
-qemu [![GoDoc](http://godoc.org/github.com/digitalocean/go-qemu?status.svg)](http://godoc.org/github.com/digitalocean/go-qemu) [![Build Status](https://travis-ci.org/digitalocean/go-qemu.svg?branch=master)](https://travis-ci.org/digitalocean/go-qemu) [![Report Card](https://goreportcard.com/badge/github.com/digitalocean/go-qemu)](https://goreportcard.com/report/github.com/digitalocean/go-qemu)
-====
+go-qemu [![GoDoc](http://godoc.org/github.com/digitalocean/go-qemu?status.svg)](http://godoc.org/github.com/digitalocean/go-qemu) [![Build Status](https://travis-ci.org/digitalocean/go-qemu.svg?branch=master)](https://travis-ci.org/digitalocean/go-qemu) [![Report Card](https://goreportcard.com/badge/github.com/digitalocean/go-qemu)](https://goreportcard.com/report/github.com/digitalocean/go-qemu)
+=======
 
-Package `qemu` provides an interface for interacting with running QEMU instances.
+`go-qemu` is a collection of Go packages for interacting with running QEMU
+instances.  Apache 2.0 Licensed.
 
 Feel free to join us in [`#go-qemu` on freenode](https://webchat.freenode.net/)
 if you'd like to discuss the project.
+
+Overview
+--------
+
+Here is a quick overview of each top-level package, and what they can be used for:
+
+- `hypervisor`: Package hypervisor provides management facilities for one or
+more QEMU virtual machines on a hypervisor.
+  - Provides easier access for managing groups of VMs than the `qemu` package.
+  - Provides access to individual `qemu.Domain` types.
+- `qemu`: Package qemu provides an interface for interacting with running QEMU instances.
+  - Typically used for managing a single VM.
+  - Good for quick experiments.
+- `qmp`: Package qmp enables interaction with QEMU instances via the QEMU Machine
+Protocol (QMP).
+  - Typically not used by consumers outside of this repository.
+  - Wraps code-generated types with friendlier APIs.
 
 Details
 -------

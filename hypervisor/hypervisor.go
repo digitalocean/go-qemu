@@ -19,7 +19,7 @@ package hypervisor
 import (
 	"fmt"
 
-	"github.com/digitalocean/go-qemu"
+	"github.com/digitalocean/go-qemu/qemu"
 	"github.com/digitalocean/go-qemu/qmp"
 )
 
