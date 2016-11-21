@@ -289,6 +289,7 @@
 # @ecb: Electronic Code Book
 # @cbc: Cipher Block Chaining
 # @xts: XEX with tweaked code book and ciphertext stealing
+# @ctr: Counter (Since 2.8)
 # Since: 2.6
 ##
 {
@@ -297,7 +298,8 @@
   "data": [
     "ecb",
     "cbc",
-    "xts"
+    "xts",
+    "ctr"
   ]
 }
 
@@ -1038,12 +1040,12 @@
 #       0.14.0 this can be: 'blkdebug', 'bochs', 'cloop', 'cow', 'dmg',
 #       'file', 'file', 'ftp', 'ftps', 'host_cdrom', 'host_device',
 #       'http', 'https', 'luks', 'nbd', 'parallels', 'qcow',
-#       'qcow2', 'raw', 'tftp', 'vdi', 'vmdk', 'vpc', 'vvfat'
+#       'qcow2', 'raw', 'vdi', 'vmdk', 'vpc', 'vvfat'
 #       2.2: 'archipelago' added, 'cow' dropped
 #       2.3: 'host_floppy' deprecated
 #       2.5: 'host_floppy' dropped
 #       2.6: 'luks' added
-#       2.8: 'replication' added
+#       2.8: 'replication' added, 'tftp' dropped
 #
 # @backing_file: #optional the name of the backing file (for copy-on-write)
 #
@@ -2528,6 +2530,13 @@
 # with query-block-jobs.  The operation can be stopped before it has completed
 # using the block-job-cancel command.
 #
+# The node that receives the data is called the top image, can be located in
+# any part of the chain (but always above the base image; see below) and can be
+# specified using its device or node name. Earlier qemu versions only allowed
+# 'device' to name the top level node; presence of the 'base-node' parameter
+# during introspection can be used as a witness of the enhanced semantics
+# of 'device'.
+#
 # If a base file is specified then sectors are not copied from that base file and
 # its backing chain.  When streaming completes the image file will have the base
 # file as its backing file.  This can be used to stream a subset of the backing
@@ -2539,12 +2548,16 @@
 # @job-id: #optional identifier for the newly-created block job. If
 #          omitted, the device name will be used. (Since 2.7)
 #
-# @device: the device name or node-name of a root node
+# @device: the device or node name of the top image
 #
-# @base:   #optional the common backing file name
+# @base:   #optional the common backing file name.
+#                    It cannot be set if @base-node is also set.
 #
-# @backing-file: #optional The backing file string to write into the active
-#                          layer. This filename is not validated.
+# @base-node: #optional the node name of the backing file.
+#                       It cannot be set if @base is also set. (Since 2.8)
+#
+# @backing-file: #optional The backing file string to write into the top
+#                          image. This filename is not validated.
 #
 #                          If a pathname string is such that it cannot be
 #                          resolved by QEMU, that means that subsequent QMP or
@@ -2572,6 +2585,7 @@
     "*job-id": "str",
     "device": "str",
     "*base": "str",
+    "*base-node": "str",
     "*backing-file": "str",
     "*speed": "int",
     "*on-error": "BlockdevOnError"
@@ -2820,6 +2834,7 @@
 #
 # @host_device, @host_cdrom: Since 2.1
 # @gluster: Since 2.7
+# @nbd, @nfs, @replication, @ssh: Since 2.8
 #
 # Since: 2.0
 ##
@@ -2841,6 +2856,8 @@
     "http",
     "https",
     "luks",
+    "nbd",
+    "nfs",
     "null-aio",
     "null-co",
     "parallels",
@@ -2850,7 +2867,7 @@
     "quorum",
     "raw",
     "replication",
-    "tftp",
+    "ssh",
     "vdi",
     "vhdx",
     "vmdk",
@@ -3142,6 +3159,29 @@
     "*mport": "int",
     "*vport": "int",
     "*segment": "str"
+  }
+}
+
+##
+# @BlockdevOptionsSsh
+#
+# @server:              host address
+#
+# @path:                path to the image on the host
+#
+# @user:                #optional user as which to connect, defaults to current
+#                       local user name
+#
+# TODO: Expose the host_key_check option in QMP
+#
+# Since 2.8
+##
+{
+  "struct": "BlockdevOptionsSsh",
+  "data": {
+    "server": "InetSocketAddress",
+    "path": "str",
+    "*user": "str"
   }
 }
 
@@ -3439,7 +3479,7 @@
 #
 # @debug-level: #optional libgfapi log level (default '4' which is Error)
 #
-# @logfile:     #optional libgfapi log file (default /dev/stderr)
+# @logfile:     #optional libgfapi log file (default /dev/stderr) (Since 2.8)
 #
 # Since: 2.7
 ##
@@ -3483,7 +3523,8 @@
 # @mode: the replication mode
 #
 # @top-id: #optional In secondary mode, node name or device ID of the root
-#          node who owns the replication node chain. Ignored in primary mode.
+#          node who owns the replication node chain. Must not be given in
+#          primary mode.
 #
 # Since: 2.8
 ##
@@ -3493,6 +3534,86 @@
   "data": {
     "mode": "ReplicationMode",
     "*top-id": "str"
+  }
+}
+
+##
+# @NFSTransport
+#
+# An enumeration of NFS transport types
+#
+# @inet:        TCP transport
+#
+# Since 2.8
+##
+{
+  "enum": "NFSTransport",
+  "data": [
+    "inet"
+  ]
+}
+
+##
+# @NFSServer
+#
+# Captures the address of the socket
+#
+# @type:        transport type used for NFS (only TCP supported)
+#
+# @host:        host address for NFS server
+#
+# Since 2.8
+##
+{
+  "struct": "NFSServer",
+  "data": {
+    "type": "NFSTransport",
+    "host": "str"
+  }
+}
+
+##
+# @BlockdevOptionsNfs
+#
+# Driver specific block device option for NFS
+#
+# @server:                  host address
+#
+# @path:                    path of the image on the host
+#
+# @user:                    #optional UID value to use when talking to the
+#                           server (defaults to 65534 on Windows and getuid()
+#                           on unix)
+#
+# @group:                   #optional GID value to use when talking to the
+#                           server (defaults to 65534 on Windows and getgid()
+#                           in unix)
+#
+# @tcp-syn-count:           #optional number of SYNs during the session
+#                           establishment (defaults to libnfs default)
+#
+# @readahead-size:          #optional set the readahead size in bytes (defaults
+#                           to libnfs default)
+#
+# @page-cache-size:         #optional set the pagecache size in bytes (defaults
+#                           to libnfs default)
+#
+# @debug-level:             #optional set the NFS debug level (max 2) (defaults
+#                           to libnfs default)
+#
+# Since 2.8
+##
+{
+  "struct": "BlockdevOptionsNfs",
+  "data": {
+    "server": "NFSServer",
+    "path": "str",
+    "*user": "int",
+    "*group": "int",
+    "*tcp-syn-count": "int",
+    "*readahead-size": "int",
+    "*page-cache-size": "int",
+    "*debug-level": "int"
   }
 }
 
@@ -3509,6 +3630,47 @@
   "struct": "BlockdevOptionsCurl",
   "data": {
     "filename": "str"
+  }
+}
+
+##
+# @BlockdevOptionsNbd
+#
+# Driver specific block device options for NBD.
+#
+# @server:      NBD server address
+#
+# @export:      #optional export name
+#
+# @tls-creds:   #optional TLS credentials ID
+#
+# Since: 2.8
+##
+{
+  "struct": "BlockdevOptionsNbd",
+  "data": {
+    "server": "SocketAddress",
+    "*export": "str",
+    "*tls-creds": "str"
+  }
+}
+
+##
+# @BlockdevOptionsRaw
+#
+# Driver specific block device options for the raw driver.
+#
+# @offset:      #optional position where the block device starts
+# @size:        #optional the assumed size of the device
+#
+# Since: 2.8
+##
+{
+  "struct": "BlockdevOptionsRaw",
+  "base": "BlockdevOptionsGenericFormat",
+  "data": {
+    "*offset": "int",
+    "*size": "int"
   }
 }
 
@@ -3559,6 +3721,8 @@
     "http": "BlockdevOptionsCurl",
     "https": "BlockdevOptionsCurl",
     "luks": "BlockdevOptionsLUKS",
+    "nbd": "BlockdevOptionsNbd",
+    "nfs": "BlockdevOptionsNfs",
     "null-aio": "BlockdevOptionsNull",
     "null-co": "BlockdevOptionsNull",
     "parallels": "BlockdevOptionsGenericFormat",
@@ -3566,9 +3730,9 @@
     "qcow": "BlockdevOptionsGenericCOWFormat",
     "qed": "BlockdevOptionsGenericCOWFormat",
     "quorum": "BlockdevOptionsQuorum",
-    "raw": "BlockdevOptionsGenericFormat",
+    "raw": "BlockdevOptionsRaw",
     "replication": "BlockdevOptionsReplication",
-    "tftp": "BlockdevOptionsCurl",
+    "ssh": "BlockdevOptionsSsh",
     "vdi": "BlockdevOptionsGenericFormat",
     "vhdx": "BlockdevOptionsGenericFormat",
     "vmdk": "BlockdevOptionsGenericCOWFormat",
@@ -3608,15 +3772,14 @@
 # block drivers among other things.  Stay away from it unless you want
 # to help with its development.
 #
-# @options: block device options for the new device
+# For the arguments, see the documentation of BlockdevOptions.
 #
 # Since: 1.7
 ##
 {
   "command": "blockdev-add",
-  "data": {
-    "options": "BlockdevOptions"
-  }
+  "data": "BlockdevOptions",
+  "boxed": true
 }
 
 ##
@@ -5576,6 +5739,10 @@
 # @watchdog: the watchdog action is configured to pause and has been triggered
 #
 # @guest-panicked: guest has been panicked as a result of guest OS panic
+#
+# @colo: guest is paused to save/restore VM state under colo checkpoint,
+#        VM can not get into this state unless colo capability is enabled
+#        for migration. (since 2.8)
 ##
 {
   "enum": "RunState",
@@ -5594,7 +5761,8 @@
     "shutdown",
     "suspended",
     "watchdog",
-    "guest-panicked"
+    "guest-panicked",
+    "colo"
   ]
 }
 
@@ -5955,6 +6123,9 @@
 #
 # @failed: some error occurred during migration process.
 #
+# @colo: VM is in the process of fault tolerance, VM can not get into this
+#        state unless colo capability is enabled for migration. (since 2.8)
+#
 # Since: 2.3
 #
 ##
@@ -5968,7 +6139,8 @@
     "active",
     "postcopy-active",
     "completed",
-    "failed"
+    "failed",
+    "colo"
   ]
 }
 
@@ -6088,6 +6260,11 @@
 #          been migrated, pulling the remaining pages along as needed. NOTE: If
 #          the migration fails during postcopy the VM will fail.  (since 2.6)
 #
+# @x-colo: If enabled, migration will never end, and the state of the VM on the
+#        primary side will be migrated continuously to the VM on secondary
+#        side, this process is called COarse-Grain LOck Stepping (COLO) for
+#        Non-stop Service. (since 2.8)
+#
 # Since: 1.2
 ##
 {
@@ -6099,7 +6276,8 @@
     "zero-blocks",
     "compress",
     "events",
-    "postcopy-ram"
+    "postcopy-ram",
+    "x-colo"
   ]
 }
 
@@ -6203,6 +6381,9 @@
 # @downtime-limit: set maximum tolerated downtime for migration. maximum
 #                  downtime in milliseconds (Since 2.8)
 #
+# @x-checkpoint-delay: The delay time (in ms) between two COLO checkpoints in
+#          periodic mode. (Since 2.8)
+#
 # Since: 2.4
 ##
 {
@@ -6216,7 +6397,8 @@
     "tls-creds",
     "tls-hostname",
     "max-bandwidth",
-    "downtime-limit"
+    "downtime-limit",
+    "x-checkpoint-delay"
   ]
 }
 
@@ -6224,6 +6406,8 @@
 # @migrate-set-parameters
 #
 # Set various migration parameters.  See MigrationParameters for details.
+#
+# @x-checkpoint-delay: the delay time between two checkpoints. (Since 2.8)
 #
 # Since: 2.4
 ##
@@ -6276,6 +6460,8 @@
 # @downtime-limit: set maximum tolerated downtime for migration. maximum
 #                  downtime in milliseconds (Since 2.8)
 #
+# @x-checkpoint-delay: the delay time between two COLO checkpoints. (Since 2.8)
+#
 # Since: 2.4
 ##
 {
@@ -6289,7 +6475,8 @@
     "*tls-creds": "str",
     "*tls-hostname": "str",
     "*max-bandwidth": "int",
-    "*downtime-limit": "int"
+    "*downtime-limit": "int",
+    "*x-checkpoint-delay": "int"
   }
 }
 
@@ -6343,6 +6530,101 @@
 # Since: 2.5
 {
   "command": "migrate-start-postcopy"
+}
+
+##
+# @COLOMessage
+#
+# The message transmission between Primary side and Secondary side.
+#
+# @checkpoint-ready: Secondary VM (SVM) is ready for checkpointing
+#
+# @checkpoint-request: Primary VM (PVM) tells SVM to prepare for checkpointing
+#
+# @checkpoint-reply: SVM gets PVM's checkpoint request
+#
+# @vmstate-send: VM's state will be sent by PVM.
+#
+# @vmstate-size: The total size of VMstate.
+#
+# @vmstate-received: VM's state has been received by SVM.
+#
+# @vmstate-loaded: VM's state has been loaded by SVM.
+#
+# Since: 2.8
+##
+{
+  "enum": "COLOMessage",
+  "data": [
+    "checkpoint-ready",
+    "checkpoint-request",
+    "checkpoint-reply",
+    "vmstate-send",
+    "vmstate-size",
+    "vmstate-received",
+    "vmstate-loaded"
+  ]
+}
+
+##
+# @COLOMode
+#
+# The colo mode
+#
+# @unknown: unknown mode
+#
+# @primary: master side
+#
+# @secondary: slave side
+#
+# Since: 2.8
+##
+{
+  "enum": "COLOMode",
+  "data": [
+    "unknown",
+    "primary",
+    "secondary"
+  ]
+}
+
+##
+# @FailoverStatus
+#
+# An enumeration of COLO failover status
+#
+# @none: no failover has ever happened
+#
+# @require: got failover requirement but not handled
+#
+# @active: in the process of doing failover
+#
+# @completed: finish the process of failover
+#
+# Since: 2.8
+##
+{
+  "enum": "FailoverStatus",
+  "data": [
+    "none",
+    "require",
+    "active",
+    "completed"
+  ]
+}
+
+##
+# @x-colo-lost-heartbeat
+#
+# Tell qemu that heartbeat is lost, request it to do takeover procedures.
+# If this command is sent to the PVM, the Primary side will exit COLO mode.
+# If sent to the Secondary, the Secondary side will run failover work,
+# then takes over server operation to become the service VM.
+#
+# Since: 2.8
+##
+{
+  "command": "x-colo-lost-heartbeat"
 }
 
 ##
@@ -6613,6 +6895,8 @@
 #
 # @unix: unix socket
 #
+# @vsock: vsock family (since 2.8)
+#
 # @unknown: otherwise
 #
 # Since: 2.1
@@ -6623,6 +6907,7 @@
     "ipv4",
     "ipv6",
     "unix",
+    "vsock",
     "unknown"
   ]
 }
@@ -9142,6 +9427,27 @@
 }
 
 ##
+# @VsockSocketAddress
+#
+# Captures a socket address in the vsock namespace.
+#
+# @cid: unique host identifier
+# @port: port
+#
+# Note that string types are used to allow for possible future hostname or
+# service resolution support.
+#
+# Since 2.8
+##
+{
+  "struct": "VsockSocketAddress",
+  "data": {
+    "cid": "str",
+    "port": "str"
+  }
+}
+
+##
 # @SocketAddress
 #
 # Captures the address of a socket, which could also be a named file descriptor
@@ -9153,6 +9459,7 @@
   "data": {
     "inet": "InetSocketAddress",
     "unix": "UnixSocketAddress",
+    "vsock": "VsockSocketAddress",
     "fd": "String"
   }
 }
@@ -11181,12 +11488,13 @@
 #
 # @pause: system pauses
 #
-# Since: 2.1
+# Since: 2.1 (poweroff since 2.8)
 ##
 {
   "enum": "GuestPanicAction",
   "data": [
-    "pause"
+    "pause",
+    "poweroff"
   ]
 }
 
