@@ -1172,6 +1172,8 @@ const (
 	BlockdevDriverHTTP
 	BlockdevDriverHTTPS
 	BlockdevDriverLUKS
+	BlockdevDriverNBD
+	BlockdevDriverNfs
 	BlockdevDriverNullAIO
 	BlockdevDriverNullCo
 	BlockdevDriverParallels
@@ -1181,7 +1183,7 @@ const (
 	BlockdevDriverQuorum
 	BlockdevDriverRaw
 	BlockdevDriverReplication
-	BlockdevDriverTftp
+	BlockdevDriverSsh
 	BlockdevDriverVdi
 	BlockdevDriverVhdx
 	BlockdevDriverVMDK
@@ -1222,6 +1224,10 @@ func (e BlockdevDriver) String() string {
 		return "https"
 	case BlockdevDriverLUKS:
 		return "luks"
+	case BlockdevDriverNBD:
+		return "nbd"
+	case BlockdevDriverNfs:
+		return "nfs"
 	case BlockdevDriverNullAIO:
 		return "null-aio"
 	case BlockdevDriverNullCo:
@@ -1240,8 +1246,8 @@ func (e BlockdevDriver) String() string {
 		return "raw"
 	case BlockdevDriverReplication:
 		return "replication"
-	case BlockdevDriverTftp:
-		return "tftp"
+	case BlockdevDriverSsh:
+		return "ssh"
 	case BlockdevDriverVdi:
 		return "vdi"
 	case BlockdevDriverVhdx:
@@ -1290,6 +1296,10 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("https")
 	case BlockdevDriverLUKS:
 		return json.Marshal("luks")
+	case BlockdevDriverNBD:
+		return json.Marshal("nbd")
+	case BlockdevDriverNfs:
+		return json.Marshal("nfs")
 	case BlockdevDriverNullAIO:
 		return json.Marshal("null-aio")
 	case BlockdevDriverNullCo:
@@ -1308,8 +1318,8 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("raw")
 	case BlockdevDriverReplication:
 		return json.Marshal("replication")
-	case BlockdevDriverTftp:
-		return json.Marshal("tftp")
+	case BlockdevDriverSsh:
+		return json.Marshal("ssh")
 	case BlockdevDriverVdi:
 		return json.Marshal("vdi")
 	case BlockdevDriverVhdx:
@@ -1362,6 +1372,10 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 		*e = BlockdevDriverHTTPS
 	case "luks":
 		*e = BlockdevDriverLUKS
+	case "nbd":
+		*e = BlockdevDriverNBD
+	case "nfs":
+		*e = BlockdevDriverNfs
 	case "null-aio":
 		*e = BlockdevDriverNullAIO
 	case "null-co":
@@ -1380,8 +1394,8 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 		*e = BlockdevDriverRaw
 	case "replication":
 		*e = BlockdevDriverReplication
-	case "tftp":
-		*e = BlockdevDriverTftp
+	case "ssh":
+		*e = BlockdevDriverSsh
 	case "vdi":
 		*e = BlockdevDriverVdi
 	case "vhdx":
@@ -1491,6 +1505,8 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsHTTP
 //   - BlockdevOptionsHTTPS
 //   - BlockdevOptionsLUKS
+//   - BlockdevOptionsNBD
+//   - BlockdevOptionsNfs
 //   - BlockdevOptionsNullAIO
 //   - BlockdevOptionsNullCo
 //   - BlockdevOptionsParallels
@@ -1500,7 +1516,7 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsQuorum
 //   - BlockdevOptionsRaw
 //   - BlockdevOptionsReplication
-//   - BlockdevOptionsTftp
+//   - BlockdevOptionsSsh
 //   - BlockdevOptionsVdi
 //   - BlockdevOptionsVhdx
 //   - BlockdevOptionsVMDK
@@ -1885,6 +1901,63 @@ func (s BlockdevOptionsLUKS) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// BlockdevOptionsNBD is an implementation of BlockdevOptions.
+type BlockdevOptionsNBD struct {
+	NodeName     *string                      `json:"node-name,omitempty"`
+	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Server       SocketAddress                `json:"server"`
+	Export       *string                      `json:"export,omitempty"`
+	TLSCreds     *string                      `json:"tls-creds,omitempty"`
+}
+
+func (BlockdevOptionsNBD) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsNBD) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsNBD
+	}{
+		BlockdevDriverNBD,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevOptionsNfs is an implementation of BlockdevOptions.
+type BlockdevOptionsNfs struct {
+	NodeName      *string                      `json:"node-name,omitempty"`
+	Discard       *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache         *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly      *bool                        `json:"read-only,omitempty"`
+	DetectZeroes  *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Server        NfsServer                    `json:"server"`
+	Path          string                       `json:"path"`
+	User          *int64                       `json:"user,omitempty"`
+	Group         *int64                       `json:"group,omitempty"`
+	TCPSynCount   *int64                       `json:"tcp-syn-count,omitempty"`
+	ReadaheadSize *int64                       `json:"readahead-size,omitempty"`
+	PageCacheSize *int64                       `json:"page-cache-size,omitempty"`
+	DebugLevel    *int64                       `json:"debug-level,omitempty"`
+}
+
+func (BlockdevOptionsNfs) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsNfs) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsNfs
+	}{
+		BlockdevDriverNfs,
+		s,
+	}
+	return json.Marshal(v)
+}
+
 // BlockdevOptionsNullAIO is an implementation of BlockdevOptions.
 type BlockdevOptionsNullAIO struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
@@ -2074,7 +2147,8 @@ type BlockdevOptionsRaw struct {
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	File         BlockdevRef                  `json:"file"`
+	Offset       *int64                       `json:"offset,omitempty"`
+	Size         *int64                       `json:"size,omitempty"`
 }
 
 func (BlockdevOptionsRaw) isBlockdevOptions() {}
@@ -2116,25 +2190,27 @@ func (s BlockdevOptionsReplication) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// BlockdevOptionsTftp is an implementation of BlockdevOptions.
-type BlockdevOptionsTftp struct {
+// BlockdevOptionsSsh is an implementation of BlockdevOptions.
+type BlockdevOptionsSsh struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Filename     string                       `json:"filename"`
+	Server       InetSocketAddress            `json:"server"`
+	Path         string                       `json:"path"`
+	User         *string                      `json:"user,omitempty"`
 }
 
-func (BlockdevOptionsTftp) isBlockdevOptions() {}
+func (BlockdevOptionsSsh) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
-func (s BlockdevOptionsTftp) MarshalJSON() ([]byte, error) {
+func (s BlockdevOptionsSsh) MarshalJSON() ([]byte, error) {
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsTftp
+		BlockdevOptionsSsh
 	}{
-		BlockdevDriverTftp,
+		BlockdevDriverSsh,
 		s,
 	}
 	return json.Marshal(v)
@@ -2332,6 +2408,14 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsLUKS
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
+	case BlockdevDriverNBD:
+		var ret BlockdevOptionsNBD
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverNfs:
+		var ret BlockdevOptionsNfs
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverNullAIO:
 		var ret BlockdevOptionsNullAIO
 		err := json.Unmarshal([]byte(bs), &ret)
@@ -2368,8 +2452,8 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsReplication
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
-	case BlockdevDriverTftp:
-		var ret BlockdevOptionsTftp
+	case BlockdevDriverSsh:
+		var ret BlockdevOptionsSsh
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverVdi:
@@ -2426,6 +2510,8 @@ func (BlockdevOptionsHostDevice) isBlockdevRef()  {}
 func (BlockdevOptionsHTTP) isBlockdevRef()        {}
 func (BlockdevOptionsHTTPS) isBlockdevRef()       {}
 func (BlockdevOptionsLUKS) isBlockdevRef()        {}
+func (BlockdevOptionsNBD) isBlockdevRef()         {}
+func (BlockdevOptionsNfs) isBlockdevRef()         {}
 func (BlockdevOptionsNullAIO) isBlockdevRef()     {}
 func (BlockdevOptionsNullCo) isBlockdevRef()      {}
 func (BlockdevOptionsParallels) isBlockdevRef()   {}
@@ -2435,7 +2521,7 @@ func (BlockdevOptionsQed) isBlockdevRef()         {}
 func (BlockdevOptionsQuorum) isBlockdevRef()      {}
 func (BlockdevOptionsRaw) isBlockdevRef()         {}
 func (BlockdevOptionsReplication) isBlockdevRef() {}
-func (BlockdevOptionsTftp) isBlockdevRef()        {}
+func (BlockdevOptionsSsh) isBlockdevRef()         {}
 func (BlockdevOptionsVdi) isBlockdevRef()         {}
 func (BlockdevOptionsVhdx) isBlockdevRef()        {}
 func (BlockdevOptionsVMDK) isBlockdevRef()        {}
@@ -2485,6 +2571,10 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsLUKS:
 			return impl, nil
+		case BlockdevOptionsNBD:
+			return impl, nil
+		case BlockdevOptionsNfs:
+			return impl, nil
 		case BlockdevOptionsNullAIO:
 			return impl, nil
 		case BlockdevOptionsNullCo:
@@ -2503,7 +2593,7 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsReplication:
 			return impl, nil
-		case BlockdevOptionsTftp:
+		case BlockdevOptionsSsh:
 			return impl, nil
 		case BlockdevOptionsVdi:
 			return impl, nil
@@ -4180,6 +4270,7 @@ type GuestPanicAction int
 // Known values of GuestPanicAction.
 const (
 	GuestPanicActionPause GuestPanicAction = iota
+	GuestPanicActionPoweroff
 )
 
 // String implements fmt.Stringer.
@@ -4187,6 +4278,8 @@ func (e GuestPanicAction) String() string {
 	switch e {
 	case GuestPanicActionPause:
 		return "pause"
+	case GuestPanicActionPoweroff:
+		return "poweroff"
 	default:
 		return fmt.Sprintf("GuestPanicAction(%d)", e)
 	}
@@ -4197,6 +4290,8 @@ func (e GuestPanicAction) MarshalJSON() ([]byte, error) {
 	switch e {
 	case GuestPanicActionPause:
 		return json.Marshal("pause")
+	case GuestPanicActionPoweroff:
+		return json.Marshal("poweroff")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for GuestPanicAction", e)
 	}
@@ -4211,6 +4306,8 @@ func (e *GuestPanicAction) UnmarshalJSON(bs []byte) error {
 	switch s {
 	case "pause":
 		*e = GuestPanicActionPause
+	case "poweroff":
+		*e = GuestPanicActionPoweroff
 	default:
 		return fmt.Errorf("unknown enum value %q for GuestPanicAction", s)
 	}
@@ -5063,6 +5160,7 @@ const (
 	MigrationCapabilityCompress
 	MigrationCapabilityEvents
 	MigrationCapabilityPostcopyRAM
+	MigrationCapabilityXColo
 )
 
 // String implements fmt.Stringer.
@@ -5082,6 +5180,8 @@ func (e MigrationCapability) String() string {
 		return "events"
 	case MigrationCapabilityPostcopyRAM:
 		return "postcopy-ram"
+	case MigrationCapabilityXColo:
+		return "x-colo"
 	default:
 		return fmt.Sprintf("MigrationCapability(%d)", e)
 	}
@@ -5104,6 +5204,8 @@ func (e MigrationCapability) MarshalJSON() ([]byte, error) {
 		return json.Marshal("events")
 	case MigrationCapabilityPostcopyRAM:
 		return json.Marshal("postcopy-ram")
+	case MigrationCapabilityXColo:
+		return json.Marshal("x-colo")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationCapability", e)
 	}
@@ -5130,6 +5232,8 @@ func (e *MigrationCapability) UnmarshalJSON(bs []byte) error {
 		*e = MigrationCapabilityEvents
 	case "postcopy-ram":
 		*e = MigrationCapabilityPostcopyRAM
+	case "x-colo":
+		*e = MigrationCapabilityXColo
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationCapability", s)
 	}
@@ -5173,6 +5277,7 @@ type MigrationParameters struct {
 	TLSHostname          *string `json:"tls-hostname,omitempty"`
 	MaxBandwidth         *int64  `json:"max-bandwidth,omitempty"`
 	DowntimeLimit        *int64  `json:"downtime-limit,omitempty"`
+	XCheckpointDelay     *int64  `json:"x-checkpoint-delay,omitempty"`
 }
 
 // MigrationStats -> MigrationStats (struct)
@@ -5207,6 +5312,7 @@ const (
 	MigrationStatusPostcopyActive
 	MigrationStatusCompleted
 	MigrationStatusFailed
+	MigrationStatusColo
 )
 
 // String implements fmt.Stringer.
@@ -5228,6 +5334,8 @@ func (e MigrationStatus) String() string {
 		return "completed"
 	case MigrationStatusFailed:
 		return "failed"
+	case MigrationStatusColo:
+		return "colo"
 	default:
 		return fmt.Sprintf("MigrationStatus(%d)", e)
 	}
@@ -5252,6 +5360,8 @@ func (e MigrationStatus) MarshalJSON() ([]byte, error) {
 		return json.Marshal("completed")
 	case MigrationStatusFailed:
 		return json.Marshal("failed")
+	case MigrationStatusColo:
+		return json.Marshal("colo")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationStatus", e)
 	}
@@ -5280,6 +5390,8 @@ func (e *MigrationStatus) UnmarshalJSON(bs []byte) error {
 		*e = MigrationStatusCompleted
 	case "failed":
 		*e = MigrationStatusFailed
+	case "colo":
+		*e = MigrationStatusColo
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationStatus", s)
 	}
@@ -5362,6 +5474,59 @@ type MouseInfo struct {
 	Absolute bool   `json:"absolute"`
 }
 
+// NFSServer -> NfsServer (struct)
+
+// NfsServer implements the "NFSServer" QMP API type.
+type NfsServer struct {
+	Type NfsTransport `json:"type"`
+	Host string       `json:"host"`
+}
+
+// NFSTransport -> NfsTransport (enum)
+
+// NfsTransport implements the "NFSTransport" QMP API type.
+type NfsTransport int
+
+// Known values of NfsTransport.
+const (
+	NfsTransportInet NfsTransport = iota
+)
+
+// String implements fmt.Stringer.
+func (e NfsTransport) String() string {
+	switch e {
+	case NfsTransportInet:
+		return "inet"
+	default:
+		return fmt.Sprintf("NfsTransport(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e NfsTransport) MarshalJSON() ([]byte, error) {
+	switch e {
+	case NfsTransportInet:
+		return json.Marshal("inet")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for NfsTransport", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *NfsTransport) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "inet":
+		*e = NfsTransportInet
+	default:
+		return fmt.Errorf("unknown enum value %q for NfsTransport", s)
+	}
+	return nil
+}
+
 // EVENT NIC_RX_FILTER_CHANGED
 
 // NameInfo -> NameInfo (struct)
@@ -5381,6 +5546,7 @@ const (
 	NetworkAddressFamilyIpv4 NetworkAddressFamily = iota
 	NetworkAddressFamilyIpv6
 	NetworkAddressFamilyUnix
+	NetworkAddressFamilyVsock
 	NetworkAddressFamilyUnknown
 )
 
@@ -5393,6 +5559,8 @@ func (e NetworkAddressFamily) String() string {
 		return "ipv6"
 	case NetworkAddressFamilyUnix:
 		return "unix"
+	case NetworkAddressFamilyVsock:
+		return "vsock"
 	case NetworkAddressFamilyUnknown:
 		return "unknown"
 	default:
@@ -5409,6 +5577,8 @@ func (e NetworkAddressFamily) MarshalJSON() ([]byte, error) {
 		return json.Marshal("ipv6")
 	case NetworkAddressFamilyUnix:
 		return json.Marshal("unix")
+	case NetworkAddressFamilyVsock:
+		return json.Marshal("vsock")
 	case NetworkAddressFamilyUnknown:
 		return json.Marshal("unknown")
 	default:
@@ -5429,6 +5599,8 @@ func (e *NetworkAddressFamily) UnmarshalJSON(bs []byte) error {
 		*e = NetworkAddressFamilyIpv6
 	case "unix":
 		*e = NetworkAddressFamilyUnix
+	case "vsock":
+		*e = NetworkAddressFamilyVsock
 	case "unknown":
 		*e = NetworkAddressFamilyUnknown
 	default:
@@ -5749,6 +5921,7 @@ const (
 	QCryptoCipherModeEcb QCryptoCipherMode = iota
 	QCryptoCipherModeCbc
 	QCryptoCipherModeXts
+	QCryptoCipherModeCtr
 )
 
 // String implements fmt.Stringer.
@@ -5760,6 +5933,8 @@ func (e QCryptoCipherMode) String() string {
 		return "cbc"
 	case QCryptoCipherModeXts:
 		return "xts"
+	case QCryptoCipherModeCtr:
+		return "ctr"
 	default:
 		return fmt.Sprintf("QCryptoCipherMode(%d)", e)
 	}
@@ -5774,6 +5949,8 @@ func (e QCryptoCipherMode) MarshalJSON() ([]byte, error) {
 		return json.Marshal("cbc")
 	case QCryptoCipherModeXts:
 		return json.Marshal("xts")
+	case QCryptoCipherModeCtr:
+		return json.Marshal("ctr")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for QCryptoCipherMode", e)
 	}
@@ -5792,6 +5969,8 @@ func (e *QCryptoCipherMode) UnmarshalJSON(bs []byte) error {
 		*e = QCryptoCipherModeCbc
 	case "xts":
 		*e = QCryptoCipherModeXts
+	case "ctr":
+		*e = QCryptoCipherModeCtr
 	default:
 		return fmt.Errorf("unknown enum value %q for QCryptoCipherMode", s)
 	}
@@ -7379,6 +7558,7 @@ const (
 	RunStateSuspended
 	RunStateWatchdog
 	RunStateGuestPanicked
+	RunStateColo
 )
 
 // String implements fmt.Stringer.
@@ -7414,6 +7594,8 @@ func (e RunState) String() string {
 		return "watchdog"
 	case RunStateGuestPanicked:
 		return "guest-panicked"
+	case RunStateColo:
+		return "colo"
 	default:
 		return fmt.Sprintf("RunState(%d)", e)
 	}
@@ -7452,6 +7634,8 @@ func (e RunState) MarshalJSON() ([]byte, error) {
 		return json.Marshal("watchdog")
 	case RunStateGuestPanicked:
 		return json.Marshal("guest-panicked")
+	case RunStateColo:
+		return json.Marshal("colo")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for RunState", e)
 	}
@@ -7494,6 +7678,8 @@ func (e *RunState) UnmarshalJSON(bs []byte) error {
 		*e = RunStateWatchdog
 	case "guest-panicked":
 		*e = RunStateGuestPanicked
+	case "colo":
+		*e = RunStateColo
 	default:
 		return fmt.Errorf("unknown enum value %q for RunState", s)
 	}
@@ -7925,6 +8111,7 @@ type SnapshotInfo struct {
 //   - SocketAddressFD
 //   - SocketAddressInet
 //   - SocketAddressUnix
+//   - SocketAddressVsock
 type SocketAddress interface {
 	isSocketAddress()
 }
@@ -7971,6 +8158,20 @@ func (s SocketAddressUnix) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// SocketAddressVsock is an implementation of SocketAddress.
+type SocketAddressVsock VsockSocketAddress
+
+func (SocketAddressVsock) isSocketAddress() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s SocketAddressVsock) MarshalJSON() ([]byte, error) {
+	v := map[string]interface{}{
+		"type": "vsock",
+		"data": s,
+	}
+	return json.Marshal(v)
+}
+
 func decodeSocketAddress(bs json.RawMessage) (SocketAddress, error) {
 	v := struct {
 		T string          `json:"type"`
@@ -7994,6 +8195,12 @@ func decodeSocketAddress(bs json.RawMessage) (SocketAddress, error) {
 		return ret, nil
 	case "unix":
 		var ret SocketAddressUnix
+		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	case "vsock":
+		var ret SocketAddressVsock
 		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
 			return nil, err
 		}
@@ -8868,6 +9075,14 @@ func (e *VNCVencryptSubAuth) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// VsockSocketAddress -> VsockSocketAddress (struct)
+
+// VsockSocketAddress implements the "VsockSocketAddress" QMP API type.
+type VsockSocketAddress struct {
+	Cid  string `json:"cid"`
+	Port string `json:"port"`
+}
+
 // EVENT WAKEUP
 
 // EVENT WATCHDOG
@@ -9314,11 +9529,12 @@ func (m *Monitor) BlockSetWriteThreshold(nodeName string, writeThreshold uint64)
 // block-stream -> BlockStream (command)
 
 // BlockStream implements the "block-stream" QMP API call.
-func (m *Monitor) BlockStream(jobID *string, device string, base *string, backingFile *string, speed *int64, onError *BlockdevOnError) (err error) {
+func (m *Monitor) BlockStream(jobID *string, device string, base *string, baseNode *string, backingFile *string, speed *int64, onError *BlockdevOnError) (err error) {
 	cmd := struct {
 		JobID       *string          `json:"job-id,omitempty"`
 		Device      string           `json:"device"`
 		Base        *string          `json:"base,omitempty"`
+		BaseNode    *string          `json:"base-node,omitempty"`
 		BackingFile *string          `json:"backing-file,omitempty"`
 		Speed       *int64           `json:"speed,omitempty"`
 		OnError     *BlockdevOnError `json:"on-error,omitempty"`
@@ -9326,6 +9542,7 @@ func (m *Monitor) BlockStream(jobID *string, device string, base *string, backin
 		jobID,
 		device,
 		base,
+		baseNode,
 		backingFile,
 		speed,
 		onError,
@@ -9419,12 +9636,7 @@ func (m *Monitor) BlockSetIOThrottle(cmd *BlockIOThrottle) (err error) {
 // blockdev-add -> BlockdevAdd (command)
 
 // BlockdevAdd implements the "blockdev-add" QMP API call.
-func (m *Monitor) BlockdevAdd(options BlockdevOptions) (err error) {
-	cmd := struct {
-		Options BlockdevOptions `json:"options"`
-	}{
-		options,
-	}
+func (m *Monitor) BlockdevAdd(cmd *BlockdevOptions) (err error) {
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "blockdev-add",
 		"arguments": cmd,
@@ -12826,6 +13038,26 @@ func (m *Monitor) XBlockdevRemoveMedium(device *string, id *string) (err error) 
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "x-blockdev-remove-medium",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// x-colo-lost-heartbeat -> XColoLostHeartbeat (command)
+
+// XColoLostHeartbeat implements the "x-colo-lost-heartbeat" QMP API call.
+func (m *Monitor) XColoLostHeartbeat() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-colo-lost-heartbeat",
 		"arguments": cmd,
 	})
 	if err != nil {
