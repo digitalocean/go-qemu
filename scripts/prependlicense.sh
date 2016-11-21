@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # License block to be prepended to file
-LICENSE=$(cat ./scripts/license.txt)
+BASEDIR=$(dirname "$0")
+LICENSE=$(cat $BASEDIR/license.txt)
 
 if [ -z "$1" ]; then
 	echo "missing filename argument"
