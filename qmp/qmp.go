@@ -43,6 +43,23 @@ type Command struct {
 	Args interface{} `json:"arguments,omitempty"`
 }
 
+type response struct {
+	ID     string      `json:"id"`
+	Return interface{} `json:"return,omitempty"`
+	Error  struct {
+		Class string `json:"class"`
+		Desc  string `json:"desc"`
+	} `json:"error,omitempty"`
+}
+
+func (r *response) Err() error {
+	if r.Error.Desc == "" {
+		return nil
+	}
+
+	return errors.New(r.Error.Desc)
+}
+
 // Event represents a QEMU QMP event.
 // See http://wiki.qemu.org/QMP
 type Event struct {
