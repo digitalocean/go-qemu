@@ -7,7 +7,7 @@ Package `qmp` enables interaction with QEMU instances via the QEMU Machine Proto
 
 ### Libvirt
 
-If your environment is managed by Libvirt, QMP interaction must be proxied through the Libvirt daemon. This can be be done through two available drivers:
+If your environment is managed by Libvirt, QMP interaction must be proxied through the Libvirt daemon. This can be done through three available drivers:
 
 #### RPC
 
@@ -17,6 +17,15 @@ The RPC driver provides a pure Go implementation of Libvirt's RPC protocol.
 //conn, err := net.DialTimeout("unix", "/var/run/libvirt/libvirt-sock", 2*time.Second)
 conn, err := net.DialTimeout("tcp", "192.168.1.1:16509", 2*time.Second)
 monitor := libvirtrpc.New("stage-lb-1", conn)
+```
+
+### Libvirt-go
+
+This monitor provides communication with the Libvirt daemon using the [libvirt-go](https://github.com/rgbkrk/libvirt-go) package as its internal implementation.
+At the moment, libvirt-go only supports `Linux`.
+
+```go
+monitor, err := qmp.NewLibvirtGoMonitor("qemu:///system", "centos7")
 ```
 
 #### virsh

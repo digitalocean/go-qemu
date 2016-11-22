@@ -122,3 +122,48 @@ You should have an output similar to this:
 Connecting to unix:///var/run/libvirt/libvirt-sock
 Domain should be shut off now
 ```
+
+#### libvirtgo_run_command
+
+[libvirtgo_run_command](./libvirtgo_run_command) demonstrates how to use 
+ the [libvirtGoMonitorLinux](https://godoc.org/github.com/digitalocean/go-qemu/libvirtGoMonitorLinux) 
+ package to send a QMP command to the specified domain.
+
+To run:
+```{r, engine='bash', count_lines}
+   $ go get github.com/digitalocean/go-qemu
+   $ go run examples/libvirtgo_run_command/main.go -uri="qemu:///system" -domainName="centos7"
+```
+
+
+You should see an output similar to this:
+```{r, engine='bash', count_lines}
+query-cpus: {"return":[{"current":true,"CPU":0,"qom_path":"/machine/unattached/device[0]","pc":-2130342250,"halted":true,"thread_id":2462}],"id":"libvirt-36"}
+```
+
+#### libvirtgo_events
+
+[libvirtgo_events](./libvirtgo_events) demonstrates how to use 
+ the [libvirtGoMonitorLinux](https://godoc.org/github.com/digitalocean/go-qemu/libvirtGoMonitorLinux) 
+ package to wait for lifecycle events from the specified domain.
+
+To run:
+```{r, engine='bash', count_lines}
+   $ go get github.com/digitalocean/go-qemu
+   
+   Terminal 1:
+   $ go run examples/libvirtgo_events/main.go -uri="qemu:///system" -domainName="ubuntu14.04"
+
+   Terminal 2:
+   virsh -c qemu:///system
+   virsh # start ubuntu14.04
+```
+
+
+You should see an output similar to this on Terminal 1:
+```{r, engine='bash', count_lines}
+Waiting for Domain events...
+Press the Enter key to stop
+Event: qmp.Event{Event:"Domain event=\"resumed\" detail=\"unpaused\"", Data:map[string]interface {}{"details":libvirt.DomainLifecycleEvent{Event:4, Detail:0}}, Timestamp:struct { Seconds int64 "json:\"seconds\""; Microseconds int64 "json:\"microseconds\"" }{Seconds:11, Microseconds:0}}
+Event: qmp.Event{Event:"Domain event=\"started\" detail=\"booted\"", Data:map[string]interface {}{"details":libvirt.DomainLifecycleEvent{Event:2, Detail:0}}, Timestamp:struct { Seconds int64 "json:\"seconds\""; Microseconds int64 "json:\"microseconds\"" }{Seconds:12, Microseconds:0}}
+```
