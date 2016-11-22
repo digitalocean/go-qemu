@@ -25,8 +25,6 @@ To see the list of posible arguments for each program, use `--help`.
 To run:
 ```{r, engine='bash', count_lines}
    $ go get github.com/digitalocean/go-qemu/...
-   $ go run examples/hypervisor_domain_list/main.go -domainName="ubuntu14.04"
-   or
    $ go run examples/hypervisor_domain_list/main.go -network=tcp \
                                           -address="hypervisorhost:16509"
 ```
