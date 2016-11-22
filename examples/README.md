@@ -24,7 +24,7 @@ To see the list of posible arguments for each program, use `--help`.
 
 To run:
 ```{r, engine='bash', count_lines}
-   $ go get github.com/digitalocean/go-qemu
+   $ go get github.com/digitalocean/go-qemu/...
    $ go run examples/hypervisor_domain_list/main.go -domainName="ubuntu14.04"
    or
    $ go run examples/hypervisor_domain_list/main.go -network=tcp \
@@ -55,7 +55,7 @@ debian8
 
 To run:
 ```{r, engine='bash', count_lines}
-   $ go get github.com/digitalocean/go-qemu
+   $ go get github.com/digitalocean/go-qemu/...
    $ go run examples/domain_details/main.go
    or
    $ go run examples/domain_details/main.go -network=tcp \
@@ -109,7 +109,7 @@ Status: running
 
 To run:
 ```{r, engine='bash', count_lines}
-   $ go get github.com/digitalocean/go-qemu
+   $ go get github.com/digitalocean/go-qemu/...
    $ go run examples/domain_system_powerdown/main.go -domainName="ubuntu14.04"
    or
    $ go run examples/domain_system_powerdown/main.go -network=tcp \
