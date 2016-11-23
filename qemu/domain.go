@@ -62,25 +62,14 @@ func (d *Domain) Close() error {
 
 // Commands returns all QMP commands supported by the domain.
 func (d *Domain) Commands() ([]string, error) {
-	raw, err := d.Run(qmp.Command{Execute: "query-commands"})
+	commands, err := d.rm.QueryCommands()
 	if err != nil {
 		return nil, err
 	}
-
-	var response struct {
-		ID     string `json:"id"`
-		Return []struct {
-			Name string `json:"name"`
-		} `json:"return"`
-	}
-
-	if err = json.Unmarshal(raw, &response); err != nil {
-		return nil, err
-	}
-
+	
 	// flatten response
-	cmds := make([]string, 0, len(response.Return))
-	for _, c := range response.Return {
+	cmds := make([]string, 0, len(commands))
+	for _, c := range commands {
 		cmds = append(cmds, c.Name)
 	}
 
