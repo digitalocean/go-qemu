@@ -7,15 +7,6 @@ instances.  Apache 2.0 Licensed.
 Feel free to join us in [`#go-qemu` on freenode](https://webchat.freenode.net/)
 if you'd like to discuss the project.
 
-Installation
-------------
-
-Use `go get` to retrieve all of the packages in `go-qemu`:
-
-```shell
-$ go get github.com/digitalocean/go-qemu/...
-```
-
 Overview
 --------
 
