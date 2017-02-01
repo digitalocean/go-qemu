@@ -59,8 +59,6 @@ func readDefinitions(path string) ([]definition, error) {
 		case 1:
 			if len(fs) == 1 && part[0] == '{' {
 				return nil, fmt.Errorf("found type definition without a docstring in %q: %s", path, string(part))
-			} else if bytes.Contains(part, []byte("##")) {
-				return nil, fmt.Errorf("part is missing type definition in %q, but looks like a docstring: %s", path, string(part))
 			}
 			// This part looks like a non-docstring comment, just skip it.
 		case 2:

@@ -1761,7 +1761,7 @@ type BlockdevOptionsGluster struct {
 	Volume       string                       `json:"volume"`
 	Path         string                       `json:"path"`
 	Server       []GlusterServer              `json:"server"`
-	DebugLevel   *int64                       `json:"debug-level,omitempty"`
+	Debug        *int64                       `json:"debug,omitempty"`
 	Logfile      *string                      `json:"logfile,omitempty"`
 }
 
@@ -1941,7 +1941,7 @@ type BlockdevOptionsNfs struct {
 	TCPSynCount   *int64                       `json:"tcp-syn-count,omitempty"`
 	ReadaheadSize *int64                       `json:"readahead-size,omitempty"`
 	PageCacheSize *int64                       `json:"page-cache-size,omitempty"`
-	DebugLevel    *int64                       `json:"debug-level,omitempty"`
+	Debug         *int64                       `json:"debug,omitempty"`
 }
 
 func (BlockdevOptionsNfs) isBlockdevOptions() {}
@@ -3355,6 +3355,7 @@ type CPUDefinitionInfo struct {
 	MigrationSafe       *bool    `json:"migration-safe,omitempty"`
 	Static              bool     `json:"static"`
 	UnavailableFeatures []string `json:"unavailable-features,omitempty"`
+	Typename            string   `json:"typename"`
 }
 
 // CpuInfo -> CPUInfo (flat union)
@@ -4149,11 +4150,12 @@ type GlusterServer interface {
 
 // GlusterServerTCP is an implementation of GlusterServer.
 type GlusterServerTCP struct {
-	Host string  `json:"host"`
-	Port string  `json:"port"`
-	To   *uint16 `json:"to,omitempty"`
-	Ipv4 *bool   `json:"ipv4,omitempty"`
-	Ipv6 *bool   `json:"ipv6,omitempty"`
+	Host    string  `json:"host"`
+	Port    string  `json:"port"`
+	Numeric *bool   `json:"numeric,omitempty"`
+	To      *uint16 `json:"to,omitempty"`
+	Ipv4    *bool   `json:"ipv4,omitempty"`
+	Ipv6    *bool   `json:"ipv6,omitempty"`
 }
 
 func (GlusterServerTCP) isGlusterServer() {}
@@ -4572,11 +4574,12 @@ type ImageInfoSpecificVMDK struct {
 
 // InetSocketAddress implements the "InetSocketAddress" QMP API type.
 type InetSocketAddress struct {
-	Host string  `json:"host"`
-	Port string  `json:"port"`
-	To   *uint16 `json:"to,omitempty"`
-	Ipv4 *bool   `json:"ipv4,omitempty"`
-	Ipv6 *bool   `json:"ipv6,omitempty"`
+	Host    string  `json:"host"`
+	Port    string  `json:"port"`
+	Numeric *bool   `json:"numeric,omitempty"`
+	To      *uint16 `json:"to,omitempty"`
+	Ipv4    *bool   `json:"ipv4,omitempty"`
+	Ipv6    *bool   `json:"ipv6,omitempty"`
 }
 
 // InputAxis -> InputAxis (enum)
@@ -5094,6 +5097,7 @@ type MachineInfo struct {
 
 // Memdev implements the "Memdev" QMP API type.
 type Memdev struct {
+	ID        *string       `json:"id,omitempty"`
 	Size      uint64        `json:"size"`
 	Merge     bool          `json:"merge"`
 	Dump      bool          `json:"dump"`
@@ -5807,6 +5811,7 @@ const (
 	QCryptoCipherAlgorithmAes192
 	QCryptoCipherAlgorithmAes256
 	QCryptoCipherAlgorithmDesRfb
+	QCryptoCipherAlgorithm3Des
 	QCryptoCipherAlgorithmCast5128
 	QCryptoCipherAlgorithmSerpent128
 	QCryptoCipherAlgorithmSerpent192
@@ -5827,6 +5832,8 @@ func (e QCryptoCipherAlgorithm) String() string {
 		return "aes-256"
 	case QCryptoCipherAlgorithmDesRfb:
 		return "des-rfb"
+	case QCryptoCipherAlgorithm3Des:
+		return "3des"
 	case QCryptoCipherAlgorithmCast5128:
 		return "cast5-128"
 	case QCryptoCipherAlgorithmSerpent128:
@@ -5857,6 +5864,8 @@ func (e QCryptoCipherAlgorithm) MarshalJSON() ([]byte, error) {
 		return json.Marshal("aes-256")
 	case QCryptoCipherAlgorithmDesRfb:
 		return json.Marshal("des-rfb")
+	case QCryptoCipherAlgorithm3Des:
+		return json.Marshal("3des")
 	case QCryptoCipherAlgorithmCast5128:
 		return json.Marshal("cast5-128")
 	case QCryptoCipherAlgorithmSerpent128:
@@ -5891,6 +5900,8 @@ func (e *QCryptoCipherAlgorithm) UnmarshalJSON(bs []byte) error {
 		*e = QCryptoCipherAlgorithmAes256
 	case "des-rfb":
 		*e = QCryptoCipherAlgorithmDesRfb
+	case "3des":
+		*e = QCryptoCipherAlgorithm3Des
 	case "cast5-128":
 		*e = QCryptoCipherAlgorithmCast5128
 	case "serpent-128":
@@ -6254,6 +6265,9 @@ const (
 	QKeyCodeCompose
 	QKeyCodePause
 	QKeyCodeRo
+	QKeyCodeHiragana
+	QKeyCodeHenkan
+	QKeyCodeYen
 	QKeyCodeKpComma
 	QKeyCodeKpEquals
 	QKeyCodePower
@@ -6510,6 +6524,12 @@ func (e QKeyCode) String() string {
 		return "pause"
 	case QKeyCodeRo:
 		return "ro"
+	case QKeyCodeHiragana:
+		return "hiragana"
+	case QKeyCodeHenkan:
+		return "henkan"
+	case QKeyCodeYen:
+		return "yen"
 	case QKeyCodeKpComma:
 		return "kp_comma"
 	case QKeyCodeKpEquals:
@@ -6772,6 +6792,12 @@ func (e QKeyCode) MarshalJSON() ([]byte, error) {
 		return json.Marshal("pause")
 	case QKeyCodeRo:
 		return json.Marshal("ro")
+	case QKeyCodeHiragana:
+		return json.Marshal("hiragana")
+	case QKeyCodeHenkan:
+		return json.Marshal("henkan")
+	case QKeyCodeYen:
+		return json.Marshal("yen")
 	case QKeyCodeKpComma:
 		return json.Marshal("kp_comma")
 	case QKeyCodeKpEquals:
@@ -7038,6 +7064,12 @@ func (e *QKeyCode) UnmarshalJSON(bs []byte) error {
 		*e = QKeyCodePause
 	case "ro":
 		*e = QKeyCodeRo
+	case "hiragana":
+		*e = QKeyCodeHiragana
+	case "henkan":
+		*e = QKeyCodeHenkan
+	case "yen":
+		*e = QKeyCodeYen
 	case "kp_comma":
 		*e = QKeyCodeKpComma
 	case "kp_equals":
@@ -10201,12 +10233,14 @@ func (m *Monitor) DeviceListProperties(typename string) (ret []DevicePropertyInf
 // device_add -> DeviceAdd (command)
 
 // DeviceAdd implements the "device_add" QMP API call.
-func (m *Monitor) DeviceAdd(driver string, id string) (err error) {
+func (m *Monitor) DeviceAdd(driver string, bus *string, id *string) (err error) {
 	cmd := struct {
-		Driver string `json:"driver"`
-		ID     string `json:"id"`
+		Driver string  `json:"driver"`
+		Bus    *string `json:"bus,omitempty"`
+		ID     *string `json:"id,omitempty"`
 	}{
 		driver,
+		bus,
 		id,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
