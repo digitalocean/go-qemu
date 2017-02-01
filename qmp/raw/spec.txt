@@ -1,5 +1,5 @@
 ##
-# @QapiErrorClass
+# @QapiErrorClass:
 #
 # QEMU error classes
 #
@@ -33,15 +33,15 @@
 }
 
 ##
-# @VersionTriple
+# @VersionTriple:
 #
 # A three-part version number.
 #
-# @qemu.major:  The major version number.
+# @major:  The major version number.
 #
-# @qemu.minor:  The minor version number.
+# @minor:  The minor version number.
 #
-# @qemu.micro:  The micro version number.
+# @micro:  The micro version number.
 #
 # Since: 2.4
 ##
@@ -89,6 +89,21 @@
 # Returns:  A @VersionInfo object describing the current version of QEMU.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-version" }
+# <- {
+#       "return":{
+#          "qemu":{
+#             "major":0,
+#             "minor":11,
+#             "micro":5
+#          },
+#          "package":""
+#       }
+#    }
+#
 ##
 {
   "command": "query-version",
@@ -119,6 +134,23 @@
 # Returns: A list of @CommandInfo for all supported commands
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-commands" }
+# <- {
+#      "return":[
+#         {
+#            "name":"query-balloon"
+#         },
+#         {
+#            "name":"system_powerdown"
+#         }
+#      ]
+#    }
+#
+# Note: This example has been shortened as the real response is too long.
+#
 ##
 {
   "command": "query-commands",
@@ -128,7 +160,7 @@
 }
 
 ##
-# @OnOffAuto
+# @OnOffAuto:
 #
 # An enumeration of three options: on, off, and auto
 #
@@ -150,7 +182,7 @@
 }
 
 ##
-# @OnOffSplit
+# @OnOffSplit:
 #
 # An enumeration of three values: on, off, and split
 #
@@ -173,7 +205,7 @@
 
 
 ##
-# QCryptoTLSCredsEndpoint:
+# @QCryptoTLSCredsEndpoint:
 #
 # The type of network endpoint that will be using the credentials.
 # Most types of credential require different setup / structures
@@ -197,7 +229,7 @@
 
 
 ##
-# QCryptoSecretFormat:
+# @QCryptoSecretFormat:
 #
 # The data format that the secret is provided in
 #
@@ -216,7 +248,7 @@
 
 
 ##
-# QCryptoHashAlgorithm:
+# @QCryptoHashAlgorithm:
 #
 # The supported algorithms for computing content digests
 #
@@ -245,7 +277,7 @@
 
 
 ##
-# QCryptoCipherAlgorithm:
+# @QCryptoCipherAlgorithm:
 #
 # The supported algorithms for content encryption ciphers
 #
@@ -253,6 +285,7 @@
 # @aes-192: AES with 192 bit / 24 byte keys
 # @aes-256: AES with 256 bit / 32 byte keys
 # @des-rfb: RFB specific variant of single DES. Do not use except in VNC.
+# @3des: 3DES(EDE) with 192 bit / 24 byte keys (since 2.9)
 # @cast5-128: Cast5 with 128 bit / 16 byte keys
 # @serpent-128: Serpent with 128 bit / 16 byte keys
 # @serpent-192: Serpent with 192 bit / 24 byte keys
@@ -270,6 +303,7 @@
     "aes-192",
     "aes-256",
     "des-rfb",
+    "3des",
     "cast5-128",
     "serpent-128",
     "serpent-192",
@@ -282,7 +316,7 @@
 
 
 ##
-# QCryptoCipherMode:
+# @QCryptoCipherMode:
 #
 # The supported modes for content encryption ciphers
 #
@@ -305,7 +339,7 @@
 
 
 ##
-# QCryptoIVGenAlgorithm:
+# @QCryptoIVGenAlgorithm:
 #
 # The supported algorithms for generating initialization
 # vectors for full disk encryption. The 'plain' generator
@@ -329,7 +363,7 @@
 }
 
 ##
-# QCryptoBlockFormat:
+# @QCryptoBlockFormat:
 #
 # The supported full disk encryption formats
 #
@@ -348,7 +382,7 @@
 }
 
 ##
-# QCryptoBlockOptionsBase:
+# @QCryptoBlockOptionsBase:
 #
 # The common options that apply to all full disk
 # encryption formats
@@ -365,7 +399,7 @@
 }
 
 ##
-# QCryptoBlockOptionsQCow:
+# @QCryptoBlockOptionsQCow:
 #
 # The options that apply to QCow/QCow2 AES-CBC encryption format
 #
@@ -383,7 +417,7 @@
 }
 
 ##
-# QCryptoBlockOptionsLUKS:
+# @QCryptoBlockOptionsLUKS:
 #
 # The options that apply to LUKS encryption format
 #
@@ -401,7 +435,7 @@
 
 
 ##
-# QCryptoBlockCreateOptionsLUKS:
+# @QCryptoBlockCreateOptionsLUKS:
 #
 # The options that apply to LUKS encryption format initialization
 #
@@ -435,7 +469,7 @@
 
 
 ##
-# QCryptoBlockOpenOptions:
+# @QCryptoBlockOpenOptions:
 #
 # The options that are available for all encryption formats
 # when opening an existing volume
@@ -454,7 +488,7 @@
 
 
 ##
-# QCryptoBlockCreateOptions:
+# @QCryptoBlockCreateOptions:
 #
 # The options that are available for all encryption formats
 # when initializing a new volume
@@ -473,7 +507,7 @@
 
 
 ##
-# QCryptoBlockInfoBase:
+# @QCryptoBlockInfoBase:
 #
 # The common information that applies to all full disk
 # encryption formats
@@ -491,7 +525,7 @@
 
 
 ##
-# QCryptoBlockInfoLUKSSlot:
+# @QCryptoBlockInfoLUKSSlot:
 #
 # Information about the LUKS block encryption key
 # slot options
@@ -515,7 +549,7 @@
 
 
 ##
-# QCryptoBlockInfoLUKS:
+# @QCryptoBlockInfoLUKS:
 #
 # Information about the LUKS block encryption options
 #
@@ -549,7 +583,7 @@
 }
 
 ##
-# QCryptoBlockInfoQCow:
+# @QCryptoBlockInfoQCow:
 #
 # Information about the QCow block encryption options
 #
@@ -562,7 +596,7 @@
 
 
 ##
-# QCryptoBlockInfo:
+# @QCryptoBlockInfo:
 #
 # Information about the block encryption options
 #
@@ -580,7 +614,7 @@
 
 
 ##
-# @QapiErrorClass
+# @QapiErrorClass:
 #
 # QEMU error classes
 #
@@ -614,15 +648,15 @@
 }
 
 ##
-# @VersionTriple
+# @VersionTriple:
 #
 # A three-part version number.
 #
-# @qemu.major:  The major version number.
+# @major:  The major version number.
 #
-# @qemu.minor:  The minor version number.
+# @minor:  The minor version number.
 #
-# @qemu.micro:  The micro version number.
+# @micro:  The micro version number.
 #
 # Since: 2.4
 ##
@@ -670,6 +704,21 @@
 # Returns:  A @VersionInfo object describing the current version of QEMU.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-version" }
+# <- {
+#       "return":{
+#          "qemu":{
+#             "major":0,
+#             "minor":11,
+#             "micro":5
+#          },
+#          "package":""
+#       }
+#    }
+#
 ##
 {
   "command": "query-version",
@@ -700,6 +749,23 @@
 # Returns: A list of @CommandInfo for all supported commands
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-commands" }
+# <- {
+#      "return":[
+#         {
+#            "name":"query-balloon"
+#         },
+#         {
+#            "name":"system_powerdown"
+#         }
+#      ]
+#    }
+#
+# Note: This example has been shortened as the real response is too long.
+#
 ##
 {
   "command": "query-commands",
@@ -709,7 +775,7 @@
 }
 
 ##
-# @OnOffAuto
+# @OnOffAuto:
 #
 # An enumeration of three options: on, off, and auto
 #
@@ -731,7 +797,7 @@
 }
 
 ##
-# @OnOffSplit
+# @OnOffSplit:
 #
 # An enumeration of three values: on, off, and split
 #
@@ -754,7 +820,7 @@
 
 
 ##
-# @SnapshotInfo
+# @SnapshotInfo:
 #
 # @id: unique snapshot id
 #
@@ -1006,7 +1072,7 @@
 }
 
 ##
-# @BlockdevCacheInfo
+# @BlockdevCacheInfo:
 #
 # Cache mode information for a block device
 #
@@ -1203,7 +1269,7 @@
 # @offset: if present, the image file stores the data for this range in
 #          raw format at the given offset.
 #
-# Since 1.7
+# Since: 1.7
 ##
 {
   "struct": "BlockDeviceMapEntry",
@@ -1322,6 +1388,87 @@
 # Returns: a list of @BlockInfo describing each virtual block device
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-block" }
+# <- {
+#       "return":[
+#          {
+#             "io-status": "ok",
+#             "device":"ide0-hd0",
+#             "locked":false,
+#             "removable":false,
+#             "inserted":{
+#                "ro":false,
+#                "drv":"qcow2",
+#                "encrypted":false,
+#                "file":"disks/test.qcow2",
+#                "backing_file_depth":1,
+#                "bps":1000000,
+#                "bps_rd":0,
+#                "bps_wr":0,
+#                "iops":1000000,
+#                "iops_rd":0,
+#                "iops_wr":0,
+#                "bps_max": 8000000,
+#                "bps_rd_max": 0,
+#                "bps_wr_max": 0,
+#                "iops_max": 0,
+#                "iops_rd_max": 0,
+#                "iops_wr_max": 0,
+#                "iops_size": 0,
+#                "detect_zeroes": "on",
+#                "write_threshold": 0,
+#                "image":{
+#                   "filename":"disks/test.qcow2",
+#                   "format":"qcow2",
+#                   "virtual-size":2048000,
+#                   "backing_file":"base.qcow2",
+#                   "full-backing-filename":"disks/base.qcow2",
+#                   "backing-filename-format":"qcow2",
+#                   "snapshots":[
+#                      {
+#                         "id": "1",
+#                         "name": "snapshot1",
+#                         "vm-state-size": 0,
+#                         "date-sec": 10000200,
+#                         "date-nsec": 12,
+#                         "vm-clock-sec": 206,
+#                         "vm-clock-nsec": 30
+#                      }
+#                   ],
+#                   "backing-image":{
+#                       "filename":"disks/base.qcow2",
+#                       "format":"qcow2",
+#                       "virtual-size":2048000
+#                   }
+#                }
+#             },
+#             "type":"unknown"
+#          },
+#          {
+#             "io-status": "ok",
+#             "device":"ide1-cd0",
+#             "locked":false,
+#             "removable":true,
+#             "type":"unknown"
+#          },
+#          {
+#             "device":"floppy0",
+#             "locked":false,
+#             "removable":true,
+#             "type":"unknown"
+#          },
+#          {
+#             "device":"sd0",
+#             "locked":false,
+#             "removable":true,
+#             "type":"unknown"
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-block",
@@ -1501,6 +1648,9 @@
 # @stats:  A @BlockDeviceStats for the device.
 #
 # @parent: #optional This describes the file block device if it has one.
+#          Contains recursively the statistics of the underlying
+#          protocol (e.g. the host file for a qcow2 image). If there is
+#          no underlying protocol, this field is omitted
 #
 # @backing: #optional This describes the backing block device if it has one.
 #           (Since 2.0)
@@ -1533,6 +1683,106 @@
 # Returns: A list of @BlockStats for each virtual block devices.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-blockstats" }
+# <- {
+#       "return":[
+#          {
+#             "device":"ide0-hd0",
+#             "parent":{
+#                "stats":{
+#                   "wr_highest_offset":3686448128,
+#                   "wr_bytes":9786368,
+#                   "wr_operations":751,
+#                   "rd_bytes":122567168,
+#                   "rd_operations":36772
+#                   "wr_total_times_ns":313253456
+#                   "rd_total_times_ns":3465673657
+#                   "flush_total_times_ns":49653
+#                   "flush_operations":61,
+#                   "rd_merged":0,
+#                   "wr_merged":0,
+#                   "idle_time_ns":2953431879,
+#                   "account_invalid":true,
+#                   "account_failed":false
+#                }
+#             },
+#             "stats":{
+#                "wr_highest_offset":2821110784,
+#                "wr_bytes":9786368,
+#                "wr_operations":692,
+#                "rd_bytes":122739200,
+#                "rd_operations":36604
+#                "flush_operations":51,
+#                "wr_total_times_ns":313253456
+#                "rd_total_times_ns":3465673657
+#                "flush_total_times_ns":49653,
+#                "rd_merged":0,
+#                "wr_merged":0,
+#                "idle_time_ns":2953431879,
+#                "account_invalid":true,
+#                "account_failed":false
+#             }
+#          },
+#          {
+#             "device":"ide1-cd0",
+#             "stats":{
+#                "wr_highest_offset":0,
+#                "wr_bytes":0,
+#                "wr_operations":0,
+#                "rd_bytes":0,
+#                "rd_operations":0
+#                "flush_operations":0,
+#                "wr_total_times_ns":0
+#                "rd_total_times_ns":0
+#                "flush_total_times_ns":0,
+#                "rd_merged":0,
+#                "wr_merged":0,
+#                "account_invalid":false,
+#                "account_failed":false
+#             }
+#          },
+#          {
+#             "device":"floppy0",
+#             "stats":{
+#                "wr_highest_offset":0,
+#                "wr_bytes":0,
+#                "wr_operations":0,
+#                "rd_bytes":0,
+#                "rd_operations":0
+#                "flush_operations":0,
+#                "wr_total_times_ns":0
+#                "rd_total_times_ns":0
+#                "flush_total_times_ns":0,
+#                "rd_merged":0,
+#                "wr_merged":0,
+#                "account_invalid":false,
+#                "account_failed":false
+#             }
+#          },
+#          {
+#             "device":"sd0",
+#             "stats":{
+#                "wr_highest_offset":0,
+#                "wr_bytes":0,
+#                "wr_operations":0,
+#                "rd_bytes":0,
+#                "rd_operations":0
+#                "flush_operations":0,
+#                "wr_total_times_ns":0
+#                "rd_total_times_ns":0
+#                "flush_total_times_ns":0,
+#                "rd_merged":0,
+#                "wr_merged":0,
+#                "account_invalid":false,
+#                "account_failed":false
+#             }
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-blockstats",
@@ -1720,6 +1970,13 @@
 #         occur if an invalid password is specified.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "block_passwd", "arguments": { "device": "ide0-hd0",
+#                                                "password": "12345" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block_passwd",
@@ -1731,7 +1988,7 @@
 }
 
 ##
-# @block_resize
+# @block_resize:
 #
 # Resize a block image while a guest is running.
 #
@@ -1747,6 +2004,13 @@
 #          If @device is not a valid block device, DeviceNotFound
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "block_resize",
+#      "arguments": { "device": "scratch", "size": 1073741824 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block_resize",
@@ -1758,7 +2022,7 @@
 }
 
 ##
-# @NewImageMode
+# @NewImageMode:
 #
 # An enumeration that tells QEMU how to set the backing file path in
 # a new image file.
@@ -1780,7 +2044,7 @@
 }
 
 ##
-# @BlockdevSnapshotSync
+# @BlockdevSnapshotSync:
 #
 # Either @device or @node-name must be set but not both.
 #
@@ -1788,7 +2052,9 @@
 #
 # @node-name: #optional graph node name to generate the snapshot from (Since 2.0)
 #
-# @snapshot-file: the target of the new image. A new file will be created.
+# @snapshot-file: the target of the new image. If the file exists, or
+# if it is a device, the snapshot will be created in the existing
+# file/device. Otherwise, a new file will be created.
 #
 # @snapshot-node-name: #optional the graph node name of the new image (Since 2.0)
 #
@@ -1810,7 +2076,7 @@
 }
 
 ##
-# @BlockdevSnapshot
+# @BlockdevSnapshot:
 #
 # @node: device or node name that will have a snapshot created.
 #
@@ -1819,7 +2085,7 @@
 #           It must not have a current backing file (this can be
 #           achieved by passing "backing": "" to blockdev-add).
 #
-# Since 2.5
+# Since: 2.5
 ##
 {
   "struct": "BlockdevSnapshot",
@@ -1830,7 +2096,7 @@
 }
 
 ##
-# @DriveBackup
+# @DriveBackup:
 #
 # @job-id: #optional identifier for the newly-created block job. If
 #          omitted, the device name will be used. (Since 2.7)
@@ -1868,9 +2134,9 @@
 #                   default 'report' (no limitations, since this applies to
 #                   a different block device than @device).
 #
-# Note that @on-source-error and @on-target-error only affect background I/O.
-# If an error occurs during a guest write request, the device's rerror/werror
-# actions will be used.
+# Note: @on-source-error and @on-target-error only affect background
+# I/O.  If an error occurs during a guest write request, the device's
+# rerror/werror actions will be used.
 #
 # Since: 1.6
 ##
@@ -1892,7 +2158,7 @@
 }
 
 ##
-# @BlockdevBackup
+# @BlockdevBackup:
 #
 # @job-id: #optional identifier for the newly-created block job. If
 #          omitted, the device name will be used. (Since 2.7)
@@ -1919,9 +2185,9 @@
 #                   default 'report' (no limitations, since this applies to
 #                   a different block device than @device).
 #
-# Note that @on-source-error and @on-target-error only affect background I/O.
-# If an error occurs during a guest write request, the device's rerror/werror
-# actions will be used.
+# Note: @on-source-error and @on-target-error only affect background
+# I/O.  If an error occurs during a guest write request, the device's
+# rerror/werror actions will be used.
 #
 # Since: 2.3
 ##
@@ -1940,7 +2206,7 @@
 }
 
 ##
-# @blockdev-snapshot-sync
+# @blockdev-snapshot-sync:
 #
 # Generates a synchronous snapshot of a block device.
 #
@@ -1949,7 +2215,17 @@
 # Returns: nothing on success
 #          If @device is not a valid block device, DeviceNotFound
 #
-# Since 0.14.0
+# Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "blockdev-snapshot-sync",
+#      "arguments": { "device": "ide-hd0",
+#                     "snapshot-file":
+#                     "/some/place/my-image",
+#                     "format": "qcow2" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-snapshot-sync",
@@ -1958,13 +2234,35 @@
 
 
 ##
-# @blockdev-snapshot
+# @blockdev-snapshot:
 #
 # Generates a snapshot of a block device.
 #
+# Create a snapshot, by installing 'node' as the backing image of
+# 'overlay'. Additionally, if 'node' is associated with a block
+# device, the block device changes to using 'overlay' as its new active
+# image.
+#
 # For the arguments, see the documentation of BlockdevSnapshot.
 #
-# Since 2.5
+# Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "blockdev-add",
+#      "arguments": { "options": { "driver": "qcow2",
+#                                  "node-name": "node1534",
+#                                  "file": { "driver": "file",
+#                                            "filename": "hd1.qcow2" },
+#                                  "backing": "" } } }
+#
+# <- { "return": {} }
+#
+# -> { "execute": "blockdev-snapshot",
+#      "arguments": { "node": "ide-hd0",
+#                     "overlay": "node1534" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-snapshot",
@@ -1972,7 +2270,7 @@
 }
 
 ##
-# @change-backing-file
+# @change-backing-file:
 #
 # Change the backing file in the image file metadata.  This does not
 # cause QEMU to reopen the image file to reparse the backing filename
@@ -1982,7 +2280,9 @@
 # updated.
 #
 # @image-node-name: The name of the block driver state node of the
-#                   image to modify.
+#                   image to modify. The "device" argument is used
+#                   to verify "image-node-name" is in the chain
+#                   described by "device".
 #
 # @device:          The device name or node-name of the root node that owns
 #                   image-node-name.
@@ -1991,6 +2291,10 @@
 #                   string is not validated, so care should be taken
 #                   when specifying the string or the image chain may
 #                   not be able to be reopened again.
+#
+# Returns: Nothing on success
+#
+#          If "device" does not exist or cannot be determined, DeviceNotFound
 #
 # Since: 2.1
 ##
@@ -2004,7 +2308,7 @@
 }
 
 ##
-# @block-commit
+# @block-commit:
 #
 # Live commit of data from overlay image nodes into backing nodes - i.e.,
 # writes data between 'top' and 'base' into 'base'.
@@ -2015,7 +2319,7 @@
 # @device:  the device name or node-name of a root node
 #
 # @base:   #optional The file name of the backing image to write data into.
-#                    If not specified, this is the deepest backing image
+#                    If not specified, this is the deepest backing image.
 #
 # @top:    #optional The file name of the backing image within the image chain,
 #                    which contains the topmost data to be committed down. If
@@ -2061,6 +2365,13 @@
 #
 # Since: 1.3
 #
+# Example:
+#
+# -> { "execute": "block-commit",
+#      "arguments": { "device": "virtio0",
+#                     "top": "/tmp/snap1.qcow2" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block-commit",
@@ -2075,7 +2386,7 @@
 }
 
 ##
-# @drive-backup
+# @drive-backup:
 #
 # Start a point-in-time copy of a block device to a new destination.  The
 # status of ongoing drive-backup operations can be checked with
@@ -2088,7 +2399,16 @@
 # Returns: nothing on success
 #          If @device is not a valid block device, GenericError
 #
-# Since 1.6
+# Since: 1.6
+#
+# Example:
+#
+# -> { "execute": "drive-backup",
+#      "arguments": { "device": "drive0",
+#                     "sync": "full",
+#                     "target": "backup.img" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "drive-backup",
@@ -2097,7 +2417,7 @@
 }
 
 ##
-# @blockdev-backup
+# @blockdev-backup:
 #
 # Start a point-in-time copy of a block device to a new destination.  The
 # status of ongoing blockdev-backup operations can be checked with
@@ -2110,7 +2430,15 @@
 # Returns: nothing on success
 #          If @device is not a valid block device, DeviceNotFound
 #
-# Since 2.3
+# Since: 2.3
+#
+# Example:
+# -> { "execute": "blockdev-backup",
+#      "arguments": { "device": "src-id",
+#                     "sync": "full",
+#                     "target": "tgt-id" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-backup",
@@ -2120,13 +2448,62 @@
 
 
 ##
-# @query-named-block-nodes
+# @query-named-block-nodes:
 #
 # Get the named block driver list
 #
 # Returns: the list of BlockDeviceInfo
 #
-# Since 2.0
+# Since: 2.0
+#
+# Example:
+#
+# -> { "execute": "query-named-block-nodes" }
+# <- { "return": [ { "ro":false,
+#                    "drv":"qcow2",
+#                    "encrypted":false,
+#                    "file":"disks/test.qcow2",
+#                    "node-name": "my-node",
+#                    "backing_file_depth":1,
+#                    "bps":1000000,
+#                    "bps_rd":0,
+#                    "bps_wr":0,
+#                    "iops":1000000,
+#                    "iops_rd":0,
+#                    "iops_wr":0,
+#                    "bps_max": 8000000,
+#                    "bps_rd_max": 0,
+#                    "bps_wr_max": 0,
+#                    "iops_max": 0,
+#                    "iops_rd_max": 0,
+#                    "iops_wr_max": 0,
+#                    "iops_size": 0,
+#                    "write_threshold": 0,
+#                    "image":{
+#                       "filename":"disks/test.qcow2",
+#                       "format":"qcow2",
+#                       "virtual-size":2048000,
+#                       "backing_file":"base.qcow2",
+#                       "full-backing-filename":"disks/base.qcow2",
+#                       "backing-filename-format":"qcow2",
+#                       "snapshots":[
+#                          {
+#                             "id": "1",
+#                             "name": "snapshot1",
+#                             "vm-state-size": 0,
+#                             "date-sec": 10000200,
+#                             "date-nsec": 12,
+#                             "vm-clock-sec": 206,
+#                             "vm-clock-nsec": 30
+#                          }
+#                       ],
+#                       "backing-image":{
+#                           "filename":"disks/base.qcow2",
+#                           "format":"qcow2",
+#                           "virtual-size":2048000
+#                       }
+#                    } } ] }
+#
 ##
 {
   "command": "query-named-block-nodes",
@@ -2136,16 +2513,31 @@
 }
 
 ##
-# @drive-mirror
+# @drive-mirror:
 #
-# Start mirroring a block device's writes to a new destination.
+# Start mirroring a block device's writes to a new destination. target
+# specifies the target of the new image. If the file exists, or if it
+# is a device, it will be used as the new destination for writes. If
+# it does not exist, a new file will be created. format specifies the
+# format of the mirror image, default is to probe if mode='existing',
+# else the format of the source.
 #
 # See DriveMirror for parameter descriptions
 #
 # Returns: nothing on success
 #          If @device is not a valid block device, GenericError
 #
-# Since 1.3
+# Since: 1.3
+#
+# Example:
+#
+# -> { "execute": "drive-mirror",
+#      "arguments": { "device": "ide-hd0",
+#                     "target": "/some/place/my-image",
+#                     "sync": "full",
+#                     "format": "qcow2" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "drive-mirror",
@@ -2154,7 +2546,7 @@
 }
 
 ##
-# DriveMirror
+# @DriveMirror:
 #
 # A set of parameters describing drive mirror setup.
 #
@@ -2208,7 +2600,7 @@
 #         written. Both will result in identical contents.
 #         Default is true. (Since 2.4)
 #
-# Since 1.3
+# Since: 1.3
 ##
 {
   "struct": "DriveMirror",
@@ -2231,13 +2623,13 @@
 }
 
 ##
-# @BlockDirtyBitmap
+# @BlockDirtyBitmap:
 #
 # @node: name of device/node which the bitmap is tracking
 #
 # @name: name of the dirty bitmap
 #
-# Since 2.4
+# Since: 2.4
 ##
 {
   "struct": "BlockDirtyBitmap",
@@ -2248,7 +2640,7 @@
 }
 
 ##
-# @BlockDirtyBitmapAdd
+# @BlockDirtyBitmapAdd:
 #
 # @node: name of device/node which the bitmap is tracking
 #
@@ -2257,7 +2649,7 @@
 # @granularity: #optional the bitmap granularity, default is 64k for
 #               block-dirty-bitmap-add
 #
-# Since 2.4
+# Since: 2.4
 ##
 {
   "struct": "BlockDirtyBitmapAdd",
@@ -2269,15 +2661,22 @@
 }
 
 ##
-# @block-dirty-bitmap-add
+# @block-dirty-bitmap-add:
 #
-# Create a dirty bitmap with a name on the node
+# Create a dirty bitmap with a name on the node, and start tracking the writes.
 #
 # Returns: nothing on success
 #          If @node is not a valid block device or node, DeviceNotFound
 #          If @name is already taken, GenericError with an explanation
 #
-# Since 2.4
+# Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "block-dirty-bitmap-add",
+#      "arguments": { "node": "drive0", "name": "bitmap0" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block-dirty-bitmap-add",
@@ -2285,16 +2684,24 @@
 }
 
 ##
-# @block-dirty-bitmap-remove
+# @block-dirty-bitmap-remove:
 #
-# Remove a dirty bitmap on the node
+# Stop write tracking and remove the dirty bitmap that was created
+# with block-dirty-bitmap-add.
 #
 # Returns: nothing on success
 #          If @node is not a valid block device or node, DeviceNotFound
 #          If @name is not found, GenericError with an explanation
 #          if @name is frozen by an operation, GenericError
 #
-# Since 2.4
+# Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "block-dirty-bitmap-remove",
+#      "arguments": { "node": "drive0", "name": "bitmap0" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block-dirty-bitmap-remove",
@@ -2302,15 +2709,24 @@
 }
 
 ##
-# @block-dirty-bitmap-clear
+# @block-dirty-bitmap-clear:
 #
-# Clear (reset) a dirty bitmap on the device
+# Clear (reset) a dirty bitmap on the device, so that an incremental
+# backup from this point in time forward will only backup clusters
+# modified after this clear operation.
 #
 # Returns: nothing on success
 #          If @node is not a valid block device, DeviceNotFound
 #          If @name is not found, GenericError with an explanation
 #
-# Since 2.4
+# Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "block-dirty-bitmap-clear",
+#      "arguments": { "node": "drive0", "name": "bitmap0" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block-dirty-bitmap-clear",
@@ -2318,7 +2734,7 @@
 }
 
 ##
-# @blockdev-mirror
+# @blockdev-mirror:
 #
 # Start mirroring a block device's writes to a new destination.
 #
@@ -2359,7 +2775,16 @@
 #
 # Returns: nothing on success.
 #
-# Since 2.6
+# Since: 2.6
+#
+# Example:
+#
+# -> { "execute": "blockdev-mirror",
+#      "arguments": { "device": "ide-hd0",
+#                     "target": "target0",
+#                     "sync": "full" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-mirror",
@@ -2378,38 +2803,6 @@
 }
 
 ##
-# @block_set_io_throttle:
-#
-# Change I/O throttle limits for a block drive.
-#
-# Since QEMU 2.4, each device with I/O limits is member of a throttle
-# group.
-#
-# If two or more devices are members of the same group, the limits
-# will apply to the combined I/O of the whole group in a round-robin
-# fashion. Therefore, setting new I/O limits to a device will affect
-# the whole group.
-#
-# The name of the group can be specified using the 'group' parameter.
-# If the parameter is unset, it is assumed to be the current group of
-# that device. If it's not in any group yet, the name of the device
-# will be used as the name for its group.
-#
-# The 'group' parameter can also be used to move a device to a
-# different group. In this case the limits specified in the parameters
-# will be applied to the new group only.
-#
-# I/O limits can be disabled by setting all of them to 0. In this case
-# the device will be removed from its group and the rest of its
-# members will not be affected. The 'group' parameter is ignored.
-#
-# See BlockIOThrottle for parameter descriptions.
-#
-# Returns: Nothing on success
-#          If @device is not a valid block device, DeviceNotFound
-#
-# Since: 1.1
-##
 {
   "command": "block_set_io_throttle",
   "boxed": true,
@@ -2417,7 +2810,7 @@
 }
 
 ##
-# BlockIOThrottle
+# @BlockIOThrottle:
 #
 # A set of parameters describing block throttling.
 #
@@ -2577,7 +2970,17 @@
 #            'stop' and 'enospc' can only be used if the block device
 #            supports io-status (see BlockInfo).  Since 1.3.
 #
+# Returns: Nothing on success. If @device does not exist, DeviceNotFound.
+#
 # Since: 1.1
+#
+# Example:
+#
+# -> { "execute": "block-stream",
+#      "arguments": { "device": "virtio0",
+#                     "base": "/tmp/master.qcow2" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block-stream",
@@ -2750,7 +3153,7 @@
 }
 
 ##
-# @BlockdevDiscardOptions
+# @BlockdevDiscardOptions:
 #
 # Determines how to handle discard requests.
 #
@@ -2768,7 +3171,7 @@
 }
 
 ##
-# @BlockdevDetectZeroesOptions
+# @BlockdevDetectZeroesOptions:
 #
 # Describes the operation mode for the automatic conversion of plain
 # zero writes by the OS to driver specific optimized zero write commands.
@@ -2790,7 +3193,7 @@
 }
 
 ##
-# @BlockdevAioOptions
+# @BlockdevAioOptions:
 #
 # Selects the AIO backend to handle I/O requests
 #
@@ -2808,7 +3211,7 @@
 }
 
 ##
-# @BlockdevCacheOptions
+# @BlockdevCacheOptions:
 #
 # Includes cache-related options for block devices
 #
@@ -2828,13 +3231,17 @@
 }
 
 ##
-# @BlockdevDriver
+# @BlockdevDriver:
 #
 # Drivers that are supported in block device operations.
 #
-# @host_device, @host_cdrom: Since 2.1
+# @host_device: Since 2.1
+# @host_cdrom: Since 2.1
 # @gluster: Since 2.7
-# @nbd, @nfs, @replication, @ssh: Since 2.8
+# @nbd: Since 2.8
+# @nfs: Since 2.8
+# @replication: Since 2.8
+# @ssh: Since 2.8
 #
 # Since: 2.0
 ##
@@ -2877,7 +3284,7 @@
 }
 
 ##
-# @BlockdevOptionsFile
+# @BlockdevOptionsFile:
 #
 # Driver specific block device options for the file backend.
 #
@@ -2895,7 +3302,7 @@
 }
 
 ##
-# @BlockdevOptionsNull
+# @BlockdevOptionsNull:
 #
 # Driver specific block device options for the null backend.
 #
@@ -2915,7 +3322,7 @@
 }
 
 ##
-# @BlockdevOptionsVVFAT
+# @BlockdevOptionsVVFAT:
 #
 # Driver specific block device options for the vvfat protocol.
 #
@@ -2943,7 +3350,7 @@
 }
 
 ##
-# @BlockdevOptionsGenericFormat
+# @BlockdevOptionsGenericFormat:
 #
 # Driver specific block device options for image format that have no option
 # besides their data source.
@@ -2960,7 +3367,7 @@
 }
 
 ##
-# @BlockdevOptionsLUKS
+# @BlockdevOptionsLUKS:
 #
 # Driver specific block device options for LUKS.
 #
@@ -2980,7 +3387,7 @@
 
 
 ##
-# @BlockdevOptionsGenericCOWFormat
+# @BlockdevOptionsGenericCOWFormat:
 #
 # Driver specific block device options for image format that have no option
 # besides their data source and an optional backing file.
@@ -3001,7 +3408,7 @@
 }
 
 ##
-# @Qcow2OverlapCheckMode
+# @Qcow2OverlapCheckMode:
 #
 # General overlap check modes.
 #
@@ -3028,7 +3435,7 @@
 }
 
 ##
-# @Qcow2OverlapCheckFlags
+# @Qcow2OverlapCheckFlags:
 #
 # Structure of flags for each metadata structure. Setting a field to 'true'
 # makes qemu guard that structure against unintended overwriting. The default
@@ -3055,7 +3462,7 @@
 }
 
 ##
-# @Qcow2OverlapChecks
+# @Qcow2OverlapChecks:
 #
 # Specifies which metadata structures should be guarded against unintended
 # overwriting.
@@ -3076,7 +3483,7 @@
 }
 
 ##
-# @BlockdevOptionsQcow2
+# @BlockdevOptionsQcow2:
 #
 # Driver specific block device options for qcow2.
 #
@@ -3130,7 +3537,7 @@
 
 
 ##
-# @BlockdevOptionsArchipelago
+# @BlockdevOptionsArchipelago:
 #
 # Driver specific block device options for Archipelago.
 #
@@ -3163,7 +3570,7 @@
 }
 
 ##
-# @BlockdevOptionsSsh
+# @BlockdevOptionsSsh:
 #
 # @server:              host address
 #
@@ -3174,7 +3581,7 @@
 #
 # TODO: Expose the host_key_check option in QMP
 #
-# Since 2.8
+# Since: 2.8
 ##
 {
   "struct": "BlockdevOptionsSsh",
@@ -3187,7 +3594,7 @@
 
 
 ##
-# @BlkdebugEvent
+# @BlkdebugEvent:
 #
 # Trigger events supported by blkdebug.
 #
@@ -3244,7 +3651,7 @@
 }
 
 ##
-# @BlkdebugInjectErrorOptions
+# @BlkdebugInjectErrorOptions:
 #
 # Describes a single error injection for blkdebug.
 #
@@ -3280,7 +3687,7 @@
 }
 
 ##
-# @BlkdebugSetStateOptions
+# @BlkdebugSetStateOptions:
 #
 # Describes a single state-change event for blkdebug.
 #
@@ -3304,7 +3711,7 @@
 }
 
 ##
-# @BlockdevOptionsBlkdebug
+# @BlockdevOptionsBlkdebug:
 #
 # Driver specific block device options for blkdebug.
 #
@@ -3337,7 +3744,7 @@
 }
 
 ##
-# @BlockdevOptionsBlkverify
+# @BlockdevOptionsBlkverify:
 #
 # Driver specific block device options for blkverify.
 #
@@ -3356,7 +3763,7 @@
 }
 
 ##
-# @QuorumReadPattern
+# @QuorumReadPattern:
 #
 # An enumeration of quorum read patterns.
 #
@@ -3375,7 +3782,7 @@
 }
 
 ##
-# @BlockdevOptionsQuorum
+# @BlockdevOptionsQuorum:
 #
 # Driver specific block device options for Quorum
 #
@@ -3408,7 +3815,7 @@
 }
 
 ##
-# @GlusterTransport
+# @GlusterTransport:
 #
 # An enumeration of Gluster transport types
 #
@@ -3428,17 +3835,13 @@
 
 
 ##
-# @GlusterServer
+# @GlusterServer:
 #
 # Captures the address of a socket
 #
 # Details for connecting to a gluster server
 #
 # @type:       Transport type used for gluster connection
-#
-# @unix:       socket file
-#
-# @tcp:        host address and port number
 #
 # This is similar to SocketAddress, only distinction:
 #
@@ -3467,7 +3870,7 @@
 }
 
 ##
-# @BlockdevOptionsGluster
+# @BlockdevOptionsGluster:
 #
 # Driver specific block device options for Gluster
 #
@@ -3477,7 +3880,8 @@
 #
 # @server:      gluster servers description
 #
-# @debug-level: #optional libgfapi log level (default '4' which is Error)
+# @debug:       #optional libgfapi log level (default '4' which is Error)
+#               (Since 2.8)
 #
 # @logfile:     #optional libgfapi log file (default /dev/stderr) (Since 2.8)
 #
@@ -3491,13 +3895,13 @@
     "server": [
       "GlusterServer"
     ],
-    "*debug-level": "int",
+    "*debug": "int",
     "*logfile": "str"
   }
 }
 
 ##
-# @ReplicationMode
+# @ReplicationMode:
 #
 # An enumeration of replication modes.
 #
@@ -3516,7 +3920,7 @@
 }
 
 ##
-# @BlockdevOptionsReplication
+# @BlockdevOptionsReplication:
 #
 # Driver specific block device options for replication
 #
@@ -3538,13 +3942,13 @@
 }
 
 ##
-# @NFSTransport
+# @NFSTransport:
 #
 # An enumeration of NFS transport types
 #
 # @inet:        TCP transport
 #
-# Since 2.8
+# Since: 2.8
 ##
 {
   "enum": "NFSTransport",
@@ -3554,7 +3958,7 @@
 }
 
 ##
-# @NFSServer
+# @NFSServer:
 #
 # Captures the address of the socket
 #
@@ -3562,7 +3966,7 @@
 #
 # @host:        host address for NFS server
 #
-# Since 2.8
+# Since: 2.8
 ##
 {
   "struct": "NFSServer",
@@ -3573,7 +3977,7 @@
 }
 
 ##
-# @BlockdevOptionsNfs
+# @BlockdevOptionsNfs:
 #
 # Driver specific block device option for NFS
 #
@@ -3598,10 +4002,10 @@
 # @page-cache-size:         #optional set the pagecache size in bytes (defaults
 #                           to libnfs default)
 #
-# @debug-level:             #optional set the NFS debug level (max 2) (defaults
+# @debug:                   #optional set the NFS debug level (max 2) (defaults
 #                           to libnfs default)
 #
-# Since 2.8
+# Since: 2.8
 ##
 {
   "struct": "BlockdevOptionsNfs",
@@ -3613,12 +4017,12 @@
     "*tcp-syn-count": "int",
     "*readahead-size": "int",
     "*page-cache-size": "int",
-    "*debug-level": "int"
+    "*debug": "int"
   }
 }
 
 ##
-# @BlockdevOptionsCurl
+# @BlockdevOptionsCurl:
 #
 # Driver specific block device options for the curl backend.
 #
@@ -3634,7 +4038,7 @@
 }
 
 ##
-# @BlockdevOptionsNbd
+# @BlockdevOptionsNbd:
 #
 # Driver specific block device options for NBD.
 #
@@ -3656,7 +4060,7 @@
 }
 
 ##
-# @BlockdevOptionsRaw
+# @BlockdevOptionsRaw:
 #
 # Driver specific block device options for the raw driver.
 #
@@ -3675,7 +4079,7 @@
 }
 
 ##
-# @BlockdevOptions
+# @BlockdevOptions:
 #
 # Options for creating a block device.  Many options are available for all
 # block devices, independent of the block driver:
@@ -3742,7 +4146,7 @@
 }
 
 ##
-# @BlockdevRef
+# @BlockdevRef:
 #
 # Reference to a block device.
 #
@@ -3768,13 +4172,52 @@
 # BlockBackend will be created; otherwise, @node-name is mandatory at the top
 # level and no BlockBackend will be created.
 #
-# This command is still a work in progress.  It doesn't support all
+# For the arguments, see the documentation of BlockdevOptions.
+#
+# Note: This command is still a work in progress.  It doesn't support all
 # block drivers among other things.  Stay away from it unless you want
 # to help with its development.
 #
-# For the arguments, see the documentation of BlockdevOptions.
-#
 # Since: 1.7
+#
+# Example:
+#
+# 1.
+# -> { "execute": "blockdev-add",
+#      "arguments": {
+#          "options" : { "driver": "qcow2",
+#                        "file": { "driver": "file",
+#                                  "filename": "test.qcow2" } } } }
+# <- { "return": {} }
+#
+# 2.
+# -> { "execute": "blockdev-add",
+#      "arguments": {
+#          "options": {
+#            "driver": "qcow2",
+#            "node-name": "node0",
+#            "discard": "unmap",
+#            "cache": {
+#                "direct": true,
+#                "writeback": true
+#            },
+#            "file": {
+#                "driver": "file",
+#                "filename": "/tmp/test.qcow2"
+#            },
+#            "backing": {
+#                "driver": "raw",
+#                "file": {
+#                    "driver": "file",
+#                    "filename": "/dev/fdset/4"
+#                }
+#            }
+#          }
+#        }
+#      }
+#
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-add",
@@ -3789,13 +4232,35 @@
 # The command will fail if the node is attached to a device or is
 # otherwise being used.
 #
-# This command is still a work in progress and is considered
+# @node-name: Name of the graph node to delete.
+#
+# Note: This command is still a work in progress and is considered
 # experimental. Stay away from it unless you want to help with its
 # development.
 #
-# @node-name: Name of the graph node to delete.
-#
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "blockdev-add",
+#      "arguments": {
+#          "options": {
+#              "driver": "qcow2",
+#              "node-name": "node0",
+#              "file": {
+#                  "driver": "file",
+#                  "filename": "test.qcow2"
+#              }
+#          }
+#      }
+#    }
+# <- { "return": {} }
+#
+# -> { "execute": "x-blockdev-del",
+#      "arguments": { "node-name": "node0" }
+#    }
+# <- { "return": {} }
+#
 ##
 {
   "command": "x-blockdev-del",
@@ -3832,6 +4297,21 @@
 #          it is locked
 #
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "blockdev-open-tray",
+#      "arguments": { "id": "ide0-1-0" } }
+#
+# <- { "timestamp": { "seconds": 1418751016,
+#                     "microseconds": 716996 },
+#      "event": "DEVICE_TRAY_MOVED",
+#      "data": { "device": "ide1-cd0",
+#                "id": "ide0-1-0",
+#                "tray-open": true } }
+#
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-open-tray",
@@ -3856,6 +4336,21 @@
 # @id:      #optional The name or QOM path of the guest device (since: 2.8)
 #
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "blockdev-close-tray",
+#      "arguments": { "id": "ide0-1-0" } }
+#
+# <- { "timestamp": { "seconds": 1418751345,
+#                     "microseconds": 272147 },
+#      "event": "DEVICE_TRAY_MOVED",
+#      "data": { "device": "ide1-cd0",
+#                "id": "ide0-1-0",
+#                "tray-open": false } }
+#
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-close-tray",
@@ -3874,14 +4369,40 @@
 #
 # If the tray is open and there is no medium inserted, this will be a no-op.
 #
-# This command is still a work in progress and is considered experimental.
-# Stay away from it unless you want to help with its development.
-#
 # @device: #optional Block device name (deprecated, use @id instead)
 #
 # @id:     #optional The name or QOM path of the guest device (since: 2.8)
 #
+# Note: This command is still a work in progress and is considered experimental.
+# Stay away from it unless you want to help with its development.
+#
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "x-blockdev-remove-medium",
+#      "arguments": { "id": "ide0-1-0" } }
+#
+# <- { "error": { "class": "GenericError",
+#                 "desc": "Tray of device 'ide0-1-0' is not open" } }
+#
+# -> { "execute": "blockdev-open-tray",
+#      "arguments": { "id": "ide0-1-0" } }
+#
+# <- { "timestamp": { "seconds": 1418751627,
+#                     "microseconds": 549958 },
+#      "event": "DEVICE_TRAY_MOVED",
+#      "data": { "device": "ide1-cd0",
+#                "id": "ide0-1-0",
+#                "tray-open": true } }
+#
+# <- { "return": {} }
+#
+# -> { "execute": "x-blockdev-remove-medium",
+#      "arguments": { "device": "ide0-1-0" } }
+#
+# <- { "return": {} }
+#
 ##
 {
   "command": "x-blockdev-remove-medium",
@@ -3898,16 +4419,33 @@
 # device's tray must currently be open (unless there is no attached guest
 # device) and there must be no medium inserted already.
 #
-# This command is still a work in progress and is considered experimental.
-# Stay away from it unless you want to help with its development.
-#
 # @device:    #optional Block device name (deprecated, use @id instead)
 #
 # @id:        #optional The name or QOM path of the guest device (since: 2.8)
 #
 # @node-name: name of a node in the block driver state graph
 #
+# Note: This command is still a work in progress and is considered experimental.
+# Stay away from it unless you want to help with its development.
+#
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "blockdev-add",
+#      "arguments": {
+#          "options": { "node-name": "node0",
+#                       "driver": "raw",
+#                       "file": { "driver": "file",
+#                                 "filename": "fedora.iso" } } } }
+# <- { "return": {} }
+#
+# -> { "execute": "x-blockdev-insert-medium",
+#      "arguments": { "id": "ide0-1-0",
+#                     "node-name": "node0" } }
+#
+# <- { "return": {} }
+#
 ##
 {
   "command": "x-blockdev-insert-medium",
@@ -3932,6 +4470,7 @@
 # @read-write:  Makes the device writable
 #
 # Since: 2.3
+#
 ##
 {
   "enum": "BlockdevChangeReadOnlyMode",
@@ -3958,13 +4497,44 @@
 #
 # @filename:        filename of the new image to be loaded
 #
-# @format:          #optional, format to open the new image with (defaults to
+# @format:          #optional format to open the new image with (defaults to
 #                   the probed format)
 #
-# @read-only-mode:  #optional, change the read-only mode of the device; defaults
+# @read-only-mode:  #optional change the read-only mode of the device; defaults
 #                   to 'retain'
 #
 # Since: 2.5
+#
+# Examples:
+#
+# 1. Change a removable medium
+#
+# -> { "execute": "blockdev-change-medium",
+#      "arguments": { "id": "ide0-1-0",
+#                     "filename": "/srv/images/Fedora-12-x86_64-DVD.iso",
+#                     "format": "raw" } }
+# <- { "return": {} }
+#
+# 2. Load a read-only medium into a writable drive
+#
+# -> { "execute": "blockdev-change-medium",
+#      "arguments": { "id": "floppyA",
+#                     "filename": "/srv/images/ro.img",
+#                     "format": "raw",
+#                     "read-only-mode": "retain" } }
+#
+# <- { "error":
+#      { "class": "GenericError",
+#        "desc": "Could not open '/srv/images/ro.img': Permission denied" } }
+#
+# -> { "execute": "blockdev-change-medium",
+#      "arguments": { "id": "floppyA",
+#                     "filename": "/srv/images/ro.img",
+#                     "format": "raw",
+#                     "read-only-mode": "read-only" } }
+#
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-change-medium",
@@ -3979,7 +4549,7 @@
 
 
 ##
-# @BlockErrorAction
+# @BlockErrorAction:
 #
 # An enumeration of action that has been taken when a DISK I/O occurs
 #
@@ -4002,9 +4572,12 @@
 
 
 ##
-# @BLOCK_IMAGE_CORRUPTED
+# @BLOCK_IMAGE_CORRUPTED:
 #
-# Emitted when a corruption has been detected in a disk image
+# Emitted when a disk image is being marked corrupt. The image can be
+# identified by its device or node name. The 'device' field is always
+# present for compatibility reasons, but it can be empty ("") if the
+# image does not have a device name associated.
 #
 # @device: device name. This is always present for compatibility
 #          reasons, but it can be empty ("") if the image does not
@@ -4016,15 +4589,26 @@
 #       corruption being detected. It should not be parsed by machine as it is
 #       not guaranteed to be stable
 #
-# @offset: #optional, if the corruption resulted from an image access, this is
+# @offset: #optional if the corruption resulted from an image access, this is
 #          the host's access offset into the image
 #
-# @size: #optional, if the corruption resulted from an image access, this is
+# @size: #optional if the corruption resulted from an image access, this is
 #        the access size
 #
-# fatal: if set, the image is marked corrupt and therefore unusable after this
+# @fatal: if set, the image is marked corrupt and therefore unusable after this
 #        event and must be repaired (Since 2.2; before, every
 #        BLOCK_IMAGE_CORRUPTED event was fatal)
+#
+# Note: If action is "stop", a STOP event will eventually follow the
+#       BLOCK_IO_ERROR event.
+#
+# Example:
+#
+# <- { "event": "BLOCK_IMAGE_CORRUPTED",
+#      "data": { "device": "ide0-hd0", "node-name": "node0",
+#                "msg": "Prevented active L1 table overwrite", "offset": 196608,
+#                "size": 65536 },
+#      "timestamp": { "seconds": 1378126126, "microseconds": 966463 } }
 #
 # Since: 1.7
 ##
@@ -4041,7 +4625,7 @@
 }
 
 ##
-# @BLOCK_IO_ERROR
+# @BLOCK_IO_ERROR:
 #
 # Emitted when a disk I/O error occurs
 #
@@ -4070,6 +4654,16 @@
 # BLOCK_IO_ERROR event
 #
 # Since: 0.13.0
+#
+# Example:
+#
+# <- { "event": "BLOCK_IO_ERROR",
+#      "data": { "device": "ide0-hd1",
+#                "node-name": "#block212",
+#                "operation": "write",
+#                "action": "stop" },
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
 ##
 {
   "event": "BLOCK_IO_ERROR",
@@ -4084,7 +4678,7 @@
 }
 
 ##
-# @BLOCK_JOB_COMPLETED
+# @BLOCK_JOB_COMPLETED:
 #
 # Emitted when a block job has completed
 #
@@ -4100,12 +4694,21 @@
 #
 # @speed: rate limit, bytes per second
 #
-# @error: #optional, error message. Only present on failure. This field
+# @error: #optional error message. Only present on failure. This field
 #         contains a human-readable error message. There are no semantics
 #         other than that streaming has failed and clients should not try to
 #         interpret the error string
 #
 # Since: 1.1
+#
+# Example:
+#
+# <- { "event": "BLOCK_JOB_COMPLETED",
+#      "data": { "type": "stream", "device": "virtio-disk0",
+#                "len": 10737418240, "offset": 10737418240,
+#                "speed": 0 },
+#      "timestamp": { "seconds": 1267061043, "microseconds": 959568 } }
+#
 ##
 {
   "event": "BLOCK_JOB_COMPLETED",
@@ -4120,7 +4723,7 @@
 }
 
 ##
-# @BLOCK_JOB_CANCELLED
+# @BLOCK_JOB_CANCELLED:
 #
 # Emitted when a block job has been cancelled
 #
@@ -4137,6 +4740,15 @@
 # @speed: rate limit, bytes per second
 #
 # Since: 1.1
+#
+# Example:
+#
+# <- { "event": "BLOCK_JOB_CANCELLED",
+#      "data": { "type": "stream", "device": "virtio-disk0",
+#                "len": 10737418240, "offset": 134217728,
+#                "speed": 0 },
+#      "timestamp": { "seconds": 1267061043, "microseconds": 959568 } }
+#
 ##
 {
   "event": "BLOCK_JOB_CANCELLED",
@@ -4150,7 +4762,7 @@
 }
 
 ##
-# @BLOCK_JOB_ERROR
+# @BLOCK_JOB_ERROR:
 #
 # Emitted when a block job encounters an error
 #
@@ -4162,6 +4774,15 @@
 # @action: action that has been taken
 #
 # Since: 1.3
+#
+# Example:
+#
+# <- { "event": "BLOCK_JOB_ERROR",
+#      "data": { "device": "ide0-hd1",
+#                "operation": "write",
+#                "action": "stop" },
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
 ##
 {
   "event": "BLOCK_JOB_ERROR",
@@ -4173,7 +4794,7 @@
 }
 
 ##
-# @BLOCK_JOB_READY
+# @BLOCK_JOB_READY:
 #
 # Emitted when a block job is ready to complete
 #
@@ -4193,6 +4814,14 @@
 # event
 #
 # Since: 1.3
+#
+# Example:
+#
+# <- { "event": "BLOCK_JOB_READY",
+#      "data": { "device": "drive0", "type": "mirror", "speed": 0,
+#                "len": 2097152, "offset": 2097152 }
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
 ##
 {
   "event": "BLOCK_JOB_READY",
@@ -4205,7 +4834,8 @@
   }
 }
 
-# @PreallocMode
+##
+# @PreallocMode:
 #
 # Preallocation mode of QEMU image file
 #
@@ -4217,7 +4847,7 @@
 #        space is really available. @full preallocation also sets up
 #        metadata correctly.
 #
-# Since 2.2
+# Since: 2.2
 ##
 {
   "enum": "PreallocMode",
@@ -4230,7 +4860,7 @@
 }
 
 ##
-# @BLOCK_WRITE_THRESHOLD
+# @BLOCK_WRITE_THRESHOLD:
 #
 # Emitted when writes on block device reaches or exceeds the
 # configured write threshold. For thin-provisioned devices, this
@@ -4257,10 +4887,14 @@
 }
 
 ##
-# @block-set-write-threshold
+# @block-set-write-threshold:
 #
-# Change the write threshold for a block drive. An event will be delivered
-# if a write to this block drive crosses the configured threshold.
+# Change the write threshold for a block drive. An event will be
+# delivered if a write to this block drive crosses the configured
+# threshold.  The threshold is an offset, thus must be
+# non-negative. Default is no write threshold. Setting the threshold
+# to zero disables it.
+#
 # This is useful to transparently resize thin-provisioned drives without
 # the guest OS noticing.
 #
@@ -4270,6 +4904,14 @@
 #                   Use 0 to disable the threshold.
 #
 # Since: 2.3
+#
+# Example:
+#
+# -> { "execute": "block-set-write-threshold",
+#      "arguments": { "node-name": "mydev",
+#                     "write-threshold": 17179869184 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "block-set-write-threshold",
@@ -4280,7 +4922,7 @@
 }
 
 ##
-# @x-blockdev-change
+# @x-blockdev-change:
 #
 # Dynamically reconfigure the block driver state graph. It can be used
 # to add, remove, insert or replace a graph node. Currently only the
@@ -4305,6 +4947,28 @@
 # the rest of the array.
 #
 # Since: 2.7
+#
+# Example:
+#
+# 1. Add a new node to a quorum
+# -> { "execute": "blockdev-add",
+#      "arguments": {
+#          "options": { "driver": "raw",
+#                       "node-name": "new_node",
+#                        "file": { "driver": "file",
+#                                  "filename": "test.raw" } } } }
+# <- { "return": {} }
+# -> { "execute": "x-blockdev-change",
+#      "arguments": { "parent": "disk1",
+#                     "node": "new_node" } }
+# <- { "return": {} }
+#
+# 2. Delete a quorum's node
+# -> { "execute": "x-blockdev-change",
+#      "arguments": { "parent": "disk1",
+#                     "child": "children.1" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "x-blockdev-change",
@@ -4359,7 +5023,7 @@
 }
 
 ##
-# @FloppyDriveType
+# @FloppyDriveType:
 #
 # Type of Floppy drive to be emulated by the Floppy Disk Controller.
 #
@@ -4383,7 +5047,7 @@
 }
 
 ##
-# @BlockdevSnapshotInternal
+# @BlockdevSnapshotInternal:
 #
 # @device: the device name or node-name of a root node to generate the snapshot
 #          from
@@ -4405,21 +5069,35 @@
 }
 
 ##
-# @blockdev-snapshot-internal-sync
+# @blockdev-snapshot-internal-sync:
 #
-# Synchronously take an internal snapshot of a block device, when the format
-# of the image used supports it.
+# Synchronously take an internal snapshot of a block device, when the
+# format of the image used supports it. If the name is an empty
+# string, or a snapshot with name already exists, the operation will
+# fail.
 #
 # For the arguments, see the documentation of BlockdevSnapshotInternal.
 #
 # Returns: nothing on success
+#
 #          If @device is not a valid block device, GenericError
+#
 #          If any snapshot matching @name exists, or @name is empty,
 #          GenericError
+#
 #          If the format of the image used does not support it,
 #          BlockFormatFeatureNotSupported
 #
-# Since 1.7
+# Since: 1.7
+#
+# Example:
+#
+# -> { "execute": "blockdev-snapshot-internal-sync",
+#      "arguments": { "device": "ide-hd0",
+#                     "name": "snapshot0" }
+#    }
+# <- { "return": {} }
+#
 ##
 {
   "command": "blockdev-snapshot-internal-sync",
@@ -4427,7 +5105,7 @@
 }
 
 ##
-# @blockdev-snapshot-delete-internal-sync
+# @blockdev-snapshot-delete-internal-sync:
 #
 # Synchronously delete an internal snapshot of a block device, when the format
 # of the image used support it. The snapshot is identified by name or id or
@@ -4448,7 +5126,25 @@
 #          BlockFormatFeatureNotSupported
 #          If @id and @name are both not specified, GenericError
 #
-# Since 1.7
+# Since: 1.7
+#
+# Example:
+#
+# -> { "execute": "blockdev-snapshot-delete-internal-sync",
+#      "arguments": { "device": "ide-hd0",
+#                     "name": "snapshot0" }
+#    }
+# <- { "return": {
+#                    "id": "1",
+#                    "name": "snapshot0",
+#                    "vm-state-size": 0,
+#                    "date-sec": 1000012,
+#                    "date-nsec": 10,
+#                    "vm-clock-sec": 100,
+#                    "vm-clock-nsec": 20
+#      }
+#    }
+#
 ##
 {
   "command": "blockdev-snapshot-delete-internal-sync",
@@ -4460,24 +5156,6 @@
   "returns": "SnapshotInfo"
 }
 
-##
-# @eject:
-#
-# Ejects a device from a removable drive.
-#
-# @device:  #optional Block device name (deprecated, use @id instead)
-#
-# @id:      #optional The name or QOM path of the guest device (since: 2.8)
-#
-# @force:   @optional If true, eject regardless of whether the drive is locked.
-#           If not specified, the default value is false.
-#
-# Returns:  Nothing on success
-#           If @device is not a valid block device, DeviceNotFound
-#
-# Notes:    Ejecting a device will no media results in success
-#
-# Since: 0.14.0
 ##
 {
   "command": "eject",
@@ -4546,7 +5224,7 @@
 }
 
 ##
-# @DEVICE_TRAY_MOVED
+# @DEVICE_TRAY_MOVED:
 #
 # Emitted whenever the tray of a removable device is moved by the guest or by
 # HMP/QMP commands
@@ -4555,11 +5233,21 @@
 #          reasons, but it can be empty ("") if the image does not
 #          have a device name associated.
 #
-# @id: The name or QOM path of the guest device
+# @id: The name or QOM path of the guest device (since 2.8)
 #
 # @tray-open: true if the tray has been opened or false if it has been closed
 #
 # Since: 1.1
+#
+# Example:
+#
+# <- { "event": "DEVICE_TRAY_MOVED",
+#      "data": { "device": "ide1-cd0",
+#                "id": "/machine/unattached/device[22]",
+#                "tray-open": true
+#      },
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
 ##
 {
   "event": "DEVICE_TRAY_MOVED",
@@ -4571,7 +5259,7 @@
 }
 
 ##
-# @QuorumOpType
+# @QuorumOpType:
 #
 # An enumeration of the quorum operation types
 #
@@ -4594,7 +5282,7 @@
 
 
 ##
-# @SHUTDOWN
+# @SHUTDOWN:
 #
 # Emitted when the virtual machine has shut down, indicating that qemu is
 # about to exit.
@@ -4603,70 +5291,106 @@
 # not exit, and a STOP event will eventually follow the SHUTDOWN event
 #
 # Since: 0.12.0
+#
+# Example:
+#
+# <- { "event": "SHUTDOWN",
+#      "timestamp": { "seconds": 1267040730, "microseconds": 682951 } }
+#
 ##
 {
   "event": "SHUTDOWN"
 }
 
 ##
-# @POWERDOWN
+# @POWERDOWN:
 #
 # Emitted when the virtual machine is powered down through the power control
 # system, such as via ACPI.
 #
 # Since: 0.12.0
+#
+# Example:
+#
+# <- { "event": "POWERDOWN",
+#      "timestamp": { "seconds": 1267040730, "microseconds": 682951 } }
+#
 ##
 {
   "event": "POWERDOWN"
 }
 
 ##
-# @RESET
+# @RESET:
 #
 # Emitted when the virtual machine is reset
 #
 # Since: 0.12.0
+#
+# Example:
+#
+# <- { "event": "RESET",
+#      "timestamp": { "seconds": 1267041653, "microseconds": 9518 } }
+#
 ##
 {
   "event": "RESET"
 }
 
 ##
-# @STOP
+# @STOP:
 #
 # Emitted when the virtual machine is stopped
 #
 # Since: 0.12.0
+#
+# Example:
+#
+# <- { "event": "STOP",
+#      "timestamp": { "seconds": 1267041730, "microseconds": 281295 } }
+#
 ##
 {
   "event": "STOP"
 }
 
 ##
-# @RESUME
+# @RESUME:
 #
 # Emitted when the virtual machine resumes execution
 #
 # Since: 0.12.0
+#
+# Example:
+#
+# <- { "event": "RESUME",
+#      "timestamp": { "seconds": 1271770767, "microseconds": 582542 } }
+#
 ##
 {
   "event": "RESUME"
 }
 
 ##
-# @SUSPEND
+# @SUSPEND:
 #
 # Emitted when guest enters a hardware suspension state, for example, S3 state,
 # which is sometimes called standby state
 #
 # Since: 1.1
+#
+# Example:
+#
+# <- { "event": "SUSPEND",
+#      "timestamp": { "seconds": 1344456160, "microseconds": 309119 } }
+#
 ##
 {
   "event": "SUSPEND"
 }
 
 ##
-# @SUSPEND_DISK
+# @SUSPEND_DISK:
 #
 # Emitted when guest enters a hardware suspension state with data saved on
 # disk, for example, S4 state, which is sometimes called hibernate state
@@ -4674,31 +5398,52 @@
 # Note: QEMU shuts down (similar to event @SHUTDOWN) when entering this state
 #
 # Since: 1.2
+#
+# Example:
+#
+# <-   { "event": "SUSPEND_DISK",
+#        "timestamp": { "seconds": 1344456160, "microseconds": 309119 } }
+#
 ##
 {
   "event": "SUSPEND_DISK"
 }
 
 ##
-# @WAKEUP
+# @WAKEUP:
 #
 # Emitted when the guest has woken up from suspend state and is running
 #
 # Since: 1.1
+#
+# Example:
+#
+# <- { "event": "WAKEUP",
+#      "timestamp": { "seconds": 1344522075, "microseconds": 745528 } }
+#
 ##
 {
   "event": "WAKEUP"
 }
 
 ##
-# @RTC_CHANGE
+# @RTC_CHANGE:
 #
 # Emitted when the guest changes the RTC time.
 #
 # @offset: offset between base RTC clock (as specified by -rtc base), and
 #          new RTC clock value
 #
+# Note: This event is rate-limited.
+#
 # Since: 0.13.0
+#
+# Example:
+#
+# <-   { "event": "RTC_CHANGE",
+#        "data": { "offset": 78 },
+#        "timestamp": { "seconds": 1267020223, "microseconds": 435656 } }
+#
 ##
 {
   "event": "RTC_CHANGE",
@@ -4708,7 +5453,7 @@
 }
 
 ##
-# @WATCHDOG
+# @WATCHDOG:
 #
 # Emitted when the watchdog device's timer is expired
 #
@@ -4717,7 +5462,16 @@
 # Note: If action is "reset", "shutdown", or "pause" the WATCHDOG event is
 # followed respectively by the RESET, SHUTDOWN, or STOP events
 #
+# Note: This event is rate-limited.
+#
 # Since: 0.13.0
+#
+# Example:
+#
+# <- { "event": "WATCHDOG",
+#      "data": { "action": "reset" },
+#      "timestamp": { "seconds": 1267061043, "microseconds": 959568 } }
+#
 ##
 {
   "event": "WATCHDOG",
@@ -4727,17 +5481,25 @@
 }
 
 ##
-# @DEVICE_DELETED
+# @DEVICE_DELETED:
 #
 # Emitted whenever the device removal completion is acknowledged by the guest.
 # At this point, it's safe to reuse the specified device ID. Device removal can
 # be initiated by the guest or by HMP/QMP commands.
 #
-# @device: #optional, device name
+# @device: #optional device name
 #
 # @path: device path
 #
 # Since: 1.5
+#
+# Example:
+#
+# <- { "event": "DEVICE_DELETED",
+#      "data": { "device": "virtio-net-pci-0",
+#                "path": "/machine/peripheral/virtio-net-pci-0" },
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
 ##
 {
   "event": "DEVICE_DELETED",
@@ -4748,16 +5510,25 @@
 }
 
 ##
-# @NIC_RX_FILTER_CHANGED
+# @NIC_RX_FILTER_CHANGED:
 #
 # Emitted once until the 'query-rx-filter' command is executed, the first event
 # will always be emitted
 #
-# @name: #optional, net client name
+# @name: #optional net client name
 #
 # @path: device path
 #
 # Since: 1.6
+#
+# Example:
+#
+# <- { "event": "NIC_RX_FILTER_CHANGED",
+#      "data": { "name": "vnet0",
+#                "path": "/machine/peripheral/vnet0/virtio-backend" },
+#      "timestamp": { "seconds": 1368697518, "microseconds": 326866 } }
+#    }
+#
 ##
 {
   "event": "NIC_RX_FILTER_CHANGED",
@@ -4768,7 +5539,7 @@
 }
 
 ##
-# @VNC_CONNECTED
+# @VNC_CONNECTED:
 #
 # Emitted when a VNC client establishes a connection
 #
@@ -4780,6 +5551,17 @@
 # the authentication ID is not provided
 #
 # Since: 0.13.0
+#
+# Example:
+#
+# <- { "event": "VNC_CONNECTED",
+#      "data": {
+#            "server": { "auth": "sasl", "family": "ipv4",
+#                        "service": "5901", "host": "0.0.0.0" },
+#            "client": { "family": "ipv4", "service": "58425",
+#                        "host": "127.0.0.1" } },
+#      "timestamp": { "seconds": 1262976601, "microseconds": 975795 } }
+#
 ##
 {
   "event": "VNC_CONNECTED",
@@ -4790,7 +5572,7 @@
 }
 
 ##
-# @VNC_INITIALIZED
+# @VNC_INITIALIZED:
 #
 # Emitted after authentication takes place (if any) and the VNC session is
 # made active
@@ -4800,6 +5582,17 @@
 # @client: client information
 #
 # Since: 0.13.0
+#
+# Example:
+#
+# <-  { "event": "VNC_INITIALIZED",
+#       "data": {
+#            "server": { "auth": "sasl", "family": "ipv4",
+#                        "service": "5901", "host": "0.0.0.0"},
+#            "client": { "family": "ipv4", "service": "46089",
+#                        "host": "127.0.0.1", "sasl_username": "luiz" } },
+#       "timestamp": { "seconds": 1263475302, "microseconds": 150772 } }
+#
 ##
 {
   "event": "VNC_INITIALIZED",
@@ -4810,7 +5603,7 @@
 }
 
 ##
-# @VNC_DISCONNECTED
+# @VNC_DISCONNECTED:
 #
 # Emitted when the connection is closed
 #
@@ -4819,6 +5612,17 @@
 # @client: client information
 #
 # Since: 0.13.0
+#
+# Example:
+#
+# <- { "event": "VNC_DISCONNECTED",
+#      "data": {
+#            "server": { "auth": "sasl", "family": "ipv4",
+#                        "service": "5901", "host": "0.0.0.0" },
+#            "client": { "family": "ipv4", "service": "58425",
+#                        "host": "127.0.0.1", "sasl_username": "luiz" } },
+#      "timestamp": { "seconds": 1262976601, "microseconds": 975795 } }
+#
 ##
 {
   "event": "VNC_DISCONNECTED",
@@ -4829,7 +5633,7 @@
 }
 
 ##
-# @SPICE_CONNECTED
+# @SPICE_CONNECTED:
 #
 # Emitted when a SPICE client establishes a connection
 #
@@ -4838,6 +5642,16 @@
 # @client: client information
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# <- { "timestamp": {"seconds": 1290688046, "microseconds": 388707},
+#      "event": "SPICE_CONNECTED",
+#      "data": {
+#        "server": { "port": "5920", "family": "ipv4", "host": "127.0.0.1"},
+#        "client": {"port": "52873", "family": "ipv4", "host": "127.0.0.1"}
+#    }}
+#
 ##
 {
   "event": "SPICE_CONNECTED",
@@ -4848,7 +5662,7 @@
 }
 
 ##
-# @SPICE_INITIALIZED
+# @SPICE_INITIALIZED:
 #
 # Emitted after initial handshake and authentication takes place (if any)
 # and the SPICE channel is up and running
@@ -4858,6 +5672,18 @@
 # @client: client information
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# <- { "timestamp": {"seconds": 1290688046, "microseconds": 417172},
+#      "event": "SPICE_INITIALIZED",
+#      "data": {"server": {"auth": "spice", "port": "5921",
+#                          "family": "ipv4", "host": "127.0.0.1"},
+#               "client": {"port": "49004", "family": "ipv4", "channel-type": 3,
+#                          "connection-id": 1804289383, "host": "127.0.0.1",
+#                          "channel-id": 0, "tls": true}
+#    }}
+#
 ##
 {
   "event": "SPICE_INITIALIZED",
@@ -4868,7 +5694,7 @@
 }
 
 ##
-# @SPICE_DISCONNECTED
+# @SPICE_DISCONNECTED:
 #
 # Emitted when the SPICE connection is closed
 #
@@ -4877,6 +5703,16 @@
 # @client: client information
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# <- { "timestamp": {"seconds": 1290688046, "microseconds": 388707},
+#      "event": "SPICE_DISCONNECTED",
+#      "data": {
+#        "server": { "port": "5920", "family": "ipv4", "host": "127.0.0.1"},
+#        "client": {"port": "52873", "family": "ipv4", "host": "127.0.0.1"}
+#    }}
+#
 ##
 {
   "event": "SPICE_DISCONNECTED",
@@ -4887,24 +5723,37 @@
 }
 
 ##
-# @SPICE_MIGRATE_COMPLETED
+# @SPICE_MIGRATE_COMPLETED:
 #
 # Emitted when SPICE migration has completed
 #
 # Since: 1.3
+#
+# Example:
+#
+# <- { "timestamp": {"seconds": 1290688046, "microseconds": 417172},
+#      "event": "SPICE_MIGRATE_COMPLETED" }
+#
 ##
 {
   "event": "SPICE_MIGRATE_COMPLETED"
 }
 
 ##
-# @MIGRATION
+# @MIGRATION:
 #
 # Emitted when a migration event happens
 #
 # @status: @MigrationStatus describing the current migration status.
 #
 # Since: 2.4
+#
+# Example:
+#
+# <- {"timestamp": {"seconds": 1432121972, "microseconds": 744001},
+#     "event": "MIGRATION",
+#     "data": {"status": "completed"} }
+#
 ##
 {
   "event": "MIGRATION",
@@ -4914,7 +5763,7 @@
 }
 
 ##
-# @MIGRATION_PASS
+# @MIGRATION_PASS:
 #
 # Emitted from the source side of a migration at the start of each pass
 # (when it syncs the dirty bitmap)
@@ -4922,6 +5771,12 @@
 # @pass: An incrementing count (starting at 1 on the first pass)
 #
 # Since: 2.6
+#
+# Example:
+#
+# { "timestamp": {"seconds": 1449669631, "microseconds": 239225},
+#   "event": "MIGRATION_PASS", "data": {"pass": 2} }
+#
 ##
 {
   "event": "MIGRATION_PASS",
@@ -4931,13 +5786,20 @@
 }
 
 ##
-# @ACPI_DEVICE_OST
+# @ACPI_DEVICE_OST:
 #
 # Emitted when guest executes ACPI _OST method.
 #
+# @info: ACPIOSTInfo type as described in qapi-schema.json
+#
 # Since: 2.1
 #
-# @info: ACPIOSTInfo type as described in qapi-schema.json
+# Example:
+#
+# <- { "event": "ACPI_DEVICE_OST",
+#      "data": { "device": "d1", "slot": "0",
+#                "slot-type": "DIMM", "source": 1, "status": 0 } }
+#
 ##
 {
   "event": "ACPI_DEVICE_OST",
@@ -4947,14 +5809,23 @@
 }
 
 ##
-# @BALLOON_CHANGE
+# @BALLOON_CHANGE:
 #
 # Emitted when the guest changes the actual BALLOON level. This value is
 # equivalent to the @actual field return by the 'query-balloon' command
 #
 # @actual: actual level of the guest memory balloon in bytes
 #
+# Note: this event is rate-limited.
+#
 # Since: 1.2
+#
+# Example:
+#
+# <- { "event": "BALLOON_CHANGE",
+#      "data": { "actual": 944766976 },
+#      "timestamp": { "seconds": 1267020223, "microseconds": 435656 } }
+#
 ##
 {
   "event": "BALLOON_CHANGE",
@@ -4964,13 +5835,19 @@
 }
 
 ##
-# @GUEST_PANICKED
+# @GUEST_PANICKED:
 #
 # Emitted when guest OS panic is detected
 #
 # @action: action that has been taken, currently always "pause"
 #
 # Since: 1.5
+#
+# Example:
+#
+# <- { "event": "GUEST_PANICKED",
+#      "data": { "action": "pause" } }
+#
 ##
 {
   "event": "GUEST_PANICKED",
@@ -4980,7 +5857,7 @@
 }
 
 ##
-# @QUORUM_FAILURE
+# @QUORUM_FAILURE:
 #
 # Emitted by the Quorum block driver if it fails to establish a quorum
 #
@@ -4990,7 +5867,16 @@
 #
 # @sectors-count: failed read operation sector count
 #
+# Note: This event is rate-limited.
+#
 # Since: 2.0
+#
+# Example:
+#
+# <- { "event": "QUORUM_FAILURE",
+#      "data": { "reference": "usr1", "sector-num": 345435, "sectors-count": 5 },
+#      "timestamp": { "seconds": 1344522075, "microseconds": 745528 } }
+#
 ##
 {
   "event": "QUORUM_FAILURE",
@@ -5002,13 +5888,13 @@
 }
 
 ##
-# @QUORUM_REPORT_BAD
+# @QUORUM_REPORT_BAD:
 #
 # Emitted to report a corruption of a Quorum file
 #
 # @type: quorum operation type (Since 2.6)
 #
-# @error: #optional, error message. Only present on failure. This field
+# @error: #optional error message. Only present on failure. This field
 #         contains a human-readable error message. There are no semantics other
 #         than that the block layer reported an error and clients should not
 #         try to interpret the error string.
@@ -5019,7 +5905,26 @@
 #
 # @sectors-count: failed read operation sector count
 #
+# Note: This event is rate-limited.
+#
 # Since: 2.0
+#
+# Example:
+#
+# 1. Read operation
+#
+# { "event": "QUORUM_REPORT_BAD",
+#      "data": { "node-name": "node0", "sector-num": 345435, "sectors-count": 5,
+#                "type": "read" },
+#      "timestamp": { "seconds": 1344522075, "microseconds": 745528 } }
+#
+# 2. Flush operation
+#
+# { "event": "QUORUM_REPORT_BAD",
+#      "data": { "node-name": "node0", "sector-num": 0, "sectors-count": 2097120,
+#                "type": "flush", "error": "Broken pipe" },
+#      "timestamp": { "seconds": 1456406829, "microseconds": 291763 } }
+#
 ##
 {
   "event": "QUORUM_REPORT_BAD",
@@ -5033,7 +5938,7 @@
 }
 
 ##
-# @VSERPORT_CHANGE
+# @VSERPORT_CHANGE:
 #
 # Emitted when the guest opens or closes a virtio-serial port.
 #
@@ -5042,6 +5947,13 @@
 # @open: true if the guest has opened the virtio-serial port
 #
 # Since: 2.1
+#
+# Example:
+#
+# <- { "event": "VSERPORT_CHANGE",
+#      "data": { "id": "channel0", "open": true },
+#      "timestamp": { "seconds": 1401385907, "microseconds": 422329 } }
+#
 ##
 {
   "event": "VSERPORT_CHANGE",
@@ -5052,7 +5964,7 @@
 }
 
 ##
-# @MEM_UNPLUG_ERROR
+# @MEM_UNPLUG_ERROR:
 #
 # Emitted when memory hot unplug error occurs.
 #
@@ -5061,6 +5973,15 @@
 # @msg: Informative message
 #
 # Since: 2.4
+#
+# Example:
+#
+# <- { "event": "MEM_UNPLUG_ERROR"
+#      "data": { "device": "dimm1",
+#                "msg": "acpi: device unplug for unsupported device"
+#      },
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
 ##
 {
   "event": "MEM_UNPLUG_ERROR",
@@ -5071,7 +5992,7 @@
 }
 
 ##
-# @DUMP_COMPLETED
+# @DUMP_COMPLETED:
 #
 # Emitted when background dump has completed
 #
@@ -5082,6 +6003,13 @@
 #         user should not try to interpret the error string.
 #
 # Since: 2.6
+#
+# Example:
+#
+# { "event": "DUMP_COMPLETED",
+#   "data": {"result": {"total": 1090650112, "status": "completed",
+#                       "completed": 1090650112} } }
+#
 ##
 {
   "event": "DUMP_COMPLETED",
@@ -5090,7 +6018,6 @@
     "*error": "str"
   }
 }
-
 
 
 ##
@@ -5104,7 +6031,7 @@
 #
 # @enabled: The event is dynamically enabled.
 #
-# Since 2.2
+# Since: 2.2
 ##
 {
   "enum": "TraceEventState",
@@ -5127,7 +6054,7 @@
 # An event is per-vCPU if it has the "vcpu" property in the "trace-events"
 # files.
 #
-# Since 2.2
+# Since: 2.2
 ##
 {
   "struct": "TraceEventInfo",
@@ -5157,7 +6084,14 @@
 # exact match, @vcpu is given and the event does not have the "vcpu" property,
 # an error is returned.
 #
-# Since 2.2
+# Since: 2.2
+#
+# Example:
+#
+# -> { "execute": "trace-event-get-state",
+#      "arguments": { "name": "qemu_memalign" } }
+# <- { "return": [ { "name": "qemu_memalign", "state": "disabled" } ] }
+#
 ##
 {
   "command": "trace-event-get-state",
@@ -5189,7 +6123,14 @@
 # match, @vcpu is given and the event does not have the "vcpu" property, an
 # error is returned.
 #
-# Since 2.2
+# Since: 2.2
+#
+# Example:
+#
+# -> { "execute": "trace-event-set-state",
+#      "arguments": { "name": "qemu_memalign", "enable": "true" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "trace-event-set-state",
@@ -5203,7 +6144,7 @@
 
 
 ##
-# @query-qmp-schema
+# @query-qmp-schema:
 #
 # Command query-qmp-schema exposes the QMP wire ABI as an array of
 # SchemaInfo.  This lets QMP clients figure out what commands and
@@ -5245,7 +6186,7 @@
 }                
 
 ##
-# @SchemaMetaType
+# @SchemaMetaType:
 #
 # This is a @SchemaInfo's meta type, i.e. the kind of entity it
 # describes.
@@ -5280,16 +6221,15 @@
 }
 
 ##
-# @SchemaInfo
+# @SchemaInfo:
 #
 # @name: the entity's name, inherited from @base.
+#        The SchemaInfo is always referenced by this name.
 #        Commands and events have the name defined in the QAPI schema.
 #        Unlike command and event names, type names are not part of
 #        the wire ABI.  Consequently, type names are meaningless
 #        strings here, although they are still guaranteed unique
 #        regardless of @meta-type.
-#
-# All references to other SchemaInfo are by name.
 #
 # @meta-type: the entity's meta type, inherited from @base.
 #
@@ -5316,7 +6256,7 @@
 }
 
 ##
-# @SchemaInfoBuiltin
+# @SchemaInfoBuiltin:
 #
 # Additional SchemaInfo members for meta-type 'builtin'.
 #
@@ -5332,7 +6272,7 @@
 }
 
 ##
-# @JSONType
+# @JSONType:
 #
 # The four primitive and two structured types according to RFC 7159
 # section 1, plus 'int' (split off 'number'), plus the obvious top
@@ -5355,7 +6295,7 @@
 }
 
 ##
-# @SchemaInfoEnum
+# @SchemaInfoEnum:
 #
 # Additional SchemaInfo members for meta-type 'enum'.
 #
@@ -5375,7 +6315,7 @@
 }
 
 ##
-# @SchemaInfoArray
+# @SchemaInfoArray:
 #
 # Additional SchemaInfo members for meta-type 'array'.
 #
@@ -5393,7 +6333,7 @@
 }
 
 ##
-# @SchemaInfoObject
+# @SchemaInfoObject:
 #
 # Additional SchemaInfo members for meta-type 'object'.
 #
@@ -5426,7 +6366,7 @@
 }
 
 ##
-# @SchemaInfoObjectMember
+# @SchemaInfoObjectMember:
 #
 # An object member.
 #
@@ -5455,7 +6395,7 @@
 
 
 ##
-# @SchemaInfoObjectVariant
+# @SchemaInfoObjectVariant:
 #
 # The variant members for a value of the type tag.
 #
@@ -5475,7 +6415,7 @@
 }
 
 ##
-# @SchemaInfoAlternate
+# @SchemaInfoAlternate:
 #
 # Additional SchemaInfo members for meta-type 'alternate'.
 #
@@ -5497,7 +6437,7 @@
 }
 
 ##
-# @SchemaInfoAlternateMember
+# @SchemaInfoAlternateMember:
 #
 # An alternate member.
 #
@@ -5513,7 +6453,7 @@
 }
 
 ##
-# @SchemaInfoCommand
+# @SchemaInfoCommand:
 #
 # Additional SchemaInfo members for meta-type 'command'.
 #
@@ -5522,7 +6462,7 @@
 #
 # @ret-type: the name of the command's result type.
 #
-# TODO @success-response (currently irrelevant, because it's QGA, not QMP)
+# TODO: @success-response (currently irrelevant, because it's QGA, not QMP)
 #
 # Since: 2.5
 ##
@@ -5535,7 +6475,7 @@
 }
 
 ##
-# @SchemaInfoEvent
+# @SchemaInfoEvent:
 #
 # Additional SchemaInfo members for meta-type 'event'.
 #
@@ -5606,7 +6546,8 @@
   ]
 }
 
-# @add_client
+##
+# @add_client:
 #
 # Allow client connections for VNC, Spice and socket based
 # character devices to be passed in to QEMU via SCM_RIGHTS.
@@ -5625,6 +6566,13 @@
 # Returns: nothing on success.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "add_client", "arguments": { "protocol": "vnc",
+#                                              "fdname": "myclient" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "add_client",
@@ -5643,7 +6591,7 @@
 #
 # @name: #optional The name of the guest
 #
-# Since 0.14.0
+# Since: 0.14.0
 ##
 {
   "struct": "NameInfo",
@@ -5659,7 +6607,13 @@
 #
 # Returns: @NameInfo of the guest
 #
-# Since 0.14.0
+# Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-name" }
+# <- { "return": { "name": "qemu-name" } }
+#
 ##
 {
   "command": "query-name",
@@ -5693,6 +6647,12 @@
 # Returns: @KvmInfo
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-kvm" }
+# <- { "return": { "enabled": true, "present": true } }
+#
 ##
 {
   "command": "query-kvm",
@@ -5700,7 +6660,7 @@
 }
 
 ##
-# @RunState
+# @RunState:
 #
 # An enumeration of VM run states.
 #
@@ -5798,6 +6758,14 @@
 # Returns: @StatusInfo reflecting all VCPUs
 #
 # Since:  0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-status" }
+# <- { "return": { "running": true,
+#                  "singlestep": false,
+#                  "status": "running" } }
+#
 ##
 {
   "command": "query-status",
@@ -5807,7 +6775,7 @@
 ##
 # @UuidInfo:
 #
-# Guest UUID information.
+# Guest UUID information (Universally Unique Identifier).
 #
 # @UUID: the UUID of the guest
 #
@@ -5829,7 +6797,13 @@
 #
 # Returns: The @UuidInfo for the guest
 #
-# Since 0.14.0
+# Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-uuid" }
+# <- { "return": { "UUID": "550e8400-e29b-41d4-a716-446655440000" } }
+#
 ##
 {
   "command": "query-uuid",
@@ -5871,6 +6845,30 @@
 # Returns: a list of @ChardevInfo
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-chardev" }
+# <- {
+#       "return": [
+#          {
+#             "label": "charchannel0",
+#             "filename": "unix:/var/lib/libvirt/qemu/seabios.rhel6.agent,server",
+#             "frontend-open": false
+#          },
+#          {
+#             "label": "charmonitor",
+#             "filename": "unix:/var/lib/libvirt/qemu/seabios.rhel6.monitor,server",
+#             "frontend-open": true
+#          },
+#          {
+#             "label": "charserial0",
+#             "filename": "pty:/dev/pts/2",
+#             "frontend-open": true
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-chardev",
@@ -5903,6 +6901,27 @@
 # Returns: a list of @ChardevBackendInfo
 #
 # Since: 2.0
+#
+# Example:
+#
+# -> { "execute": "query-chardev-backends" }
+# <- {
+#       "return":[
+#          {
+#             "name":"udp"
+#          },
+#          {
+#             "name":"tcp"
+#          },
+#          {
+#             "name":"unix"
+#          },
+#          {
+#             "name":"spiceport"
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-chardev-backends",
@@ -5949,6 +6968,15 @@
 # Returns: Nothing on success
 #
 # Since: 1.4
+#
+# Example:
+#
+# -> { "execute": "ringbuf-write",
+#      "arguments": { "device": "foo",
+#                     "data": "abcdefgh",
+#                     "format": "utf8" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "ringbuf-write",
@@ -5981,6 +7009,15 @@
 # Returns: data read from the device
 #
 # Since: 1.4
+#
+# Example:
+#
+# -> { "execute": "ringbuf-read",
+#      "arguments": { "device": "foo",
+#                     "size": 1000,
+#                     "format": "utf8" } }
+# <- { "return": "abcdefgh" }
+#
 ##
 {
   "command": "ringbuf-read",
@@ -6016,6 +7053,23 @@
 # Returns: A list of @EventInfo for all supported events
 #
 # Since: 1.2.0
+#
+# Example:
+#
+# -> { "execute": "query-events" }
+# <- {
+#      "return": [
+#          {
+#             "name":"SHUTDOWN"
+#          },
+#          {
+#             "name":"RESET"
+#          }
+#       ]
+#    }
+#
+# Note: This example has been shortened as the real response is too long.
+#
 ##
 {
   "command": "query-events",
@@ -6025,7 +7079,7 @@
 }
 
 ##
-# @MigrationStats
+# @MigrationStats:
 #
 # Detailed migration status.
 #
@@ -6039,7 +7093,7 @@
 #
 # @skipped: number of skipped zero pages (since 1.5)
 #
-# @normal : number of normal pages (since 1.2)
+# @normal: number of normal pages (since 1.2)
 #
 # @normal-bytes: number of normal bytes sent (since 1.2)
 #
@@ -6073,7 +7127,7 @@
 }
 
 ##
-# @XBZRLECacheStats
+# @XBZRLECacheStats:
 #
 # Detailed XBZRLE migration cache statistics
 #
@@ -6103,6 +7157,7 @@
   }
 }
 
+##
 # @MigrationStatus:
 #
 # An enumeration of migration status.
@@ -6145,7 +7200,7 @@
 }
 
 ##
-# @MigrationInfo
+# @MigrationInfo:
 #
 # Information about current migration process.
 #
@@ -6210,13 +7265,126 @@
 }
 
 ##
-# @query-migrate
+# @query-migrate:
 #
-# Returns information about current migration process.
+# Returns information about current migration process. If migration
+# is active there will be another json-object with RAM migration
+# status and if block migration is active another one with block
+# migration status.
 #
 # Returns: @MigrationInfo
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# 1. Before the first migration
+#
+# -> { "execute": "query-migrate" }
+# <- { "return": {} }
+#
+# 2. Migration is done and has succeeded
+#
+# -> { "execute": "query-migrate" }
+# <- { "return": {
+#         "status": "completed",
+#         "ram":{
+#           "transferred":123,
+#           "remaining":123,
+#           "total":246,
+#           "total-time":12345,
+#           "setup-time":12345,
+#           "downtime":12345,
+#           "duplicate":123,
+#           "normal":123,
+#           "normal-bytes":123456,
+#           "dirty-sync-count":15
+#         }
+#      }
+#    }
+#
+# 3. Migration is done and has failed
+#
+# -> { "execute": "query-migrate" }
+# <- { "return": { "status": "failed" } }
+#
+# 4. Migration is being performed and is not a block migration:
+#
+# -> { "execute": "query-migrate" }
+# <- {
+#       "return":{
+#          "status":"active",
+#          "ram":{
+#             "transferred":123,
+#             "remaining":123,
+#             "total":246,
+#             "total-time":12345,
+#             "setup-time":12345,
+#             "expected-downtime":12345,
+#             "duplicate":123,
+#             "normal":123,
+#             "normal-bytes":123456,
+#             "dirty-sync-count":15
+#          }
+#       }
+#    }
+#
+# 5. Migration is being performed and is a block migration:
+#
+# -> { "execute": "query-migrate" }
+# <- {
+#       "return":{
+#          "status":"active",
+#          "ram":{
+#             "total":1057024,
+#             "remaining":1053304,
+#             "transferred":3720,
+#             "total-time":12345,
+#             "setup-time":12345,
+#             "expected-downtime":12345,
+#             "duplicate":123,
+#             "normal":123,
+#             "normal-bytes":123456,
+#             "dirty-sync-count":15
+#          },
+#          "disk":{
+#             "total":20971520,
+#             "remaining":20880384,
+#             "transferred":91136
+#          }
+#       }
+#    }
+#
+# 6. Migration is being performed and XBZRLE is active:
+#
+# -> { "execute": "query-migrate" }
+# <- {
+#       "return":{
+#          "status":"active",
+#          "capabilities" : [ { "capability": "xbzrle", "state" : true } ],
+#          "ram":{
+#             "total":1057024,
+#             "remaining":1053304,
+#             "transferred":3720,
+#             "total-time":12345,
+#             "setup-time":12345,
+#             "expected-downtime":12345,
+#             "duplicate":10,
+#             "normal":3333,
+#             "normal-bytes":3412992,
+#             "dirty-sync-count":15
+#          },
+#          "xbzrle-cache":{
+#             "cache-size":67108864,
+#             "bytes":20971520,
+#             "pages":2444343,
+#             "cache-miss":2244,
+#             "cache-miss-rate":0.123,
+#             "overflow":34434
+#          }
+#       }
+#    }
+#
 ##
 {
   "command": "query-migrate",
@@ -6224,7 +7392,7 @@
 }
 
 ##
-# @MigrationCapability
+# @MigrationCapability:
 #
 # Migration capabilities enumeration
 #
@@ -6282,7 +7450,7 @@
 }
 
 ##
-# @MigrationCapabilityStatus
+# @MigrationCapabilityStatus:
 #
 # Migration capability information
 #
@@ -6301,13 +7469,19 @@
 }
 
 ##
-# @migrate-set-capabilities
+# @migrate-set-capabilities:
 #
 # Enable/Disable the following migration capabilities (like xbzrle)
 #
 # @capabilities: json array of capability modifications to make
 #
 # Since: 1.2
+#
+# Example:
+#
+# -> { "execute": "migrate-set-capabilities" , "arguments":
+#      { "capabilities": [ { "capability": "xbzrle", "state": true } ] } }
+#
 ##
 {
   "command": "migrate-set-capabilities",
@@ -6319,13 +7493,28 @@
 }
 
 ##
-# @query-migrate-capabilities
+# @query-migrate-capabilities:
 #
 # Returns information about the current migration capabilities status
 #
 # Returns: @MigrationCapabilitiesStatus
 #
 # Since: 1.2
+#
+# Example:
+#
+# -> { "execute": "query-migrate-capabilities" }
+# <- { "return": [
+#       {"state": false, "capability": "xbzrle"},
+#       {"state": false, "capability": "rdma-pin-all"},
+#       {"state": false, "capability": "auto-converge"},
+#       {"state": false, "capability": "zero-blocks"},
+#       {"state": false, "capability": "compress"},
+#       {"state": true, "capability": "events"},
+#       {"state": false, "capability": "postcopy-ram"},
+#       {"state": false, "capability": "x-colo"}
+#    ]}
+#
 ##
 {
   "command": "query-migrate-capabilities",
@@ -6334,7 +7523,8 @@
   ]
 }
 
-# @MigrationParameter
+##
+# @MigrationParameter:
 #
 # Migration parameters enumeration
 #
@@ -6402,14 +7592,18 @@
   ]
 }
 
-#
-# @migrate-set-parameters
+##
+# @migrate-set-parameters:
 #
 # Set various migration parameters.  See MigrationParameters for details.
 #
-# @x-checkpoint-delay: the delay time between two checkpoints. (Since 2.8)
-#
 # Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "migrate-set-parameters" ,
+#      "arguments": { "compress-level": 1 } }
+#
 ##
 {
   "command": "migrate-set-parameters",
@@ -6417,8 +7611,8 @@
   "data": "MigrationParameters"
 }
 
-#
-# @MigrationParameters
+##
+# @MigrationParameters:
 #
 # Optional members can be omitted on input ('migrate-set-parameters')
 # but most members will always be present on output
@@ -6481,13 +7675,28 @@
 }
 
 ##
-# @query-migrate-parameters
+# @query-migrate-parameters:
 #
 # Returns information about the current migration parameters
 #
 # Returns: @MigrationParameters
 #
 # Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "query-migrate-parameters" }
+# <- { "return": {
+#          "decompress-threads": 2,
+#          "cpu-throttle-increment": 10,
+#          "compress-threads": 8,
+#          "compress-level": 1,
+#          "cpu-throttle-initial": 20,
+#          "max-bandwidth": 33554432,
+#          "downtime-limit": 300
+#       }
+#    }
+#
 ##
 {
   "command": "query-migrate-parameters",
@@ -6495,7 +7704,7 @@
 }
 
 ##
-# @client_migrate_info
+# @client_migrate_info:
 #
 # Set migration information for remote display.  This makes the server
 # ask the client to automatically reconnect using the new parameters
@@ -6508,6 +7717,15 @@
 # @cert-subject: #optional server certificate subject
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "client_migrate_info",
+#      "arguments": { "protocol": "spice",
+#                     "hostname": "virt42.lab.kraxel.org",
+#                     "port": 1234 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "client_migrate_info",
@@ -6521,19 +7739,26 @@
 }
 
 ##
-# @migrate-start-postcopy
+# @migrate-start-postcopy:
 #
 # Followup to a migration command to switch the migration to postcopy mode.
 # The postcopy-ram capability must be set before the original migration
 # command.
 #
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "migrate-start-postcopy" }
+# <- { "return": {} }
+#
+##
 {
   "command": "migrate-start-postcopy"
 }
 
 ##
-# @COLOMessage
+# @COLOMessage:
 #
 # The message transmission between Primary side and Secondary side.
 #
@@ -6567,7 +7792,7 @@
 }
 
 ##
-# @COLOMode
+# @COLOMode:
 #
 # The colo mode
 #
@@ -6589,7 +7814,7 @@
 }
 
 ##
-# @FailoverStatus
+# @FailoverStatus:
 #
 # An enumeration of COLO failover status
 #
@@ -6614,7 +7839,7 @@
 }
 
 ##
-# @x-colo-lost-heartbeat
+# @x-colo-lost-heartbeat:
 #
 # Tell qemu that heartbeat is lost, request it to do takeover procedures.
 # If this command is sent to the PVM, the Primary side will exit COLO mode.
@@ -6622,6 +7847,12 @@
 # then takes over server operation to become the service VM.
 #
 # Since: 2.8
+#
+# Example:
+#
+# -> { "execute": "x-colo-lost-heartbeat" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "x-colo-lost-heartbeat"
@@ -6660,6 +7891,26 @@
 # Returns: a list of @MouseInfo for each device
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-mice" }
+# <- { "return": [
+#          {
+#             "name":"QEMU Microsoft Mouse",
+#             "index":0,
+#             "current":false,
+#             "absolute":false
+#          },
+#          {
+#             "name":"QEMU PS/2 Mouse",
+#             "index":1,
+#             "current":true,
+#             "absolute":true
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-mice",
@@ -6740,7 +7991,7 @@
 #
 # @pc: the 64-bit instruction pointer
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "struct": "CpuInfoX86",
@@ -6758,7 +8009,7 @@
 #
 # @npc: the NPC component of the instruction pointer
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "struct": "CpuInfoSPARC",
@@ -6775,7 +8026,7 @@
 #
 # @nip: the instruction pointer
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "struct": "CpuInfoPPC",
@@ -6791,7 +8042,7 @@
 #
 # @PC: the instruction pointer
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "struct": "CpuInfoMIPS",
@@ -6807,7 +8058,7 @@
 #
 # @PC: the instruction pointer
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "struct": "CpuInfoTricore",
@@ -6821,7 +8072,7 @@
 #
 # No additional information is available about the virtual CPU
 #
-# Since 2.6
+# Since: 2.6
 #
 ##
 {
@@ -6837,6 +8088,32 @@
 # Returns: a list of @CpuInfo for each virtual CPU
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-cpus" }
+# <- { "return": [
+#          {
+#             "CPU":0,
+#             "current":true,
+#             "halted":false,
+#             "qom_path":"/machine/unattached/device[0]",
+#             "arch":"x86",
+#             "pc":3227107138,
+#             "thread_id":3134
+#          },
+#          {
+#             "CPU":1,
+#             "current":false,
+#             "halted":true,
+#             "qom_path":"/machine/unattached/device[2]",
+#             "arch":"x86",
+#             "pc":7108165,
+#             "thread_id":3135
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-cpus",
@@ -6869,13 +8146,29 @@
 #
 # Returns a list of information about each iothread.
 #
-# Note this list excludes the QEMU main loop thread, which is not declared
+# Note: this list excludes the QEMU main loop thread, which is not declared
 # using the -object iothread command-line option.  It is always the main thread
 # of the process.
 #
 # Returns: a list of @IOThreadInfo for each iothread
 #
 # Since: 2.0
+#
+# Example:
+#
+# -> { "execute": "query-iothreads" }
+# <- { "return": [
+#          {
+#             "id":"iothread0",
+#             "thread-id":3134
+#          },
+#          {
+#             "id":"iothread1",
+#             "thread-id":3135
+#          }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-iothreads",
@@ -6885,7 +8178,7 @@
 }
 
 ##
-# @NetworkAddressFamily
+# @NetworkAddressFamily:
 #
 # The network address family
 #
@@ -6913,7 +8206,7 @@
 }
 
 ##
-# @VncBasicInfo
+# @VncBasicInfo:
 #
 # The basic information for vnc network connection
 #
@@ -6940,11 +8233,11 @@
 }
 
 ##
-# @VncServerInfo
+# @VncServerInfo:
 #
 # The network connection information for server
 #
-# @auth: #optional, authentication method
+# @auth: #optional authentication method
 #
 # Since: 2.1
 ##
@@ -7029,7 +8322,7 @@
 }
 
 ##
-# @VncPriAuth:
+# @VncPrimaryAuth:
 #
 # vnc primary authentication method.
 #
@@ -7120,6 +8413,26 @@
 # Returns: @VncInfo
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-vnc" }
+# <- { "return": {
+#          "enabled":true,
+#          "host":"0.0.0.0",
+#          "service":"50402",
+#          "auth":"vnc",
+#          "family":"ipv4",
+#          "clients":[
+#             {
+#                "host":"127.0.0.1",
+#                "service":"50401",
+#                "family":"ipv4"
+#             }
+#          ]
+#       }
+#    }
+#
 ##
 {
   "command": "query-vnc",
@@ -7143,7 +8456,7 @@
 }
 
 ##
-# @SpiceBasicInfo
+# @SpiceBasicInfo:
 #
 # The basic information for SPICE network connection
 #
@@ -7165,11 +8478,11 @@
 }
 
 ##
-# @SpiceServerInfo
+# @SpiceServerInfo:
 #
 # Information about a SPICE server
 #
-# @auth: #optional, authentication method
+# @auth: #optional authentication method
 #
 # Since: 2.1
 ##
@@ -7182,7 +8495,7 @@
 }
 
 ##
-# @SpiceChannel
+# @SpiceChannel:
 #
 # Information about a SPICE client channel.
 #
@@ -7213,7 +8526,7 @@
 }
 
 ##
-# @SpiceQueryMouseMode
+# @SpiceQueryMouseMode:
 #
 # An enumeration of Spice mouse states.
 #
@@ -7238,14 +8551,14 @@
 }
 
 ##
-# @SpiceInfo
+# @SpiceInfo:
 #
 # Information about the SPICE session.
 #
 # @enabled: true if the SPICE server is enabled, false otherwise
 #
 # @migrated: true if the last guest migration completed and spice
-#            migration had completed as well. false otherwise.
+#            migration had completed as well. false otherwise. (since 1.4)
 #
 # @host: #optional The hostname the SPICE server is bound to.  This depends on
 #        the name resolution on the host and may be an IP address.
@@ -7263,9 +8576,7 @@
 #
 # @mouse-mode: The mode in which the mouse cursor is displayed currently. Can
 #              be determined by the client or the server, or unknown if spice
-#              server doesn't provide this information.
-#
-#              Since: 1.1
+#              server doesn't provide this information. (since: 1.1)
 #
 # @channels: a list of @SpiceChannel for each active spice channel
 #
@@ -7289,13 +8600,47 @@
 }
 
 ##
-# @query-spice
+# @query-spice:
 #
 # Returns information about the current SPICE server
 #
 # Returns: @SpiceInfo
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-spice" }
+# <- { "return": {
+#          "enabled": true,
+#          "auth": "spice",
+#          "port": 5920,
+#          "tls-port": 5921,
+#          "host": "0.0.0.0",
+#          "channels": [
+#             {
+#                "port": "54924",
+#                "family": "ipv4",
+#                "channel-type": 1,
+#                "connection-id": 1804289383,
+#                "host": "127.0.0.1",
+#                "channel-id": 0,
+#                "tls": true
+#             },
+#             {
+#                "port": "36710",
+#                "family": "ipv4",
+#                "channel-type": 4,
+#                "connection-id": 1804289383,
+#                "host": "127.0.0.1",
+#                "channel-id": 0,
+#                "tls": false
+#             },
+#             [ ... more channels follow ... ]
+#          ]
+#       }
+#    }
+#
 ##
 {
   "command": "query-spice",
@@ -7325,11 +8670,22 @@
 # Return information about the balloon device.
 #
 # Returns: @BalloonInfo on success
+#
 #          If the balloon driver is enabled but not functional because the KVM
 #          kernel module cannot support it, KvmMissingCap
+#
 #          If no balloon device is present, DeviceNotActive
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-balloon" }
+# <- { "return": {
+#          "actual": 1073741824,
+#       }
+#    }
+#
 ##
 {
   "command": "query-balloon",
@@ -7356,7 +8712,7 @@
 }
 
 ##
-# @PciMemoryRegion
+# @PciMemoryRegion:
 #
 # Information about a PCI device I/O region.
 #
@@ -7364,6 +8720,8 @@
 #
 # @type: 'io' if the region is a PIO region
 #        'memory' if the region is a MMIO region
+#
+# @size: memory size
 #
 # @prefetch: #optional if @type is 'memory', true if the memory is prefetchable
 #
@@ -7548,9 +8906,144 @@
 #
 # Return information about the PCI bus topology of the guest.
 #
-# Returns: a list of @PciInfo for each PCI bus
+# Returns: a list of @PciInfo for each PCI bus. Each bus is
+# represented by a json-object, which has a key with a json-array of
+# all PCI devices attached to it. Each device is represented by a
+# json-object.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "query-pci" }
+# <- { "return": [
+#          {
+#             "bus": 0,
+#             "devices": [
+#                {
+#                   "bus": 0,
+#                   "qdev_id": "",
+#                   "slot": 0,
+#                   "class_info": {
+#                      "class": 1536,
+#                      "desc": "Host bridge"
+#                   },
+#                   "id": {
+#                      "device": 32902,
+#                      "vendor": 4663
+#                   },
+#                   "function": 0,
+#                   "regions": [
+#                   ]
+#                },
+#                {
+#                   "bus": 0,
+#                   "qdev_id": "",
+#                   "slot": 1,
+#                   "class_info": {
+#                      "class": 1537,
+#                      "desc": "ISA bridge"
+#                   },
+#                   "id": {
+#                      "device": 32902,
+#                      "vendor": 28672
+#                   },
+#                   "function": 0,
+#                   "regions": [
+#                   ]
+#                },
+#                {
+#                   "bus": 0,
+#                   "qdev_id": "",
+#                   "slot": 1,
+#                   "class_info": {
+#                      "class": 257,
+#                      "desc": "IDE controller"
+#                   },
+#                   "id": {
+#                      "device": 32902,
+#                      "vendor": 28688
+#                   },
+#                   "function": 1,
+#                   "regions": [
+#                      {
+#                         "bar": 4,
+#                         "size": 16,
+#                         "address": 49152,
+#                         "type": "io"
+#                      }
+#                   ]
+#                },
+#                {
+#                   "bus": 0,
+#                   "qdev_id": "",
+#                   "slot": 2,
+#                   "class_info": {
+#                      "class": 768,
+#                      "desc": "VGA controller"
+#                   },
+#                   "id": {
+#                      "device": 4115,
+#                      "vendor": 184
+#                   },
+#                   "function": 0,
+#                   "regions": [
+#                      {
+#                         "prefetch": true,
+#                         "mem_type_64": false,
+#                         "bar": 0,
+#                         "size": 33554432,
+#                         "address": 4026531840,
+#                         "type": "memory"
+#                      },
+#                      {
+#                         "prefetch": false,
+#                         "mem_type_64": false,
+#                         "bar": 1,
+#                         "size": 4096,
+#                         "address": 4060086272,
+#                         "type": "memory"
+#                      },
+#                      {
+#                         "prefetch": false,
+#                         "mem_type_64": false,
+#                         "bar": 6,
+#                         "size": 65536,
+#                         "address": -1,
+#                         "type": "memory"
+#                      }
+#                   ]
+#                },
+#                {
+#                   "bus": 0,
+#                   "qdev_id": "",
+#                   "irq": 11,
+#                   "slot": 4,
+#                   "class_info": {
+#                      "class": 1280,
+#                      "desc": "RAM controller"
+#                   },
+#                   "id": {
+#                      "device": 6900,
+#                      "vendor": 4098
+#                   },
+#                   "function": 0,
+#                   "regions": [
+#                      {
+#                         "bar": 0,
+#                         "size": 32,
+#                         "address": 49280,
+#                         "type": "io"
+#                      }
+#                   ]
+#                }
+#             ]
+#          }
+#       ]
+#    }
+#
+# Note: This example has been shortened as the real response is too long.
+#
 ##
 {
   "command": "query-pci",
@@ -7559,15 +9052,6 @@
   ]
 }
 
-##
-# @quit:
-#
-# This command will cause the QEMU process to exit gracefully.  While every
-# attempt is made to send the QMP response before terminating, this is not
-# guaranteed.  When using this interface, a premature EOF would not be
-# unexpected.
-#
-# Since: 0.14.0
 ##
 {
   "command": "quit"
@@ -7584,6 +9068,12 @@
 #         state.  In "inmigrate" state, it will ensure that the guest
 #         remains paused once migration finishes, as if the -S option was
 #         passed on the command line.
+#
+# Example:
+#
+# -> { "execute": "stop" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "stop"
@@ -7595,6 +9085,12 @@
 # Performs a hard reset of a guest.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "system_reset" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "system_reset"
@@ -7611,6 +9107,11 @@
 #        returning does not indicate that a guest has accepted the request or
 #        that it has shut down.  Many guests will respond to this command by
 #        prompting the user in some way.
+# Example:
+#
+# -> { "execute": "system_powerdown" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "system_powerdown"
@@ -7633,7 +9134,7 @@
 }
 
 ##
-# @cpu-add
+# @cpu-add:
 #
 # Adds CPU with specified ID
 #
@@ -7641,7 +9142,13 @@
 #
 # Returns: Nothing on success
 #
-# Since 1.5
+# Since: 1.5
+#
+# Example:
+#
+# -> { "execute": "cpu-add", "arguments": { "id": 2 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "cpu-add",
@@ -7669,6 +9176,15 @@
 # Since: 0.14.0
 #
 # Notes: Errors were not reliably returned until 1.1
+#
+# Example:
+#
+# -> { "execute": "memsave",
+#      "arguments": { "val": 10,
+#                     "size": 100,
+#                     "filename": "/tmp/virtual-mem-dump" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "memsave",
@@ -7696,6 +9212,15 @@
 # Since: 0.14.0
 #
 # Notes: Errors were not reliably returned until 1.1
+#
+# Example:
+#
+# -> { "execute": "pmemsave",
+#      "arguments": { "val": 10,
+#                     "size": 100,
+#                     "filename": "/tmp/physical-mem-dump" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "pmemsave",
@@ -7722,6 +9247,12 @@
 #         this case, the effect of the command is to make sure the guest
 #         starts once migration finishes, removing the effect of the -S
 #         command line option if it was passed.
+#
+# Example:
+#
+# -> { "execute": "cont" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "cont"
@@ -7735,6 +9266,12 @@
 # Since:  1.1
 #
 # Returns:  nothing.
+#
+# Example:
+#
+# -> { "execute": "system_wakeup" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "system_wakeup"
@@ -7744,12 +9281,19 @@
 # @inject-nmi:
 #
 # Injects a Non-Maskable Interrupt into the default CPU (x86/s390) or all CPUs (ppc64).
+# The command fails when the guest doesn't support injecting.
 #
 # Returns:  If successful, nothing
 #
 # Since:  0.14.0
 #
 # Note: prior to 2.1, this command was only supported for x86 and s390 VMs
+#
+# Example:
+#
+# -> { "execute": "inject-nmi" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "inject-nmi"
@@ -7772,6 +9316,13 @@
 # Notes: Not all network adapters support setting link status.  This command
 #        will succeed even if the network adapter does not support link status
 #        notification.
+#
+# Example:
+#
+# -> { "execute": "set_link",
+#      "arguments": { "name": "e1000.0", "up": false } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "set_link",
@@ -7798,6 +9349,12 @@
 #        size independent of this command.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "balloon", "arguments": { "value": 536870912 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "balloon",
@@ -7807,19 +9364,19 @@
 }
 
 ##
-# @Abort
+# @Abort:
 #
 # This action can be used to test transaction failure.
 #
 # Since: 1.6
-###
+##
 {
   "struct": "Abort",
   "data": {}
 }
 
 ##
-# @ActionCompletionMode
+# @ActionCompletionMode:
 #
 # An enumeration of Transactional completion modes.
 #
@@ -7844,37 +9401,38 @@
 }
 
 ##
-# @TransactionAction
+# @TransactionAction:
 #
 # A discriminated record of operations that can be performed with
-# @transaction.
+# @transaction. Action @type can be:
 #
-# Since 1.1
+# - @abort: since 1.6
+# - @block-dirty-bitmap-add: since 2.5
+# - @block-dirty-bitmap-clear: since 2.5
+# - @blockdev-backup: since 2.3
+# - @blockdev-snapshot: since 2.5
+# - @blockdev-snapshot-internal-sync: since 1.7
+# - @blockdev-snapshot-sync: since 1.1
+# - @drive-backup: since 1.6
 #
-# drive-backup since 1.6
-# abort since 1.6
-# blockdev-snapshot-internal-sync since 1.7
-# blockdev-backup since 2.3
-# blockdev-snapshot since 2.5
-# block-dirty-bitmap-add since 2.5
-# block-dirty-bitmap-clear since 2.5
+# Since: 1.1
 ##
 {
   "union": "TransactionAction",
   "data": {
-    "blockdev-snapshot": "BlockdevSnapshot",
-    "blockdev-snapshot-sync": "BlockdevSnapshotSync",
-    "drive-backup": "DriveBackup",
-    "blockdev-backup": "BlockdevBackup",
     "abort": "Abort",
-    "blockdev-snapshot-internal-sync": "BlockdevSnapshotInternal",
     "block-dirty-bitmap-add": "BlockDirtyBitmapAdd",
-    "block-dirty-bitmap-clear": "BlockDirtyBitmap"
+    "block-dirty-bitmap-clear": "BlockDirtyBitmap",
+    "blockdev-backup": "BlockdevBackup",
+    "blockdev-snapshot": "BlockdevSnapshot",
+    "blockdev-snapshot-internal-sync": "BlockdevSnapshotInternal",
+    "blockdev-snapshot-sync": "BlockdevSnapshotSync",
+    "drive-backup": "DriveBackup"
   }
 }
 
 ##
-# @TransactionProperties
+# @TransactionProperties:
 #
 # Optional arguments to modify the behavior of a Transaction.
 #
@@ -7892,11 +9450,33 @@
 }
 
 ##
-# @transaction
+# @transaction:
 #
 # Executes a number of transactionable QMP commands atomically. If any
 # operation fails, then the entire set of actions will be abandoned and the
 # appropriate error returned.
+#
+# For external snapshots, the dictionary contains the device, the file to use for
+# the new snapshot, and the format.  The default format, if not specified, is
+# qcow2.
+#
+# Each new snapshot defaults to being created by QEMU (wiping any
+# contents if the file already exists), but it is also possible to reuse
+# an externally-created file.  In the latter case, you should ensure that
+# the new image file has the same contents as the current one; QEMU cannot
+# perform any meaningful check.  Typically this is achieved by using the
+# current image file as the backing file for the new image.
+#
+# On failure, the original disks pre-snapshot attempt will be used.
+#
+# For internal snapshots, the dictionary contains the device and the snapshot's
+# name.  If an internal snapshot matching name already exists, the request will
+# be rejected.  Only some image formats support it, for example, qcow2, rbd,
+# and sheepdog.
+#
+# On failure, qemu will try delete the newly created internal snapshot in the
+# transaction.  When an I/O error occurs during deletion, the user needs to fix
+# it later with qemu-img or other command.
 #
 # @actions: List of @TransactionAction;
 #           information needed for the respective operations.
@@ -7906,13 +9486,36 @@
 #              for additional detail.
 #
 # Returns: nothing on success
+#
 #          Errors depend on the operations of the transaction
 #
 # Note: The transaction aborts on the first failure.  Therefore, there will be
 # information on only one failed operation returned in an error condition, and
 # subsequent actions will not have been attempted.
 #
-# Since 1.1
+# Since: 1.1
+#
+# Example:
+#
+# -> { "execute": "transaction",
+#      "arguments": { "actions": [
+#          { "type": "blockdev-snapshot-sync", "data" : { "device": "ide-hd0",
+#                                      "snapshot-file": "/some/place/my-image",
+#                                      "format": "qcow2" } },
+#          { "type": "blockdev-snapshot-sync", "data" : { "node-name": "myfile",
+#                                      "snapshot-file": "/some/place/my-image2",
+#                                      "snapshot-node-name": "node3432",
+#                                      "mode": "existing",
+#                                      "format": "qcow2" } },
+#          { "type": "blockdev-snapshot-sync", "data" : { "device": "ide-hd1",
+#                                      "snapshot-file": "/some/place/my-image2",
+#                                      "mode": "existing",
+#                                      "format": "qcow2" } },
+#          { "type": "blockdev-snapshot-internal-sync", "data" : {
+#                                      "device": "ide-hd2",
+#                                      "name": "snapshot0" } } ] } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "transaction",
@@ -7938,15 +9541,26 @@
 # Since: 0.14.0
 #
 # Notes: This command only exists as a stop-gap.  Its use is highly
-#        discouraged.  The semantics of this command are not guaranteed.
+#        discouraged.  The semantics of this command are not
+#        guaranteed: this means that command names, arguments and
+#        responses can change or be removed at ANY time.  Applications
+#        that rely on long term stability guarantees should NOT
+#        use this command.
 #
 #        Known limitations:
 #
-#        o This command is stateless, this means that commands that depend
+#        * This command is stateless, this means that commands that depend
 #          on state information (such as getfd) might not work
 #
-#       o Commands that prompt the user for data (eg. 'cont' when the block
-#         device is encrypted) don't currently work
+#        * Commands that prompt the user for data (eg. 'cont' when the block
+#          device is encrypted) don't currently work
+#
+# Example:
+#
+# -> { "execute": "human-monitor-command",
+#      "arguments": { "command-line": "info kvm" } }
+# <- { "return": "kvm support: enabled\r\n" }
+#
 ##
 {
   "command": "human-monitor-command",
@@ -7958,7 +9572,7 @@
 }
 
 ##
-# @migrate_cancel
+# @migrate_cancel:
 #
 # Cancel the current executing migration process.
 #
@@ -7967,13 +9581,19 @@
 # Notes: This command succeeds even if there is no migration process running.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "migrate_cancel" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "migrate_cancel"
 }
 
 ##
-# @migrate_set_downtime
+# @migrate_set_downtime:
 #
 # Set maximum tolerated downtime for migration.
 #
@@ -7984,6 +9604,12 @@
 # Notes: This command is deprecated in favor of 'migrate-set-parameters'
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "migrate_set_downtime", "arguments": { "value": 0.1 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "migrate_set_downtime",
@@ -7993,17 +9619,23 @@
 }
 
 ##
-# @migrate_set_speed
+# @migrate_set_speed:
 #
 # Set maximum speed for migration.
 #
-# @value: maximum speed in bytes.
+# @value: maximum speed in bytes per second.
 #
 # Returns: nothing on success
 #
 # Notes: This command is deprecated in favor of 'migrate-set-parameters'
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "migrate_set_speed", "arguments": { "value": 1024 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "migrate_set_speed",
@@ -8013,9 +9645,9 @@
 }
 
 ##
-# @migrate-set-cache-size
+# @migrate-set-cache-size:
 #
-# Set XBZRLE cache size
+# Set cache size to be used by XBZRLE migration
 #
 # @value: cache size in bytes
 #
@@ -8025,6 +9657,13 @@
 # Returns: nothing on success
 #
 # Since: 1.2
+#
+# Example:
+#
+# -> { "execute": "migrate-set-cache-size",
+#      "arguments": { "value": 536870912 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "migrate-set-cache-size",
@@ -8034,13 +9673,19 @@
 }
 
 ##
-# @query-migrate-cache-size
+# @query-migrate-cache-size:
 #
-# query XBZRLE cache size
+# Query migration XBZRLE cache size
 #
 # Returns: XBZRLE cache size in bytes
 #
 # Since: 1.2
+#
+# Example:
+#
+# -> { "execute": "query-migrate-cache-size" }
+# <- { "return": 67108864 }
+#
 ##
 {
   "command": "query-migrate-cache-size",
@@ -8182,6 +9827,13 @@
 #          If Spice is not enabled, DeviceNotFound
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "set_password", "arguments": { "protocol": "vnc",
+#                                                "password": "secret" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "set_password",
@@ -8214,6 +9866,13 @@
 #        coordinate server time with client time.  It is not recommended to
 #        use the absolute time version of the @time parameter unless you're
 #        sure you are on the same machine as the QEMU instance.
+#
+# Example:
+#
+# -> { "execute": "expire_password", "arguments": { "protocol": "vnc",
+#                                                   "time": "+60" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "expire_password",
@@ -8275,6 +9934,23 @@
 #         change-vnc-password.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# 1. Change a removable medium
+#
+# -> { "execute": "change",
+#      "arguments": { "device": "ide1-cd0",
+#                     "target": "/srv/images/Fedora-12-x86_64-DVD.iso" } }
+# <- { "return": {} }
+#
+# 2. Change VNC password
+#
+# -> { "execute": "change",
+#      "arguments": { "device": "vnc", "target": "password",
+#                     "arg": "foobar1" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "change",
@@ -8370,7 +10046,7 @@
 }
 
 ##
-# @migrate
+# @migrate:
 #
 # Migrates the current running guest to another Virtual Machine.
 #
@@ -8386,6 +10062,22 @@
 # Returns: nothing on success
 #
 # Since: 0.14.0
+#
+# Notes:
+#
+# 1. The 'query-migrate' command should be used to check migration's progress
+#    and final result (this information is provided by the 'status' member)
+#
+# 2. All boolean arguments default to false
+#
+# 3. The user Monitor's "detach" argument is invalid in QMP and should not
+#    be used
+#
+# Example:
+#
+# -> { "execute": "migrate", "arguments": { "uri": "tcp:0:4446" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "migrate",
@@ -8398,7 +10090,7 @@
 }
 
 ##
-# @migrate-incoming
+# @migrate-incoming:
 #
 # Start an incoming migration, the qemu must have been started
 # with -incoming defer
@@ -8409,9 +10101,24 @@
 # Returns: nothing on success
 #
 # Since: 2.3
-# Note: It's a bad idea to use a string for the uri, but it needs to stay
-# compatible with -incoming and the format of the uri is already exposed
-# above libvirt
+#
+# Notes:
+#
+# 1. It's a bad idea to use a string for the uri, but it needs to stay
+#    compatible with -incoming and the format of the uri is already exposed
+#    above libvirt.
+#
+# 2. QEMU must be started with -incoming defer to allow migrate-incoming to
+#    be used.
+#
+# 3. The uri format is the same as for -incoming
+#
+# Example:
+#
+# -> { "execute": "migrate-incoming",
+#      "arguments": { "uri": "tcp::4446" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "migrate-incoming",
@@ -8420,6 +10127,7 @@
   }
 }
 
+##
 # @xen-save-devices-state:
 #
 # Save the state of all devices to file. The RAM and the block devices
@@ -8432,6 +10140,13 @@
 # Returns: Nothing on success
 #
 # Since: 1.1
+#
+# Example:
+#
+# -> { "execute": "xen-save-devices-state",
+#      "arguments": { "filename": "/tmp/save" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "xen-save-devices-state",
@@ -8441,7 +10156,7 @@
 }
 
 ##
-# @xen-set-global-dirty-log
+# @xen-set-global-dirty-log:
 #
 # Enable or disable the global dirty log mode.
 #
@@ -8450,6 +10165,13 @@
 # Returns: nothing
 #
 # Since: 1.3
+#
+# Example:
+#
+# -> { "execute": "xen-set-global-dirty-log",
+#      "arguments": { "enable": true } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "xen-set-global-dirty-log",
@@ -8465,7 +10187,7 @@
 #
 # @bus: #optional the device's parent bus (device tree path)
 #
-# @id: the device's ID, must be unique
+# @id: #optional the device's ID, must be unique
 #
 # Additional arguments depend on the type.
 #
@@ -8487,7 +10209,7 @@
 #                     "mac": "52:54:00:12:34:56" } }
 # <- { "return": {} }
 #
-# TODO This command effectively bypasses QAPI completely due to its
+# TODO: This command effectively bypasses QAPI completely due to its
 # "additional arguments" business.  It shouldn't have been added to
 # the schema in this form.  It should be qapified properly, or
 # replaced by a properly qapified command.
@@ -8498,7 +10220,8 @@
   "command": "device_add",
   "data": {
     "driver": "str",
-    "id": "str"
+    "*bus": "str",
+    "*id": "str"
   },
   "gen": false
 } 
@@ -8508,7 +10231,7 @@
 #
 # Remove a device from a guest
 #
-# @id: the name or QOM path of the device
+# @id: the device's ID or QOM path
 #
 # Returns: Nothing on success
 #          If @id is not a valid device, DeviceNotFound
@@ -8521,6 +10244,17 @@
 #        for all devices.
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "device_del",
+#      "arguments": { "id": "net1" } }
+# <- { "return": {} }
+#
+# -> { "execute": "device_del",
+#      "arguments": { "id": "/machine/peripheral-anon/device[0]" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "device_del",
@@ -8555,7 +10289,7 @@
 }
 
 ##
-# @dump-guest-memory
+# @dump-guest-memory:
 #
 # Dump guest's memory to vmcore. It is a synchronous operation that can take
 # very long depending on the amount of guest memory.
@@ -8599,9 +10333,18 @@
 #          @length is not allowed to be specified with non-elf @format at the
 #          same time (since 2.0)
 #
+# Note: All boolean arguments default to false
+#
 # Returns: nothing on success
 #
 # Since: 1.2
+#
+# Example:
+#
+# -> { "execute": "dump-guest-memory",
+#      "arguments": { "protocol": "fd:dump" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "dump-guest-memory",
@@ -8616,7 +10359,7 @@
 }
 
 ##
-# @DumpStatus
+# @DumpStatus:
 #
 # Describe the status of a long-running background guest memory dump.
 #
@@ -8628,7 +10371,7 @@
 #
 # @failed: the last dump has failed.
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "enum": "DumpStatus",
@@ -8641,7 +10384,7 @@
 }
 
 ##
-# @DumpQueryResult
+# @DumpQueryResult:
 #
 # The result format for 'query-dump'.
 #
@@ -8651,7 +10394,7 @@
 #
 # @total: total bytes to be written in latest dump (uncompressed)
 #
-# Since 2.6
+# Since: 2.6
 ##
 {
   "struct": "DumpQueryResult",
@@ -8663,13 +10406,20 @@
 }
 
 ##
-# @query-dump
+# @query-dump:
 #
 # Query latest dump status.
 #
 # Returns: A @DumpStatus object showing the dump status.
 #
 # Since: 2.6
+#
+# Example:
+#
+# -> { "execute": "query-dump" }
+# <- { "return": { "status": "active", "completed": 1024000,
+#                  "total": 2048000 } }
+#
 ##
 {
   "command": "query-dump",
@@ -8701,6 +10451,13 @@
 #           dump-guest-memory
 #
 # Since: 2.0
+#
+# Example:
+#
+# -> { "execute": "query-dump-guest-memory-capability" }
+# <- { "return": { "formats":
+#                  ["elf", "kdump-zlib", "kdump-lzo", "kdump-snappy"] }
+#
 ##
 {
   "command": "query-dump-guest-memory-capability",
@@ -8708,7 +10465,7 @@
 }
 
 ##
-# @dump-skeys
+# @dump-skeys:
 #
 # Dump guest's storage keys
 #
@@ -8717,6 +10474,13 @@
 # This command is only supported on s390 architecture.
 #
 # Since: 2.5
+#
+# Example:
+#
+# -> { "execute": "dump-skeys",
+#      "arguments": { "filename": "/tmp/skeys" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "dump-skeys",
@@ -8737,7 +10501,7 @@
 #
 # Additional arguments depend on the type.
 #
-# TODO This command effectively bypasses QAPI completely due to its
+# TODO: This command effectively bypasses QAPI completely due to its
 # "additional arguments" business.  It shouldn't have been added to
 # the schema in this form.  It should be qapified properly, or
 # replaced by a properly qapified command.
@@ -8746,6 +10510,14 @@
 #
 # Returns: Nothing on success
 #          If @type is not a valid network backend, DeviceNotFound
+#
+# Example:
+#
+# -> { "execute": "netdev_add",
+#      "arguments": { "type": "user", "id": "netdev1",
+#                     "dnssearch": "example.org" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "netdev_add",
@@ -8767,6 +10539,12 @@
 #          If @id is not a valid network backend, DeviceNotFound
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "netdev_del", "arguments": { "id": "netdev1" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "netdev_del",
@@ -8790,6 +10568,14 @@
 #          Error if @qom-type is not a valid class name
 #
 # Since: 2.0
+#
+# Example:
+#
+# -> { "execute": "object-add",
+#      "arguments": { "qom-type": "rng-random", "id": "rng1",
+#                     "props": { "filename": "/dev/hwrng" } } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "object-add",
@@ -8811,6 +10597,12 @@
 #          Error if @id is not a valid id for a QOM object
 #
 # Since: 2.0
+#
+# Example:
+#
+# -> { "execute": "object-del", "arguments": { "id": "rng1" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "object-del",
@@ -8820,11 +10612,11 @@
 }
 
 ##
-# @NetdevNoneOptions
+# @NetdevNoneOptions:
 #
 # Use it alone to have zero network devices.
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevNoneOptions",
@@ -8832,7 +10624,7 @@
 }
 
 ##
-# @NetLegacyNicOptions
+# @NetLegacyNicOptions:
 #
 # Create a new Network Interface Card.
 #
@@ -8846,7 +10638,7 @@
 #
 # @vectors: #optional number of MSI-x vectors, 0 to disable MSI-X
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetLegacyNicOptions",
@@ -8860,11 +10652,11 @@
 }
 
 ##
-# @String
+# @String:
 #
 # A fat type wrapping 'str', to be embedded in lists.
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "String",
@@ -8874,7 +10666,7 @@
 }
 
 ##
-# @NetdevUserOptions
+# @NetdevUserOptions:
 #
 # Use the user mode network stack which requires no administrator privilege to
 # run.
@@ -8931,7 +10723,7 @@
 #
 # @guestfwd: #optional forward guest TCP connections
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevUserOptions",
@@ -8966,7 +10758,7 @@
 }
 
 ##
-# @NetdevTapOptions
+# @NetdevTapOptions:
 #
 # Connect the host TAP network interface name to the VLAN.
 #
@@ -9003,7 +10795,7 @@
 # @poll-us: #optional maximum number of microseconds that could
 # be spent on busy polling for tap (since 2.7)
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevTapOptions",
@@ -9027,7 +10819,7 @@
 }
 
 ##
-# @NetdevSocketOptions
+# @NetdevSocketOptions:
 #
 # Connect the VLAN to a remote VLAN in another QEMU virtual machine using a TCP
 # socket connection.
@@ -9044,7 +10836,7 @@
 #
 # @udp: #optional UDP unicast address and port number
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevSocketOptions",
@@ -9059,7 +10851,7 @@
 }
 
 ##
-# @NetdevL2TPv3Options
+# @NetdevL2TPv3Options:
 #
 # Connect the VLAN to Ethernet over L2TPv3 Static tunnel
 #
@@ -9095,7 +10887,7 @@
 # @offset: #optional additional offset - allows the insertion of
 #          additional application-specific data before the packet payload
 #
-# Since 2.1
+# Since: 2.1
 ##
 {
   "struct": "NetdevL2TPv3Options",
@@ -9118,7 +10910,7 @@
 }
 
 ##
-# @NetdevVdeOptions
+# @NetdevVdeOptions:
 #
 # Connect the VLAN to a vde switch running on the host.
 #
@@ -9130,7 +10922,7 @@
 #
 # @mode: #optional permissions for socket
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevVdeOptions",
@@ -9143,7 +10935,7 @@
 }
 
 ##
-# @NetdevDumpOptions
+# @NetdevDumpOptions:
 #
 # Dump VLAN network traffic to a file.
 #
@@ -9152,7 +10944,7 @@
 #
 # @file: #optional dump file path (default is qemu-vlan0.pcap)
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevDumpOptions",
@@ -9163,7 +10955,7 @@
 }
 
 ##
-# @NetdevBridgeOptions
+# @NetdevBridgeOptions:
 #
 # Connect a host TAP network interface to a host bridge device.
 #
@@ -9171,7 +10963,7 @@
 #
 # @helper: #optional command to execute to configure bridge
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevBridgeOptions",
@@ -9182,13 +10974,13 @@
 }
 
 ##
-# @NetdevHubPortOptions
+# @NetdevHubPortOptions:
 #
 # Connect two or more net clients through a software hub.
 #
 # @hubid: hub identifier number
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetdevHubPortOptions",
@@ -9198,7 +10990,7 @@
 }
 
 ##
-# @NetdevNetmapOptions
+# @NetdevNetmapOptions:
 #
 # Connect a client to a netmap-enabled NIC or to a VALE switch port
 #
@@ -9211,7 +11003,7 @@
 #
 # @devname: #optional path of the netmap device (default: '/dev/netmap').
 #
-# Since 2.0
+# Since: 2.0
 ##
 {
   "struct": "NetdevNetmapOptions",
@@ -9222,7 +11014,7 @@
 }
 
 ##
-# @NetdevVhostUserOptions
+# @NetdevVhostUserOptions:
 #
 # Vhost-user network backend
 #
@@ -9233,7 +11025,7 @@
 # @queues: #optional number of queues to be created for multiqueue vhost-user
 #          (default: 1) (Since 2.5)
 #
-# Since 2.1
+# Since: 2.1
 ##
 {
   "struct": "NetdevVhostUserOptions",
@@ -9245,11 +11037,11 @@
 }
 
 ##
-# @NetClientDriver
+# @NetClientDriver:
 #
 # Available netdev drivers.
 #
-# Since 2.7
+# Since: 2.7
 ##
 {
   "enum": "NetClientDriver",
@@ -9270,7 +11062,7 @@
 }
 
 ##
-# @Netdev
+# @Netdev:
 #
 # Captures the configuration of a network device.
 #
@@ -9278,7 +11070,7 @@
 #
 # @type: Specify the driver used for interpreting remaining arguments.
 #
-# Since 1.2
+# Since: 1.2
 #
 # 'l2tpv3' - since 2.1
 ##
@@ -9306,7 +11098,7 @@
 }
 
 ##
-# @NetLegacy
+# @NetLegacy:
 #
 # Captures the configuration of a network device; legacy.
 #
@@ -9318,7 +11110,7 @@
 #
 # @opts: device type specific properties (legacy)
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "struct": "NetLegacy",
@@ -9331,11 +11123,11 @@
 }
 
 ##
-# @NetLegacyOptions
+# @NetLegacyOptions:
 #
 # Like Netdev, but for use only by the legacy command line options
 #
-# Since 1.2
+# Since: 1.2
 ##
 {
   "union": "NetLegacyOptions",
@@ -9355,7 +11147,7 @@
 }
 
 ##
-# @NetFilterDirection
+# @NetFilterDirection:
 #
 # Indicates whether a netfilter is attached to a netdev's transmit queue or
 # receive queue or both.
@@ -9369,7 +11161,7 @@
 # @tx: the filter is attached to the transmit queue of the netdev,
 #      where it will receive packets sent by the netdev.
 #
-# Since 2.5
+# Since: 2.5
 ##
 {
   "enum": "NetFilterDirection",
@@ -9381,13 +11173,17 @@
 }
 
 ##
-# @InetSocketAddress
+# @InetSocketAddress:
 #
 # Captures a socket address or address range in the Internet namespace.
 #
 # @host: host part of the address
 #
 # @port: port part of the address, or lowest port if @to is present
+#
+# @numeric: #optional true if the host/port are guaranteed to be numeric,
+#           false if name resolution should be attempted. Defaults to false.
+#           (Since 2.9)
 #
 # @to: highest port to try
 #
@@ -9397,13 +11193,14 @@
 # @ipv6: whether to accept IPv6 addresses, default try both IPv4 and IPv6
 #        #optional
 #
-# Since 1.3
+# Since: 1.3
 ##
 {
   "struct": "InetSocketAddress",
   "data": {
     "host": "str",
     "port": "str",
+    "*numeric": "bool",
     "*to": "uint16",
     "*ipv4": "bool",
     "*ipv6": "bool"
@@ -9411,13 +11208,13 @@
 }
 
 ##
-# @UnixSocketAddress
+# @UnixSocketAddress:
 #
 # Captures a socket address in the local ("Unix socket") namespace.
 #
 # @path: filesystem path to use
 #
-# Since 1.3
+# Since: 1.3
 ##
 {
   "struct": "UnixSocketAddress",
@@ -9427,17 +11224,17 @@
 }
 
 ##
-# @VsockSocketAddress
+# @VsockSocketAddress:
 #
 # Captures a socket address in the vsock namespace.
 #
 # @cid: unique host identifier
 # @port: port
 #
-# Note that string types are used to allow for possible future hostname or
+# Note: string types are used to allow for possible future hostname or
 # service resolution support.
 #
-# Since 2.8
+# Since: 2.8
 ##
 {
   "struct": "VsockSocketAddress",
@@ -9448,11 +11245,11 @@
 }
 
 ##
-# @SocketAddress
+# @SocketAddress:
 #
 # Captures the address of a socket, which could also be a named file descriptor
 #
-# Since 1.3
+# Since: 1.3
 ##
 {
   "union": "SocketAddress",
@@ -9478,8 +11275,15 @@
 # Notes: If @fdname already exists, the file descriptor assigned to
 #        it will be closed and replaced by the received file
 #        descriptor.
+#
 #        The 'closefd' command can be used to explicitly close the
 #        file descriptor when it is no longer needed.
+#
+# Example:
+#
+# -> { "execute": "getfd", "arguments": { "fdname": "fd1" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "getfd",
@@ -9498,6 +11302,12 @@
 # Returns: Nothing on success
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "closefd", "arguments": { "fdname": "fd1" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "closefd",
@@ -9515,7 +11325,7 @@
 #
 # @alias: #optional an alias for the machine name
 #
-# @default: #optional whether the machine is default
+# @is-default: #optional whether the machine is default
 #
 # @cpu-max: maximum number of CPUs supported by the machine type
 #           (since 1.5.0)
@@ -9573,6 +11383,9 @@
 # @unavailable-features: #optional List of properties that prevent
 #                        the CPU model from running in the current
 #                        host. (since 2.8)
+# @typename: Type name that can be used as argument to @device-list-properties,
+#            to introspect properties configurable using -cpu or -global.
+#            (since 2.9)
 #
 # @unavailable-features is a list of QOM property names that
 # represent CPU model attributes that prevent the CPU from running.
@@ -9600,7 +11413,8 @@
     "static": "bool",
     "*unavailable-features": [
       "str"
-    ]
+    ],
+    "typename": "str"
   }
 }
 
@@ -9644,7 +11458,7 @@
 }
 
 ##
-# @CpuModelExpansionType
+# @CpuModelExpansionType:
 #
 # An enumeration of CPU model expansion types.
 #
@@ -9672,7 +11486,7 @@
 
 
 ##
-# @CpuModelExpansionInfo
+# @CpuModelExpansionInfo:
 #
 # The result of a cpu model expansion.
 #
@@ -9761,7 +11575,7 @@
 }
 
 ##
-# @CpuModelCompareInfo
+# @CpuModelCompareInfo:
 #
 # The result of a CPU model comparison.
 #
@@ -9834,7 +11648,7 @@
 }
 
 ##
-# @CpuModelBaselineInfo
+# @CpuModelBaselineInfo:
 #
 # The result of a CPU model baseline.
 #
@@ -9893,6 +11707,7 @@
   "returns": "CpuModelBaselineInfo"
 }
 
+##
 # @AddfdInfo:
 #
 # Information about a file descriptor that was added to an fd set.
@@ -9922,7 +11737,9 @@
 # @opaque: #optional A free-form string that can be used to describe the fd.
 #
 # Returns: @AddfdInfo on success
+#
 #          If file descriptor was not received, FdNotSupplied
+#
 #          If @fdset-id is a negative value, InvalidParameterValue
 #
 # Notes: The list of fd sets is shared by all monitor connections.
@@ -9930,6 +11747,12 @@
 #        If @fdset-id is not specified, a new fd set will be created.
 #
 # Since: 1.2.0
+#
+# Example:
+#
+# -> { "execute": "add-fd", "arguments": { "fdset-id": 1 } }
+# <- { "return": { "fdset-id": 1, "fd": 3 } }
+#
 ##
 {
   "command": "add-fd",
@@ -9958,6 +11781,12 @@
 #
 #        If @fd is not specified, all file descriptors in @fdset-id
 #        will be removed.
+#
+# Example:
+#
+# -> { "execute": "remove-fd", "arguments": { "fdset-id": 1, "fd": 3 } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "remove-fd",
@@ -10018,6 +11847,37 @@
 #
 # Note: The list of fd sets is shared by all monitor connections.
 #
+# Example:
+#
+# -> { "execute": "query-fdsets" }
+# <- { "return": [
+#        {
+#          "fds": [
+#            {
+#              "fd": 30,
+#              "opaque": "rdonly:/path/to/file"
+#            },
+#            {
+#              "fd": 24,
+#              "opaque": "rdwr:/path/to/file"
+#            }
+#          ],
+#          "fdset-id": 1
+#        },
+#        {
+#          "fds": [
+#            {
+#              "fd": 28
+#            },
+#            {
+#              "fd": 29
+#            }
+#          ],
+#          "fdset-id": 0
+#        }
+#      ]
+#    }
+#
 ##
 {
   "command": "query-fdsets",
@@ -10061,13 +11921,20 @@
 #
 # An enumeration of key name.
 #
-# This is used by the send-key command.
+# This is used by the @send-key command.
+#
+# @unmapped: since 2.0
+# @pause: since 2.0
+# @ro: since 2.4
+# @kp_comma: since 2.4
+# @kp_equals: since 2.6
+# @power: since 2.6
+# @hiragana: since 2.9
+# @henkan: since 2.9
+# @yen: since 2.9
 #
 # Since: 1.3.0
 #
-# 'unmapped' and 'pause' since 2.0
-# 'ro' and 'kp_comma' since 2.4
-# 'kp_equals' and 'power' since 2.6
 ##
 {
   "enum": "QKeyCode",
@@ -10196,6 +12063,9 @@
     "compose",
     "pause",
     "ro",
+    "hiragana",
+    "henkan",
+    "yen",
     "kp_comma",
     "kp_equals",
     "power"
@@ -10203,7 +12073,7 @@
 }
 
 ##
-# @KeyValue
+# @KeyValue:
 #
 # Represents a keyboard key.
 #
@@ -10235,6 +12105,14 @@
 #
 # Since: 1.3.0
 #
+# Example:
+#
+# -> { "execute": "send-key",
+#      "arguments": { "keys": [ { "type": "qcode", "data": "ctrl" },
+#                               { "type": "qcode", "data": "alt" },
+#                               { "type": "qcode", "data": "delete" } ] } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "send-key",
@@ -10256,6 +12134,13 @@
 # Returns: Nothing on success
 #
 # Since: 0.14.0
+#
+# Example:
+#
+# -> { "execute": "screendump",
+#      "arguments": { "filename": "/tmp/image" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "screendump",
@@ -10313,7 +12198,6 @@
 #
 # @device: The name of the special file for the device,
 #          i.e. /dev/ttyS0 on Unix or COM1: on Windows
-# @type: What kind of device this is.
 #
 # Since: 1.4
 ##
@@ -10550,6 +12434,25 @@
 # Returns: ChardevReturn.
 #
 # Since: 1.4
+#
+# Example:
+#
+# -> { "execute" : "chardev-add",
+#      "arguments" : { "id" : "foo",
+#                      "backend" : { "type" : "null", "data" : {} } } }
+# <- { "return": {} }
+#
+# -> { "execute" : "chardev-add",
+#      "arguments" : { "id" : "bar",
+#                      "backend" : { "type" : "file",
+#                                    "data" : { "out" : "/tmp/bar.log" } } } }
+# <- { "return": {} }
+#
+# -> { "execute" : "chardev-add",
+#      "arguments" : { "id" : "baz",
+#                      "backend" : { "type" : "pty", "data" : {} } } }
+# <- { "return": { "pty" : "/dev/pty/42" } }
+#
 ##
 {
   "command": "chardev-add",
@@ -10570,6 +12473,12 @@
 # Returns: Nothing on success
 #
 # Since: 1.4
+#
+# Example:
+#
+# -> { "execute": "chardev-remove", "arguments": { "id" : "foo" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "chardev-remove",
@@ -10602,6 +12511,12 @@
 # Returns: a list of TpmModel
 #
 # Since: 1.5
+#
+# Example:
+#
+# -> { "execute": "query-tpm-models" }
+# <- { "return": [ "tpm-tis" ] }
+#
 ##
 {
   "command": "query-tpm-models",
@@ -10634,6 +12549,12 @@
 # Returns: a list of TpmType
 #
 # Since: 1.5
+#
+# Example:
+#
+# -> { "execute": "query-tpm-types" }
+# <- { "return": [ "passthrough" ] }
+#
 ##
 {
   "command": "query-tpm-types",
@@ -10667,7 +12588,7 @@
 #
 # A union referencing different TPM backend types' configuration options
 #
-# @passthrough: The configuration options for the TPM passthrough type
+# @type: 'passthrough' The configuration options for the TPM passthrough type
 #
 # Since: 1.5
 ##
@@ -10679,7 +12600,7 @@
 }
 
 ##
-# @TpmInfo:
+# @TPMInfo:
 #
 # Information about the TPM
 #
@@ -10708,6 +12629,25 @@
 # Returns: @TPMInfo on success
 #
 # Since: 1.5
+#
+# Example:
+#
+# -> { "execute": "query-tpm" }
+# <- { "return":
+#      [
+#        { "model": "tpm-tis",
+#          "options":
+#            { "type": "passthrough",
+#              "data":
+#                { "cancel-path": "/sys/class/misc/tpm0/device/cancel",
+#                  "path": "/dev/tpm0"
+#                }
+#            },
+#          "id": "tpm0"
+#        }
+#      ]
+#    }
+#
 ##
 {
   "command": "query-tpm",
@@ -10717,7 +12657,7 @@
 }
 
 ##
-# @AcpiTableOptions
+# @AcpiTableOptions:
 #
 # Specify an ACPI table on the command line to load.
 #
@@ -10760,7 +12700,7 @@
 #        ACPI table header. At least one file is required. This field excludes
 #        @file.
 #
-# Since 1.5
+# Since: 1.5
 ##
 {
   "struct": "AcpiTableOptions",
@@ -10791,7 +12731,7 @@
 # @size: accepts a number followed by an optional suffix (K)ilo,
 #        (M)ega, (G)iga, (T)era
 #
-# Since 1.5
+# Since: 1.5
 ##
 {
   "enum": "CommandLineParameterType",
@@ -10816,7 +12756,7 @@
 #
 # @default: #optional default value string (since 2.1)
 #
-# Since 1.5
+# Since: 1.5
 ##
 {
   "struct": "CommandLineParameterInfo",
@@ -10837,7 +12777,7 @@
 #
 # @parameters: an array of @CommandLineParameterInfo
 #
-# Since 1.5
+# Since: 1.5
 ##
 {
   "struct": "CommandLineOptionInfo",
@@ -10859,7 +12799,29 @@
 # Returns: list of @CommandLineOptionInfo for all options (or for the given
 #          @option).  Returns an error if the given @option doesn't exist.
 #
-# Since 1.5
+# Since: 1.5
+#
+# Example:
+#
+# -> { "execute": "query-command-line-options",
+#      "arguments": { "option": "option-rom" } }
+# <- { "return": [
+#         {
+#             "parameters": [
+#                 {
+#                     "name": "romfile",
+#                     "type": "string"
+#                 },
+#                 {
+#                     "name": "bootindex",
+#                     "type": "number"
+#                 }
+#             ],
+#             "option": "option-rom"
+#         }
+#      ]
+#    }
+#
 ##
 {
   "command": "query-command-line-options",
@@ -10872,7 +12834,7 @@
 }
 
 ##
-# @X86CPURegister32
+# @X86CPURegister32:
 #
 # A X86 32-bit register
 #
@@ -10893,7 +12855,7 @@
 }
 
 ##
-# @X86CPUFeatureWordInfo
+# @X86CPUFeatureWordInfo:
 #
 # Information about a X86 CPU feature word
 #
@@ -10919,11 +12881,11 @@
 }
 
 ##
-# @DummyForceArrays
+# @DummyForceArrays:
 #
 # Not used by QMP; hack to let us use X86CPUFeatureWordInfoList internally
 #
-# Since 2.5
+# Since: 2.5
 ##
 {
   "struct": "DummyForceArrays",
@@ -10986,7 +12948,7 @@
 #
 # @multicast-table: a list of multicast macaddr string
 #
-# Since 1.6
+# Since: 1.6
 ##
 {
   "struct": "RxFilterInfo",
@@ -11025,6 +12987,36 @@
 #          isn't a NIC.
 #
 # Since: 1.6
+#
+# Example:
+#
+# -> { "execute": "query-rx-filter", "arguments": { "name": "vnet0" } }
+# <- { "return": [
+#         {
+#             "promiscuous": true,
+#             "name": "vnet0",
+#             "main-mac": "52:54:00:12:34:56",
+#             "unicast": "normal",
+#             "vlan": "normal",
+#             "vlan-table": [
+#                 4,
+#                 0
+#             ],
+#             "unicast-table": [
+#             ],
+#             "multicast": "normal",
+#             "multicast-overflow": false,
+#             "unicast-overflow": false,
+#             "multicast-table": [
+#                 "01:00:5e:00:00:01",
+#                 "33:33:00:00:00:01",
+#                 "33:33:ff:12:34:56"
+#             ],
+#             "broadcast-allowed": false
+#         }
+#       ]
+#    }
+#
 ##
 {
   "command": "query-rx-filter",
@@ -11037,7 +13029,7 @@
 }
 
 ##
-# @InputButton
+# @InputButton:
 #
 # Button of a pointer input device (mouse, tablet).
 #
@@ -11055,7 +13047,7 @@
 }
 
 ##
-# @InputAxis
+# @InputAxis:
 #
 # Position axis of a pointer input device (mouse, tablet).
 #
@@ -11070,7 +13062,7 @@
 }
 
 ##
-# @InputKeyEvent
+# @InputKeyEvent:
 #
 # Keyboard input event.
 #
@@ -11088,7 +13080,7 @@
 }
 
 ##
-# @InputBtnEvent
+# @InputBtnEvent:
 #
 # Pointer button input event.
 #
@@ -11106,7 +13098,7 @@
 }
 
 ##
-# @InputMoveEvent
+# @InputMoveEvent:
 #
 # Pointer motion input event.
 #
@@ -11125,14 +13117,15 @@
 }
 
 ##
-# @InputEvent
+# @InputEvent:
 #
 # Input event union.
 #
-# @key: Input event of Keyboard
-# @btn: Input event of pointer buttons
-# @rel: Input event of relative pointer motion
-# @abs: Input event of absolute pointer motion
+# @type: the input type, one of:
+#  - 'key': Input event of Keyboard
+#  - 'btn': Input event of pointer buttons
+#  - 'rel': Input event of relative pointer motion
+#  - 'abs': Input event of absolute pointer motion
 #
 # Since: 2.0
 ##
@@ -11147,7 +13140,7 @@
 }
 
 ##
-# @input-send-event
+# @input-send-event:
 #
 # Send input event(s) to guest.
 #
@@ -11158,9 +13151,9 @@
 #
 # Returns: Nothing on success.
 #
-# The @display and @head parameters can be used to send the input
-# event to specific input devices in case (a) multiple input devices
-# of the same kind are added to the virtual machine and (b) you have
+# The @device and @head parameters can be used to send the input event
+# to specific input devices in case (a) multiple input devices of the
+# same kind are added to the virtual machine and (b) you have
 # configured input routing (see docs/multiseat.txt) for those input
 # devices.  The parameters work exactly like the device and head
 # properties of input devices.  If @device is missing, only devices
@@ -11170,6 +13163,48 @@
 # precedence.
 #
 # Since: 2.6
+#
+# Note: The consoles are visible in the qom tree, under
+# /backend/console[$index]. They have a device link and head property,
+# so it is possible to map which console belongs to which device and
+# display.
+#
+# Example:
+#
+# 1. Press left mouse button.
+#
+# -> { "execute": "input-send-event",
+#     "arguments": { "device": "video0",
+#                    "events": [ { "type": "btn",
+#                    "data" : { "down": true, "button": "left" } } ] } }
+# <- { "return": {} }
+#
+# -> { "execute": "input-send-event",
+#     "arguments": { "device": "video0",
+#                    "events": [ { "type": "btn",
+#                    "data" : { "down": false, "button": "left" } } ] } }
+# <- { "return": {} }
+#
+# 2. Press ctrl-alt-del.
+#
+# -> { "execute": "input-send-event",
+#      "arguments": { "events": [
+#         { "type": "key", "data" : { "down": true,
+#           "key": {"type": "qcode", "data": "ctrl" } } },
+#         { "type": "key", "data" : { "down": true,
+#           "key": {"type": "qcode", "data": "alt" } } },
+#         { "type": "key", "data" : { "down": true,
+#           "key": {"type": "qcode", "data": "delete" } } } ] } }
+# <- { "return": {} }
+#
+# 3. Move mouse pointer to absolute coordinates (20000, 400).
+#
+# -> { "execute": "input-send-event" ,
+#   "arguments": { "events": [
+#                { "type": "abs", "data" : { "axis": "x", "value" : 20000 } },
+#                { "type": "abs", "data" : { "axis": "y", "value" : 400 } } ] } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "input-send-event",
@@ -11183,11 +13218,11 @@
 }
 
 ##
-# @NumaOptions
+# @NumaOptions:
 #
 # A discriminated record of NUMA options. (for OptsVisitor)
 #
-# Since 2.1
+# Since: 2.1
 ##
 {
   "union": "NumaOptions",
@@ -11197,7 +13232,7 @@
 }
 
 ##
-# @NumaNodeOptions
+# @NumaNodeOptions:
 #
 # Create a guest NUMA node. (for OptsVisitor)
 #
@@ -11228,7 +13263,7 @@
 }
 
 ##
-# @HostMemPolicy
+# @HostMemPolicy:
 #
 # Host memory policy types
 #
@@ -11242,7 +13277,7 @@
 # @interleave: memory allocations are interleaved across the set
 #              of host nodes specified
 #
-# Since 2.1
+# Since: 2.1
 ##
 {
   "enum": "HostMemPolicy",
@@ -11258,6 +13293,8 @@
 # @Memdev:
 #
 # Information about memory backend
+#
+# @id: #optional backend's ID if backend has 'id' property (since 2.9)
 #
 # @size: memory backend size
 #
@@ -11276,6 +13313,7 @@
 {
   "struct": "Memdev",
   "data": {
+    "*id": "str",
     "size": "size",
     "merge": "bool",
     "dump": "bool",
@@ -11295,6 +13333,31 @@
 # Returns: a list of @Memdev.
 #
 # Since: 2.1
+#
+# Example:
+#
+# -> { "execute": "query-memdev" }
+# <- { "return": [
+#        {
+#          "id": "mem1",
+#          "size": 536870912,
+#          "merge": false,
+#          "dump": true,
+#          "prealloc": false,
+#          "host-nodes": [0, 1],
+#          "policy": "bind"
+#        },
+#        {
+#          "size": 536870912,
+#          "merge": false,
+#          "dump": true,
+#          "prealloc": true,
+#          "host-nodes": [2, 3],
+#          "policy": "preferred"
+#        }
+#      ]
+#    }
+#
 ##
 {
   "command": "query-memdev",
@@ -11355,11 +13418,27 @@
 }
 
 ##
-# @query-memory-devices
+# @query-memory-devices:
 #
 # Lists available memory devices and their state
 #
 # Since: 2.1
+#
+# Example:
+#
+# -> { "execute": "query-memory-devices" }
+# <- { "return": [ { "data":
+#                       { "addr": 5368709120,
+#                         "hotpluggable": true,
+#                         "hotplugged": true,
+#                         "id": "d1",
+#                         "memdev": "/objects/memX",
+#                         "node": 0,
+#                         "size": 1073741824,
+#                         "slot": 0},
+#                    "type": "dimm"
+#                  } ] }
+#
 ##
 {
   "command": "query-memory-devices",
@@ -11368,11 +13447,12 @@
   ]
 }
 
-## @ACPISlotType
+##
+# @ACPISlotType:
 #
 # @DIMM: memory slot
 # @CPU: logical CPU slot (since 2.7)
-#
+##
 {
   "enum": "ACPISlotType",
   "data": [
@@ -11381,7 +13461,8 @@
   ]
 }
 
-## @ACPIOSTInfo
+##
+# @ACPIOSTInfo:
 #
 # OSPM Status Indication for a device
 # For description of possible values of @source and @status fields
@@ -11411,12 +13492,22 @@
 }
 
 ##
-# @query-acpi-ospm-status
+# @query-acpi-ospm-status:
 #
-# Lists ACPI OSPM status of ACPI device objects,
-# which might be reported via _OST method
+# Return a list of ACPIOSTInfo for devices that support status
+# reporting via ACPI _OST method.
 #
 # Since: 2.1
+#
+# Example:
+#
+# -> { "execute": "query-acpi-ospm-status" }
+# <- { "return": [ { "device": "d1", "slot": "0", "slot-type": "DIMM", "source": 1, "status": 0},
+#                  { "slot": "1", "slot-type": "DIMM", "source": 0, "status": 0},
+#                  { "slot": "2", "slot-type": "DIMM", "source": 0, "status": 0},
+#                  { "slot": "3", "slot-type": "DIMM", "source": 0, "status": 0}
+#    ]}
+#
 ##
 {
   "command": "query-acpi-ospm-status",
@@ -11426,7 +13517,7 @@
 }
 
 ##
-# @WatchdogExpirationAction
+# @WatchdogExpirationAction:
 #
 # An enumeration of the actions taken when the watchdog device's timer is
 # expired
@@ -11463,7 +13554,7 @@
 }
 
 ##
-# @IoOperationType
+# @IoOperationType:
 #
 # An enumeration of the I/O operation types
 #
@@ -11482,7 +13573,7 @@
 }
 
 ##
-# @GuestPanicAction
+# @GuestPanicAction:
 #
 # An enumeration of the actions taken when guest OS panic is detected
 #
@@ -11499,7 +13590,7 @@
 }
 
 ##
-# @rtc-reset-reinjection
+# @rtc-reset-reinjection:
 #
 # This command will reset the RTC interrupt reinjection backlog.
 # Can be used if another mechanism to synchronize guest time
@@ -11507,13 +13598,19 @@
 # command.
 #
 # Since: 2.1
+#
+# Example:
+#
+# -> { "execute": "rtc-reset-reinjection" }
+# <- { "return": {} }
+#
 ##
 {
   "command": "rtc-reset-reinjection"
 }
 
 ##
-# @Rocker:
+# @RockerSwitch:
 #
 # Rocker switch information.
 #
@@ -11542,6 +13639,12 @@
 # Returns: @Rocker information
 #
 # Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "query-rocker", "arguments": { "name": "sw1" } }
+# <- { "return": {"name": "sw1", "ports": 2, "id": 1327446905938}}
+#
 ##
 {
   "command": "query-rocker",
@@ -11623,11 +13726,21 @@
 ##
 # @query-rocker-ports:
 #
-# Return rocker switch information.
+# Return rocker switch port information.
 #
-# Returns: @Rocker information
+# Returns: a list of @RockerPort information
 #
 # Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "query-rocker-ports", "arguments": { "name": "sw1" } }
+# <- { "return": [ {"duplex": "full", "enabled": true, "name": "sw1.1",
+#                   "autoneg": "off", "link-up": true, "speed": 10000},
+#                  {"duplex": "full", "enabled": true, "name": "sw1.2",
+#                   "autoneg": "off", "link-up": true, "speed": 10000}
+#    ]}
+#
 ##
 {
   "command": "query-rocker-ports",
@@ -11797,9 +13910,23 @@
 # @tbl-id: #optional flow table ID.  If tbl-id is not specified, returns
 # flow information for all tables.
 #
-# Returns: @Rocker OF-DPA flow information
+# Returns: rocker OF-DPA flow information
 #
 # Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "query-rocker-of-dpa-flows",
+#      "arguments": { "name": "sw1" } }
+# <- { "return": [ {"key": {"in-pport": 0, "priority": 1, "tbl-id": 0},
+#                   "hits": 138,
+#                   "cookie": 0,
+#                   "action": {"goto-tbl": 10},
+#                   "mask": {"in-pport": 4294901760}
+#                  },
+#                  {...more...},
+#    ]}
+#
 ##
 {
   "command": "query-rocker-of-dpa-flows",
@@ -11879,9 +14006,28 @@
 # @type: #optional group type.  If type is not specified, returns
 # group information for all group types.
 #
-# Returns: @Rocker OF-DPA group information
+# Returns: rocker OF-DPA group information
 #
 # Since: 2.4
+#
+# Example:
+#
+# -> { "execute": "query-rocker-of-dpa-groups",
+#      "arguments": { "name": "sw1" } }
+# <- { "return": [ {"type": 0, "out-pport": 2,
+#                   "pport": 2, "vlan-id": 3841,
+#                   "pop-vlan": 1, "id": 251723778},
+#                  {"type": 0, "out-pport": 0,
+#                   "pport": 0, "vlan-id": 3841,
+#                   "pop-vlan": 1, "id": 251723776},
+#                  {"type": 0, "out-pport": 1,
+#                   "pport": 1, "vlan-id": 3840,
+#                   "pop-vlan": 1, "id": 251658241},
+#                  {"type": 0, "out-pport": 0,
+#                   "pport": 0, "vlan-id": 3840,
+#                   "pop-vlan": 1, "id": 251658240}
+#    ]}
+#
 ##
 {
   "command": "query-rocker-of-dpa-groups",
@@ -11896,7 +14042,7 @@
 
 
 ##
-# ReplayMode:
+# @ReplayMode:
 #
 # Mode of the replay subsystem.
 #
@@ -11930,6 +14076,13 @@
 # format.
 #
 # Since: 2.7
+#
+# Example:
+#
+# -> { "execute": "xen-load-devices-state",
+#      "arguments": { "filename": "/tmp/resume" } }
+# <- { "return": {} }
+#
 ##
 {
   "command": "xen-load-devices-state",
@@ -11975,6 +14128,13 @@
 # Returns: a list of GICCapability objects.
 #
 # Since: 2.6
+#
+# Example:
+#
+# -> { "execute": "query-gic-capabilities" }
+# <- { "return": [{ "version": 2, "emulated": true, "kernel": false },
+#                 { "version": 3, "emulated": false, "kernel": true } ] }
+#
 ##
 {
   "command": "query-gic-capabilities",
@@ -11984,22 +14144,22 @@
 }
 
 ##
-# CpuInstanceProperties
+# @CpuInstanceProperties:
 #
 # List of properties to be used for hotplugging a CPU instance,
 # it should be passed by management with device_add command when
 # a CPU is being hotplugged.
+#
+# @node-id: #optional NUMA node ID the CPU belongs to
+# @socket-id: #optional socket number within node/board the CPU belongs to
+# @core-id: #optional core number within socket the CPU belongs to
+# @thread-id: #optional thread number within core the CPU belongs to
 #
 # Note: currently there are 4 properties that could be present
 # but management should be prepared to pass through other
 # properties with device_add command to allow for future
 # interface extension. This also requires the filed names to be kept in
 # sync with the properties passed to -device/device_add.
-#
-# @node-id: #optional NUMA node ID the CPU belongs to
-# @socket-id: #optional socket number within node/board the CPU belongs to
-# @core-id: #optional core number within socket the CPU belongs to
-# @thread-id: #optional thread number within core the CPU belongs to
 #
 # Since: 2.7
 ##
@@ -12014,7 +14174,7 @@
 }
 
 ##
-# @HotpluggableCPU
+# @HotpluggableCPU:
 #
 # @type: CPU object type for usage with device_add command
 # @props: list of properties to be used for hotplugging CPU
@@ -12035,11 +14195,39 @@
 }
 
 ##
-# @query-hotpluggable-cpus
+# @query-hotpluggable-cpus:
 #
 # Returns: a list of HotpluggableCPU objects.
 #
 # Since: 2.7
+#
+# Example:
+#
+# For pseries machine type started with -smp 2,cores=2,maxcpus=4 -cpu POWER8:
+#
+# -> { "execute": "query-hotpluggable-cpus" }
+# <- {"return": [
+#      { "props": { "core": 8 }, "type": "POWER8-spapr-cpu-core",
+#        "vcpus-count": 1 },
+#      { "props": { "core": 0 }, "type": "POWER8-spapr-cpu-core",
+#        "vcpus-count": 1, "qom-path": "/machine/unattached/device[0]"}
+#    ]}'
+#
+# For pc machine type started with -smp 1,maxcpus=2:
+#
+# -> { "execute": "query-hotpluggable-cpus" }
+# <- {"return": [
+#      {
+#         "type": "qemu64-x86_64-cpu", "vcpus-count": 1,
+#         "props": {"core-id": 0, "socket-id": 1, "thread-id": 0}
+#      },
+#      {
+#         "qom-path": "/machine/unattached/device[0]",
+#         "type": "qemu64-x86_64-cpu", "vcpus-count": 1,
+#         "props": {"core-id": 0, "socket-id": 0, "thread-id": 0}
+#      }
+#    ]}
+#
 ##
 {
   "command": "query-hotpluggable-cpus",
