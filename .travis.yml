@@ -1,9 +1,55 @@
 language: go
+os: ubuntu
+dist: trusty
+sudo: require
+
 go:
-  - 1.7
+  - 1.x
+
+env:
+  - QEMU=2.2.0 QEMU_EXT=xz LIBVIRT=1.2.2 LIBVIRT_EXT=gz
+  - QEMU=2.2.0 QEMU_EXT=xz LIBVIRT=2.3.0 LIBVIRT_EXT=xz
+  - QEMU=2.2.0 QEMU_EXT=xz LIBVIRT=3.1.0 LIBVIRT_EXT=xz
+  - QEMU=2.5.0 QEMU_EXT=xz LIBVIRT=1.2.2 LIBVIRT_EXT=gz
+  - QEMU=2.5.0 QEMU_EXT=xz LIBVIRT=2.3.0 LIBVIRT_EXT=xz
+  - QEMU=2.5.0 QEMU_EXT=xz LIBVIRT=3.1.0 LIBVIRT_EXT=xz
+  - QEMU=2.9.0 QEMU_EXT=xz LIBVIRT=1.2.2 LIBVIRT_EXT=gz
+  - QEMU=2.9.0 QEMU_EXT=xz LIBVIRT=2.3.0 LIBVIRT_EXT=xz
+  - QEMU=2.9.0 QEMU_EXT=xz LIBVIRT=3.1.0 LIBVIRT_EXT=xz
+
+install:
+  - sudo apt-get -qqy build-dep qemu-system-x86 libvirt
+  - sudo apt-get -qqy install curl
+  - sudo mkdir -p /usr/src && sudo chown $(id -u) /usr/src
+  - curl -O -L -s http://download.qemu-project.org/qemu-${QEMU}.tar.${QEMU_EXT}
+  - tar -C /usr/src -xf qemu-${QEMU}.tar.${QEMU_EXT}
+  - pushd /usr/src/qemu-${QEMU}  
+  - |
+        ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc \
+                    --disable-docs \
+                    --target-list=x86_64-softmmu             
+  - make
+  - sudo make install
+  - popd
+  - curl -O -s https://libvirt.org/sources/libvirt-${LIBVIRT}.tar.${LIBVIRT_EXT}
+  - tar -C /usr/src -xf libvirt-${LIBVIRT}.tar.${LIBVIRT_EXT}
+  - pushd /usr/src/libvirt-${LIBVIRT}
+  - |
+        ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc \
+                    --without-polkit \
+                    --without-esx --without-vbox --without-xen --without-libxl --without-lxc \
+                    --with-qemu
+  - make
+  - sudo make install
+  - popd
+  - sudo libvirtd -d -l -f .travis/libvirtd.conf
+  - sudo virtlogd -d || true
+  - rm qemu-${QEMU}.tar.${QEMU_EXT} libvirt-${LIBVIRT}.tar.${LIBVIRT_EXT}
+  
 before_install:
   - go get github.com/golang/lint/golint
   - go get golang.org/x/tools/cmd/stringer
+
 before_script:
   - go get -d ./...
 script:
