@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/digitalocean/go-qemu/qmp"
+	"github.com/digitalocean/go-qemu/qmp/raw"
 )
 
 func TestVersion(t *testing.T) {
@@ -46,5 +47,35 @@ func TestVersion(t *testing.T) {
 	expected := "2.5.0"
 	if v != expected {
 		t.Errorf("expected version %q, instead got %q", expected, v)
+	}
+}
+
+func TestPackageVersion(t *testing.T) {
+	result := raw.VersionInfo{}
+	result.Qemu.Major = 2
+	result.Qemu.Minor = 8
+	result.Qemu.Micro = 0
+	result.Package = "(Debian 1:2.8+dfsg-3ubuntu2.4)"
+
+	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
+		if want, got := "query-version", cmd.Execute; want != got {
+			t.Fatalf("unexpected QMP command:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
+		return success{
+			Return: result,
+		}, nil
+	})
+	defer done()
+
+	v, err := d.PackageVersion()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := "(Debian 1:2.8+dfsg-3ubuntu2.4)"
+	if v != expected {
+		t.Errorf("expected package version %q, instead got %q", expected, v)
 	}
 }
