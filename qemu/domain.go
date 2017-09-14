@@ -346,6 +346,17 @@ func (d *Domain) Version() (string, error) {
 	return response.Return.String(), nil
 }
 
+// PackageVersion returns the domain's QEMU package version, the full build
+// information for QEMU.
+func (d *Domain) PackageVersion() (string, error) {
+	vers, err := d.rm.QueryVersion()
+	if err != nil {
+		return "", err
+	}
+
+	return vers.Package, nil
+}
+
 // Events streams QEMU QMP events.
 // Two channels are returned, the first contains events emitted by the domain.
 // The second is used to signal completion of event processing.
