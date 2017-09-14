@@ -57,7 +57,7 @@ func readDefinitions(path string) ([]definition, error) {
 		default:
 			return nil, fmt.Errorf("unexpected part of spec file %q: %s", path, string(part))
 		case 1:
-			if len(fs) == 1 && part[0] == '{' {
+			if len(fs) == 1 && part[0] == '{' && !bytes.HasPrefix(part, []byte("{ 'pragma'")) {
 				return nil, fmt.Errorf("found type definition without a docstring in %q: %s", path, string(part))
 			}
 			// This part looks like a non-docstring comment, just skip it.
@@ -187,6 +187,9 @@ func parse(defs []definition) (map[name]interface{}, error) {
 				return nil, err
 			}
 			ret[v.Name] = v
+		case m["pragma"] != nil:
+			// We ignore pragmas, they're there for the benefit of
+			// qemu's own self-validation.
 		default:
 			return nil, fmt.Errorf("unknown definition kind: %q", string(def.JSON))
 		}
