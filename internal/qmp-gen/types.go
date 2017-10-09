@@ -585,6 +585,18 @@ func pyToJSON(py []byte) []byte {
 	return ret
 }
 
+func tryGetVersionFromSpecPath(specPath string) string {
+	retVersion := "UNKNOWN"
+	verPath, err := resolvePath(specPath, "VERSION")
+	if err == nil {
+		verBuf, err := getQAPI(verPath)
+		if err == nil {
+			return string(verBuf)
+		}
+	}
+	return retVersion
+}
+
 func resolvePath(orig, new string) (string, error) {
 	u, err := url.Parse(orig)
 	if err != nil {
