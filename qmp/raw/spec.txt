@@ -742,12 +742,12 @@
 {
   "event": "WATCHDOG",
   "data": {
-    "action": "WatchdogExpirationAction"
+    "action": "WatchdogAction"
   }
 }
 
 ##
-# @WatchdogExpirationAction:
+# @WatchdogAction:
 #
 # An enumeration of the actions taken when the watchdog device's timer is
 # expired
@@ -771,7 +771,7 @@
 # Since: 2.1
 ##
 {
-  "enum": "WatchdogExpirationAction",
+  "enum": "WatchdogAction",
   "data": [
     "reset",
     "shutdown",
@@ -4707,6 +4707,9 @@
 # Driver specific block device options for the file backend.
 #
 # @filename:    path to the image file
+# @pr-manager:  the id for the object that will handle persistent reservations
+#               for this device (default: none, forward the commands via SG_IO;
+#               since 2.11)
 # @aio:         AIO backend (default: threads) (since: 2.8)
 # @locking:     whether to enable file locking. If set to 'auto', only enable
 #               when Open File Descriptor (OFD) locking API is available
@@ -4718,6 +4721,7 @@
   "struct": "BlockdevOptionsFile",
   "data": {
     "filename": "str",
+    "*pr-manager": "str",
     "*locking": "OnOffAuto",
     "*aio": "BlockdevAioOptions"
   }
@@ -5069,6 +5073,13 @@
 #
 # Trigger events supported by blkdebug.
 #
+# @l1_shrink_write_table:      write zeros to the l1 table to shrink image.
+#                              (since 2.11)
+#
+# @l1_shrink_free_l2_clusters: discard the l2 tables. (since 2.11)
+#
+# @cor_write: a write due to copy-on-read (since 2.11)
+#
 # Since: 2.9
 ##
 {
@@ -5117,7 +5128,10 @@
     "pwritev",
     "pwritev_zero",
     "pwritev_done",
-    "empty_image_prepare"
+    "empty_image_prepare",
+    "l1_shrink_write_table",
+    "l1_shrink_free_l2_clusters",
+    "cor_write"
   ]
 }
 
@@ -11702,6 +11716,8 @@
 # @return-path: If enabled, migration will use the return path even
 #               for precopy. (since 2.10)
 #
+# @x-multifd: Use more than one fd for migration (since 2.11)
+#
 # Since: 1.2
 ##
 {
@@ -11717,7 +11733,8 @@
     "x-colo",
     "release-ram",
     "block",
-    "return-path"
+    "return-path",
+    "x-multifd"
   ]
 }
 
@@ -11853,6 +11870,14 @@
 # 	migrated and the destination must already have access to the
 # 	same backing chain as was used on the source.  (since 2.10)
 #
+# @x-multifd-channels: Number of channels used to migrate data in
+#                     parallel. This is the same number that the
+#                     number of sockets used for migration.  The
+#                     default value is 2 (since 2.11)
+#
+# @x-multifd-page-count: Number of pages sent together to a thread
+#                        The default value is 16 (since 2.11)
+#
 # Since: 2.4
 ##
 {
@@ -11868,7 +11893,9 @@
     "max-bandwidth",
     "downtime-limit",
     "x-checkpoint-delay",
-    "block-incremental"
+    "block-incremental",
+    "x-multifd-channels",
+    "x-multifd-page-count"
   ]
 }
 
@@ -11926,6 +11953,14 @@
 # 	migrated and the destination must already have access to the
 # 	same backing chain as was used on the source.  (since 2.10)
 #
+# @x-multifd-channels: Number of channels used to migrate data in
+#                     parallel. This is the same number that the
+#                     number of sockets used for migration.  The
+#                     default value is 2 (since 2.11)
+#
+# @x-multifd-page-count: Number of pages sent together to a thread
+#                        The default value is 16 (since 2.11)
+#
 # Since: 2.4
 ##
 # TODO either fuse back into MigrationParameters, or make
@@ -11943,7 +11978,9 @@
     "*max-bandwidth": "int",
     "*downtime-limit": "int",
     "*x-checkpoint-delay": "int",
-    "*block-incremental": "bool"
+    "*block-incremental": "bool",
+    "*x-multifd-channels": "int",
+    "*x-multifd-page-count": "int"
   }
 }
 
@@ -12019,6 +12056,14 @@
 # 	migrated and the destination must already have access to the
 # 	same backing chain as was used on the source.  (since 2.10)
 #
+# @x-multifd-channels: Number of channels used to migrate data in
+#                     parallel. This is the same number that the
+#                     number of sockets used for migration.
+#                     The default value is 2 (since 2.11)
+#
+# @x-multifd-page-count: Number of pages sent together to a thread
+#                        The default value is 16 (since 2.11)
+#
 # Since: 2.4
 ##
 {
@@ -12034,7 +12079,9 @@
     "*max-bandwidth": "int",
     "*downtime-limit": "int",
     "*x-checkpoint-delay": "int",
-    "*block-incremental": "bool"
+    "*block-incremental": "bool",
+    "*x-multifd-channels": "int",
+    "*x-multifd-page-count": "int"
   }
 }
 
@@ -16013,6 +16060,9 @@
 # Driver specific block device options for the file backend.
 #
 # @filename:    path to the image file
+# @pr-manager:  the id for the object that will handle persistent reservations
+#               for this device (default: none, forward the commands via SG_IO;
+#               since 2.11)
 # @aio:         AIO backend (default: threads) (since: 2.8)
 # @locking:     whether to enable file locking. If set to 'auto', only enable
 #               when Open File Descriptor (OFD) locking API is available
@@ -16024,6 +16074,7 @@
   "struct": "BlockdevOptionsFile",
   "data": {
     "filename": "str",
+    "*pr-manager": "str",
     "*locking": "OnOffAuto",
     "*aio": "BlockdevAioOptions"
   }
@@ -16375,6 +16426,13 @@
 #
 # Trigger events supported by blkdebug.
 #
+# @l1_shrink_write_table:      write zeros to the l1 table to shrink image.
+#                              (since 2.11)
+#
+# @l1_shrink_free_l2_clusters: discard the l2 tables. (since 2.11)
+#
+# @cor_write: a write due to copy-on-read (since 2.11)
+#
 # Since: 2.9
 ##
 {
@@ -16423,7 +16481,10 @@
     "pwritev",
     "pwritev_zero",
     "pwritev_done",
-    "empty_image_prepare"
+    "empty_image_prepare",
+    "l1_shrink_write_table",
+    "l1_shrink_free_l2_clusters",
+    "cor_write"
   ]
 }
 
@@ -22758,6 +22819,22 @@
 #      }
 #    ]}
 #
+# For s390x-virtio-ccw machine type started with -smp 1,maxcpus=2 -cpu qemu
+# (Since: 2.11):
+#
+# -> { "execute": "query-hotpluggable-cpus" }
+# <- {"return": [
+#      {
+#         "type": "qemu-s390-cpu", "vcpus-count": 1,
+#         "props": { "core-id": 1 }
+#      },
+#      {
+#         "qom-path": "/machine/unattached/device[0]",
+#         "type": "qemu-s390-cpu", "vcpus-count": 1,
+#         "props": { "core-id": 0 }
+#      }
+#    ]}
+#
 ##
 {
   "command": "query-hotpluggable-cpus",
@@ -22792,6 +22869,20 @@
 {
   "command": "query-vm-generation-id",
   "returns": "GuidInfo"
+}
+
+##
+# @watchdog-set-action:
+#
+# Set watchdog action
+#
+# Since: 2.11
+##
+{
+  "command": "watchdog-set-action",
+  "data": {
+    "action": "WatchdogAction"
+  }
 }
 
 

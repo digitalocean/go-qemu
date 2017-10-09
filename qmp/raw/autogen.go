@@ -225,6 +225,9 @@ const (
 	BlkdebugEventPwritevZero
 	BlkdebugEventPwritevDone
 	BlkdebugEventEmptyImagePrepare
+	BlkdebugEventL1ShrinkWriteTable
+	BlkdebugEventL1ShrinkFreeL2Clusters
+	BlkdebugEventCorWrite
 )
 
 // String implements fmt.Stringer.
@@ -316,6 +319,12 @@ func (e BlkdebugEvent) String() string {
 		return "pwritev_done"
 	case BlkdebugEventEmptyImagePrepare:
 		return "empty_image_prepare"
+	case BlkdebugEventL1ShrinkWriteTable:
+		return "l1_shrink_write_table"
+	case BlkdebugEventL1ShrinkFreeL2Clusters:
+		return "l1_shrink_free_l2_clusters"
+	case BlkdebugEventCorWrite:
+		return "cor_write"
 	default:
 		return fmt.Sprintf("BlkdebugEvent(%d)", e)
 	}
@@ -410,6 +419,12 @@ func (e BlkdebugEvent) MarshalJSON() ([]byte, error) {
 		return json.Marshal("pwritev_done")
 	case BlkdebugEventEmptyImagePrepare:
 		return json.Marshal("empty_image_prepare")
+	case BlkdebugEventL1ShrinkWriteTable:
+		return json.Marshal("l1_shrink_write_table")
+	case BlkdebugEventL1ShrinkFreeL2Clusters:
+		return json.Marshal("l1_shrink_free_l2_clusters")
+	case BlkdebugEventCorWrite:
+		return json.Marshal("cor_write")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for BlkdebugEvent", e)
 	}
@@ -508,6 +523,12 @@ func (e *BlkdebugEvent) UnmarshalJSON(bs []byte) error {
 		*e = BlkdebugEventPwritevDone
 	case "empty_image_prepare":
 		*e = BlkdebugEventEmptyImagePrepare
+	case "l1_shrink_write_table":
+		*e = BlkdebugEventL1ShrinkWriteTable
+	case "l1_shrink_free_l2_clusters":
+		*e = BlkdebugEventL1ShrinkFreeL2Clusters
+	case "cor_write":
+		*e = BlkdebugEventCorWrite
 	default:
 		return fmt.Errorf("unknown enum value %q for BlkdebugEvent", s)
 	}
@@ -1705,6 +1726,7 @@ type BlockdevOptionsFile struct {
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	PrManager    *string                      `json:"pr-manager,omitempty"`
 	Locking      *OnOffAuto                   `json:"locking,omitempty"`
 	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
@@ -1810,6 +1832,7 @@ type BlockdevOptionsHostCdrom struct {
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	PrManager    *string                      `json:"pr-manager,omitempty"`
 	Locking      *OnOffAuto                   `json:"locking,omitempty"`
 	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
@@ -1837,6 +1860,7 @@ type BlockdevOptionsHostDevice struct {
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	PrManager    *string                      `json:"pr-manager,omitempty"`
 	Locking      *OnOffAuto                   `json:"locking,omitempty"`
 	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
@@ -2961,6 +2985,7 @@ type BlockdevRefReference string
 func (BlockdevRefReference) isBlockdevRef() {}
 
 func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
+
 	var reference BlockdevRefReference
 	if err := json.Unmarshal([]byte(bs), &reference); err == nil {
 		return reference, nil
@@ -3097,9 +3122,17 @@ func (BlockdevOptionsVpc) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsVvfat) isBlockdevRefOrNull()       {}
 func (BlockdevOptionsVxhs) isBlockdevRefOrNull()        {}
 
-// BlockdevRefOrNullNull is an implementation of BlockdevRefOrNull
-type BlockdevRefOrNullNull Null
+// Special case handling of JSON null type
+type isBlockdevRefOrNullNullNullable interface {
+	isNull() bool
+}
+type BlockdevRefOrNullNull struct {
+	isNotNull bool
+}
 
+func (n BlockdevRefOrNullNull) isNull() bool {
+	return !n.isNotNull
+}
 func (BlockdevRefOrNullNull) isBlockdevRefOrNull() {}
 
 // BlockdevRefOrNullReference is an implementation of BlockdevRefOrNull
@@ -3108,6 +3141,16 @@ type BlockdevRefOrNullReference string
 func (BlockdevRefOrNullReference) isBlockdevRefOrNull() {}
 
 func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
+
+	// Always try unmarshalling for nil first if it's an option
+	// because other types could unmarshal successfully in the case
+	// where a Null json type was provided.
+	var null *int
+	if err := json.Unmarshal([]byte(bs), &null); err == nil {
+		if null == nil {
+			return BlockdevRefOrNullNull{}, nil
+		}
+	}
 	var reference BlockdevRefOrNullReference
 	if err := json.Unmarshal([]byte(bs), &reference); err == nil {
 		return reference, nil
@@ -3188,11 +3231,6 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 		case BlockdevOptionsVxhs:
 			return impl, nil
 		}
-	}
-
-	var null BlockdevRefOrNullNull
-	if err := json.Unmarshal([]byte(bs), &null); err == nil {
-		return null, nil
 	}
 	return nil, fmt.Errorf("unable to decode %q as a BlockdevRefOrNull", string(bs))
 }
@@ -6015,6 +6053,8 @@ type MigrateSetParameters struct {
 	DowntimeLimit        *int64    `json:"downtime-limit,omitempty"`
 	XCheckpointDelay     *int64    `json:"x-checkpoint-delay,omitempty"`
 	BlockIncremental     *bool     `json:"block-incremental,omitempty"`
+	XMultifdChannels     *int64    `json:"x-multifd-channels,omitempty"`
+	XMultifdPageCount    *int64    `json:"x-multifd-page-count,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -6031,6 +6071,8 @@ func (s *MigrateSetParameters) UnmarshalJSON(bs []byte) error {
 		DowntimeLimit        *int64          `json:"downtime-limit,omitempty"`
 		XCheckpointDelay     *int64          `json:"x-checkpoint-delay,omitempty"`
 		BlockIncremental     *bool           `json:"block-incremental,omitempty"`
+		XMultifdChannels     *int64          `json:"x-multifd-channels,omitempty"`
+		XMultifdPageCount    *int64          `json:"x-multifd-page-count,omitempty"`
 	}{}
 	err := json.Unmarshal(bs, &v)
 	if err != nil {
@@ -6061,6 +6103,8 @@ func (s *MigrateSetParameters) UnmarshalJSON(bs []byte) error {
 	s.DowntimeLimit = v.DowntimeLimit
 	s.XCheckpointDelay = v.XCheckpointDelay
 	s.BlockIncremental = v.BlockIncremental
+	s.XMultifdChannels = v.XMultifdChannels
+	s.XMultifdPageCount = v.XMultifdPageCount
 
 	return nil
 }
@@ -6083,6 +6127,7 @@ const (
 	MigrationCapabilityReleaseRAM
 	MigrationCapabilityBlock
 	MigrationCapabilityReturnPath
+	MigrationCapabilityXMultifd
 )
 
 // String implements fmt.Stringer.
@@ -6110,6 +6155,8 @@ func (e MigrationCapability) String() string {
 		return "block"
 	case MigrationCapabilityReturnPath:
 		return "return-path"
+	case MigrationCapabilityXMultifd:
+		return "x-multifd"
 	default:
 		return fmt.Sprintf("MigrationCapability(%d)", e)
 	}
@@ -6140,6 +6187,8 @@ func (e MigrationCapability) MarshalJSON() ([]byte, error) {
 		return json.Marshal("block")
 	case MigrationCapabilityReturnPath:
 		return json.Marshal("return-path")
+	case MigrationCapabilityXMultifd:
+		return json.Marshal("x-multifd")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationCapability", e)
 	}
@@ -6174,6 +6223,8 @@ func (e *MigrationCapability) UnmarshalJSON(bs []byte) error {
 		*e = MigrationCapabilityBlock
 	case "return-path":
 		*e = MigrationCapabilityReturnPath
+	case "x-multifd":
+		*e = MigrationCapabilityXMultifd
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationCapability", s)
 	}
@@ -6219,6 +6270,8 @@ type MigrationParameters struct {
 	DowntimeLimit        *int64  `json:"downtime-limit,omitempty"`
 	XCheckpointDelay     *int64  `json:"x-checkpoint-delay,omitempty"`
 	BlockIncremental     *bool   `json:"block-incremental,omitempty"`
+	XMultifdChannels     *int64  `json:"x-multifd-channels,omitempty"`
+	XMultifdPageCount    *int64  `json:"x-multifd-page-count,omitempty"`
 }
 
 // MigrationStats -> MigrationStats (struct)
@@ -9675,9 +9728,17 @@ type StrOrNull interface {
 	isStrOrNull()
 }
 
-// StrOrNullN is an implementation of StrOrNull
-type StrOrNullN Null
+// Special case handling of JSON null type
+type isStrOrNullNNullable interface {
+	isNull() bool
+}
+type StrOrNullN struct {
+	isNotNull bool
+}
 
+func (n StrOrNullN) isNull() bool {
+	return !n.isNotNull
+}
 func (StrOrNullN) isStrOrNull() {}
 
 // StrOrNullS is an implementation of StrOrNull
@@ -9686,14 +9747,19 @@ type StrOrNullS string
 func (StrOrNullS) isStrOrNull() {}
 
 func decodeStrOrNull(bs json.RawMessage) (StrOrNull, error) {
+
+	// Always try unmarshalling for nil first if it's an option
+	// because other types could unmarshal successfully in the case
+	// where a Null json type was provided.
+	var n *int
+	if err := json.Unmarshal([]byte(bs), &n); err == nil {
+		if n == nil {
+			return StrOrNullN{}, nil
+		}
+	}
 	var s StrOrNullS
 	if err := json.Unmarshal([]byte(bs), &s); err == nil {
 		return s, nil
-	}
-
-	var n StrOrNullN
-	if err := json.Unmarshal([]byte(bs), &n); err == nil {
-		return n, nil
 	}
 	return nil, fmt.Errorf("unable to decode %q as a StrOrNull", string(bs))
 }
@@ -10472,89 +10538,89 @@ type VsockSocketAddress struct {
 
 // EVENT WATCHDOG
 
-// WatchdogExpirationAction -> WatchdogExpirationAction (enum)
+// WatchdogAction -> WatchdogAction (enum)
 
-// WatchdogExpirationAction implements the "WatchdogExpirationAction" QMP API type.
-type WatchdogExpirationAction int
+// WatchdogAction implements the "WatchdogAction" QMP API type.
+type WatchdogAction int
 
-// Known values of WatchdogExpirationAction.
+// Known values of WatchdogAction.
 const (
-	WatchdogExpirationActionReset WatchdogExpirationAction = iota
-	WatchdogExpirationActionShutdown
-	WatchdogExpirationActionPoweroff
-	WatchdogExpirationActionPause
-	WatchdogExpirationActionDebug
-	WatchdogExpirationActionNone
-	WatchdogExpirationActionInjectNmi
+	WatchdogActionReset WatchdogAction = iota
+	WatchdogActionShutdown
+	WatchdogActionPoweroff
+	WatchdogActionPause
+	WatchdogActionDebug
+	WatchdogActionNone
+	WatchdogActionInjectNmi
 )
 
 // String implements fmt.Stringer.
-func (e WatchdogExpirationAction) String() string {
+func (e WatchdogAction) String() string {
 	switch e {
-	case WatchdogExpirationActionReset:
+	case WatchdogActionReset:
 		return "reset"
-	case WatchdogExpirationActionShutdown:
+	case WatchdogActionShutdown:
 		return "shutdown"
-	case WatchdogExpirationActionPoweroff:
+	case WatchdogActionPoweroff:
 		return "poweroff"
-	case WatchdogExpirationActionPause:
+	case WatchdogActionPause:
 		return "pause"
-	case WatchdogExpirationActionDebug:
+	case WatchdogActionDebug:
 		return "debug"
-	case WatchdogExpirationActionNone:
+	case WatchdogActionNone:
 		return "none"
-	case WatchdogExpirationActionInjectNmi:
+	case WatchdogActionInjectNmi:
 		return "inject-nmi"
 	default:
-		return fmt.Sprintf("WatchdogExpirationAction(%d)", e)
+		return fmt.Sprintf("WatchdogAction(%d)", e)
 	}
 }
 
 // MarshalJSON implements json.Marshaler.
-func (e WatchdogExpirationAction) MarshalJSON() ([]byte, error) {
+func (e WatchdogAction) MarshalJSON() ([]byte, error) {
 	switch e {
-	case WatchdogExpirationActionReset:
+	case WatchdogActionReset:
 		return json.Marshal("reset")
-	case WatchdogExpirationActionShutdown:
+	case WatchdogActionShutdown:
 		return json.Marshal("shutdown")
-	case WatchdogExpirationActionPoweroff:
+	case WatchdogActionPoweroff:
 		return json.Marshal("poweroff")
-	case WatchdogExpirationActionPause:
+	case WatchdogActionPause:
 		return json.Marshal("pause")
-	case WatchdogExpirationActionDebug:
+	case WatchdogActionDebug:
 		return json.Marshal("debug")
-	case WatchdogExpirationActionNone:
+	case WatchdogActionNone:
 		return json.Marshal("none")
-	case WatchdogExpirationActionInjectNmi:
+	case WatchdogActionInjectNmi:
 		return json.Marshal("inject-nmi")
 	default:
-		return nil, fmt.Errorf("unknown enum value %q for WatchdogExpirationAction", e)
+		return nil, fmt.Errorf("unknown enum value %q for WatchdogAction", e)
 	}
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (e *WatchdogExpirationAction) UnmarshalJSON(bs []byte) error {
+func (e *WatchdogAction) UnmarshalJSON(bs []byte) error {
 	var s string
 	if err := json.Unmarshal(bs, &s); err != nil {
 		return err
 	}
 	switch s {
 	case "reset":
-		*e = WatchdogExpirationActionReset
+		*e = WatchdogActionReset
 	case "shutdown":
-		*e = WatchdogExpirationActionShutdown
+		*e = WatchdogActionShutdown
 	case "poweroff":
-		*e = WatchdogExpirationActionPoweroff
+		*e = WatchdogActionPoweroff
 	case "pause":
-		*e = WatchdogExpirationActionPause
+		*e = WatchdogActionPause
 	case "debug":
-		*e = WatchdogExpirationActionDebug
+		*e = WatchdogActionDebug
 	case "none":
-		*e = WatchdogExpirationActionNone
+		*e = WatchdogActionNone
 	case "inject-nmi":
-		*e = WatchdogExpirationActionInjectNmi
+		*e = WatchdogActionInjectNmi
 	default:
-		return fmt.Errorf("unknown enum value %q for WatchdogExpirationAction", s)
+		return fmt.Errorf("unknown enum value %q for WatchdogAction", s)
 	}
 	return nil
 }
@@ -14498,6 +14564,29 @@ func (m *Monitor) Transaction(actions []TransactionAction, properties *Transacti
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "transaction",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// watchdog-set-action -> WatchdogSetAction (command)
+
+// WatchdogSetAction implements the "watchdog-set-action" QMP API call.
+func (m *Monitor) WatchdogSetAction(action WatchdogAction) (err error) {
+	cmd := struct {
+		Action WatchdogAction `json:"action"`
+	}{
+		action,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "watchdog-set-action",
 		"arguments": cmd,
 	})
 	if err != nil {
