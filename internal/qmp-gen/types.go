@@ -475,6 +475,13 @@ func (n name) SimpleType() bool {
 	return ok
 }
 
+func (n name) NullType() bool {
+	if n.SimpleType() {
+		return false
+	}
+	return strings.EqualFold(string(n), "Null")
+}
+
 func (n name) InterfaceType(api map[name]interface{}) bool {
 	if n.SimpleType() {
 		return false
