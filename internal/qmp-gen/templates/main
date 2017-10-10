@@ -21,6 +21,10 @@ import (
        "fmt"
 )
 
+type isNullable interface {
+       isNull() bool
+}
+
 {{ range . }}
 {{ render . }}
 {{ end }}
