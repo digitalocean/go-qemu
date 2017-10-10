@@ -66,7 +66,7 @@ func (d *Domain) Commands() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// flatten response
 	cmds := make([]string, 0, len(commands))
 	for _, c := range commands {

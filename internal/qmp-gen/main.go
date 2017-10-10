@@ -74,9 +74,6 @@ func Generate() error {
 		ioutil.WriteFile(*outputGo, bs, 0640)
 		return err
 	}
-	if err = ioutil.WriteFile(*outputGo, formatted, 0640); err != nil {
-		return err
-	}
 
-	return nil
+	return ioutil.WriteFile(*outputGo, formatted, 0640)
 }

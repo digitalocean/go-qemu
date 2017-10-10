@@ -25,7 +25,8 @@ type {{ $basename }} interface {
   {{ $subname := printf "%s%s" $basename $suffix.Go }}
 
   {{- if $type.NullType }}
-    // Special case handling of JSON null type
+    // {{ $subname }} is a JSON null type, so it must
+    // also implement the isNullable interface.
     type {{ $subname }} struct {}
     func ({{ $subname }}) isNull() bool { return true }
   {{- else }}

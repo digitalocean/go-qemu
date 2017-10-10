@@ -1213,7 +1213,7 @@ const (
 	BlockdevDriverRbd
 	BlockdevDriverReplication
 	BlockdevDriverSheepdog
-	BlockdevDriverSsh
+	BlockdevDriverSSH
 	BlockdevDriverThrottle
 	BlockdevDriverVdi
 	BlockdevDriverVhdx
@@ -1282,7 +1282,7 @@ func (e BlockdevDriver) String() string {
 		return "replication"
 	case BlockdevDriverSheepdog:
 		return "sheepdog"
-	case BlockdevDriverSsh:
+	case BlockdevDriverSSH:
 		return "ssh"
 	case BlockdevDriverThrottle:
 		return "throttle"
@@ -1362,7 +1362,7 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("replication")
 	case BlockdevDriverSheepdog:
 		return json.Marshal("sheepdog")
-	case BlockdevDriverSsh:
+	case BlockdevDriverSSH:
 		return json.Marshal("ssh")
 	case BlockdevDriverThrottle:
 		return json.Marshal("throttle")
@@ -1447,7 +1447,7 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 	case "sheepdog":
 		*e = BlockdevDriverSheepdog
 	case "ssh":
-		*e = BlockdevDriverSsh
+		*e = BlockdevDriverSSH
 	case "throttle":
 		*e = BlockdevDriverThrottle
 	case "vdi":
@@ -1574,7 +1574,7 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsRbd
 //   - BlockdevOptionsReplication
 //   - BlockdevOptionsSheepdog
-//   - BlockdevOptionsSsh
+//   - BlockdevOptionsSSH
 //   - BlockdevOptionsThrottle
 //   - BlockdevOptionsVdi
 //   - BlockdevOptionsVhdx
@@ -2353,8 +2353,8 @@ func (s BlockdevOptionsSheepdog) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// BlockdevOptionsSsh is an implementation of BlockdevOptions.
-type BlockdevOptionsSsh struct {
+// BlockdevOptionsSSH is an implementation of BlockdevOptions.
+type BlockdevOptionsSSH struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
@@ -2366,15 +2366,15 @@ type BlockdevOptionsSsh struct {
 	User         *string                      `json:"user,omitempty"`
 }
 
-func (BlockdevOptionsSsh) isBlockdevOptions() {}
+func (BlockdevOptionsSSH) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
-func (s BlockdevOptionsSsh) MarshalJSON() ([]byte, error) {
+func (s BlockdevOptionsSSH) MarshalJSON() ([]byte, error) {
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsSsh
+		BlockdevOptionsSSH
 	}{
-		BlockdevDriverSsh,
+		BlockdevDriverSSH,
 		s,
 	}
 	return json.Marshal(v)
@@ -2682,8 +2682,8 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsSheepdog
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
-	case BlockdevDriverSsh:
-		var ret BlockdevOptionsSsh
+	case BlockdevDriverSSH:
+		var ret BlockdevOptionsSSH
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverThrottle:
@@ -2974,7 +2974,7 @@ func (BlockdevOptionsRaw) isBlockdevRef()         {}
 func (BlockdevOptionsRbd) isBlockdevRef()         {}
 func (BlockdevOptionsReplication) isBlockdevRef() {}
 func (BlockdevOptionsSheepdog) isBlockdevRef()    {}
-func (BlockdevOptionsSsh) isBlockdevRef()         {}
+func (BlockdevOptionsSSH) isBlockdevRef()         {}
 func (BlockdevOptionsThrottle) isBlockdevRef()    {}
 func (BlockdevOptionsVdi) isBlockdevRef()         {}
 func (BlockdevOptionsVhdx) isBlockdevRef()        {}
@@ -3053,7 +3053,7 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsSheepdog:
 			return impl, nil
-		case BlockdevOptionsSsh:
+		case BlockdevOptionsSSH:
 			return impl, nil
 		case BlockdevOptionsThrottle:
 			return impl, nil
@@ -3117,7 +3117,7 @@ func (BlockdevOptionsRaw) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsRbd) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsReplication) isBlockdevRefOrNull() {}
 func (BlockdevOptionsSheepdog) isBlockdevRefOrNull()    {}
-func (BlockdevOptionsSsh) isBlockdevRefOrNull()         {}
+func (BlockdevOptionsSSH) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsThrottle) isBlockdevRefOrNull()    {}
 func (BlockdevOptionsVdi) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsVhdx) isBlockdevRefOrNull()        {}
@@ -3126,7 +3126,8 @@ func (BlockdevOptionsVpc) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsVvfat) isBlockdevRefOrNull()       {}
 func (BlockdevOptionsVxhs) isBlockdevRefOrNull()        {}
 
-// Special case handling of JSON null type
+// BlockdevRefOrNullNull is a JSON null type, so it must
+// also implement the isNullable interface.
 type BlockdevRefOrNullNull struct{}
 
 func (BlockdevRefOrNullNull) isNull() bool         { return true }
@@ -3211,7 +3212,7 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 			return impl, nil
 		case BlockdevOptionsSheepdog:
 			return impl, nil
-		case BlockdevOptionsSsh:
+		case BlockdevOptionsSSH:
 			return impl, nil
 		case BlockdevOptionsThrottle:
 			return impl, nil
@@ -4936,11 +4937,11 @@ func (e *GuestPanicInformationType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// GuidInfo -> GuidInfo (struct)
+// GuidInfo -> GUIDInfo (struct)
 
-// GuidInfo implements the "GuidInfo" QMP API type.
-type GuidInfo struct {
-	Guid string `json:"guid"`
+// GUIDInfo implements the "GuidInfo" QMP API type.
+type GUIDInfo struct {
+	GUID string `json:"guid"`
 }
 
 // HostMemPolicy -> HostMemPolicy (enum)
@@ -9725,7 +9726,8 @@ type StrOrNull interface {
 	isStrOrNull()
 }
 
-// Special case handling of JSON null type
+// StrOrNullN is a JSON null type, so it must
+// also implement the isNullable interface.
 type StrOrNullN struct{}
 
 func (StrOrNullN) isNull() bool { return true }
@@ -12059,7 +12061,7 @@ func (m *Monitor) Memsave(val int64, size int64, filename string, cpuIndex *int6
 // Migrate implements the "migrate" QMP API call.
 func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err error) {
 	cmd := struct {
-		Uri    string `json:"uri"`
+		URI    string `json:"uri"`
 		Blk    *bool  `json:"blk,omitempty"`
 		Inc    *bool  `json:"inc,omitempty"`
 		Detach *bool  `json:"detach,omitempty"`
@@ -12088,7 +12090,7 @@ func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err e
 // MigrateIncoming implements the "migrate-incoming" QMP API call.
 func (m *Monitor) MigrateIncoming(uri string) (err error) {
 	cmd := struct {
-		Uri string `json:"uri"`
+		URI string `json:"uri"`
 	}{
 		uri,
 	}
@@ -14057,7 +14059,7 @@ func (m *Monitor) QueryVersion() (ret VersionInfo, err error) {
 // query-vm-generation-id -> QueryVMGenerationID (command)
 
 // QueryVMGenerationID implements the "query-vm-generation-id" QMP API call.
-func (m *Monitor) QueryVMGenerationID() (ret GuidInfo, err error) {
+func (m *Monitor) QueryVMGenerationID() (ret GUIDInfo, err error) {
 	cmd := struct {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
