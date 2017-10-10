@@ -21,6 +21,10 @@ import (
 	"fmt"
 )
 
+type isNullable interface {
+	isNull() bool
+}
+
 // ACPIOSTInfo -> ACPIOSTInfo (struct)
 
 // ACPIOSTInfo implements the "ACPIOSTInfo" QMP API type.
@@ -3123,16 +3127,9 @@ func (BlockdevOptionsVvfat) isBlockdevRefOrNull()       {}
 func (BlockdevOptionsVxhs) isBlockdevRefOrNull()        {}
 
 // Special case handling of JSON null type
-type isBlockdevRefOrNullNullNullable interface {
-	isNull() bool
-}
-type BlockdevRefOrNullNull struct {
-	isNotNull bool
-}
+type BlockdevRefOrNullNull struct{}
 
-func (n BlockdevRefOrNullNull) isNull() bool {
-	return !n.isNotNull
-}
+func (BlockdevRefOrNullNull) isNull() bool         { return true }
 func (BlockdevRefOrNullNull) isBlockdevRefOrNull() {}
 
 // BlockdevRefOrNullReference is an implementation of BlockdevRefOrNull
@@ -9729,16 +9726,9 @@ type StrOrNull interface {
 }
 
 // Special case handling of JSON null type
-type isStrOrNullNNullable interface {
-	isNull() bool
-}
-type StrOrNullN struct {
-	isNotNull bool
-}
+type StrOrNullN struct{}
 
-func (n StrOrNullN) isNull() bool {
-	return !n.isNotNull
-}
+func (StrOrNullN) isNull() bool { return true }
 func (StrOrNullN) isStrOrNull() {}
 
 // StrOrNullS is an implementation of StrOrNull

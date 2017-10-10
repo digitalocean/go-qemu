@@ -26,15 +26,8 @@ type {{ $basename }} interface {
 
   {{- if $type.NullType }}
     // Special case handling of JSON null type
-    type is{{ $subname }}Nullable interface {
-      isNull() bool
-    }
-    type {{ $subname }} struct {
-      isNotNull bool
-    }
-    func (n {{ $subname }}) isNull() bool {
-      return !n.isNotNull
-    }
+    type {{ $subname }} struct {}
+    func ({{ $subname }}) isNull() bool { return true }
   {{- else }}
     // {{ $subname }} is an implementation of {{ $basename }}
     type {{ $subname }} {{ $type.Go }}
