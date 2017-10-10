@@ -21,7 +21,9 @@ import (
 	"fmt"
 )
 
-type isNullable interface {
+// IsNullable is implemented by any
+// JSON null type
+type IsNullable interface {
 	isNull() bool
 }
 
