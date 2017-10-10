@@ -42,6 +42,12 @@ func Generate() error {
 
 	// Write out the concatenated spec.
 	var spec bytes.Buffer
+
+	// First add a comment with the best guess of version
+	spec.WriteString("\n##QEMU SPECIFICATION VERSION:  ")
+	spec.WriteString(tryGetVersionFromSpecPath(*inputSpec))
+	spec.WriteString("\n\n")
+
 	for _, def := range defs {
 		spec.WriteString(def.Docstring)
 		spec.WriteByte('\n')
@@ -68,9 +74,6 @@ func Generate() error {
 		ioutil.WriteFile(*outputGo, bs, 0640)
 		return err
 	}
-	if err = ioutil.WriteFile(*outputGo, formatted, 0640); err != nil {
-		return err
-	}
 
-	return nil
+	return ioutil.WriteFile(*outputGo, formatted, 0640)
 }

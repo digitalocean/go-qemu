@@ -33,6 +33,40 @@ type definition struct {
 	JSON      []byte
 }
 
+// definitions that are safe to ignore when a docstring is missing.
+func ignoreWithoutDocstring(buf []byte) bool {
+	switch {
+	case bytes.HasPrefix(buf, []byte("{ 'pragma'")):
+		return true
+	case bytes.HasPrefix(buf, []byte("{ 'include'")):
+		return true
+	}
+
+	return false
+}
+
+func importDefinitions(path string, jsonBuf []byte) ([]definition, error) {
+	v := struct {
+		I string `json:"include"`
+	}{}
+
+	if err := json.Unmarshal(jsonBuf, &v); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal include %q json: %s", path, err)
+	}
+
+	incPath, err := resolvePath(path, v.I)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve include %q relative to %q: %s", v.I, path, err)
+	}
+
+	subdefs, err := readDefinitions(incPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse included file %q: %s", incPath, err)
+	}
+
+	return subdefs, nil
+}
+
 // readDefinitions reads the definitions from a QAPI spec file.
 //
 // Includes are processed, so the returned definitions is the full API
@@ -51,32 +85,49 @@ func readDefinitions(path string) ([]definition, error) {
 	// input so that we can process it with less gymnastics.
 	bs = bytes.Replace(bs, []byte("}\n##"), []byte("}\n\n##"), -1)
 
+	// As mentioned directly above, most of the spec includes two newlines
+	// between definitions. This normalizes stacked include statements.
+	bs = bytes.Replace(bs, []byte("}\n{ 'include'"), []byte("}\n\n{ 'include'"), -1)
+
 	for _, part := range bytes.Split(bs, []byte("\n\n")) {
+		if len(part) < 1 {
+			continue
+		}
+
 		fs := bytes.SplitN(part, []byte("\n{"), 2)
 		switch len(fs) {
 		default:
 			return nil, fmt.Errorf("unexpected part of spec file %q: %s", path, string(part))
 		case 1:
-			if len(fs) == 1 && part[0] == '{' && !bytes.HasPrefix(part, []byte("{ 'pragma'")) {
+			if len(fs) == 1 && part[0] == '{' && !ignoreWithoutDocstring(part) {
 				return nil, fmt.Errorf("found type definition without a docstring in %q: %s", path, string(part))
 			}
+
+			// handle 'include' when no docstring is present
+			if bytes.HasPrefix(fs[0], []byte("{ 'include'")) {
+				js := pyToJSON(fs[0])
+
+				subdefs, err := importDefinitions(path, js)
+				if err != nil {
+					return nil, err
+
+				}
+
+				ret = append(ret, subdefs...)
+			}
+
 			// This part looks like a non-docstring comment, just skip it.
 		case 2:
 			docstring := string(fs[0])
 			js := pyToJSON(append([]byte{'{'}, fs[1]...))
 
-			v := struct {
-				I string `json:"include"`
-			}{}
-			if err = json.Unmarshal(js, &v); err == nil && v.I != "" {
-				incPath, err := resolvePath(path, v.I)
+			if bytes.HasPrefix(fs[0], []byte("{ 'include'")) {
+				subdefs, err := importDefinitions(path, js)
 				if err != nil {
-					return nil, fmt.Errorf("failed to resolve include %q relative to %q: %s", v.I, path, err)
+					return nil, err
+
 				}
-				subdefs, err := readDefinitions(incPath)
-				if err != nil {
-					return nil, fmt.Errorf("failed to parse included file %q: %s", incPath, err)
-				}
+
 				ret = append(ret, subdefs...)
 			} else {
 				ret = append(ret, definition{docstring, js})
@@ -424,6 +475,13 @@ func (n name) SimpleType() bool {
 	return ok
 }
 
+func (n name) NullType() bool {
+	if n.SimpleType() {
+		return false
+	}
+	return strings.EqualFold(string(n), "Null")
+}
+
 func (n name) InterfaceType(api map[name]interface{}) bool {
 	if n.SimpleType() {
 		return false
@@ -460,6 +518,7 @@ var upperWords = map[string]bool{
 	"fd":      true,
 	"ftp":     true,
 	"ftps":    true,
+	"guid":    true,
 	"http":    true,
 	"https":   true,
 	"id":      true,
@@ -476,11 +535,13 @@ var upperWords = map[string]bool{
 	"qmp":     true,
 	"ram":     true,
 	"sparc":   true,
+	"ssh":     true,
 	"tcp":     true,
 	"tls":     true,
 	"tpm":     true,
 	"ttl":     true,
 	"udp":     true,
+	"uri":     true,
 	"uuid":    true,
 	"vm":      true,
 	"vmdk":    true,
@@ -525,6 +586,18 @@ func pyToJSON(py []byte) []byte {
 		}
 	}
 	return ret
+}
+
+func tryGetVersionFromSpecPath(specPath string) string {
+	retVersion := "UNKNOWN"
+	verPath, err := resolvePath(specPath, "VERSION")
+	if err == nil {
+		verBuf, err := getQAPI(verPath)
+		if err == nil {
+			return string(verBuf)
+		}
+	}
+	return retVersion
 }
 
 func resolvePath(orig, new string) (string, error) {
