@@ -9513,13 +9513,16 @@
 # An enumeration of TPM types
 #
 # @passthrough: TPM passthrough type
+# @emulator: Software Emulator TPM type
+#            Since: 2.11
 #
 # Since: 1.5
 ##
 {
   "enum": "TpmType",
   "data": [
-    "passthrough"
+    "passthrough",
+    "emulator"
   ]
 }
 
@@ -9535,7 +9538,7 @@
 # Example:
 #
 # -> { "execute": "query-tpm-types" }
-# <- { "return": [ "passthrough" ] }
+# <- { "return": [ "passthrough", "emulator" ] }
 #
 ##
 {
@@ -9566,18 +9569,36 @@
 }
 
 ##
+# @TPMEmulatorOptions:
+#
+# Information about the TPM emulator type
+#
+# @chardev: Name of a unix socket chardev
+#
+# Since: 2.11
+##
+{
+  "struct": "TPMEmulatorOptions",
+  "data": {
+    "chardev": "str"
+  }
+}
+
+##
 # @TpmTypeOptions:
 #
 # A union referencing different TPM backend types' configuration options
 #
 # @type: 'passthrough' The configuration options for the TPM passthrough type
+#        'emulator' The configuration options for TPM emulator backend type
 #
 # Since: 1.5
 ##
 {
   "union": "TpmTypeOptions",
   "data": {
-    "passthrough": "TPMPassthroughOptions"
+    "passthrough": "TPMPassthroughOptions",
+    "emulator": "TPMEmulatorOptions"
   }
 }
 
