@@ -9765,6 +9765,13 @@ type String struct {
 	Str string `json:"str"`
 }
 
+// TPMEmulatorOptions -> TPMEmulatorOptions (struct)
+
+// TPMEmulatorOptions implements the "TPMEmulatorOptions" QMP API type.
+type TPMEmulatorOptions struct {
+	Chardev string `json:"chardev"`
+}
+
 // TPMInfo -> TPMInfo (struct)
 
 // TPMInfo implements the "TPMInfo" QMP API type.
@@ -9863,6 +9870,7 @@ type TPMType int
 // Known values of TPMType.
 const (
 	TPMTypePassthrough TPMType = iota
+	TPMTypeEmulator
 )
 
 // String implements fmt.Stringer.
@@ -9870,6 +9878,8 @@ func (e TPMType) String() string {
 	switch e {
 	case TPMTypePassthrough:
 		return "passthrough"
+	case TPMTypeEmulator:
+		return "emulator"
 	default:
 		return fmt.Sprintf("TPMType(%d)", e)
 	}
@@ -9880,6 +9890,8 @@ func (e TPMType) MarshalJSON() ([]byte, error) {
 	switch e {
 	case TPMTypePassthrough:
 		return json.Marshal("passthrough")
+	case TPMTypeEmulator:
+		return json.Marshal("emulator")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for TPMType", e)
 	}
@@ -9894,6 +9906,8 @@ func (e *TPMType) UnmarshalJSON(bs []byte) error {
 	switch s {
 	case "passthrough":
 		*e = TPMTypePassthrough
+	case "emulator":
+		*e = TPMTypeEmulator
 	default:
 		return fmt.Errorf("unknown enum value %q for TPMType", s)
 	}
@@ -9905,9 +9919,24 @@ func (e *TPMType) UnmarshalJSON(bs []byte) error {
 // TPMTypeOptions implements the "TpmTypeOptions" QMP API type.
 //
 // Can be one of:
+//   - TPMTypeOptionsEmulator
 //   - TPMTypeOptionsPassthrough
 type TPMTypeOptions interface {
 	isTPMTypeOptions()
+}
+
+// TPMTypeOptionsEmulator is an implementation of TPMTypeOptions.
+type TPMTypeOptionsEmulator TPMEmulatorOptions
+
+func (TPMTypeOptionsEmulator) isTPMTypeOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s TPMTypeOptionsEmulator) MarshalJSON() ([]byte, error) {
+	v := map[string]interface{}{
+		"type": "emulator",
+		"data": s,
+	}
+	return json.Marshal(v)
 }
 
 // TPMTypeOptionsPassthrough is an implementation of TPMTypeOptions.
@@ -9933,6 +9962,12 @@ func decodeTPMTypeOptions(bs json.RawMessage) (TPMTypeOptions, error) {
 		return nil, err
 	}
 	switch v.T {
+	case "emulator":
+		var ret TPMTypeOptionsEmulator
+		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
 	case "passthrough":
 		var ret TPMTypeOptionsPassthrough
 		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
