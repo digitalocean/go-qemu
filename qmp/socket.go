@@ -68,6 +68,26 @@ func NewSocketMonitor(network, addr string, timeout time.Duration) (*SocketMonit
 	return mon, nil
 }
 
+// NewListeningSocketMonitor listens for a monitor socket connection from Qemu.
+// An error is returned if the connection fails to accept.
+func NewListeningSocketMonitor(network, addr string) (*SocketMonitor, error) {
+	listener, listenerErr := net.Listen(network, addr)
+	if listenerErr != nil {
+		return nil, listenerErr
+	}
+	c, err := listener.Accept()
+	if err != nil {
+		return nil, err
+	}
+
+	mon := &SocketMonitor{
+		c:         c,
+		listeners: new(int32),
+	}
+
+	return mon, nil
+}
+
 // Disconnect closes the QEMU monitor socket connection.
 func (mon *SocketMonitor) Disconnect() error {
 	atomic.StoreInt32(mon.listeners, 0)
