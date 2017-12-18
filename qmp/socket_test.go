@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
@@ -35,37 +35,48 @@ func TestSocketMonitorConnectDisconnect(t *testing.T) {
 	done()
 }
 
-func TestSocketMonitor_Listen(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "qemu-go.tests.")
-	defer os.Remove(dir)
+func TestSocketMonitorListen(t *testing.T) {
+	dir, err := ioutil.TempDir(os.TempDir(), "go-qemu-test")
 	if err != nil {
 		t.Fatalf("failed to create temporary directory: %v", err)
 	}
-	sock := path.Join(dir, "sock")
+	defer os.RemoveAll(dir)
+
+	sock := filepath.Join(dir, "listener.sock")
+
+	// Fail the test if the socket takes too long to be ready.
+	timer := time.AfterFunc(3*time.Second, func() {
+		panic("took too long to connect to QMP listener")
+	})
+	defer timer.Stop()
+
+	// Ensure that goroutine client stops.
+	var wg sync.WaitGroup
+	wg.Add(1)
 
 	go func() {
-		timer := time.NewTimer(50 * time.Millisecond)
+		defer wg.Done()
 
-		select {
-		case <-timer.C:
+		// Keep waiting for the socket to appear.
+		for {
 			if _, err := os.Stat(sock); err == nil {
-				_, err := net.Dial("unix", sock)
-				if err != nil {
-					t.Fatalf("failed to connect to socket %s: %v", sock, err)
-				}
 				break
 			}
-		case <-time.After(time.Second * 3):
-			t.Fatalf("timed out connecting to socket %s", sock)
-			break
+
+			time.Sleep(100 * time.Millisecond)
 		}
-		timer.Stop()
+
+		// Attempt to dial the socket before the timeout expires.
+		if _, err := net.Dial("unix", sock); err != nil {
+			panic(fmt.Sprintf("failed to dial to listener: %v", err))
+		}
 	}()
 
-	_, err = Listen("unix", sock)
-	if err != nil {
-		t.Fatalf("failed to listen with socket %s: %v", sock, err)
+	if _, err := Listen("unix", sock); err != nil {
+		t.Fatalf("failed to listen with socket %q: %v", sock, err)
 	}
+
+	wg.Wait()
 }
 
 func TestSocketMonitorEvents(t *testing.T) {
