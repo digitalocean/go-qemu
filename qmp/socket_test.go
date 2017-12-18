@@ -19,16 +19,53 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
+	"os"
+	"path"
 	"reflect"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestSocketMonitorConnectDisconnect(t *testing.T) {
 	_, _, done := testSocket(t)
 	done()
+}
+
+func TestSocketMonitor_Listen(t *testing.T) {
+	dir, err := ioutil.TempDir(os.TempDir(), "qemu-go.tests.")
+	defer os.Remove(dir)
+	if err != nil {
+		t.Fatalf("failed to create temporary directory: %v", err)
+	}
+	sock := path.Join(dir, "sock")
+
+	go func() {
+		timer := time.NewTimer(50 * time.Millisecond)
+
+		select {
+		case <-timer.C:
+			if _, err := os.Stat(sock); err == nil {
+				_, err := net.Dial("unix", sock)
+				if err != nil {
+					t.Fatalf("failed to connect to socket %s: %v", sock, err)
+				}
+				break
+			}
+		case <-time.After(time.Second * 3):
+			t.Fatalf("timed out connecting to socket %s", sock)
+			break
+		}
+		timer.Stop()
+	}()
+
+	_, err = Listen("unix", sock)
+	if err != nil {
+		t.Fatalf("failed to listen with socket %s: %v", sock, err)
+	}
 }
 
 func TestSocketMonitorEvents(t *testing.T) {
