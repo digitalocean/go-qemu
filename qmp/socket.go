@@ -68,14 +68,19 @@ func NewSocketMonitor(network, addr string, timeout time.Duration) (*SocketMonit
 	return mon, nil
 }
 
-// NewListeningSocketMonitor listens for a monitor socket connection from Qemu.
-// An error is returned if the connection fails to accept.
-func NewListeningSocketMonitor(network, addr string) (*SocketMonitor, error) {
+// Listen creates a new SocketMonitor by listening to the provided socket file or address.
+// An error is returned if unable to listen at the specified file path or port.
+//
+// Listen willl wait for a QEMU socket connection using a variety connection types:
+//	Listen("unix", "/var/lib/qemu/example.monitor")
+//	Listen("tcp", "0.0.0.0:4444")
+func Listen(network, addr string) (*SocketMonitor, error) {
 	listener, listenerErr := net.Listen(network, addr)
 	if listenerErr != nil {
 		return nil, listenerErr
 	}
 	c, err := listener.Accept()
+	defer listener.Close()
 	if err != nil {
 		return nil, err
 	}
