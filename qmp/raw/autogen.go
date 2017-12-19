@@ -6055,6 +6055,7 @@ type MigrateSetParameters struct {
 	BlockIncremental     *bool     `json:"block-incremental,omitempty"`
 	XMultifdChannels     *int64    `json:"x-multifd-channels,omitempty"`
 	XMultifdPageCount    *int64    `json:"x-multifd-page-count,omitempty"`
+	XbzrleCacheSize      *uint64   `json:"xbzrle-cache-size,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -6073,6 +6074,7 @@ func (s *MigrateSetParameters) UnmarshalJSON(bs []byte) error {
 		BlockIncremental     *bool           `json:"block-incremental,omitempty"`
 		XMultifdChannels     *int64          `json:"x-multifd-channels,omitempty"`
 		XMultifdPageCount    *int64          `json:"x-multifd-page-count,omitempty"`
+		XbzrleCacheSize      *uint64         `json:"xbzrle-cache-size,omitempty"`
 	}{}
 	err := json.Unmarshal(bs, &v)
 	if err != nil {
@@ -6105,6 +6107,7 @@ func (s *MigrateSetParameters) UnmarshalJSON(bs []byte) error {
 	s.BlockIncremental = v.BlockIncremental
 	s.XMultifdChannels = v.XMultifdChannels
 	s.XMultifdPageCount = v.XMultifdPageCount
+	s.XbzrleCacheSize = v.XbzrleCacheSize
 
 	return nil
 }
@@ -6127,6 +6130,7 @@ const (
 	MigrationCapabilityReleaseRAM
 	MigrationCapabilityBlock
 	MigrationCapabilityReturnPath
+	MigrationCapabilityPauseBeforeSwitchover
 	MigrationCapabilityXMultifd
 )
 
@@ -6155,6 +6159,8 @@ func (e MigrationCapability) String() string {
 		return "block"
 	case MigrationCapabilityReturnPath:
 		return "return-path"
+	case MigrationCapabilityPauseBeforeSwitchover:
+		return "pause-before-switchover"
 	case MigrationCapabilityXMultifd:
 		return "x-multifd"
 	default:
@@ -6187,6 +6193,8 @@ func (e MigrationCapability) MarshalJSON() ([]byte, error) {
 		return json.Marshal("block")
 	case MigrationCapabilityReturnPath:
 		return json.Marshal("return-path")
+	case MigrationCapabilityPauseBeforeSwitchover:
+		return json.Marshal("pause-before-switchover")
 	case MigrationCapabilityXMultifd:
 		return json.Marshal("x-multifd")
 	default:
@@ -6223,6 +6231,8 @@ func (e *MigrationCapability) UnmarshalJSON(bs []byte) error {
 		*e = MigrationCapabilityBlock
 	case "return-path":
 		*e = MigrationCapabilityReturnPath
+	case "pause-before-switchover":
+		*e = MigrationCapabilityPauseBeforeSwitchover
 	case "x-multifd":
 		*e = MigrationCapabilityXMultifd
 	default:
@@ -6272,6 +6282,7 @@ type MigrationParameters struct {
 	BlockIncremental     *bool   `json:"block-incremental,omitempty"`
 	XMultifdChannels     *int64  `json:"x-multifd-channels,omitempty"`
 	XMultifdPageCount    *int64  `json:"x-multifd-page-count,omitempty"`
+	XbzrleCacheSize      *uint64 `json:"xbzrle-cache-size,omitempty"`
 }
 
 // MigrationStats -> MigrationStats (struct)
@@ -6308,6 +6319,8 @@ const (
 	MigrationStatusCompleted
 	MigrationStatusFailed
 	MigrationStatusColo
+	MigrationStatusPreSwitchover
+	MigrationStatusDevice
 )
 
 // String implements fmt.Stringer.
@@ -6331,6 +6344,10 @@ func (e MigrationStatus) String() string {
 		return "failed"
 	case MigrationStatusColo:
 		return "colo"
+	case MigrationStatusPreSwitchover:
+		return "pre-switchover"
+	case MigrationStatusDevice:
+		return "device"
 	default:
 		return fmt.Sprintf("MigrationStatus(%d)", e)
 	}
@@ -6357,6 +6374,10 @@ func (e MigrationStatus) MarshalJSON() ([]byte, error) {
 		return json.Marshal("failed")
 	case MigrationStatusColo:
 		return json.Marshal("colo")
+	case MigrationStatusPreSwitchover:
+		return json.Marshal("pre-switchover")
+	case MigrationStatusDevice:
+		return json.Marshal("device")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationStatus", e)
 	}
@@ -6387,6 +6408,10 @@ func (e *MigrationStatus) UnmarshalJSON(bs []byte) error {
 		*e = MigrationStatusFailed
 	case "colo":
 		*e = MigrationStatusColo
+	case "pre-switchover":
+		*e = MigrationStatusPreSwitchover
+	case "device":
+		*e = MigrationStatusDevice
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationStatus", s)
 	}
@@ -12122,6 +12147,29 @@ func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err e
 	return
 }
 
+// migrate-continue -> MigrateContinue (command)
+
+// MigrateContinue implements the "migrate-continue" QMP API call.
+func (m *Monitor) MigrateContinue(state MigrationStatus) (err error) {
+	cmd := struct {
+		State MigrationStatus `json:"state"`
+	}{
+		state,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-continue",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // migrate-incoming -> MigrateIncoming (command)
 
 // MigrateIncoming implements the "migrate-incoming" QMP API call.
@@ -14773,11 +14821,13 @@ func (m *Monitor) XenLoadDevicesState(filename string) (err error) {
 // xen-save-devices-state -> XenSaveDevicesState (command)
 
 // XenSaveDevicesState implements the "xen-save-devices-state" QMP API call.
-func (m *Monitor) XenSaveDevicesState(filename string) (err error) {
+func (m *Monitor) XenSaveDevicesState(filename string, live *bool) (err error) {
 	cmd := struct {
 		Filename string `json:"filename"`
+		Live     *bool  `json:"live,omitempty"`
 	}{
 		filename,
+		live,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "xen-save-devices-state",
