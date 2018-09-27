@@ -147,6 +147,22 @@ func TestSocketMonitor_listenScannerErr(t *testing.T) {
 	}
 }
 
+func TestSocketMonitor_listenUseClosedConnErr(t *testing.T) {
+	mon := &SocketMonitor{listeners: new(int32)}
+
+	errClosedConn := errors.New(useClosedConnErr)
+	r := &errReader{err: errClosedConn}
+
+	events := make(chan Event)
+	stream := make(chan streamResponse)
+
+	go mon.listen(r, events, stream)
+
+	if _, ok := <-stream; ok {
+		t.Fatal("stream channel should be closed")
+	}
+}
+
 func TestSocketMonitor_listenInvalidJSON(t *testing.T) {
 	mon := &SocketMonitor{listeners: new(int32)}
 
