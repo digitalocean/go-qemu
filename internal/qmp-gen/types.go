@@ -475,6 +475,13 @@ func (n name) SimpleType() bool {
 	return ok
 }
 
+func (n name) NullType() bool {
+	if n.SimpleType() {
+		return false
+	}
+	return strings.EqualFold(string(n), "Null")
+}
+
 func (n name) InterfaceType(api map[name]interface{}) bool {
 	if n.SimpleType() {
 		return false
@@ -511,6 +518,7 @@ var upperWords = map[string]bool{
 	"fd":      true,
 	"ftp":     true,
 	"ftps":    true,
+	"guid":    true,
 	"http":    true,
 	"https":   true,
 	"id":      true,
@@ -527,11 +535,13 @@ var upperWords = map[string]bool{
 	"qmp":     true,
 	"ram":     true,
 	"sparc":   true,
+	"ssh":     true,
 	"tcp":     true,
 	"tls":     true,
 	"tpm":     true,
 	"ttl":     true,
 	"udp":     true,
+	"uri":     true,
 	"uuid":    true,
 	"vm":      true,
 	"vmdk":    true,
@@ -576,6 +586,18 @@ func pyToJSON(py []byte) []byte {
 		}
 	}
 	return ret
+}
+
+func tryGetVersionFromSpecPath(specPath string) string {
+	retVersion := "UNKNOWN"
+	verPath, err := resolvePath(specPath, "VERSION")
+	if err == nil {
+		verBuf, err := getQAPI(verPath)
+		if err == nil {
+			return string(verBuf)
+		}
+	}
+	return retVersion
 }
 
 func resolvePath(orig, new string) (string, error) {

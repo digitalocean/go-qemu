@@ -24,8 +24,15 @@ type {{ $basename }} interface {
 {{- range $suffix, $type := .Options }}
   {{ $subname := printf "%s%s" $basename $suffix.Go }}
 
-  // {{ $subname }} is an implementation of {{ $basename }}
-  type {{ $subname }} {{ $type.Go }}
+  {{- if $type.NullType }}
+    // {{ $subname }} is a JSON null type, so it must
+    // also implement the isNullable interface.
+    type {{ $subname }} struct {}
+    func ({{ $subname }}) isNull() bool { return true }
+  {{- else }}
+    // {{ $subname }} is an implementation of {{ $basename }}
+    type {{ $subname }} {{ $type.Go }}
+  {{- end }}
 
   {{- if eq (typeOf (index API $type)) "flatunion" }}
     {{ $u := index API $type }}
@@ -38,6 +45,23 @@ type {{ $basename }} interface {
 {{- end }}
 
 func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
+{{/*
+     Unfortunately, we have to range through the types three times in order
+     for us to do the type discovery via unmarshalling in the correct order
+*/}}
+  {{- range $suffix, $type := .Options }}
+    {{- if $type.NullType }}
+      // Always try unmarshalling for nil first if it's an option
+      // because other types could unmarshal successfully in the case
+      // where a Null json type was provided.
+      var {{ $suffix }} *int
+      if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
+        if {{ $suffix }} == nil {
+          return {{ printf "%s%s" $basename $suffix.Go }}{}, nil
+        }
+      }
+    {{- end }}
+  {{- end }}
   {{- range $suffix, $type := .Options }}
     {{- if $type.SimpleType }}
       var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
@@ -47,22 +71,24 @@ func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
     {{- end }}
   {{- end }}
   {{- range $suffix, $type := .Options }}
-    {{- if not $type.SimpleType }}
-      {{ $subtype := index API $type }}
-      {{- if eq (typeOf $subtype) "flatunion" }}
-        if {{ $suffix }}, err := decode{{ $type.Go }}([]byte(bs)); err == nil {
-          switch impl := {{ $suffix }}.(type) {
-          {{- range $suffix, $type := $subtype.Options }}
-          case {{ $subtype.Name.Go }}{{ $suffix.Go }}:
-            return impl, nil
-          {{- end }}
+    {{- if not $type.NullType }}
+      {{- if not $type.SimpleType }}
+        {{ $subtype := index API $type }}
+        {{- if eq (typeOf $subtype) "flatunion" }}
+          if {{ $suffix }}, err := decode{{ $type.Go }}([]byte(bs)); err == nil {
+            switch impl := {{ $suffix }}.(type) {
+            {{- range $suffix, $type := $subtype.Options }}
+            case {{ $subtype.Name.Go }}{{ $suffix.Go }}:
+              return impl, nil
+            {{- end }}
+            }
           }
-        }
-      {{- else }}
-        var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
-        if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
-          return {{ $suffix }}, nil
-        }
+        {{- else }}
+          var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
+          if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
+            return {{ $suffix }}, nil
+          }
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}

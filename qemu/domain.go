@@ -66,7 +66,7 @@ func (d *Domain) Commands() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// flatten response
 	cmds := make([]string, 0, len(commands))
 	for _, c := range commands {
@@ -344,6 +344,17 @@ func (d *Domain) Version() (string, error) {
 	}
 
 	return response.Return.String(), nil
+}
+
+// PackageVersion returns the domain's QEMU package version, the full build
+// information for QEMU.
+func (d *Domain) PackageVersion() (string, error) {
+	vers, err := d.rm.QueryVersion()
+	if err != nil {
+		return "", err
+	}
+
+	return vers.Package, nil
 }
 
 // Events streams QEMU QMP events.

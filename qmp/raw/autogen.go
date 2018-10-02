@@ -21,6 +21,12 @@ import (
 	"fmt"
 )
 
+// IsNullable is implemented by any
+// JSON null type
+type IsNullable interface {
+	isNull() bool
+}
+
 // ACPIOSTInfo -> ACPIOSTInfo (struct)
 
 // ACPIOSTInfo implements the "ACPIOSTInfo" QMP API type.
@@ -225,6 +231,9 @@ const (
 	BlkdebugEventPwritevZero
 	BlkdebugEventPwritevDone
 	BlkdebugEventEmptyImagePrepare
+	BlkdebugEventL1ShrinkWriteTable
+	BlkdebugEventL1ShrinkFreeL2Clusters
+	BlkdebugEventCorWrite
 )
 
 // String implements fmt.Stringer.
@@ -316,6 +325,12 @@ func (e BlkdebugEvent) String() string {
 		return "pwritev_done"
 	case BlkdebugEventEmptyImagePrepare:
 		return "empty_image_prepare"
+	case BlkdebugEventL1ShrinkWriteTable:
+		return "l1_shrink_write_table"
+	case BlkdebugEventL1ShrinkFreeL2Clusters:
+		return "l1_shrink_free_l2_clusters"
+	case BlkdebugEventCorWrite:
+		return "cor_write"
 	default:
 		return fmt.Sprintf("BlkdebugEvent(%d)", e)
 	}
@@ -410,6 +425,12 @@ func (e BlkdebugEvent) MarshalJSON() ([]byte, error) {
 		return json.Marshal("pwritev_done")
 	case BlkdebugEventEmptyImagePrepare:
 		return json.Marshal("empty_image_prepare")
+	case BlkdebugEventL1ShrinkWriteTable:
+		return json.Marshal("l1_shrink_write_table")
+	case BlkdebugEventL1ShrinkFreeL2Clusters:
+		return json.Marshal("l1_shrink_free_l2_clusters")
+	case BlkdebugEventCorWrite:
+		return json.Marshal("cor_write")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for BlkdebugEvent", e)
 	}
@@ -508,6 +529,12 @@ func (e *BlkdebugEvent) UnmarshalJSON(bs []byte) error {
 		*e = BlkdebugEventPwritevDone
 	case "empty_image_prepare":
 		*e = BlkdebugEventEmptyImagePrepare
+	case "l1_shrink_write_table":
+		*e = BlkdebugEventL1ShrinkWriteTable
+	case "l1_shrink_free_l2_clusters":
+		*e = BlkdebugEventL1ShrinkFreeL2Clusters
+	case "cor_write":
+		*e = BlkdebugEventCorWrite
 	default:
 		return fmt.Errorf("unknown enum value %q for BlkdebugEvent", s)
 	}
@@ -1188,7 +1215,7 @@ const (
 	BlockdevDriverRbd
 	BlockdevDriverReplication
 	BlockdevDriverSheepdog
-	BlockdevDriverSsh
+	BlockdevDriverSSH
 	BlockdevDriverThrottle
 	BlockdevDriverVdi
 	BlockdevDriverVhdx
@@ -1257,7 +1284,7 @@ func (e BlockdevDriver) String() string {
 		return "replication"
 	case BlockdevDriverSheepdog:
 		return "sheepdog"
-	case BlockdevDriverSsh:
+	case BlockdevDriverSSH:
 		return "ssh"
 	case BlockdevDriverThrottle:
 		return "throttle"
@@ -1337,7 +1364,7 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("replication")
 	case BlockdevDriverSheepdog:
 		return json.Marshal("sheepdog")
-	case BlockdevDriverSsh:
+	case BlockdevDriverSSH:
 		return json.Marshal("ssh")
 	case BlockdevDriverThrottle:
 		return json.Marshal("throttle")
@@ -1422,7 +1449,7 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 	case "sheepdog":
 		*e = BlockdevDriverSheepdog
 	case "ssh":
-		*e = BlockdevDriverSsh
+		*e = BlockdevDriverSSH
 	case "throttle":
 		*e = BlockdevDriverThrottle
 	case "vdi":
@@ -1549,7 +1576,7 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsRbd
 //   - BlockdevOptionsReplication
 //   - BlockdevOptionsSheepdog
-//   - BlockdevOptionsSsh
+//   - BlockdevOptionsSSH
 //   - BlockdevOptionsThrottle
 //   - BlockdevOptionsVdi
 //   - BlockdevOptionsVhdx
@@ -1705,6 +1732,7 @@ type BlockdevOptionsFile struct {
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	PrManager    *string                      `json:"pr-manager,omitempty"`
 	Locking      *OnOffAuto                   `json:"locking,omitempty"`
 	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
@@ -1810,6 +1838,7 @@ type BlockdevOptionsHostCdrom struct {
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	PrManager    *string                      `json:"pr-manager,omitempty"`
 	Locking      *OnOffAuto                   `json:"locking,omitempty"`
 	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
@@ -1837,6 +1866,7 @@ type BlockdevOptionsHostDevice struct {
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Filename     string                       `json:"filename"`
+	PrManager    *string                      `json:"pr-manager,omitempty"`
 	Locking      *OnOffAuto                   `json:"locking,omitempty"`
 	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
 }
@@ -2325,8 +2355,8 @@ func (s BlockdevOptionsSheepdog) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// BlockdevOptionsSsh is an implementation of BlockdevOptions.
-type BlockdevOptionsSsh struct {
+// BlockdevOptionsSSH is an implementation of BlockdevOptions.
+type BlockdevOptionsSSH struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
@@ -2338,15 +2368,15 @@ type BlockdevOptionsSsh struct {
 	User         *string                      `json:"user,omitempty"`
 }
 
-func (BlockdevOptionsSsh) isBlockdevOptions() {}
+func (BlockdevOptionsSSH) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
-func (s BlockdevOptionsSsh) MarshalJSON() ([]byte, error) {
+func (s BlockdevOptionsSSH) MarshalJSON() ([]byte, error) {
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsSsh
+		BlockdevOptionsSSH
 	}{
-		BlockdevDriverSsh,
+		BlockdevDriverSSH,
 		s,
 	}
 	return json.Marshal(v)
@@ -2654,8 +2684,8 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsSheepdog
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
-	case BlockdevDriverSsh:
-		var ret BlockdevOptionsSsh
+	case BlockdevDriverSSH:
+		var ret BlockdevOptionsSSH
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverThrottle:
@@ -2946,7 +2976,7 @@ func (BlockdevOptionsRaw) isBlockdevRef()         {}
 func (BlockdevOptionsRbd) isBlockdevRef()         {}
 func (BlockdevOptionsReplication) isBlockdevRef() {}
 func (BlockdevOptionsSheepdog) isBlockdevRef()    {}
-func (BlockdevOptionsSsh) isBlockdevRef()         {}
+func (BlockdevOptionsSSH) isBlockdevRef()         {}
 func (BlockdevOptionsThrottle) isBlockdevRef()    {}
 func (BlockdevOptionsVdi) isBlockdevRef()         {}
 func (BlockdevOptionsVhdx) isBlockdevRef()        {}
@@ -2961,6 +2991,7 @@ type BlockdevRefReference string
 func (BlockdevRefReference) isBlockdevRef() {}
 
 func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
+
 	var reference BlockdevRefReference
 	if err := json.Unmarshal([]byte(bs), &reference); err == nil {
 		return reference, nil
@@ -3024,7 +3055,7 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsSheepdog:
 			return impl, nil
-		case BlockdevOptionsSsh:
+		case BlockdevOptionsSSH:
 			return impl, nil
 		case BlockdevOptionsThrottle:
 			return impl, nil
@@ -3088,7 +3119,7 @@ func (BlockdevOptionsRaw) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsRbd) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsReplication) isBlockdevRefOrNull() {}
 func (BlockdevOptionsSheepdog) isBlockdevRefOrNull()    {}
-func (BlockdevOptionsSsh) isBlockdevRefOrNull()         {}
+func (BlockdevOptionsSSH) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsThrottle) isBlockdevRefOrNull()    {}
 func (BlockdevOptionsVdi) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsVhdx) isBlockdevRefOrNull()        {}
@@ -3097,9 +3128,11 @@ func (BlockdevOptionsVpc) isBlockdevRefOrNull()         {}
 func (BlockdevOptionsVvfat) isBlockdevRefOrNull()       {}
 func (BlockdevOptionsVxhs) isBlockdevRefOrNull()        {}
 
-// BlockdevRefOrNullNull is an implementation of BlockdevRefOrNull
-type BlockdevRefOrNullNull Null
+// BlockdevRefOrNullNull is a JSON null type, so it must
+// also implement the isNullable interface.
+type BlockdevRefOrNullNull struct{}
 
+func (BlockdevRefOrNullNull) isNull() bool         { return true }
 func (BlockdevRefOrNullNull) isBlockdevRefOrNull() {}
 
 // BlockdevRefOrNullReference is an implementation of BlockdevRefOrNull
@@ -3108,6 +3141,16 @@ type BlockdevRefOrNullReference string
 func (BlockdevRefOrNullReference) isBlockdevRefOrNull() {}
 
 func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
+
+	// Always try unmarshalling for nil first if it's an option
+	// because other types could unmarshal successfully in the case
+	// where a Null json type was provided.
+	var null *int
+	if err := json.Unmarshal([]byte(bs), &null); err == nil {
+		if null == nil {
+			return BlockdevRefOrNullNull{}, nil
+		}
+	}
 	var reference BlockdevRefOrNullReference
 	if err := json.Unmarshal([]byte(bs), &reference); err == nil {
 		return reference, nil
@@ -3171,7 +3214,7 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 			return impl, nil
 		case BlockdevOptionsSheepdog:
 			return impl, nil
-		case BlockdevOptionsSsh:
+		case BlockdevOptionsSSH:
 			return impl, nil
 		case BlockdevOptionsThrottle:
 			return impl, nil
@@ -3188,11 +3231,6 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 		case BlockdevOptionsVxhs:
 			return impl, nil
 		}
-	}
-
-	var null BlockdevRefOrNullNull
-	if err := json.Unmarshal([]byte(bs), &null); err == nil {
-		return null, nil
 	}
 	return nil, fmt.Errorf("unable to decode %q as a BlockdevRefOrNull", string(bs))
 }
@@ -4901,11 +4939,11 @@ func (e *GuestPanicInformationType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// GuidInfo -> GuidInfo (struct)
+// GuidInfo -> GUIDInfo (struct)
 
-// GuidInfo implements the "GuidInfo" QMP API type.
-type GuidInfo struct {
-	Guid string `json:"guid"`
+// GUIDInfo implements the "GuidInfo" QMP API type.
+type GUIDInfo struct {
+	GUID string `json:"guid"`
 }
 
 // HostMemPolicy -> HostMemPolicy (enum)
@@ -6015,6 +6053,9 @@ type MigrateSetParameters struct {
 	DowntimeLimit        *int64    `json:"downtime-limit,omitempty"`
 	XCheckpointDelay     *int64    `json:"x-checkpoint-delay,omitempty"`
 	BlockIncremental     *bool     `json:"block-incremental,omitempty"`
+	XMultifdChannels     *int64    `json:"x-multifd-channels,omitempty"`
+	XMultifdPageCount    *int64    `json:"x-multifd-page-count,omitempty"`
+	XbzrleCacheSize      *uint64   `json:"xbzrle-cache-size,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -6031,6 +6072,9 @@ func (s *MigrateSetParameters) UnmarshalJSON(bs []byte) error {
 		DowntimeLimit        *int64          `json:"downtime-limit,omitempty"`
 		XCheckpointDelay     *int64          `json:"x-checkpoint-delay,omitempty"`
 		BlockIncremental     *bool           `json:"block-incremental,omitempty"`
+		XMultifdChannels     *int64          `json:"x-multifd-channels,omitempty"`
+		XMultifdPageCount    *int64          `json:"x-multifd-page-count,omitempty"`
+		XbzrleCacheSize      *uint64         `json:"xbzrle-cache-size,omitempty"`
 	}{}
 	err := json.Unmarshal(bs, &v)
 	if err != nil {
@@ -6061,6 +6105,9 @@ func (s *MigrateSetParameters) UnmarshalJSON(bs []byte) error {
 	s.DowntimeLimit = v.DowntimeLimit
 	s.XCheckpointDelay = v.XCheckpointDelay
 	s.BlockIncremental = v.BlockIncremental
+	s.XMultifdChannels = v.XMultifdChannels
+	s.XMultifdPageCount = v.XMultifdPageCount
+	s.XbzrleCacheSize = v.XbzrleCacheSize
 
 	return nil
 }
@@ -6083,6 +6130,8 @@ const (
 	MigrationCapabilityReleaseRAM
 	MigrationCapabilityBlock
 	MigrationCapabilityReturnPath
+	MigrationCapabilityPauseBeforeSwitchover
+	MigrationCapabilityXMultifd
 )
 
 // String implements fmt.Stringer.
@@ -6110,6 +6159,10 @@ func (e MigrationCapability) String() string {
 		return "block"
 	case MigrationCapabilityReturnPath:
 		return "return-path"
+	case MigrationCapabilityPauseBeforeSwitchover:
+		return "pause-before-switchover"
+	case MigrationCapabilityXMultifd:
+		return "x-multifd"
 	default:
 		return fmt.Sprintf("MigrationCapability(%d)", e)
 	}
@@ -6140,6 +6193,10 @@ func (e MigrationCapability) MarshalJSON() ([]byte, error) {
 		return json.Marshal("block")
 	case MigrationCapabilityReturnPath:
 		return json.Marshal("return-path")
+	case MigrationCapabilityPauseBeforeSwitchover:
+		return json.Marshal("pause-before-switchover")
+	case MigrationCapabilityXMultifd:
+		return json.Marshal("x-multifd")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationCapability", e)
 	}
@@ -6174,6 +6231,10 @@ func (e *MigrationCapability) UnmarshalJSON(bs []byte) error {
 		*e = MigrationCapabilityBlock
 	case "return-path":
 		*e = MigrationCapabilityReturnPath
+	case "pause-before-switchover":
+		*e = MigrationCapabilityPauseBeforeSwitchover
+	case "x-multifd":
+		*e = MigrationCapabilityXMultifd
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationCapability", s)
 	}
@@ -6219,6 +6280,9 @@ type MigrationParameters struct {
 	DowntimeLimit        *int64  `json:"downtime-limit,omitempty"`
 	XCheckpointDelay     *int64  `json:"x-checkpoint-delay,omitempty"`
 	BlockIncremental     *bool   `json:"block-incremental,omitempty"`
+	XMultifdChannels     *int64  `json:"x-multifd-channels,omitempty"`
+	XMultifdPageCount    *int64  `json:"x-multifd-page-count,omitempty"`
+	XbzrleCacheSize      *uint64 `json:"xbzrle-cache-size,omitempty"`
 }
 
 // MigrationStats -> MigrationStats (struct)
@@ -6255,6 +6319,8 @@ const (
 	MigrationStatusCompleted
 	MigrationStatusFailed
 	MigrationStatusColo
+	MigrationStatusPreSwitchover
+	MigrationStatusDevice
 )
 
 // String implements fmt.Stringer.
@@ -6278,6 +6344,10 @@ func (e MigrationStatus) String() string {
 		return "failed"
 	case MigrationStatusColo:
 		return "colo"
+	case MigrationStatusPreSwitchover:
+		return "pre-switchover"
+	case MigrationStatusDevice:
+		return "device"
 	default:
 		return fmt.Sprintf("MigrationStatus(%d)", e)
 	}
@@ -6304,6 +6374,10 @@ func (e MigrationStatus) MarshalJSON() ([]byte, error) {
 		return json.Marshal("failed")
 	case MigrationStatusColo:
 		return json.Marshal("colo")
+	case MigrationStatusPreSwitchover:
+		return json.Marshal("pre-switchover")
+	case MigrationStatusDevice:
+		return json.Marshal("device")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationStatus", e)
 	}
@@ -6334,6 +6408,10 @@ func (e *MigrationStatus) UnmarshalJSON(bs []byte) error {
 		*e = MigrationStatusFailed
 	case "colo":
 		*e = MigrationStatusColo
+	case "pre-switchover":
+		*e = MigrationStatusPreSwitchover
+	case "device":
+		*e = MigrationStatusDevice
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationStatus", s)
 	}
@@ -9675,9 +9753,11 @@ type StrOrNull interface {
 	isStrOrNull()
 }
 
-// StrOrNullN is an implementation of StrOrNull
-type StrOrNullN Null
+// StrOrNullN is a JSON null type, so it must
+// also implement the isNullable interface.
+type StrOrNullN struct{}
 
+func (StrOrNullN) isNull() bool { return true }
 func (StrOrNullN) isStrOrNull() {}
 
 // StrOrNullS is an implementation of StrOrNull
@@ -9686,14 +9766,19 @@ type StrOrNullS string
 func (StrOrNullS) isStrOrNull() {}
 
 func decodeStrOrNull(bs json.RawMessage) (StrOrNull, error) {
+
+	// Always try unmarshalling for nil first if it's an option
+	// because other types could unmarshal successfully in the case
+	// where a Null json type was provided.
+	var n *int
+	if err := json.Unmarshal([]byte(bs), &n); err == nil {
+		if n == nil {
+			return StrOrNullN{}, nil
+		}
+	}
 	var s StrOrNullS
 	if err := json.Unmarshal([]byte(bs), &s); err == nil {
 		return s, nil
-	}
-
-	var n StrOrNullN
-	if err := json.Unmarshal([]byte(bs), &n); err == nil {
-		return n, nil
 	}
 	return nil, fmt.Errorf("unable to decode %q as a StrOrNull", string(bs))
 }
@@ -9703,6 +9788,13 @@ func decodeStrOrNull(bs json.RawMessage) (StrOrNull, error) {
 // String implements the "String" QMP API type.
 type String struct {
 	Str string `json:"str"`
+}
+
+// TPMEmulatorOptions -> TPMEmulatorOptions (struct)
+
+// TPMEmulatorOptions implements the "TPMEmulatorOptions" QMP API type.
+type TPMEmulatorOptions struct {
+	Chardev string `json:"chardev"`
 }
 
 // TPMInfo -> TPMInfo (struct)
@@ -9803,6 +9895,7 @@ type TPMType int
 // Known values of TPMType.
 const (
 	TPMTypePassthrough TPMType = iota
+	TPMTypeEmulator
 )
 
 // String implements fmt.Stringer.
@@ -9810,6 +9903,8 @@ func (e TPMType) String() string {
 	switch e {
 	case TPMTypePassthrough:
 		return "passthrough"
+	case TPMTypeEmulator:
+		return "emulator"
 	default:
 		return fmt.Sprintf("TPMType(%d)", e)
 	}
@@ -9820,6 +9915,8 @@ func (e TPMType) MarshalJSON() ([]byte, error) {
 	switch e {
 	case TPMTypePassthrough:
 		return json.Marshal("passthrough")
+	case TPMTypeEmulator:
+		return json.Marshal("emulator")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for TPMType", e)
 	}
@@ -9834,6 +9931,8 @@ func (e *TPMType) UnmarshalJSON(bs []byte) error {
 	switch s {
 	case "passthrough":
 		*e = TPMTypePassthrough
+	case "emulator":
+		*e = TPMTypeEmulator
 	default:
 		return fmt.Errorf("unknown enum value %q for TPMType", s)
 	}
@@ -9845,9 +9944,24 @@ func (e *TPMType) UnmarshalJSON(bs []byte) error {
 // TPMTypeOptions implements the "TpmTypeOptions" QMP API type.
 //
 // Can be one of:
+//   - TPMTypeOptionsEmulator
 //   - TPMTypeOptionsPassthrough
 type TPMTypeOptions interface {
 	isTPMTypeOptions()
+}
+
+// TPMTypeOptionsEmulator is an implementation of TPMTypeOptions.
+type TPMTypeOptionsEmulator TPMEmulatorOptions
+
+func (TPMTypeOptionsEmulator) isTPMTypeOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s TPMTypeOptionsEmulator) MarshalJSON() ([]byte, error) {
+	v := map[string]interface{}{
+		"type": "emulator",
+		"data": s,
+	}
+	return json.Marshal(v)
 }
 
 // TPMTypeOptionsPassthrough is an implementation of TPMTypeOptions.
@@ -9873,6 +9987,12 @@ func decodeTPMTypeOptions(bs json.RawMessage) (TPMTypeOptions, error) {
 		return nil, err
 	}
 	switch v.T {
+	case "emulator":
+		var ret TPMTypeOptionsEmulator
+		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
 	case "passthrough":
 		var ret TPMTypeOptionsPassthrough
 		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
@@ -10472,89 +10592,89 @@ type VsockSocketAddress struct {
 
 // EVENT WATCHDOG
 
-// WatchdogExpirationAction -> WatchdogExpirationAction (enum)
+// WatchdogAction -> WatchdogAction (enum)
 
-// WatchdogExpirationAction implements the "WatchdogExpirationAction" QMP API type.
-type WatchdogExpirationAction int
+// WatchdogAction implements the "WatchdogAction" QMP API type.
+type WatchdogAction int
 
-// Known values of WatchdogExpirationAction.
+// Known values of WatchdogAction.
 const (
-	WatchdogExpirationActionReset WatchdogExpirationAction = iota
-	WatchdogExpirationActionShutdown
-	WatchdogExpirationActionPoweroff
-	WatchdogExpirationActionPause
-	WatchdogExpirationActionDebug
-	WatchdogExpirationActionNone
-	WatchdogExpirationActionInjectNmi
+	WatchdogActionReset WatchdogAction = iota
+	WatchdogActionShutdown
+	WatchdogActionPoweroff
+	WatchdogActionPause
+	WatchdogActionDebug
+	WatchdogActionNone
+	WatchdogActionInjectNmi
 )
 
 // String implements fmt.Stringer.
-func (e WatchdogExpirationAction) String() string {
+func (e WatchdogAction) String() string {
 	switch e {
-	case WatchdogExpirationActionReset:
+	case WatchdogActionReset:
 		return "reset"
-	case WatchdogExpirationActionShutdown:
+	case WatchdogActionShutdown:
 		return "shutdown"
-	case WatchdogExpirationActionPoweroff:
+	case WatchdogActionPoweroff:
 		return "poweroff"
-	case WatchdogExpirationActionPause:
+	case WatchdogActionPause:
 		return "pause"
-	case WatchdogExpirationActionDebug:
+	case WatchdogActionDebug:
 		return "debug"
-	case WatchdogExpirationActionNone:
+	case WatchdogActionNone:
 		return "none"
-	case WatchdogExpirationActionInjectNmi:
+	case WatchdogActionInjectNmi:
 		return "inject-nmi"
 	default:
-		return fmt.Sprintf("WatchdogExpirationAction(%d)", e)
+		return fmt.Sprintf("WatchdogAction(%d)", e)
 	}
 }
 
 // MarshalJSON implements json.Marshaler.
-func (e WatchdogExpirationAction) MarshalJSON() ([]byte, error) {
+func (e WatchdogAction) MarshalJSON() ([]byte, error) {
 	switch e {
-	case WatchdogExpirationActionReset:
+	case WatchdogActionReset:
 		return json.Marshal("reset")
-	case WatchdogExpirationActionShutdown:
+	case WatchdogActionShutdown:
 		return json.Marshal("shutdown")
-	case WatchdogExpirationActionPoweroff:
+	case WatchdogActionPoweroff:
 		return json.Marshal("poweroff")
-	case WatchdogExpirationActionPause:
+	case WatchdogActionPause:
 		return json.Marshal("pause")
-	case WatchdogExpirationActionDebug:
+	case WatchdogActionDebug:
 		return json.Marshal("debug")
-	case WatchdogExpirationActionNone:
+	case WatchdogActionNone:
 		return json.Marshal("none")
-	case WatchdogExpirationActionInjectNmi:
+	case WatchdogActionInjectNmi:
 		return json.Marshal("inject-nmi")
 	default:
-		return nil, fmt.Errorf("unknown enum value %q for WatchdogExpirationAction", e)
+		return nil, fmt.Errorf("unknown enum value %q for WatchdogAction", e)
 	}
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (e *WatchdogExpirationAction) UnmarshalJSON(bs []byte) error {
+func (e *WatchdogAction) UnmarshalJSON(bs []byte) error {
 	var s string
 	if err := json.Unmarshal(bs, &s); err != nil {
 		return err
 	}
 	switch s {
 	case "reset":
-		*e = WatchdogExpirationActionReset
+		*e = WatchdogActionReset
 	case "shutdown":
-		*e = WatchdogExpirationActionShutdown
+		*e = WatchdogActionShutdown
 	case "poweroff":
-		*e = WatchdogExpirationActionPoweroff
+		*e = WatchdogActionPoweroff
 	case "pause":
-		*e = WatchdogExpirationActionPause
+		*e = WatchdogActionPause
 	case "debug":
-		*e = WatchdogExpirationActionDebug
+		*e = WatchdogActionDebug
 	case "none":
-		*e = WatchdogExpirationActionNone
+		*e = WatchdogActionNone
 	case "inject-nmi":
-		*e = WatchdogExpirationActionInjectNmi
+		*e = WatchdogActionInjectNmi
 	default:
-		return fmt.Errorf("unknown enum value %q for WatchdogExpirationAction", s)
+		return fmt.Errorf("unknown enum value %q for WatchdogAction", s)
 	}
 	return nil
 }
@@ -12003,7 +12123,7 @@ func (m *Monitor) Memsave(val int64, size int64, filename string, cpuIndex *int6
 // Migrate implements the "migrate" QMP API call.
 func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err error) {
 	cmd := struct {
-		Uri    string `json:"uri"`
+		URI    string `json:"uri"`
 		Blk    *bool  `json:"blk,omitempty"`
 		Inc    *bool  `json:"inc,omitempty"`
 		Detach *bool  `json:"detach,omitempty"`
@@ -12027,12 +12147,35 @@ func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err e
 	return
 }
 
+// migrate-continue -> MigrateContinue (command)
+
+// MigrateContinue implements the "migrate-continue" QMP API call.
+func (m *Monitor) MigrateContinue(state MigrationStatus) (err error) {
+	cmd := struct {
+		State MigrationStatus `json:"state"`
+	}{
+		state,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-continue",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // migrate-incoming -> MigrateIncoming (command)
 
 // MigrateIncoming implements the "migrate-incoming" QMP API call.
 func (m *Monitor) MigrateIncoming(uri string) (err error) {
 	cmd := struct {
-		Uri string `json:"uri"`
+		URI string `json:"uri"`
 	}{
 		uri,
 	}
@@ -14001,7 +14144,7 @@ func (m *Monitor) QueryVersion() (ret VersionInfo, err error) {
 // query-vm-generation-id -> QueryVMGenerationID (command)
 
 // QueryVMGenerationID implements the "query-vm-generation-id" QMP API call.
-func (m *Monitor) QueryVMGenerationID() (ret GuidInfo, err error) {
+func (m *Monitor) QueryVMGenerationID() (ret GUIDInfo, err error) {
 	cmd := struct {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -14510,6 +14653,29 @@ func (m *Monitor) Transaction(actions []TransactionAction, properties *Transacti
 	return
 }
 
+// watchdog-set-action -> WatchdogSetAction (command)
+
+// WatchdogSetAction implements the "watchdog-set-action" QMP API call.
+func (m *Monitor) WatchdogSetAction(action WatchdogAction) (err error) {
+	cmd := struct {
+		Action WatchdogAction `json:"action"`
+	}{
+		action,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "watchdog-set-action",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // x-blockdev-change -> XBlockdevChange (command)
 
 // XBlockdevChange implements the "x-blockdev-change" QMP API call.
@@ -14655,11 +14821,13 @@ func (m *Monitor) XenLoadDevicesState(filename string) (err error) {
 // xen-save-devices-state -> XenSaveDevicesState (command)
 
 // XenSaveDevicesState implements the "xen-save-devices-state" QMP API call.
-func (m *Monitor) XenSaveDevicesState(filename string) (err error) {
+func (m *Monitor) XenSaveDevicesState(filename string, live *bool) (err error) {
 	cmd := struct {
 		Filename string `json:"filename"`
+		Live     *bool  `json:"live,omitempty"`
 	}{
 		filename,
+		live,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "xen-save-devices-state",

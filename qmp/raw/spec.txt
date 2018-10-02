@@ -1,3 +1,7 @@
+
+##QEMU SPECIFICATION VERSION:  2.11.50
+
+
 # Whitelists to permit QAPI rule violations; think twice before you
 # add to them!
 {
@@ -742,12 +746,12 @@
 {
   "event": "WATCHDOG",
   "data": {
-    "action": "WatchdogExpirationAction"
+    "action": "WatchdogAction"
   }
 }
 
 ##
-# @WatchdogExpirationAction:
+# @WatchdogAction:
 #
 # An enumeration of the actions taken when the watchdog device's timer is
 # expired
@@ -771,7 +775,7 @@
 # Since: 2.1
 ##
 {
-  "enum": "WatchdogExpirationAction",
+  "enum": "WatchdogAction",
   "data": [
     "reset",
     "shutdown",
@@ -4456,6 +4460,12 @@
 # BLOCK_JOB_CANCELLED event.  Before that happens the job is still visible when
 # enumerated using query-block-jobs.
 #
+# Note that if you issue 'block-job-cancel' after 'drive-mirror' has indicated
+# (via the event BLOCK_JOB_READY) that the source and destination are
+# synchronized, then the event triggered by this command changes to
+# BLOCK_JOB_COMPLETED, to indicate that the mirroring has ended and the
+# destination now has a point-in-time copy tied to the time of the cancellation.
+#
 # For streaming, the image file retains its backing file unless the streaming
 # operation happens to complete just as it is being cancelled.  A new streaming
 # operation can be started at a later time to finish copying all data from the
@@ -4707,6 +4717,9 @@
 # Driver specific block device options for the file backend.
 #
 # @filename:    path to the image file
+# @pr-manager:  the id for the object that will handle persistent reservations
+#               for this device (default: none, forward the commands via SG_IO;
+#               since 2.11)
 # @aio:         AIO backend (default: threads) (since: 2.8)
 # @locking:     whether to enable file locking. If set to 'auto', only enable
 #               when Open File Descriptor (OFD) locking API is available
@@ -4718,6 +4731,7 @@
   "struct": "BlockdevOptionsFile",
   "data": {
     "filename": "str",
+    "*pr-manager": "str",
     "*locking": "OnOffAuto",
     "*aio": "BlockdevAioOptions"
   }
@@ -5069,6 +5083,13 @@
 #
 # Trigger events supported by blkdebug.
 #
+# @l1_shrink_write_table:      write zeros to the l1 table to shrink image.
+#                              (since 2.11)
+#
+# @l1_shrink_free_l2_clusters: discard the l2 tables. (since 2.11)
+#
+# @cor_write: a write due to copy-on-read (since 2.11)
+#
 # Since: 2.9
 ##
 {
@@ -5117,7 +5138,10 @@
     "pwritev",
     "pwritev_zero",
     "pwritev_done",
-    "empty_image_prepare"
+    "empty_image_prepare",
+    "l1_shrink_write_table",
+    "l1_shrink_free_l2_clusters",
+    "cor_write"
   ]
 }
 
@@ -5819,8 +5843,11 @@
 #                 This option is required on the top level of blockdev-add.
 # @discard:       discard-related options (default: ignore)
 # @cache:         cache-related options
-# @read-only:     whether the block device should be read-only
-#                 (default: false)
+# @read-only:     whether the block device should be read-only (default: false).
+#                 Note that some block drivers support only read-only access,
+#                 either generally or in certain configurations. In this case,
+#                 the default value does not work and the option must be
+#                 specified explicitly.
 # @detect-zeroes: detect and optimize zero writes (Since 2.1)
 #                 (default: off)
 # @force-share:   force share all permission on added nodes.
@@ -9495,13 +9522,16 @@
 # An enumeration of TPM types
 #
 # @passthrough: TPM passthrough type
+# @emulator: Software Emulator TPM type
+#            Since: 2.11
 #
 # Since: 1.5
 ##
 {
   "enum": "TpmType",
   "data": [
-    "passthrough"
+    "passthrough",
+    "emulator"
   ]
 }
 
@@ -9517,7 +9547,7 @@
 # Example:
 #
 # -> { "execute": "query-tpm-types" }
-# <- { "return": [ "passthrough" ] }
+# <- { "return": [ "passthrough", "emulator" ] }
 #
 ##
 {
@@ -9548,18 +9578,36 @@
 }
 
 ##
+# @TPMEmulatorOptions:
+#
+# Information about the TPM emulator type
+#
+# @chardev: Name of a unix socket chardev
+#
+# Since: 2.11
+##
+{
+  "struct": "TPMEmulatorOptions",
+  "data": {
+    "chardev": "str"
+  }
+}
+
+##
 # @TpmTypeOptions:
 #
 # A union referencing different TPM backend types' configuration options
 #
 # @type: 'passthrough' The configuration options for the TPM passthrough type
+#        'emulator' The configuration options for TPM emulator backend type
 #
 # Since: 1.5
 ##
 {
   "union": "TpmTypeOptions",
   "data": {
-    "passthrough": "TPMPassthroughOptions"
+    "passthrough": "TPMPassthroughOptions",
+    "emulator": "TPMEmulatorOptions"
   }
 }
 
@@ -10800,6 +10848,13 @@
 # @ac_bookmarks: since 2.10
 # altgr, altgr_r: dropped in 2.10
 #
+# 'sysrq' was mistakenly added to hack around the fact that
+# the ps2 driver was not generating correct scancodes sequences
+# when 'alt+print' was pressed. This flaw is now fixed and the
+# 'sysrq' key serves no further purpose. Any further use of
+# 'sysrq' will be transparently changed to 'print', so they
+# are effectively synonyms.
+#
 # Since: 1.3.0
 #
 ##
@@ -11438,6 +11493,11 @@
 # @colo: VM is in the process of fault tolerance, VM can not get into this
 #        state unless colo capability is enabled for migration. (since 2.8)
 #
+# @pre-switchover: Paused before device serialisation. (since 2.11)
+#
+# @device: During device serialisation when pause-before-switchover is enabled
+#        (since 2.11)
+#
 # Since: 2.3
 #
 ##
@@ -11452,7 +11512,9 @@
     "postcopy-active",
     "completed",
     "failed",
-    "colo"
+    "colo",
+    "pre-switchover",
+    "device"
   ]
 }
 
@@ -11702,6 +11764,11 @@
 # @return-path: If enabled, migration will use the return path even
 #               for precopy. (since 2.10)
 #
+# @pause-before-switchover: Pause outgoing migration before serialising device
+#          state and before disabling block IO (since 2.11)
+#
+# @x-multifd: Use more than one fd for migration (since 2.11)
+#
 # Since: 1.2
 ##
 {
@@ -11717,7 +11784,9 @@
     "x-colo",
     "release-ram",
     "block",
-    "return-path"
+    "return-path",
+    "pause-before-switchover",
+    "x-multifd"
   ]
 }
 
@@ -11853,6 +11922,19 @@
 # 	migrated and the destination must already have access to the
 # 	same backing chain as was used on the source.  (since 2.10)
 #
+# @x-multifd-channels: Number of channels used to migrate data in
+#                     parallel. This is the same number that the
+#                     number of sockets used for migration.  The
+#                     default value is 2 (since 2.11)
+#
+# @x-multifd-page-count: Number of pages sent together to a thread.
+#                        The default value is 16 (since 2.11)
+#
+# @xbzrle-cache-size: cache size to be used by XBZRLE migration.  It
+#                     needs to be a multiple of the target page size
+#                     and a power of 2
+#                     (Since 2.11)
+#
 # Since: 2.4
 ##
 {
@@ -11868,7 +11950,10 @@
     "max-bandwidth",
     "downtime-limit",
     "x-checkpoint-delay",
-    "block-incremental"
+    "block-incremental",
+    "x-multifd-channels",
+    "x-multifd-page-count",
+    "xbzrle-cache-size"
   ]
 }
 
@@ -11926,6 +12011,18 @@
 # 	migrated and the destination must already have access to the
 # 	same backing chain as was used on the source.  (since 2.10)
 #
+# @x-multifd-channels: Number of channels used to migrate data in
+#                     parallel. This is the same number that the
+#                     number of sockets used for migration.  The
+#                     default value is 2 (since 2.11)
+#
+# @x-multifd-page-count: Number of pages sent together to a thread.
+#                        The default value is 16 (since 2.11)
+#
+# @xbzrle-cache-size: cache size to be used by XBZRLE migration.  It
+#                     needs to be a multiple of the target page size
+#                     and a power of 2
+#                     (Since 2.11)
 # Since: 2.4
 ##
 # TODO either fuse back into MigrationParameters, or make
@@ -11943,7 +12040,10 @@
     "*max-bandwidth": "int",
     "*downtime-limit": "int",
     "*x-checkpoint-delay": "int",
-    "*block-incremental": "bool"
+    "*block-incremental": "bool",
+    "*x-multifd-channels": "int",
+    "*x-multifd-page-count": "int",
+    "*xbzrle-cache-size": "size"
   }
 }
 
@@ -12019,6 +12119,18 @@
 # 	migrated and the destination must already have access to the
 # 	same backing chain as was used on the source.  (since 2.10)
 #
+# @x-multifd-channels: Number of channels used to migrate data in
+#                     parallel. This is the same number that the
+#                     number of sockets used for migration.
+#                     The default value is 2 (since 2.11)
+#
+# @x-multifd-page-count: Number of pages sent together to a thread.
+#                        The default value is 16 (since 2.11)
+#
+# @xbzrle-cache-size: cache size to be used by XBZRLE migration.  It
+#                     needs to be a multiple of the target page size
+#                     and a power of 2
+#                     (Since 2.11)
 # Since: 2.4
 ##
 {
@@ -12034,7 +12146,10 @@
     "*max-bandwidth": "int",
     "*downtime-limit": "int",
     "*x-checkpoint-delay": "int",
-    "*block-incremental": "bool"
+    "*block-incremental": "bool",
+    "*x-multifd-channels": "int",
+    "*x-multifd-page-count": "int",
+    "*xbzrle-cache-size": "size"
   }
 }
 
@@ -12293,6 +12408,14 @@
 }
 
 ##
+{
+  "command": "migrate-continue",
+  "data": {
+    "state": "MigrationStatus"
+  }
+}
+
+##
 # @migrate_set_downtime:
 #
 # Set maximum tolerated downtime for migration.
@@ -12356,6 +12479,8 @@
 #
 # Returns: nothing on success
 #
+# Notes: This command is deprecated in favor of 'migrate-set-parameters'
+#
 # Since: 1.2
 #
 # Example:
@@ -12378,6 +12503,8 @@
 # Query migration XBZRLE cache size
 #
 # Returns: XBZRLE cache size in bytes
+#
+# Notes: This command is deprecated in favor of 'query-migrate-parameters'
 #
 # Since: 1.2
 #
@@ -12484,6 +12611,9 @@
 # data. See xen-save-devices-state.txt for a description of the binary
 # format.
 #
+# @live: Optional argument to ask QEMU to treat this command as part of a live
+# migration. Default to true. (since 2.11)
+#
 # Returns: Nothing on success
 #
 # Since: 1.1
@@ -12498,7 +12628,8 @@
 {
   "command": "xen-save-devices-state",
   "data": {
-    "filename": "str"
+    "filename": "str",
+    "*live": "bool"
   }
 }
 
@@ -15762,6 +15893,12 @@
 # BLOCK_JOB_CANCELLED event.  Before that happens the job is still visible when
 # enumerated using query-block-jobs.
 #
+# Note that if you issue 'block-job-cancel' after 'drive-mirror' has indicated
+# (via the event BLOCK_JOB_READY) that the source and destination are
+# synchronized, then the event triggered by this command changes to
+# BLOCK_JOB_COMPLETED, to indicate that the mirroring has ended and the
+# destination now has a point-in-time copy tied to the time of the cancellation.
+#
 # For streaming, the image file retains its backing file unless the streaming
 # operation happens to complete just as it is being cancelled.  A new streaming
 # operation can be started at a later time to finish copying all data from the
@@ -16013,6 +16150,9 @@
 # Driver specific block device options for the file backend.
 #
 # @filename:    path to the image file
+# @pr-manager:  the id for the object that will handle persistent reservations
+#               for this device (default: none, forward the commands via SG_IO;
+#               since 2.11)
 # @aio:         AIO backend (default: threads) (since: 2.8)
 # @locking:     whether to enable file locking. If set to 'auto', only enable
 #               when Open File Descriptor (OFD) locking API is available
@@ -16024,6 +16164,7 @@
   "struct": "BlockdevOptionsFile",
   "data": {
     "filename": "str",
+    "*pr-manager": "str",
     "*locking": "OnOffAuto",
     "*aio": "BlockdevAioOptions"
   }
@@ -16375,6 +16516,13 @@
 #
 # Trigger events supported by blkdebug.
 #
+# @l1_shrink_write_table:      write zeros to the l1 table to shrink image.
+#                              (since 2.11)
+#
+# @l1_shrink_free_l2_clusters: discard the l2 tables. (since 2.11)
+#
+# @cor_write: a write due to copy-on-read (since 2.11)
+#
 # Since: 2.9
 ##
 {
@@ -16423,7 +16571,10 @@
     "pwritev",
     "pwritev_zero",
     "pwritev_done",
-    "empty_image_prepare"
+    "empty_image_prepare",
+    "l1_shrink_write_table",
+    "l1_shrink_free_l2_clusters",
+    "cor_write"
   ]
 }
 
@@ -17125,8 +17276,11 @@
 #                 This option is required on the top level of blockdev-add.
 # @discard:       discard-related options (default: ignore)
 # @cache:         cache-related options
-# @read-only:     whether the block device should be read-only
-#                 (default: false)
+# @read-only:     whether the block device should be read-only (default: false).
+#                 Note that some block drivers support only read-only access,
+#                 either generally or in certain configurations. In this case,
+#                 the default value does not work and the option must be
+#                 specified explicitly.
 # @detect-zeroes: detect and optimize zero writes (Since 2.1)
 #                 (default: off)
 # @force-share:   force share all permission on added nodes.
@@ -22758,6 +22912,22 @@
 #      }
 #    ]}
 #
+# For s390x-virtio-ccw machine type started with -smp 1,maxcpus=2 -cpu qemu
+# (Since: 2.11):
+#
+# -> { "execute": "query-hotpluggable-cpus" }
+# <- {"return": [
+#      {
+#         "type": "qemu-s390x-cpu", "vcpus-count": 1,
+#         "props": { "core-id": 1 }
+#      },
+#      {
+#         "qom-path": "/machine/unattached/device[0]",
+#         "type": "qemu-s390x-cpu", "vcpus-count": 1,
+#         "props": { "core-id": 0 }
+#      }
+#    ]}
+#
 ##
 {
   "command": "query-hotpluggable-cpus",
@@ -22792,6 +22962,20 @@
 {
   "command": "query-vm-generation-id",
   "returns": "GuidInfo"
+}
+
+##
+# @watchdog-set-action:
+#
+# Set watchdog action
+#
+# Since: 2.11
+##
+{
+  "command": "watchdog-set-action",
+  "data": {
+    "action": "WatchdogAction"
+  }
 }
 
 
