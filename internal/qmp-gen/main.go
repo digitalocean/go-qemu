@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 )
 
-const specURL = `https://raw.githubusercontent.com/qemu/qemu/master/qapi-schema.json`
+const specURL = `https://raw.githubusercontent.com/qemu/qemu/stable-2.11/qapi-schema.json`
 
 var (
 	inputSpec  = flag.String("input", specURL, "Input spec")
