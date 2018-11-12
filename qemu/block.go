@@ -225,21 +225,25 @@ func (bd BlockDevice) Snapshot(d *Domain, overlay string) error {
 // waitForSignal opens a domain's QMP event stream and invokes an input
 // closure to send commands which would create results on that event stream.
 func waitForSignal(d *Domain, signal string, timeout time.Duration, fn func() error) error {
-	// "done" signal must be sent in both the error and non-error case, to
-	// avoid leaking goroutines.
+	// "done" signal must always be sent to avoid leaking goroutines.
 	events, done, err := d.Events()
 	if err != nil {
 		return err
 	}
+	defer func() { done <- struct{}{} }()
 
-	if err = fn(); err != nil {
-		done <- struct{}{}
+	// start listening for events prior to command execution. QMP events
+	// may emit before the command returns.
+	jobErr := make(chan error)
+	go func() {
+		jobErr <- waitForJob(events, signal, timeout)
+	}()
+
+	if err := fn(); err != nil {
 		return err
 	}
 
-	err = waitForJob(events, signal, timeout)
-	done <- struct{}{}
-	return err
+	return <-jobErr
 }
 
 // waitForJob monitors the domain's QMP event stream, waiting
