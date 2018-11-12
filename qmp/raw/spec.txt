@@ -1,5 +1,5 @@
 
-##QEMU SPECIFICATION VERSION:  2.11.50
+##QEMU SPECIFICATION VERSION:  2.11.2
 
 
 # Whitelists to permit QAPI rule violations; think twice before you
