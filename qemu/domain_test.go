@@ -577,6 +577,28 @@ func TestEvents(t *testing.T) {
 	}
 }
 
+// Test when a listener connects, but disconnects without
+// receiving from the events chaannel returned.
+func TestEventsDerelictListener(t *testing.T) {
+	d, done := testDomain(t, nil)
+	defer done()
+
+	_, stop, err := d.Events()
+	if err != nil {
+		t.Error(err)
+	}
+
+	<-time.After(200 * time.Millisecond)
+
+	stop <- struct{}{}
+	select {
+	case <-stop:
+		return
+	case <-time.After(time.Millisecond * 20):
+		t.Error("shutdown failed to complete")
+	}
+}
+
 func TestEventsUnsupported(t *testing.T) {
 	d, done := testDomain(t, nil)
 	defer done()
@@ -589,6 +611,8 @@ func TestEventsUnsupported(t *testing.T) {
 }
 
 func testDomain(t *testing.T, fn func(qmp.Command) (interface{}, error)) (*Domain, func()) {
+	t.Helper()
+
 	mon := &testMonitor{fn: fn}
 	d, err := NewDomain(mon, "test")
 	if err != nil {
