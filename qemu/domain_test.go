@@ -578,7 +578,7 @@ func TestEvents(t *testing.T) {
 }
 
 // Test when a listener connects, but disconnects without
-// receiving from the events chaannel returned.
+// receiving from the events channel returned.
 func TestEventsDerelictListener(t *testing.T) {
 	d, done := testDomain(t, nil)
 	defer done()
