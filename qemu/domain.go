@@ -372,6 +372,14 @@ func (d *Domain) Events() (chan qmp.Event, chan struct{}, error) {
 	// handle disconnection
 	go func() {
 		<-done
+		// drain anything that gets sent on the channel
+		// because the disconnect won't be processed if the
+		// listenAndServe loop is waiting for the listener
+		// to read from the unbuffered channel.
+		go func() {
+			for range stream {
+			}
+		}()
 		d.disconnect <- stream
 		close(stream)
 		close(done)

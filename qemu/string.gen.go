@@ -18,6 +18,27 @@ package qemu
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[StatusDebug-0]
+	_ = x[StatusFinishMigrate-7]
+	_ = x[StatusGuestPanicked-14]
+	_ = x[StatusIOError-3]
+	_ = x[StatusInMigrate-1]
+	_ = x[StatusInternalError-2]
+	_ = x[StatusPaused-4]
+	_ = x[StatusPostMigrate-5]
+	_ = x[StatusPreLaunch-6]
+	_ = x[StatusRestoreVM-8]
+	_ = x[StatusRunning-9]
+	_ = x[StatusSaveVM-10]
+	_ = x[StatusShutdown-11]
+	_ = x[StatusSuspended-12]
+	_ = x[StatusWatchdog-13]
+}
+
 const _Status_name = "StatusDebugStatusInMigrateStatusInternalErrorStatusIOErrorStatusPausedStatusPostMigrateStatusPreLaunchStatusFinishMigrateStatusRestoreVMStatusRunningStatusSaveVMStatusShutdownStatusSuspendedStatusWatchdogStatusGuestPanicked"
 
 var _Status_index = [...]uint8{0, 11, 26, 45, 58, 70, 87, 102, 121, 136, 149, 161, 175, 190, 204, 223}
