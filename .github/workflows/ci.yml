@@ -1,0 +1,136 @@
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - versions: qemu-2.2.0_libvirt-1.2.2
+            libvirt-version: 1.2.2
+            libvirt-ext: gz
+            qemu-version: 2.2.0
+            qemu-ext: xz
+          - versions: qemu-2.2.0_libvirt-2.3.0
+            libvirt-version: 1.2.2
+            libvirt-ext: xz
+            qemu-version: 2.2.0
+            qemu-ext: xz
+          - versions: qemu-2.2.0_libvirt-3.1.0
+            libvirt-version: 1.2.2
+            libvirt-ext: xz
+            qemu-version: 2.2.0
+            qemu-ext: xz
+          - versions: qemu-2.5.0_libvirt-1.2.2
+            libvirt-version: 1.2.2
+            libvirt-ext: gz
+            qemu-version: 2.5.0
+            qemu-ext: xz
+          - versions: qemu-2.5.0_libvirt-2.3.0
+            libvirt-version: 1.2.2
+            libvirt-ext: xz
+            qemu-version: 2.5.0
+            qemu-ext: xz
+          - versions: qemu-2.5.0_libvirt-3.1.0
+            libvirt-version: 1.2.2
+            libvirt-ext: xz
+            qemu-version: 2.5.0
+            qemu-ext: xz
+          - versions: qemu-2.9.0_libvirt-1.2.2
+            libvirt-version: 1.2.2
+            libvirt-ext: gz
+            qemu-version: 2.9.0
+            qemu-ext: xz
+          - versions: qemu-2.9.0_libvirt-2.3.0
+            libvirt-version: 1.2.2
+            libvirt-ext: xz
+            qemu-version: 2.9.0
+            qemu-ext: xz
+          - versions: qemu-2.9.0_libvirt-3.1.0
+            libvirt-version: 1.2.2
+            libvirt-ext: xz
+            qemu-version: 2.9.0
+            qemu-ext: xz
+
+
+    steps:
+
+    - name: Install Dependencies
+      env:
+        QEMU: ${{ matrix.qemu-version }}
+        QEMU_EXT: ${{ matrix.qemu-ext }}
+        LIBVIRT: ${{ matrix.libvirt-version }}
+        LIBVIRT_EXT: ${{ matrix.libvirt-ext }}
+      run: |
+        sudo apt-get -qqy build-dep qemu-system-x86 libvirt
+        sudo apt-get -qqy install curl
+        sudo mkdir -p /usr/src && sudo chown $(id -u) /usr/src
+        curl -O -L -s http://download.qemu-project.org/qemu-${QEMU}.tar.${QEMU_EXT}
+        tar -C /usr/src -xf qemu-${QEMU}.tar.${QEMU_EXT}
+        pushd /usr/src/qemu-${QEMU}  
+        |
+        ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc \
+        --disable-docs \
+        --target-list=x86_64-softmmu             
+        make
+        sudo make install
+        popd
+        curl -O -s https://libvirt.org/sources/libvirt-${LIBVIRT}.tar.${LIBVIRT_EXT}
+        tar -C /usr/src -xf libvirt-${LIBVIRT}.tar.${LIBVIRT_EXT}
+        pushd /usr/src/libvirt-${LIBVIRT}
+        |
+        ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc \
+        --without-polkit \
+        --without-esx --without-vbox --without-xen --without-libxl --without-lxc \
+        --with-qemu
+        make
+        sudo make install
+        popd
+        sudo libvirtd -d -l -f ci/libvirtd.conf
+        sudo virtlogd -d || true
+        rm qemu-${QEMU}.tar.${QEMU_EXT} libvirt-${LIBVIRT}.tar.${LIBVIRT_EXT}
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: licensecheck
+      run: ./scripts/licensecheck.sh
+
+    - name: Ensure License
+      run: ./scripts/licensecheck.sh
+
+    - name: Generate Code
+      run: ./scripts/codegeneration.sh
+
+    - name: Lint
+      run: golint ./...
+
+    - name: Vet
+      run: go vet ./...
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
