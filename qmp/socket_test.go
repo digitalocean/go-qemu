@@ -15,6 +15,7 @@
 package qmp
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -83,7 +84,7 @@ func TestSocketMonitorEvents(t *testing.T) {
 	mon, w, done := testSocket(t)
 	defer done()
 
-	events, err := mon.Events()
+	events, err := mon.Events(context.Background())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -16,6 +16,7 @@ package qemu
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -647,7 +648,7 @@ func (t *testMonitor) Run(raw []byte) ([]byte, error) {
 	return json.Marshal(result)
 }
 
-func (t *testMonitor) Events() (<-chan qmp.Event, error) {
+func (t *testMonitor) Events(ctx context.Context) (<-chan qmp.Event, error) {
 	c := make(chan qmp.Event)
 	go func() {
 		events := []string{blockJobReady, blockJobCompleted}
@@ -679,7 +680,7 @@ var _ qmp.Monitor = &noopMonitor{}
 
 type noopMonitor struct{}
 
-func (noopMonitor) Connect() error                    { return nil }
-func (noopMonitor) Disconnect() error                 { return nil }
-func (noopMonitor) Run(_ []byte) ([]byte, error)      { return nil, nil }
-func (noopMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
+func (noopMonitor) Connect() error                                   { return nil }
+func (noopMonitor) Disconnect() error                                { return nil }
+func (noopMonitor) Run(_ []byte) ([]byte, error)                     { return nil, nil }
+func (noopMonitor) Events(context.Context) (<-chan qmp.Event, error) { return nil, nil }
