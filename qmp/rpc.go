@@ -15,6 +15,7 @@
 package qmp
 
 import (
+	"context"
 	"encoding/json"
 	"net"
 
@@ -59,7 +60,7 @@ func (rpc *LibvirtRPCMonitor) Disconnect() error {
 // an error will be returned. Errors encountered during streaming will
 // cause the returned event channel to be closed.
 func (rpc *LibvirtRPCMonitor) Events() (<-chan Event, error) {
-	events, err := rpc.l.Events(rpc.Domain)
+	events, err := rpc.l.SubscribeQEMUEvents(context.Background(), rpc.Domain)
 	if err != nil {
 		return nil, err
 	}
