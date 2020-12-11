@@ -19,6 +19,7 @@ package qemu
 //go:generate ../scripts/prependlicense.sh string.gen.go
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -393,8 +394,10 @@ func (d *Domain) Events() (chan qmp.Event, chan struct{}, error) {
 
 // listenAndServe handles a domain's event broadcast service.
 func (d *Domain) listenAndServe() error {
-	stream, err := d.m.Events()
+	ctx, cancel := context.WithCancel(context.Background())
+	stream, err := d.m.Events(ctx)
 	if err != nil {
+		cancel()
 		// let Event() inform the user events are not supported
 		if err == qmp.ErrEventsNotSupported {
 			d.eventsUnsupported = true
@@ -405,6 +408,7 @@ func (d *Domain) listenAndServe() error {
 	}
 
 	go func() {
+		defer cancel()
 		for {
 			select {
 			case <-d.done:

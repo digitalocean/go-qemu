@@ -15,6 +15,7 @@
 package hypervisor
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -122,10 +123,10 @@ var _ qmp.Monitor = &noopMonitor{}
 
 type noopMonitor struct{}
 
-func (noopMonitor) Connect() error                    { return nil }
-func (noopMonitor) Disconnect() error                 { return nil }
-func (noopMonitor) Run(_ []byte) ([]byte, error)      { return nil, nil }
-func (noopMonitor) Events() (<-chan qmp.Event, error) { return nil, nil }
+func (noopMonitor) Connect() error                                   { return nil }
+func (noopMonitor) Disconnect() error                                { return nil }
+func (noopMonitor) Run(_ []byte) ([]byte, error)                     { return nil, nil }
+func (noopMonitor) Events(context.Context) (<-chan qmp.Event, error) { return nil, nil }
 
 type testConnectMonitor struct {
 	connected bool

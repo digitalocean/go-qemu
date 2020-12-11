@@ -15,6 +15,7 @@
 package qmp
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 	"time"
@@ -170,11 +171,12 @@ func TestLibvirtRPCMonitorRun(t *testing.T) {
 }
 
 func TestLibvirtRPCMonitorEvents(t *testing.T) {
+	ctx := context.Background()
 	conn := libvirttest.New()
 	mon := NewLibvirtRPCMonitor("test", conn)
 	done := make(chan struct{})
 
-	stream, err := mon.Events()
+	stream, err := mon.Events(ctx)
 	if err != nil {
 		t.Error(err)
 	}
