@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -155,6 +156,10 @@ func (mon *SocketMonitor) Events(context.Context) (<-chan Event, error) {
 	return mon.events, nil
 }
 
+// useClosedConnErr is the error string received when the scanner is
+// stopped from the connection being closed.
+const useClosedConnErr = "use of closed network connection"
+
 // listen listens for incoming data from a QEMU monitor socket.  It determines
 // if the data is an asynchronous event or a response to a command, and returns
 // the data on the appropriate channel.
@@ -185,7 +190,7 @@ func (mon *SocketMonitor) listen(r io.Reader, events chan<- Event, stream chan<-
 		events <- e
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil && !strings.Contains(err.Error(), useClosedConnErr) {
 		stream <- streamResponse{err: err}
 	}
 }
