@@ -18,11 +18,15 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 // A SocketMonitor is a Monitor which speaks directly to a QEMU Machine Protocol
@@ -198,13 +202,45 @@ func (mon *SocketMonitor) listen(r io.Reader, events chan<- Event, stream chan<-
 // For a list of available QAPI commands, see:
 //	http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD
 func (mon *SocketMonitor) Run(command []byte) ([]byte, error) {
+	// Just call RunWithFile with no file
+	return mon.RunWithFile(command, nil)
+}
+
+// RunWithFile behaves like Run but allows for passing a file through out-of-band data.
+func (mon *SocketMonitor) RunWithFile(command []byte, file *os.File) ([]byte, error) {
 	// Only allow a single command to be run at a time to ensure that responses
 	// to a command cannot be mixed with responses from another command
 	mon.mu.Lock()
 	defer mon.mu.Unlock()
 
-	if _, err := mon.c.Write(command); err != nil {
-		return nil, err
+	if file == nil {
+		// Just send a normal command through.
+		if _, err := mon.c.Write(command); err != nil {
+			return nil, err
+		}
+	} else {
+		unixConn, ok := mon.c.(*net.UnixConn)
+		if !ok {
+			return nil, fmt.Errorf("RunWithFile only works with unix monitor sockets")
+		}
+
+		oobSupported := false
+		for _, capability := range mon.Capabilities {
+			if capability == "oob" {
+				oobSupported = true
+				break
+			}
+		}
+
+		if !oobSupported {
+			return nil, fmt.Errorf("The QEMU server doesn't support oob (needed for RunWithFile)")
+		}
+
+		// Send the command along with the file descriptor.
+		oob := unix.UnixRights(int(file.Fd()))
+		if _, _, err := unixConn.WriteMsgUnix(command, oob, nil); err != nil {
+			return nil, err
+		}
 	}
 
 	// Wait for a response or error to our command
