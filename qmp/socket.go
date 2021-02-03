@@ -34,6 +34,9 @@ type SocketMonitor struct {
 	// QEMU version reported by a connected monitor socket.
 	Version *Version
 
+	// QEMU QMP capabiltiies reported by a connected monitor socket.
+	Capabilities []string
+
 	// Underlying connection
 	c net.Conn
 
@@ -119,6 +122,7 @@ func (mon *SocketMonitor) Connect() error {
 		return err
 	}
 	mon.Version = &ban.QMP.Version
+	mon.Capabilities = ban.QMP.Capabilities
 
 	// Issue capabilities handshake
 	cmd := Command{Execute: qmpCapabilities}
@@ -224,6 +228,7 @@ func (mon *SocketMonitor) Run(command []byte) ([]byte, error) {
 // banner is a wrapper type around a Version.
 type banner struct {
 	QMP struct {
+		Capabilities []string `json:"capabilities"`
 		Version Version `json:"version"`
 	} `json:"QMP"`
 }
