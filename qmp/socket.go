@@ -25,8 +25,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"golang.org/x/sys/unix"
 )
 
 // A SocketMonitor is a Monitor which speaks directly to a QEMU Machine Protocol
@@ -237,7 +235,7 @@ func (mon *SocketMonitor) RunWithFile(command []byte, file *os.File) ([]byte, er
 		}
 
 		// Send the command along with the file descriptor.
-		oob := unix.UnixRights(int(file.Fd()))
+		oob := getUnixRights(file)
 		if _, _, err := unixConn.WriteMsgUnix(command, oob, nil); err != nil {
 			return nil, err
 		}
