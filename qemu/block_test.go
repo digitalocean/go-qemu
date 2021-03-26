@@ -39,8 +39,8 @@ func TestCancelJob(t *testing.T) {
 	})
 	defer done()
 
-	disk := BlockDevice{Device: device}
-	err := disk.CancelJob(d, defaultTestTimeout)
+	job := BlockJob{Device: device}
+	err := job.Cancel(d, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,8 +48,9 @@ func TestCancelJob(t *testing.T) {
 
 func TestCommit(t *testing.T) {
 	const (
-		device  = "drive-virtio-disk0"
+		device  = "inserted[node-name] before commit"
 		overlay = "/tmp/foo.img"
+		jobID   = "made-up-job-id-for-the-commit"
 	)
 	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "block-commit", cmd.Execute; want != got {
@@ -66,20 +67,24 @@ func TestCommit(t *testing.T) {
 			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
 				want, got)
 		}
+		if want, got := jobID, args["job-id"]; want != got {
+			t.Fatalf("unexpected job-id:\n- want: %q\n-  got: %q",
+				want, got)
+		}
 
 		return success{}, nil
 	})
 	defer done()
 
-	disk := BlockDevice{Device: device}
-	err := disk.Commit(d, overlay, defaultTestTimeout)
+	disk := BlockDevice{}
+	disk.Inserted.NodeName = device
+	err := disk.Commit(d, overlay, jobID, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestCommitActiveBlockJob(t *testing.T) {
-	const device = "drive-virtio-disk0"
 	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
 		return failure{
 			Error: map[string]string{
@@ -89,8 +94,8 @@ func TestCommitActiveBlockJob(t *testing.T) {
 	})
 	defer done()
 
-	disk := BlockDevice{Device: device}
-	err := disk.Commit(d, "/tmp/foo", defaultTestTimeout)
+	disk := BlockDevice{}
+	err := disk.Commit(d, "/tmp/foo", "job-id", defaultTestTimeout)
 	if err == nil {
 		t.Errorf("expected blockcommit with active blockjob to fail")
 	}
@@ -103,8 +108,8 @@ func TestCommitBlockJobError(t *testing.T) {
 	d.m.(*testMonitor).eventErrors = true
 	defer done()
 
-	disk := BlockDevice{Device: "test"}
-	err := disk.Commit(d, "/tmp/foo", defaultTestTimeout)
+	disk := BlockDevice{}
+	err := disk.Commit(d, "/tmp/foo", "job-id", defaultTestTimeout)
 	if err == nil {
 		t.Error("expected block job error to cause failure")
 	}
@@ -118,7 +123,7 @@ func TestCommitTimeout(t *testing.T) {
 	defer done()
 
 	disk := BlockDevice{Device: "test"}
-	err := disk.Commit(d, "/tmp/foo", 0)
+	err := disk.Commit(d, "/tmp/foo", "job-id", 0)
 	if err == nil {
 		t.Error("expected timeout")
 	}
@@ -142,8 +147,8 @@ func TestJobComplete(t *testing.T) {
 	})
 	defer done()
 
-	disk := BlockDevice{Device: device}
-	err := disk.CompleteJob(d, defaultTestTimeout)
+	job := BlockJob{Device: device}
+	err := job.Complete(d, defaultTestTimeout)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,8 +161,8 @@ func TestJobCompleteEventError(t *testing.T) {
 	d.m.(*testMonitor).eventErrors = true
 	defer done()
 
-	disk := BlockDevice{Device: "test"}
-	err := disk.CompleteJob(d, defaultTestTimeout)
+	job := BlockJob{Device: "test"}
+	err := job.Complete(d, defaultTestTimeout)
 	if err == nil {
 		t.Error("expected block job error to cause failure")
 	}
@@ -170,8 +175,8 @@ func TestJobCompleteTimeout(t *testing.T) {
 	d.m.(*testMonitor).eventTimeout = true
 	defer done()
 
-	disk := BlockDevice{Device: "test"}
-	err := disk.CompleteJob(d, 0)
+	job := BlockJob{Device: "test"}
+	err := job.Complete(d, 0)
 	if err == nil {
 		t.Error("expected timeout")
 	}
@@ -229,8 +234,9 @@ func TestMirrorRelativePath(t *testing.T) {
 
 func TestSnapshot(t *testing.T) {
 	const (
-		device  = "drive-virtio-disk0"
-		overlay = "/tmp/foo.img"
+		device   = "drive-virtio-disk0"
+		overlay  = "/tmp/foo.img"
+		nodeName = "my-node"
 	)
 	d, done := testDomain(t, func(cmd qmp.Command) (interface{}, error) {
 		if want, got := "blockdev-snapshot-sync", cmd.Execute; want != got {
@@ -239,7 +245,7 @@ func TestSnapshot(t *testing.T) {
 		}
 
 		args, _ := cmd.Args.(map[string]interface{})
-		if want, got := device, args["device"]; want != got {
+		if want, got := device, args["node-name"]; want != got {
 			t.Fatalf("unexpected device:\n- want: %q\n-  got: %q",
 				want, got)
 		}
@@ -249,12 +255,18 @@ func TestSnapshot(t *testing.T) {
 				want, got)
 		}
 
+		if want, got := nodeName, args["snapshot-node-name"]; want != got {
+			t.Fatalf("unexpected target:\n- want: %q\n-  got: %q",
+				want, got)
+		}
+
 		return success{}, nil
 	})
 	defer done()
 
-	disk := BlockDevice{Device: device}
-	err := disk.Snapshot(d, overlay)
+	disk := BlockDevice{}
+	disk.Inserted.NodeName = device
+	err := disk.Snapshot(d, overlay, "my-node")
 	if err != nil {
 		t.Error(err)
 	}

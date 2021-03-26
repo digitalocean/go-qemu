@@ -158,13 +158,14 @@ func (bd BlockDevice) Mirror(d *Domain, dest string, timeout time.Duration) erro
 // Commit synchronously merges an overlay image onto a block device's
 // root backing image. Once the operation is complete, CompleteJob()
 // must be called to pivot the domain back to the original backing image.
-func (bd BlockDevice) Commit(d *Domain, overlay string, timeout time.Duration) error {
+func (bd BlockDevice) Commit(d *Domain, overlay, jobID string, timeout time.Duration) error {
 	return waitForSignal(d, blockJobReady, timeout, func() error {
 		cmd := qmp.Command{
 			Execute: "block-commit",
 			Args: map[string]string{
-				"device": bd.Device,
+				"device": bd.Inserted.NodeName,
 				"top":    overlay,
+				"job-id": jobID,
 			},
 		}
 
@@ -173,14 +174,14 @@ func (bd BlockDevice) Commit(d *Domain, overlay string, timeout time.Duration) e
 	})
 }
 
-// CancelJob cancels any active block jobs on a block device.
-// For block-mirror operations, this completes the block job.
-func (bd BlockDevice) CancelJob(d *Domain, timeout time.Duration) error {
+// Cancel a running block job.
+// For block-mirror operations, this cancels the block job.
+func (job BlockJob) Cancel(d *Domain, timeout time.Duration) error {
 	return waitForSignal(d, blockJobCompleted, timeout, func() error {
 		cmd := qmp.Command{
 			Execute: "block-job-cancel",
 			Args: map[string]string{
-				"device": bd.Device,
+				"device": job.Device,
 			},
 		}
 
@@ -189,15 +190,15 @@ func (bd BlockDevice) CancelJob(d *Domain, timeout time.Duration) error {
 	})
 }
 
-// CompleteJob finalizes any running block jobs on the provided block device.
+// Complete a running block job.
 // For blockcommit backups, this performs the "pivot" back to the original
 // backing image.
-func (bd BlockDevice) CompleteJob(d *Domain, timeout time.Duration) error {
+func (job BlockJob) Complete(d *Domain, timeout time.Duration) error {
 	return waitForSignal(d, blockJobCompleted, timeout, func() error {
 		cmd := qmp.Command{
 			Execute: "block-job-complete",
 			Args: map[string]string{
-				"device": bd.Device,
+				"device": job.Device,
 			},
 		}
 
@@ -209,12 +210,13 @@ func (bd BlockDevice) CompleteJob(d *Domain, timeout time.Duration) error {
 // Snapshot creates a point in time snapshot.
 // The disk's image is given a new QCOW2 overlay, leaving the underlying image
 // in a state that is considered safe for copying.
-func (bd BlockDevice) Snapshot(d *Domain, overlay string) error {
+func (bd BlockDevice) Snapshot(d *Domain, overlay, nodeName string) error {
 	cmd := qmp.Command{
 		Execute: "blockdev-snapshot-sync",
 		Args: map[string]string{
-			"device":        bd.Device,
-			"snapshot-file": overlay,
+			"node-name":          bd.Inserted.NodeName,
+			"snapshot-node-name": nodeName,
+			"snapshot-file":      overlay,
 		},
 	}
 
