@@ -16,8 +16,9 @@ package qemu
 
 // CPU represents a QEMU CPU.
 type CPU struct {
-	CPU     int  `json:"cpu"`
-	Current bool `json:"current"`
-	Halted  bool `json:"halted"`
-	PC      int  `json:"pc"`
+	CPU      int  `json:"cpu"`
+	Current  bool `json:"current"`
+	Halted   bool `json:"halted"`
+	PC       int  `json:"pc"`
+	ThreadID int  `json:"thread_id"`
 }
