@@ -192,7 +192,15 @@ func (mon *SocketMonitor) listen(r io.Reader, events chan<- Event, stream chan<-
 	}
 
 	if err := scanner.Err(); err != nil {
-		stream <- streamResponse{err: err}
+		// In case stream reader went away we wait for a bit
+		waitTimer := time.NewTimer(3 * time.Second)
+		defer waitTimer.Stop()
+		select {
+		case <-waitTimer.C:
+			// Do nothing
+		case stream <- streamResponse{err: err}:
+			// Done
+		}
 	}
 }
 
