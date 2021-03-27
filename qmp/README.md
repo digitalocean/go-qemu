@@ -98,7 +98,7 @@ EVENT: RESET
 
 ## More information
 
-* [QEMU QMP Wiki](http://wiki.qemu.org/QMP)
-* [QEMU QMP Intro](http://git.qemu.org/?p=qemu.git;a=blob_plain;f=docs/qmp-intro.txt;hb=HEAD)
-* [QEMU QMP Events](http://git.qemu.org/?p=qemu.git;a=blob_plain;f=docs/qmp-events.txt;hb=HEAD)
-* [QEMU QMP Spec](http://git.qemu.org/?p=qemu.git;a=blob_plain;f=docs/qmp-spec.txt;hb=HEAD)
+* [QEMU QMP Wiki](https://wiki.qemu.org/QMP)
+* [QEMU QMP Intro](https://git.qemu.org/?p=qemu.git;a=blob_plain;f=docs/interop/qmp-intro.txt;hb=HEAD)
+* [QEMU QMP Spec](https://git.qemu.org/?p=qemu.git;a=blob_plain;f=docs/interop/qmp-spec.txt;hb=HEAD)
+* [QEMU QMP Schemas](https://git.qemu.org/?p=qemu.git;a=blob_plain;f=qapi/qapi-schema.json;hb=HEAD)
