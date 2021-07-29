@@ -3301,7 +3301,7 @@ func (ChardevBackendBraille) isChardevBackend() {}
 func (s ChardevBackendBraille) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "braille",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -3315,7 +3315,7 @@ func (ChardevBackendConsole) isChardevBackend() {}
 func (s ChardevBackendConsole) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "console",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -3329,7 +3329,7 @@ func (ChardevBackendFile) isChardevBackend() {}
 func (s ChardevBackendFile) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "file",
-		"data": s,
+		"data": ChardevFile(s),
 	}
 	return json.Marshal(v)
 }
@@ -3343,7 +3343,7 @@ func (ChardevBackendMemory) isChardevBackend() {}
 func (s ChardevBackendMemory) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "memory",
-		"data": s,
+		"data": ChardevRingbuf(s),
 	}
 	return json.Marshal(v)
 }
@@ -3357,7 +3357,7 @@ func (ChardevBackendMsmouse) isChardevBackend() {}
 func (s ChardevBackendMsmouse) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "msmouse",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -3371,7 +3371,7 @@ func (ChardevBackendMux) isChardevBackend() {}
 func (s ChardevBackendMux) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "mux",
-		"data": s,
+		"data": ChardevMux(s),
 	}
 	return json.Marshal(v)
 }
@@ -3385,7 +3385,7 @@ func (ChardevBackendNull) isChardevBackend() {}
 func (s ChardevBackendNull) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "null",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -3399,7 +3399,7 @@ func (ChardevBackendParallel) isChardevBackend() {}
 func (s ChardevBackendParallel) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "parallel",
-		"data": s,
+		"data": ChardevHostdev(s),
 	}
 	return json.Marshal(v)
 }
@@ -3413,7 +3413,7 @@ func (ChardevBackendPipe) isChardevBackend() {}
 func (s ChardevBackendPipe) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "pipe",
-		"data": s,
+		"data": ChardevHostdev(s),
 	}
 	return json.Marshal(v)
 }
@@ -3427,7 +3427,7 @@ func (ChardevBackendPty) isChardevBackend() {}
 func (s ChardevBackendPty) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "pty",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -3441,7 +3441,7 @@ func (ChardevBackendRingbuf) isChardevBackend() {}
 func (s ChardevBackendRingbuf) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "ringbuf",
-		"data": s,
+		"data": ChardevRingbuf(s),
 	}
 	return json.Marshal(v)
 }
@@ -3455,7 +3455,7 @@ func (ChardevBackendSerial) isChardevBackend() {}
 func (s ChardevBackendSerial) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "serial",
-		"data": s,
+		"data": ChardevHostdev(s),
 	}
 	return json.Marshal(v)
 }
@@ -3469,7 +3469,7 @@ func (ChardevBackendSocket) isChardevBackend() {}
 func (s ChardevBackendSocket) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "socket",
-		"data": s,
+		"data": ChardevSocket(s),
 	}
 	return json.Marshal(v)
 }
@@ -3483,7 +3483,7 @@ func (ChardevBackendSpiceport) isChardevBackend() {}
 func (s ChardevBackendSpiceport) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "spiceport",
-		"data": s,
+		"data": ChardevSpicePort(s),
 	}
 	return json.Marshal(v)
 }
@@ -3497,7 +3497,7 @@ func (ChardevBackendSpicevmc) isChardevBackend() {}
 func (s ChardevBackendSpicevmc) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "spicevmc",
-		"data": s,
+		"data": ChardevSpiceChannel(s),
 	}
 	return json.Marshal(v)
 }
@@ -3511,7 +3511,7 @@ func (ChardevBackendStdio) isChardevBackend() {}
 func (s ChardevBackendStdio) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "stdio",
-		"data": s,
+		"data": ChardevStdio(s),
 	}
 	return json.Marshal(v)
 }
@@ -3525,7 +3525,7 @@ func (ChardevBackendTestdev) isChardevBackend() {}
 func (s ChardevBackendTestdev) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "testdev",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -3539,7 +3539,7 @@ func (ChardevBackendUDP) isChardevBackend() {}
 func (s ChardevBackendUDP) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "udp",
-		"data": s,
+		"data": ChardevUDP(s),
 	}
 	return json.Marshal(v)
 }
@@ -3553,7 +3553,7 @@ func (ChardevBackendVc) isChardevBackend() {}
 func (s ChardevBackendVc) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "vc",
-		"data": s,
+		"data": ChardevVc(s),
 	}
 	return json.Marshal(v)
 }
@@ -3567,7 +3567,7 @@ func (ChardevBackendWctablet) isChardevBackend() {}
 func (s ChardevBackendWctablet) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "wctablet",
-		"data": s,
+		"data": ChardevCommon(s),
 	}
 	return json.Marshal(v)
 }
@@ -5121,7 +5121,7 @@ func (ImageInfoSpecificLUKS) isImageInfoSpecific() {}
 func (s ImageInfoSpecificLUKS) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "luks",
-		"data": s,
+		"data": QCryptoBlockInfoLUKS(s),
 	}
 	return json.Marshal(v)
 }
@@ -5135,7 +5135,7 @@ func (ImageInfoSpecificQcow2) isImageInfoSpecific() {}
 func (s ImageInfoSpecificQcow2) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "qcow2",
-		"data": s,
+		"data": ImageInfoSpecificQCow2(s),
 	}
 	return json.Marshal(v)
 }
@@ -5146,7 +5146,7 @@ func (ImageInfoSpecificVMDK) isImageInfoSpecific() {}
 func (s ImageInfoSpecificVMDK) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "vmdk",
-		"data": s,
+		"data": ImageInfoSpecificVMDK(s),
 	}
 	return json.Marshal(v)
 }
@@ -5499,7 +5499,7 @@ func (InputEventAbs) isInputEvent() {}
 func (s InputEventAbs) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "abs",
-		"data": s,
+		"data": InputMoveEvent(s),
 	}
 	return json.Marshal(v)
 }
@@ -5513,7 +5513,7 @@ func (InputEventBtn) isInputEvent() {}
 func (s InputEventBtn) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "btn",
-		"data": s,
+		"data": InputBtnEvent(s),
 	}
 	return json.Marshal(v)
 }
@@ -5527,7 +5527,7 @@ func (InputEventKey) isInputEvent() {}
 func (s InputEventKey) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "key",
-		"data": s,
+		"data": InputKeyEvent(s),
 	}
 	return json.Marshal(v)
 }
@@ -5541,7 +5541,7 @@ func (InputEventRel) isInputEvent() {}
 func (s InputEventRel) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "rel",
-		"data": s,
+		"data": InputMoveEvent(s),
 	}
 	return json.Marshal(v)
 }
@@ -5903,7 +5903,7 @@ func (KeyValuefloat64) isKeyValue() {}
 func (s KeyValuefloat64) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "number",
-		"data": s,
+		"data": int64(s),
 	}
 	return json.Marshal(v)
 }
@@ -5917,7 +5917,7 @@ func (KeyValueQcode) isKeyValue() {}
 func (s KeyValueQcode) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "qcode",
-		"data": s,
+		"data": QKeyCode(s),
 	}
 	return json.Marshal(v)
 }
@@ -6005,7 +6005,7 @@ func (MemoryDeviceInfoDimm) isMemoryDeviceInfo() {}
 func (s MemoryDeviceInfoDimm) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "dimm",
-		"data": s,
+		"data": PcdimmDeviceInfo(s),
 	}
 	return json.Marshal(v)
 }
@@ -9476,7 +9476,7 @@ func (SocketAddressLegacyFD) isSocketAddressLegacy() {}
 func (s SocketAddressLegacyFD) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "fd",
-		"data": s,
+		"data": String(s),
 	}
 	return json.Marshal(v)
 }
@@ -9490,7 +9490,7 @@ func (SocketAddressLegacyInet) isSocketAddressLegacy() {}
 func (s SocketAddressLegacyInet) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "inet",
-		"data": s,
+		"data": InetSocketAddress(s),
 	}
 	return json.Marshal(v)
 }
@@ -9504,7 +9504,7 @@ func (SocketAddressLegacyUnix) isSocketAddressLegacy() {}
 func (s SocketAddressLegacyUnix) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "unix",
-		"data": s,
+		"data": UnixSocketAddress(s),
 	}
 	return json.Marshal(v)
 }
@@ -9518,7 +9518,7 @@ func (SocketAddressLegacyVsock) isSocketAddressLegacy() {}
 func (s SocketAddressLegacyVsock) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "vsock",
-		"data": s,
+		"data": VsockSocketAddress(s),
 	}
 	return json.Marshal(v)
 }
@@ -9959,7 +9959,7 @@ func (TPMTypeOptionsEmulator) isTPMTypeOptions() {}
 func (s TPMTypeOptionsEmulator) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "emulator",
-		"data": s,
+		"data": TPMEmulatorOptions(s),
 	}
 	return json.Marshal(v)
 }
@@ -9973,7 +9973,7 @@ func (TPMTypeOptionsPassthrough) isTPMTypeOptions() {}
 func (s TPMTypeOptionsPassthrough) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "passthrough",
-		"data": s,
+		"data": TPMPassthroughOptions(s),
 	}
 	return json.Marshal(v)
 }
@@ -10098,7 +10098,7 @@ func (TransactionActionAbort) isTransactionAction() {}
 func (s TransactionActionAbort) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "abort",
-		"data": s,
+		"data": Abort(s),
 	}
 	return json.Marshal(v)
 }
@@ -10112,7 +10112,7 @@ func (TransactionActionBlockDirtyBitmapAdd) isTransactionAction() {}
 func (s TransactionActionBlockDirtyBitmapAdd) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "block-dirty-bitmap-add",
-		"data": s,
+		"data": BlockDirtyBitmapAdd(s),
 	}
 	return json.Marshal(v)
 }
@@ -10126,7 +10126,7 @@ func (TransactionActionBlockDirtyBitmapClear) isTransactionAction() {}
 func (s TransactionActionBlockDirtyBitmapClear) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "block-dirty-bitmap-clear",
-		"data": s,
+		"data": BlockDirtyBitmap(s),
 	}
 	return json.Marshal(v)
 }
@@ -10140,7 +10140,7 @@ func (TransactionActionBlockdevBackup) isTransactionAction() {}
 func (s TransactionActionBlockdevBackup) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "blockdev-backup",
-		"data": s,
+		"data": BlockdevBackup(s),
 	}
 	return json.Marshal(v)
 }
@@ -10154,7 +10154,7 @@ func (TransactionActionBlockdevSnapshot) isTransactionAction() {}
 func (s TransactionActionBlockdevSnapshot) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "blockdev-snapshot",
-		"data": s,
+		"data": BlockdevSnapshot(s),
 	}
 	return json.Marshal(v)
 }
@@ -10168,7 +10168,7 @@ func (TransactionActionBlockdevSnapshotInternalSync) isTransactionAction() {}
 func (s TransactionActionBlockdevSnapshotInternalSync) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "blockdev-snapshot-internal-sync",
-		"data": s,
+		"data": BlockdevSnapshotInternal(s),
 	}
 	return json.Marshal(v)
 }
@@ -10182,7 +10182,7 @@ func (TransactionActionBlockdevSnapshotSync) isTransactionAction() {}
 func (s TransactionActionBlockdevSnapshotSync) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "blockdev-snapshot-sync",
-		"data": s,
+		"data": BlockdevSnapshotSync(s),
 	}
 	return json.Marshal(v)
 }
@@ -10196,7 +10196,7 @@ func (TransactionActionDriveBackup) isTransactionAction() {}
 func (s TransactionActionDriveBackup) MarshalJSON() ([]byte, error) {
 	v := map[string]interface{}{
 		"type": "drive-backup",
-		"data": s,
+		"data": DriveBackup(s),
 	}
 	return json.Marshal(v)
 }
