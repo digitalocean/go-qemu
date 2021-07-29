@@ -39,7 +39,7 @@ func ({{ $subname }}) is{{ $basename }}() {}
 func (s {{ $subname }}) MarshalJSON() ([]byte, error) {
      v := map[string]interface{}{
           "type": "{{ $suffix }}",
-          "data": s,
+          "data": {{ $type.Go }} (s),
      }
      return json.Marshal(v)
 }
