@@ -35,6 +35,12 @@ If your QEMU instances are not managed by libvirt, direct communication over its
 monitor, err := qmp.NewSocketMonitor("unix", "/var/lib/qemu/example.monitor", 2*time.Second)
 ```
 
+The Windows version of QEMU doesn't have UNIX sockets, but instead uses named pipes (fifo) for communication.
+
+```go
+monitor, err := qmp.NewPipeMonitor("example", 2*time.Second) // will open `\\.\pipe\example`
+```
+
 ## Examples
 
 Using the above to establish a new `qmp.Monitor`, the following examples provide a brief overview of QMP usage.
