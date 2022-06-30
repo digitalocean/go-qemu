@@ -1,4 +1,4 @@
-go-qemu [![GoDoc](http://godoc.org/github.com/digitalocean/go-qemu?status.svg)](http://godoc.org/github.com/digitalocean/go-qemu) [![Build Status](https://travis-ci.org/digitalocean/go-qemu.svg?branch=master)](https://travis-ci.org/digitalocean/go-qemu) [![Report Card](https://goreportcard.com/badge/github.com/digitalocean/go-qemu)](https://goreportcard.com/report/github.com/digitalocean/go-qemu)
+go-qemu [![GoDoc](http://godoc.org/github.com/digitalocean/go-qemu?status.svg)](http://godoc.org/github.com/digitalocean/go-qemu) ![Build Status](https://github.com/digitalocean/go-qemu/actions/workflows/goqemu.yml/badge.svg?branch=master) [![Report Card](https://goreportcard.com/badge/github.com/digitalocean/go-qemu)](https://goreportcard.com/report/github.com/digitalocean/go-qemu)
 =======
 
 `go-qemu` is a collection of Go packages for interacting with running QEMU
