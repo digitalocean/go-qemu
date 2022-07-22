@@ -16,6 +16,7 @@ package qemu
 
 import (
 	"errors"
+	"io"
 	"testing"
 
 	"github.com/digitalocean/go-qemu/qmp"
@@ -104,22 +105,22 @@ func TestCommitActiveBlockJob(t *testing.T) {
 func TestCommitBlockJobError(t *testing.T) {
 	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
 		return success{}, nil
-	})
-	d.m.(*testMonitor).eventErrors = true
+	}, withEventErrors)
 	defer done()
 
 	disk := BlockDevice{}
 	err := disk.Commit(d, "/tmp/foo", "job-id", defaultTestTimeout)
 	if err == nil {
 		t.Error("expected block job error to cause failure")
+	} else if errors.Is(err, io.EOF) {
+		t.Error("didn't expect the event stream to close")
 	}
 }
 
 func TestCommitTimeout(t *testing.T) {
 	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
 		return success{}, nil
-	})
-	d.m.(*testMonitor).eventTimeout = true
+	}, withEventTimeout)
 	defer done()
 
 	disk := BlockDevice{Device: "test"}
@@ -157,8 +158,7 @@ func TestJobComplete(t *testing.T) {
 func TestJobCompleteEventError(t *testing.T) {
 	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
 		return success{}, nil
-	})
-	d.m.(*testMonitor).eventErrors = true
+	}, withEventErrors)
 	defer done()
 
 	job := BlockJob{Device: "test"}
@@ -171,8 +171,7 @@ func TestJobCompleteEventError(t *testing.T) {
 func TestJobCompleteTimeout(t *testing.T) {
 	d, done := testDomain(t, func(_ qmp.Command) (interface{}, error) {
 		return success{}, nil
-	})
-	d.m.(*testMonitor).eventTimeout = true
+	}, withEventTimeout)
 	defer done()
 
 	job := BlockJob{Device: "test"}

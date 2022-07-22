@@ -1,4 +1,4 @@
-// Copyright 2016 The go-qemu Authors.
+// Copyright 2022 The go-qemu Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/digitalocean/go-qemu/qmp"
@@ -40,13 +41,14 @@ var (
 
 // Domain represents a QEMU instance.
 type Domain struct {
-	Name       string
-	m          qmp.Monitor
-	rm         *raw.Monitor
-	done       chan struct{}
-	connect    chan chan qmp.Event
-	disconnect chan chan qmp.Event
-	listeners  []chan qmp.Event
+	Name      string
+	m         qmp.Monitor
+	rm        *raw.Monitor
+	cancel    context.CancelFunc
+	listeners struct {
+		sync.Mutex
+		value []chan<- qmp.Event
+	}
 
 	eventsUnsupported bool
 
@@ -57,7 +59,7 @@ type Domain struct {
 // qmp.Monitor.  Close must be called when done with a Domain to avoid leaking
 // resources.
 func (d *Domain) Close() error {
-	close(d.done)
+	d.cancel()
 	return d.m.Disconnect()
 }
 
@@ -358,48 +360,45 @@ func (d *Domain) PackageVersion() (string, error) {
 	return vers.Package, nil
 }
 
-// Events streams QEMU QMP events.
-// Two channels are returned, the first contains events emitted by the domain.
-// The second is used to signal completion of event processing.
-// It is the responsibility of the caller to always signal when finished.
+// Events streams QEMU QMP events. Two channels are returned, the first contains
+// events emitted by the domain. The second is used to signal completion of
+// event processing. It is the responsibility of the caller to always close this
+// channel when finished.
 func (d *Domain) Events() (chan qmp.Event, chan struct{}, error) {
 	if d.eventsUnsupported {
 		return nil, nil, qmp.ErrEventsNotSupported
 	}
 
 	stream := make(chan qmp.Event)
-	done := make(chan struct{})
+	// The previous expectation was that you write to this channel, not
+	// close it, so ensure we continue to support this.
+	done := make(chan struct{}, 1)
 
 	// handle disconnection
 	go func() {
 		<-done
-		// drain anything that gets sent on the channel
-		// because the disconnect won't be processed if the
-		// listenAndServe loop is waiting for the listener
-		// to read from the unbuffered channel.
+		// If the caller has indicated they are done, they will
+		// no longer be reading from the stream, and there needs
+		// to be something which unblocks the main broadcast
+		// goroutine for writes to this stream so we can remove
+		// the stream from the list of listeners.
 		go func() {
 			for range stream {
 			}
 		}()
-		d.disconnect <- stream
-		close(stream)
-		close(done)
+		d.closeAndRemoveListener(stream)
 	}()
 
-	// add stream to broadcast
-	d.connect <- stream
-
+	d.addListener(stream)
 	return stream, done, nil
 }
 
 // listenAndServe handles a domain's event broadcast service.
-func (d *Domain) listenAndServe() error {
-	ctx, cancel := context.WithCancel(context.Background())
+func (d *Domain) listenAndServe(ctx context.Context) error {
 	stream, err := d.m.Events(ctx)
 	if err != nil {
-		cancel()
 		// let Event() inform the user events are not supported
-		if err == qmp.ErrEventsNotSupported {
+		if errors.Is(err, qmp.ErrEventsNotSupported) {
 			d.eventsUnsupported = true
 			return nil
 		}
@@ -408,41 +407,56 @@ func (d *Domain) listenAndServe() error {
 	}
 
 	go func() {
-		defer cancel()
-		for {
-			select {
-			case <-d.done:
-				return
-			case client := <-d.connect:
-				d.addListener(client)
-			case client := <-d.disconnect:
-				d.removeListener(client)
-			case event := <-stream:
-				d.broadcast(event)
-			}
+		// When we're done broadcasting, ensure all of our listeners
+		// become aware.
+		defer d.closeAndRemoveListeners()
+		for event := range stream {
+			d.broadcast(event)
 		}
 	}()
 
 	return nil
 }
 
-// addListener adds the given stream to the domain's event broadcast.
-func (d *Domain) addListener(stream chan qmp.Event) {
-	d.listeners = append(d.listeners, stream)
+// addListener adds the given stream to the domain's event broadcast. The main
+// broadcast goroutine takes ownership of the goroutine's lifetime.
+func (d *Domain) addListener(stream chan<- qmp.Event) {
+	d.listeners.Lock()
+	defer d.listeners.Unlock()
+	d.listeners.value = append(d.listeners.value, stream)
 }
 
-// removeListener removes the given stream from the domain's event broadcast.
-func (d *Domain) removeListener(stream chan qmp.Event) {
-	for i, client := range d.listeners {
+// closeAndRemoveListeners closes all listeners and removes them from the list.
+func (d *Domain) closeAndRemoveListeners() {
+	d.listeners.Lock()
+	defer d.listeners.Unlock()
+	for _, l := range d.listeners.value {
+		close(l)
+	}
+	d.listeners.value = nil
+}
+
+// closeAndRemoveListener closes the listener and removes it from the domain's
+// event broadcast.
+func (d *Domain) closeAndRemoveListener(stream chan<- qmp.Event) {
+	d.listeners.Lock()
+	defer d.listeners.Unlock()
+
+	listeners := d.listeners.value
+	for i, client := range listeners {
 		if client == stream {
-			d.listeners = append(d.listeners[:i], d.listeners[i+1:]...)
+			close(client)
+			listeners = append(listeners[:i], listeners[i+1:]...)
 		}
 	}
+	d.listeners.value = listeners
 }
 
 // broadcast sends the provided event to all event listeners.
 func (d *Domain) broadcast(event qmp.Event) {
-	for _, stream := range d.listeners {
+	d.listeners.Lock()
+	defer d.listeners.Unlock()
+	for _, stream := range d.listeners.value {
 		stream <- event
 	}
 }
@@ -451,13 +465,15 @@ func (d *Domain) broadcast(event qmp.Event) {
 // QMP communication is handled by the provided monitor socket.
 func NewDomain(m qmp.Monitor, name string) (*Domain, error) {
 	d := &Domain{
-		Name:       name,
-		m:          m,
-		rm:         raw.NewMonitor(m),
-		done:       make(chan struct{}),
-		connect:    make(chan chan qmp.Event),
-		disconnect: make(chan chan qmp.Event),
-		listeners:  []chan qmp.Event{},
+		Name: name,
+		m:    m,
+		rm:   raw.NewMonitor(m),
+		listeners: struct {
+			sync.Mutex
+			value []chan<- qmp.Event
+		}{
+			value: []chan<- qmp.Event{},
+		},
 
 		// By default, try to generate decently random file names
 		// for temporary files.
@@ -474,7 +490,13 @@ func NewDomain(m qmp.Monitor, name string) (*Domain, error) {
 	}
 
 	// start event broadcast
-	err := d.listenAndServe()
+	ctx, cancel := context.WithCancel(context.Background())
+	d.cancel = cancel
+	err := d.listenAndServe(ctx)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 
-	return d, err
+	return d, nil
 }

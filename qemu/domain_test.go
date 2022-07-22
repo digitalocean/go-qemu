@@ -1,4 +1,4 @@
-// Copyright 2016 The go-qemu Authors.
+// Copyright 2022 The go-qemu Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -195,23 +196,6 @@ func TestBlockStats(t *testing.T) {
 	expectedBytes := uint64(9786368)
 	if stats[0].WriteBytes != expectedBytes {
 		t.Errorf("expected %d write bytes, got %d", expectedBytes, stats[0].WriteBytes)
-	}
-}
-
-func TestClose(t *testing.T) {
-	m := &testMonitor{}
-
-	d, err := NewDomain(m, "foo")
-	if err != nil {
-		t.Error(err)
-	}
-
-	if err := d.Close(); err != nil {
-		t.Error(err)
-	}
-
-	if _, ok := <-d.done; ok {
-		t.Error("domain should be closed")
 	}
 }
 
@@ -572,7 +556,7 @@ func TestEvents(t *testing.T) {
 
 	select {
 	case <-events:
-		stop <- struct{}{}
+		close(stop)
 	case <-time.After(time.Millisecond * 20):
 		t.Error("expected event")
 	}
@@ -581,22 +565,32 @@ func TestEvents(t *testing.T) {
 // Test when a listener connects, but disconnects without
 // receiving from the events channel returned.
 func TestEventsDerelictListener(t *testing.T) {
-	d, done := testDomain(t, nil)
-	defer done()
+	mon := &testMonitor{}
+
+	d, err := NewDomain(mon, "test")
+	if err != nil {
+		t.Error(err)
+	}
+	defer d.Close()
 
 	_, stop, err := d.Events()
 	if err != nil {
 		t.Error(err)
 	}
 
-	<-time.After(200 * time.Millisecond)
+	events2, stop2, err := d.Events()
+	if err != nil {
+		t.Error(err)
+	}
 
-	stop <- struct{}{}
-	select {
-	case <-stop:
-		return
-	case <-time.After(time.Millisecond * 20):
-		t.Error("shutdown failed to complete")
+	time.Sleep(200 * time.Millisecond)
+	close(stop)
+
+	t.Log("Attempting to drain events2")
+	var once sync.Once
+	for range events2 {
+		// Ensure we see 1 event so we know we're receiving
+		once.Do(func() { close(stop2) })
 	}
 }
 
@@ -611,10 +605,22 @@ func TestEventsUnsupported(t *testing.T) {
 	}
 }
 
-func testDomain(t *testing.T, fn func(qmp.Command) (interface{}, error)) (*Domain, func()) {
+type testDomainOptFn func(*testMonitor)
+
+func withEventErrors(m *testMonitor)  { m.eventErrors = true }
+func withEventTimeout(m *testMonitor) { m.eventTimeout = true }
+
+func testDomain(
+	t *testing.T,
+	fn func(qmp.Command) (interface{}, error),
+	options ...testDomainOptFn,
+) (*Domain, func()) {
 	t.Helper()
 
 	mon := &testMonitor{fn: fn}
+	for _, o := range options {
+		o(mon)
+	}
 	d, err := NewDomain(mon, "test")
 	if err != nil {
 		t.Fatalf("failed to create test domain: %v", err)
@@ -651,23 +657,35 @@ func (t *testMonitor) Run(raw []byte) ([]byte, error) {
 func (t *testMonitor) Events(ctx context.Context) (<-chan qmp.Event, error) {
 	c := make(chan qmp.Event)
 	go func() {
+		defer close(c)
 		events := []string{blockJobReady, blockJobCompleted}
 
 		i := 0
 		for {
 			if t.eventTimeout {
-				<-time.After(10 * time.Millisecond)
-				continue
+				var forever <-chan struct{}
+				select {
+				case <-ctx.Done():
+					return
+				case <-forever:
+				}
 			}
 
 			if t.eventErrors {
-				c <- qmp.Event{Event: blockJobError}
-				<-time.After(10 * time.Millisecond)
+				select {
+				case <-ctx.Done():
+					return
+				case c <- qmp.Event{Event: blockJobError}:
+				}
+				time.Sleep(10 * time.Millisecond)
 				continue
 			}
 
-			c <- qmp.Event{Event: events[i]}
-			<-time.After(10 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+			case c <- qmp.Event{Event: events[i]}:
+			}
+			time.Sleep(10 * time.Millisecond)
 
 			i = (i + 1) % len(events)
 		}
