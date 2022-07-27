@@ -1,4 +1,4 @@
-// Copyright 2016 The go-qemu Authors.
+// Copyright 2022 The go-qemu Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package qemu
 import (
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"time"
 
@@ -232,10 +233,8 @@ func waitForSignal(d *Domain, signal string, timeout time.Duration, fn func() er
 	if err != nil {
 		return err
 	}
-	defer func() { done <- struct{}{} }()
+	defer close(done)
 
-	// start listening for events prior to command execution. QMP events
-	// may emit before the command returns.
 	jobErr := make(chan error)
 	go func() {
 		jobErr <- waitForJob(events, signal, timeout)
@@ -248,17 +247,20 @@ func waitForSignal(d *Domain, signal string, timeout time.Duration, fn func() er
 	return <-jobErr
 }
 
-// waitForJob monitors the domain's QMP event stream, waiting
-// for the provided signal, timeout, or BLOCK_JOB_ERROR.
-// An error is returned should either BLOCK_JOB_ERROR or timeout occur.
-func waitForJob(events chan qmp.Event, signal string, timeout time.Duration) error {
+// waitForJob monitors the domain's QMP event stream, waiting for the provided
+// signal. An error is returned when a BLOCK_JOB_ERROR is seen, a timeout
+// occurs, or the underlying channel is closed.
+func waitForJob(events <-chan qmp.Event, signal string, timeout time.Duration) error {
 	// Consider events stalled after timeout for X amount of time total,
 	// rather than X amount of time without an incoming event
 	stalled := time.After(timeout)
 
 	for {
 		select {
-		case e := <-events:
+		case e, ok := <-events:
+			if !ok {
+				return io.EOF
+			}
 			switch e.Event {
 			case signal:
 				return nil
