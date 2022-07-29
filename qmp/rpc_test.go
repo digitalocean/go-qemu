@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
-	"time"
 
 	"github.com/digitalocean/go-libvirt"
 	"github.com/digitalocean/go-libvirt/libvirttest"
@@ -182,19 +181,13 @@ func TestLibvirtRPCMonitorEvents(t *testing.T) {
 	}
 
 	go func() {
-		var e Event
-		select {
-		case e = <-stream:
-		case <-time.After(time.Second * 1):
-			t.Error("expected event, received timeout")
-		}
+		defer close(done)
+		got := <-stream
 
 		expected := "drive-ide0-0-0"
-		if e.Data["device"] != expected {
-			t.Errorf("expected device %q, got %q", expected, e.Data["device"])
+		if got.Data["device"] != expected {
+			t.Errorf("expected device %q, got %q", expected, got.Data["device"])
 		}
-
-		done <- struct{}{}
 	}()
 
 	// send an event to the listener goroutine
