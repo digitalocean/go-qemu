@@ -24,7 +24,8 @@ import (
 
 var hvConn = func() (net.Conn, error) {
 	m := libvirttest.New()
-	return m, nil
+	conn, err := m.Dial()
+	return conn, err
 }
 
 func TestRPCDriverDomainNames(t *testing.T) {
