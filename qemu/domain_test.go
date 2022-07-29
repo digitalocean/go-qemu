@@ -554,12 +554,8 @@ func TestEvents(t *testing.T) {
 		t.Error(err)
 	}
 
-	select {
-	case <-events:
-		close(stop)
-	case <-time.After(time.Millisecond * 20):
-		t.Error("expected event")
-	}
+	<-events
+	close(stop)
 }
 
 // Test when a listener connects, but disconnects without
@@ -582,8 +578,6 @@ func TestEventsDerelictListener(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
-	time.Sleep(200 * time.Millisecond)
 	close(stop)
 
 	t.Log("Attempting to drain events2")
@@ -677,7 +671,6 @@ func (t *testMonitor) Events(ctx context.Context) (<-chan qmp.Event, error) {
 					return
 				case c <- qmp.Event{Event: blockJobError}:
 				}
-				time.Sleep(10 * time.Millisecond)
 				continue
 			}
 
@@ -685,7 +678,6 @@ func (t *testMonitor) Events(ctx context.Context) (<-chan qmp.Event, error) {
 			case <-ctx.Done():
 			case c <- qmp.Event{Event: events[i]}:
 			}
-			time.Sleep(10 * time.Millisecond)
 
 			i = (i + 1) % len(events)
 		}
