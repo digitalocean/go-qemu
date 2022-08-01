@@ -17,10 +17,19 @@
 package qmp
 
 import (
+	"fmt"
 	"os"
+	"time"
 
 	"golang.org/x/sys/unix"
 )
+
+// NewPipeMonitor configures a connection to the provided QEMU monitor pipe.
+// An error is returned if the pipe cannot be successfully dialed, or the
+// dial attempt times out.
+func NewPipeMonitor(addr string, timeout time.Duration) (*SocketMonitor, error) {
+	return nil, fmt.Errorf("unimplemented")
+}
 
 func getUnixRights(file *os.File) []byte {
 	return unix.UnixRights(int(file.Fd()))

@@ -18,7 +18,27 @@ package qmp
 
 import (
 	"os"
+	"time"
+
+	"gopkg.in/natefinch/npipe.v2"
 )
+
+// NewPipeMonitor configures a connection to the provided QEMU monitor pipe.
+// An error is returned if the pipe cannot be successfully dialed, or the
+// dial attempt times out.
+func NewPipeMonitor(addr string, timeout time.Duration) (*SocketMonitor, error) {
+        c, err := npipe.DialTimeout(addr, timeout)
+        if err != nil {
+                return nil, err
+        }
+
+        mon := &SocketMonitor{
+                c:         c,
+                listeners: new(int32),
+        }
+
+        return mon, nil
+}
 
 func getUnixRights(file *os.File) []byte {
 	return nil
