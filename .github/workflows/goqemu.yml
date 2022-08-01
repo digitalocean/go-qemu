@@ -39,8 +39,11 @@ jobs:
 #     - name: vet
 #       run: go vet ./...
 
-      - name: check license
-        run: ./scripts/licensecheck.sh
+# disabled for now, is incompatible with anything that doesn't have 2016 as
+# the year. Might need fixing if we want to keep this.
+#
+#     - name: check license
+#       run: ./scripts/licensecheck.sh
 
       - name: check code generation
         run: |
