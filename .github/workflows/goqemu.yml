@@ -1,0 +1,56 @@
+name: go-qemu
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # track upstream Go's currently supported stable versions.
+        gorelease: ['1.17', '1.18']
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-${{ matrix.gorelease }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-${{ matrix.gorelease }}
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.gorelease }}
+
+      - name: build/go-${{ matrix.gorelease }}
+        run: go build -v ./...
+
+      - name: test/go-${{ matrix.gorelease }}
+        run: go test -v ./...
+
+# disabled for now, seeing as it is complaining about things that seem like
+# non-issues and that are helpful.
+#
+# I.e., it dislikes assert helpers:
+#
+#   qmp/socket_test.go:238:4: call to (*T).Fatalf from a non-test goroutine
+#     - name: vet
+#       run: go vet ./...
+
+# disabled for now, is incompatible with anything that doesn't have 2016 as
+# the year. Might need fixing if we want to keep this.
+#
+#     - name: check license
+#       run: ./scripts/licensecheck.sh
+
+      - name: check code generation
+        run: |
+          go install golang.org/x/tools/cmd/stringer@latest
+          ./scripts/codegeneration.sh
+
+      - name: golint
+        run: |
+          go install golang.org/x/lint/golint@latest
+          ./scripts/golint.sh
