@@ -69,7 +69,11 @@ var testEvent = []byte{
 }
 
 func TestNewLibvirtRPCMonitor(t *testing.T) {
-	conn := libvirttest.New()
+	lv := libvirttest.New()
+	conn, err := lv.Dial()
+	if err != nil {
+		t.Error(err)
+	}
 
 	domain := "test-1"
 	rpc := NewLibvirtRPCMonitor(domain, conn)
@@ -118,28 +122,46 @@ func TestQMPEvent(t *testing.T) {
 }
 
 func TestLibvirtRPCMonitorConnect(t *testing.T) {
-	conn := libvirttest.New()
+	lv := libvirttest.New()
+	conn, err := lv.Dial()
+	if err != nil {
+		t.Error(err)
+	}
 	mon := NewLibvirtRPCMonitor("test", conn)
 
-	err := mon.Connect()
+	err = mon.Connect()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestLibvirtRPCMonitorDisconnect(t *testing.T) {
-	conn := libvirttest.New()
+	lv := libvirttest.New()
+	conn, err := lv.Dial()
+	if err != nil {
+		t.Error(err)
+	}
 	mon := NewLibvirtRPCMonitor("test", conn)
 
-	err := mon.Disconnect()
+	err = mon.Disconnect()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestLibvirtRPCMonitorRun(t *testing.T) {
-	conn := libvirttest.New()
+	lv := libvirttest.New()
+	conn, err := lv.Dial()
+	if err != nil {
+		t.Error(err)
+	}
 	mon := NewLibvirtRPCMonitor("test", conn)
+
+	err = mon.Connect()
+	if err != nil {
+		t.Error(err)
+	}
+	defer mon.Disconnect()
 
 	res, err := mon.Run([]byte(`{"query-version"}`))
 	if err != nil {
@@ -171,8 +193,18 @@ func TestLibvirtRPCMonitorRun(t *testing.T) {
 
 func TestLibvirtRPCMonitorEvents(t *testing.T) {
 	ctx := context.Background()
-	conn := libvirttest.New()
+	lv := libvirttest.New()
+	conn, err := lv.Dial()
+	if err != nil {
+		t.Error(err)
+	}
 	mon := NewLibvirtRPCMonitor("test", conn)
+	err = mon.Connect()
+	if err != nil {
+		t.Error(err)
+	}
+	defer mon.Disconnect()
+
 	done := make(chan struct{})
 
 	stream, err := mon.Events(ctx)
@@ -191,7 +223,7 @@ func TestLibvirtRPCMonitorEvents(t *testing.T) {
 	}()
 
 	// send an event to the listener goroutine
-	_, _ = conn.Test.Write(testEvent)
+	_, _ = lv.Test.Write(testEvent)
 
 	// wait for completion
 	<-done
