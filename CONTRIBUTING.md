@@ -26,5 +26,5 @@ under the "Contributors" section using the format:
 
 Finally, submit a pull request for review!
 
-Questions?  Feel free to join us in [`#go-qemu` on freenode](https://webchat.freenode.net/)
+Questions?  Feel free to join us in [`#go-qemu` on libera chat](https://web.libera.chat/)
 if you'd like to discuss the project.
