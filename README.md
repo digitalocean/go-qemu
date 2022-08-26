@@ -4,7 +4,7 @@ go-qemu [![GoDoc](http://godoc.org/github.com/digitalocean/go-qemu?status.svg)](
 `go-qemu` is a collection of Go packages for interacting with running QEMU
 instances.  Apache 2.0 Licensed.
 
-Feel free to join us in [`#go-qemu` on freenode](https://webchat.freenode.net/)
+Feel free to join us in [`#go-qemu` on libera chat](https://web.libera.chat/)
 if you'd like to discuss the project.
 
 Installation
