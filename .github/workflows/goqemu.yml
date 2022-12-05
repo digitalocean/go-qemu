@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         # track upstream Go's currently supported stable versions.
-        gorelease: ['1.17', '1.18']
+        gorelease: ['1.18', '1.19']
     steps:
       - uses: actions/checkout@v3
 
