@@ -21,6 +21,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	qapischema "github.com/digitalocean/go-qemu/qapi-schema"
 )
 
 func TestGenerate(t *testing.T) {
@@ -202,78 +204,28 @@ func indent(s string) string {
 	return strings.Replace(s, "\n", "\n  ", -1)
 }
 
-func TestPyToJSON(t *testing.T) {
-	tests := []struct {
-		name, in, out string
-	}{
-		{
-			name: "Basic translation",
-			in:   `{'foo': 42, "bar": 'baz'}`,
-			out:  `{"foo": 42, "bar": "baz"}`,
-		},
-		{
-			name: "Idempotency",
-			in:   `{"foo": 42, "bar": "baz"}`,
-			out:  `{"foo": 42, "bar": "baz"}`,
-		},
-		{
-			name: "Lone comment",
-			in:   `# foo`,
-			out:  ``,
-		},
-		{
-			name: "Whole line comment",
-			in: `# This is a test
-{'foo': 42, 'bar': 'baz'}
-# This is another`,
-			out: `{"foo": 42, "bar": "baz"}`,
-		},
-		{
-			name: "Inline comment",
-			in: `{'foo': 42, # This is a test
-'bar': 'baz'} # This is another`,
-			// there's a trailing space on the next line.
-			out: `{"foo": 42, 
-"bar": "baz"}`,
-		},
-		{
-			name: "Comment in a string",
-			in:   `{'foo': 'look, # a comment!'}`,
-			out:  `{"foo": "look, # a comment!"}`,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			actual := strings.TrimSpace(string(pyToJSON([]byte(test.in))))
-			if actual != test.out {
-				t.Errorf(`Wrong output
-Input:
-  %s
-Want:
-  %s
-Got:
-  %s`, indent(test.in), indent(test.out), indent(actual))
-			}
-		})
-	}
-}
-
 func testGenerate(t *testing.T, in []byte, checkNeededTypes bool) []byte {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(in)
 	}))
 	defer s.Close()
 
-	defs, err := readDefinitions(s.URL)
+	data, err := getQAPI(s.URL)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	symbols, err := parse(defs)
+	tree, err := qapischema.Parse(string(data))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
+	tree, err = completeParseTree(tree, s.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	symbols := lowerParseTree(tree)
 
 	need := symbols
 	if checkNeededTypes {
