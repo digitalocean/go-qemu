@@ -723,6 +723,13 @@ type BlockDirtyBitmapAdd struct {
 	Autoload    *bool   `json:"autoload,omitempty"`
 }
 
+// BlockDirtyBitmapSha256 -> BlockDirtyBitmapSha256 (struct)
+
+// BlockDirtyBitmapSha256 implements the "BlockDirtyBitmapSha256" QMP API type.
+type BlockDirtyBitmapSha256 struct {
+	Sha256 string `json:"sha256"`
+}
+
 // BlockDirtyInfo -> BlockDirtyInfo (struct)
 
 // BlockDirtyInfo implements the "BlockDirtyInfo" QMP API type.
@@ -14770,6 +14777,40 @@ func (m *Monitor) XColoLostHeartbeat() (err error) {
 	}
 	bs, err = m.mon.Run(bs)
 	if err != nil {
+		return
+	}
+	return
+}
+
+// x-debug-block-dirty-bitmap-sha256 -> XDebugBlockDirtyBitmapSha256 (command)
+
+// XDebugBlockDirtyBitmapSha256 implements the "x-debug-block-dirty-bitmap-sha256" QMP API call.
+func (m *Monitor) XDebugBlockDirtyBitmapSha256(node string, name string) (ret BlockDirtyBitmapSha256, err error) {
+	cmd := struct {
+		Node string `json:"node"`
+		Name string `json:"name"`
+	}{
+		node,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-debug-block-dirty-bitmap-sha256",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
 		return
 	}
 	return
