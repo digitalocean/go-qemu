@@ -8,14 +8,14 @@
 //
 // Can be one of:
 {{- range $suffix, $type := $u.Options }}
-//   - {{ $basename }}{{ $suffix.Go }}
+//   - {{ $basename }}Variant{{ $suffix.Go }}
 {{- end }}
 type {{ $basename }} interface {
      is{{ $basename }}()
 }
 
 {{- range $suffix, $type := $u.Options }}
-{{ $subname := printf "%s%s" $basename $suffix.Go }}
+{{ $subname := printf "%sVariant%s" $basename $suffix.Go }}
 {{ $subtype := (index API $type) }}
 
 // {{ $subname }} is an implementation of {{ $basename }}.
@@ -58,8 +58,9 @@ func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
      }
      switch v.{{ $discriminatorField.Name.Go }} {
      {{- range $suffix, $type := $u.Options }}
+     {{- $subname := printf "%sVariant%s" $basename $suffix.Go}}
      case {{ $discriminatorField.Type.Go }}{{ $suffix.Go }}:
-          var ret {{ $basename }}{{ $suffix.Go }}
+          var ret {{ $subname }}
           err := json.Unmarshal([]byte(bs), &ret)
           return ret, err
      {{- end }}

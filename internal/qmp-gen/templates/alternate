@@ -15,14 +15,14 @@ supporting flat unions as implementations of an alternate.
 //
 // Can be one of:
 {{- range $suffix, $type := .Options }}
-//   - {{ $basename }}{{ $suffix.Go }}
+//   - {{ $basename }}Variant{{ $suffix.Go }}
 {{- end }}
 type {{ $basename }} interface {
   is{{ $basename }}()
 }
 
 {{- range $suffix, $type := .Options }}
-  {{ $subname := printf "%s%s" $basename $suffix.Go }}
+  {{ $subname := printf "%sVariant%s" $basename $suffix.Go }}
 
   {{- if $type.NullType }}
     // {{ $subname }} is a JSON null type, so it must
@@ -37,7 +37,7 @@ type {{ $basename }} interface {
   {{- if eq (typeOf (index API $type)) "flatunion" }}
     {{ $u := index API $type }}
     {{- range $suffix, $type := $u.Options }}
-      func ({{ $u.Name.Go }}{{ $suffix.Go }}) is{{ $basename }}() {}
+      func ({{ $u.Name.Go }}Variant{{ $suffix.Go }}) is{{ $basename }}() {}
     {{- end }}
   {{- else }}
     func ({{ $subname }}) is{{ $basename }}() {}
@@ -57,14 +57,14 @@ func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
       var {{ $suffix }} *int
       if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
         if {{ $suffix }} == nil {
-          return {{ printf "%s%s" $basename $suffix.Go }}{}, nil
+          return {{ printf "%sVariant%s" $basename $suffix.Go }}{}, nil
         }
       }
     {{- end }}
   {{- end }}
   {{- range $suffix, $type := .Options }}
     {{- if $type.SimpleType }}
-      var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
+      var {{ $suffix }} {{ printf "%sVariant%s" $basename $suffix.Go }}
       if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
         return {{ $suffix }}, nil
        }
@@ -78,13 +78,13 @@ func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
           if {{ $suffix }}, err := decode{{ $type.Go }}([]byte(bs)); err == nil {
             switch impl := {{ $suffix }}.(type) {
             {{- range $suffix, $type := $subtype.Options }}
-            case {{ $subtype.Name.Go }}{{ $suffix.Go }}:
+            case {{ $subtype.Name.Go }}Variant{{ $suffix.Go }}:
               return impl, nil
             {{- end }}
             }
           }
         {{- else }}
-          var {{ $suffix }} {{ printf "%s%s" $basename $suffix.Go }}
+          var {{ $suffix }} {{ printf "%sVariant%s" $basename $suffix.Go }}
           if err := json.Unmarshal([]byte(bs), &{{ $suffix }}); err == nil {
             return {{ $suffix }}, nil
           }

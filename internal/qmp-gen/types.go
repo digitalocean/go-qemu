@@ -263,13 +263,6 @@ func (n name) NullType() bool {
 }
 
 func (n name) InterfaceType(api map[name]interface{}) bool {
-	if n.SimpleType() {
-		return false
-	}
-	switch api[n].(type) {
-	case simpleUnion, flatUnion, alternate:
-		return true
-	}
 	return false
 }
 

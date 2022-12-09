@@ -20,14 +20,14 @@ redefinition, but still tack on all the marshaling logic.
 //
 // Can be one of:
 {{- range $suffix, $type := .Options }}
-//   - {{ $basename }}{{ $suffix.Go }}
+//   - {{ $basename }}Variant{{ $suffix.Go }}
 {{- end }}
 type {{ $basename }} interface {
      is{{ $basename }}()
 }
 
 {{- range $suffix, $type := .Options }}
-{{ $subname := printf "%s%s" $basename $suffix.Go }}
+{{ $subname := printf "%sVariant%s" $basename $suffix.Go }}
 {{- if ne $subname $type.Go }}
 // {{ $subname }} is an implementation of {{ $basename }}.
 type {{ $subname }} {{ $type.Go }}
@@ -55,8 +55,9 @@ func decode{{ $basename }}(bs json.RawMessage) ({{ $basename }}, error) {
      }
      switch v.T {
      {{- range $suffix, $type := .Options }}
+     {{- $subname := printf "%sVariant%s" $basename $suffix.Go}}
      case "{{ $suffix }}":
-          var ret {{ $basename }}{{ $suffix.Go }}
+          var ret {{ $subname }}
           if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
                return nil, err
           }
