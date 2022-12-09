@@ -7,7 +7,7 @@ import (
 
 func TestKeyValueQcode(t *testing.T) {
 	key := QKeyCodeShift
-	code := KeyValueQcode(key)
+	code := KeyValueVariantQcode(key)
 	json, err := code.MarshalJSON()
 	expectedJSON := []byte(`{"data":"shift","type":"qcode"}`)
 	if err != nil {
