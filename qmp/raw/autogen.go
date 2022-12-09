@@ -158,7 +158,21 @@ type AddfdInfo struct {
 	FD      int64 `json:"fd"`
 }
 
+// AnnounceParameters -> AnnounceParameters (struct)
+
+// AnnounceParameters implements the "AnnounceParameters" QMP API type.
+type AnnounceParameters struct {
+	Initial    int64    `json:"initial"`
+	Max        int64    `json:"max"`
+	Rounds     int64    `json:"rounds"`
+	Step       int64    `json:"step"`
+	Interfaces []string `json:"interfaces,omitempty"`
+	ID         *string  `json:"id,omitempty"`
+}
+
 // EVENT BALLOON_CHANGE
+
+// EVENT BLOCK_EXPORT_DELETED
 
 // EVENT BLOCK_IMAGE_CORRUPTED
 
@@ -170,15 +184,110 @@ type AddfdInfo struct {
 
 // EVENT BLOCK_JOB_ERROR
 
+// EVENT BLOCK_JOB_PENDING
+
 // EVENT BLOCK_JOB_READY
 
 // EVENT BLOCK_WRITE_THRESHOLD
+
+// BackupPerf -> BackupPerf (struct)
+
+// BackupPerf implements the "BackupPerf" QMP API type.
+type BackupPerf struct {
+	UseCopyRange *bool  `json:"use-copy-range,omitempty"`
+	MaxWorkers   *int64 `json:"max-workers,omitempty"`
+	MaxChunk     *int64 `json:"max-chunk,omitempty"`
+}
 
 // BalloonInfo -> BalloonInfo (struct)
 
 // BalloonInfo implements the "BalloonInfo" QMP API type.
 type BalloonInfo struct {
 	Actual int64 `json:"actual"`
+}
+
+// BitmapMigrationBitmapAlias -> BitmapMigrationBitmapAlias (struct)
+
+// BitmapMigrationBitmapAlias implements the "BitmapMigrationBitmapAlias" QMP API type.
+type BitmapMigrationBitmapAlias struct {
+	Name      string                               `json:"name"`
+	Alias     string                               `json:"alias"`
+	Transform *BitmapMigrationBitmapAliasTransform `json:"transform,omitempty"`
+}
+
+// BitmapMigrationBitmapAliasTransform -> BitmapMigrationBitmapAliasTransform (struct)
+
+// BitmapMigrationBitmapAliasTransform implements the "BitmapMigrationBitmapAliasTransform" QMP API type.
+type BitmapMigrationBitmapAliasTransform struct {
+	Persistent *bool `json:"persistent,omitempty"`
+}
+
+// BitmapMigrationNodeAlias -> BitmapMigrationNodeAlias (struct)
+
+// BitmapMigrationNodeAlias implements the "BitmapMigrationNodeAlias" QMP API type.
+type BitmapMigrationNodeAlias struct {
+	NodeName string                       `json:"node-name"`
+	Alias    string                       `json:"alias"`
+	Bitmaps  []BitmapMigrationBitmapAlias `json:"bitmaps"`
+}
+
+// BitmapSyncMode -> BitmapSyncMode (enum)
+
+// BitmapSyncMode implements the "BitmapSyncMode" QMP API type.
+type BitmapSyncMode int
+
+// Known values of BitmapSyncMode.
+const (
+	BitmapSyncModeOnSuccess BitmapSyncMode = iota
+	BitmapSyncModeNever
+	BitmapSyncModeAlways
+)
+
+// String implements fmt.Stringer.
+func (e BitmapSyncMode) String() string {
+	switch e {
+	case BitmapSyncModeOnSuccess:
+		return "on-success"
+	case BitmapSyncModeNever:
+		return "never"
+	case BitmapSyncModeAlways:
+		return "always"
+	default:
+		return fmt.Sprintf("BitmapSyncMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BitmapSyncMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BitmapSyncModeOnSuccess:
+		return json.Marshal("on-success")
+	case BitmapSyncModeNever:
+		return json.Marshal("never")
+	case BitmapSyncModeAlways:
+		return json.Marshal("always")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BitmapSyncMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BitmapSyncMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "on-success":
+		*e = BitmapSyncModeOnSuccess
+	case "never":
+		*e = BitmapSyncModeNever
+	case "always":
+		*e = BitmapSyncModeAlways
+	default:
+		return fmt.Errorf("unknown enum value %q for BitmapSyncMode", s)
+	}
+	return nil
 }
 
 // BlkdebugEvent -> BlkdebugEvent (enum)
@@ -234,6 +343,8 @@ const (
 	BlkdebugEventL1ShrinkWriteTable
 	BlkdebugEventL1ShrinkFreeL2Clusters
 	BlkdebugEventCorWrite
+	BlkdebugEventClusterAllocSpace
+	BlkdebugEventNone
 )
 
 // String implements fmt.Stringer.
@@ -331,6 +442,10 @@ func (e BlkdebugEvent) String() string {
 		return "l1_shrink_free_l2_clusters"
 	case BlkdebugEventCorWrite:
 		return "cor_write"
+	case BlkdebugEventClusterAllocSpace:
+		return "cluster_alloc_space"
+	case BlkdebugEventNone:
+		return "none"
 	default:
 		return fmt.Sprintf("BlkdebugEvent(%d)", e)
 	}
@@ -431,6 +546,10 @@ func (e BlkdebugEvent) MarshalJSON() ([]byte, error) {
 		return json.Marshal("l1_shrink_free_l2_clusters")
 	case BlkdebugEventCorWrite:
 		return json.Marshal("cor_write")
+	case BlkdebugEventClusterAllocSpace:
+		return json.Marshal("cluster_alloc_space")
+	case BlkdebugEventNone:
+		return json.Marshal("none")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for BlkdebugEvent", e)
 	}
@@ -535,8 +654,92 @@ func (e *BlkdebugEvent) UnmarshalJSON(bs []byte) error {
 		*e = BlkdebugEventL1ShrinkFreeL2Clusters
 	case "cor_write":
 		*e = BlkdebugEventCorWrite
+	case "cluster_alloc_space":
+		*e = BlkdebugEventClusterAllocSpace
+	case "none":
+		*e = BlkdebugEventNone
 	default:
 		return fmt.Errorf("unknown enum value %q for BlkdebugEvent", s)
+	}
+	return nil
+}
+
+// BlkdebugIOType -> BlkdebugIOType (enum)
+
+// BlkdebugIOType implements the "BlkdebugIOType" QMP API type.
+type BlkdebugIOType int
+
+// Known values of BlkdebugIOType.
+const (
+	BlkdebugIOTypeRead BlkdebugIOType = iota
+	BlkdebugIOTypeWrite
+	BlkdebugIOTypeWriteZeroes
+	BlkdebugIOTypeDiscard
+	BlkdebugIOTypeFlush
+	BlkdebugIOTypeBlockStatus
+)
+
+// String implements fmt.Stringer.
+func (e BlkdebugIOType) String() string {
+	switch e {
+	case BlkdebugIOTypeRead:
+		return "read"
+	case BlkdebugIOTypeWrite:
+		return "write"
+	case BlkdebugIOTypeWriteZeroes:
+		return "write-zeroes"
+	case BlkdebugIOTypeDiscard:
+		return "discard"
+	case BlkdebugIOTypeFlush:
+		return "flush"
+	case BlkdebugIOTypeBlockStatus:
+		return "block-status"
+	default:
+		return fmt.Sprintf("BlkdebugIOType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlkdebugIOType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlkdebugIOTypeRead:
+		return json.Marshal("read")
+	case BlkdebugIOTypeWrite:
+		return json.Marshal("write")
+	case BlkdebugIOTypeWriteZeroes:
+		return json.Marshal("write-zeroes")
+	case BlkdebugIOTypeDiscard:
+		return json.Marshal("discard")
+	case BlkdebugIOTypeFlush:
+		return json.Marshal("flush")
+	case BlkdebugIOTypeBlockStatus:
+		return json.Marshal("block-status")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlkdebugIOType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlkdebugIOType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "read":
+		*e = BlkdebugIOTypeRead
+	case "write":
+		*e = BlkdebugIOTypeWrite
+	case "write-zeroes":
+		*e = BlkdebugIOTypeWriteZeroes
+	case "discard":
+		*e = BlkdebugIOTypeDiscard
+	case "flush":
+		*e = BlkdebugIOTypeFlush
+	case "block-status":
+		*e = BlkdebugIOTypeBlockStatus
+	default:
+		return fmt.Errorf("unknown enum value %q for BlkdebugIOType", s)
 	}
 	return nil
 }
@@ -545,12 +748,13 @@ func (e *BlkdebugEvent) UnmarshalJSON(bs []byte) error {
 
 // BlkdebugInjectErrorOptions implements the "BlkdebugInjectErrorOptions" QMP API type.
 type BlkdebugInjectErrorOptions struct {
-	Event       BlkdebugEvent `json:"event"`
-	State       *int64        `json:"state,omitempty"`
-	Errno       *int64        `json:"errno,omitempty"`
-	Sector      *int64        `json:"sector,omitempty"`
-	Once        *bool         `json:"once,omitempty"`
-	Immediately *bool         `json:"immediately,omitempty"`
+	Event       BlkdebugEvent   `json:"event"`
+	State       *int64          `json:"state,omitempty"`
+	Iotype      *BlkdebugIOType `json:"iotype,omitempty"`
+	Errno       *int64          `json:"errno,omitempty"`
+	Sector      *int64          `json:"sector,omitempty"`
+	Once        *bool           `json:"once,omitempty"`
+	Immediately *bool           `json:"immediately,omitempty"`
 }
 
 // BlkdebugSetStateOptions -> BlkdebugSetStateOptions (struct)
@@ -566,38 +770,38 @@ type BlkdebugSetStateOptions struct {
 
 // BlockDeviceInfo implements the "BlockDeviceInfo" QMP API type.
 type BlockDeviceInfo struct {
-	File                 string                      `json:"file"`
-	NodeName             *string                     `json:"node-name,omitempty"`
-	Ro                   bool                        `json:"ro"`
-	Drv                  string                      `json:"drv"`
-	BackingFile          *string                     `json:"backing_file,omitempty"`
-	BackingFileDepth     int64                       `json:"backing_file_depth"`
-	Encrypted            bool                        `json:"encrypted"`
-	EncryptionKeyMissing bool                        `json:"encryption_key_missing"`
-	DetectZeroes         BlockdevDetectZeroesOptions `json:"detect_zeroes"`
-	Bps                  int64                       `json:"bps"`
-	BpsRd                int64                       `json:"bps_rd"`
-	BpsWr                int64                       `json:"bps_wr"`
-	Iops                 int64                       `json:"iops"`
-	IopsRd               int64                       `json:"iops_rd"`
-	IopsWr               int64                       `json:"iops_wr"`
-	Image                ImageInfo                   `json:"image"`
-	BpsMax               *int64                      `json:"bps_max,omitempty"`
-	BpsRdMax             *int64                      `json:"bps_rd_max,omitempty"`
-	BpsWrMax             *int64                      `json:"bps_wr_max,omitempty"`
-	IopsMax              *int64                      `json:"iops_max,omitempty"`
-	IopsRdMax            *int64                      `json:"iops_rd_max,omitempty"`
-	IopsWrMax            *int64                      `json:"iops_wr_max,omitempty"`
-	BpsMaxLength         *int64                      `json:"bps_max_length,omitempty"`
-	BpsRdMaxLength       *int64                      `json:"bps_rd_max_length,omitempty"`
-	BpsWrMaxLength       *int64                      `json:"bps_wr_max_length,omitempty"`
-	IopsMaxLength        *int64                      `json:"iops_max_length,omitempty"`
-	IopsRdMaxLength      *int64                      `json:"iops_rd_max_length,omitempty"`
-	IopsWrMaxLength      *int64                      `json:"iops_wr_max_length,omitempty"`
-	IopsSize             *int64                      `json:"iops_size,omitempty"`
-	Group                *string                     `json:"group,omitempty"`
-	Cache                BlockdevCacheInfo           `json:"cache"`
-	WriteThreshold       int64                       `json:"write_threshold"`
+	File             string                      `json:"file"`
+	NodeName         *string                     `json:"node-name,omitempty"`
+	Ro               bool                        `json:"ro"`
+	Drv              string                      `json:"drv"`
+	BackingFile      *string                     `json:"backing_file,omitempty"`
+	BackingFileDepth int64                       `json:"backing_file_depth"`
+	Encrypted        bool                        `json:"encrypted"`
+	DetectZeroes     BlockdevDetectZeroesOptions `json:"detect_zeroes"`
+	Bps              int64                       `json:"bps"`
+	BpsRd            int64                       `json:"bps_rd"`
+	BpsWr            int64                       `json:"bps_wr"`
+	Iops             int64                       `json:"iops"`
+	IopsRd           int64                       `json:"iops_rd"`
+	IopsWr           int64                       `json:"iops_wr"`
+	Image            ImageInfo                   `json:"image"`
+	BpsMax           *int64                      `json:"bps_max,omitempty"`
+	BpsRdMax         *int64                      `json:"bps_rd_max,omitempty"`
+	BpsWrMax         *int64                      `json:"bps_wr_max,omitempty"`
+	IopsMax          *int64                      `json:"iops_max,omitempty"`
+	IopsRdMax        *int64                      `json:"iops_rd_max,omitempty"`
+	IopsWrMax        *int64                      `json:"iops_wr_max,omitempty"`
+	BpsMaxLength     *int64                      `json:"bps_max_length,omitempty"`
+	BpsRdMaxLength   *int64                      `json:"bps_rd_max_length,omitempty"`
+	BpsWrMaxLength   *int64                      `json:"bps_wr_max_length,omitempty"`
+	IopsMaxLength    *int64                      `json:"iops_max_length,omitempty"`
+	IopsRdMaxLength  *int64                      `json:"iops_rd_max_length,omitempty"`
+	IopsWrMaxLength  *int64                      `json:"iops_wr_max_length,omitempty"`
+	IopsSize         *int64                      `json:"iops_size,omitempty"`
+	Group            *string                     `json:"group,omitempty"`
+	Cache            BlockdevCacheInfo           `json:"cache"`
+	WriteThreshold   int64                       `json:"write_threshold"`
+	DirtyBitmaps     []BlockDirtyInfo            `json:"dirty-bitmaps,omitempty"`
 }
 
 // BlockDeviceIoStatus -> BlockDeviceIOStatus (enum)
@@ -663,27 +867,36 @@ func (e *BlockDeviceIOStatus) UnmarshalJSON(bs []byte) error {
 
 // BlockDeviceStats implements the "BlockDeviceStats" QMP API type.
 type BlockDeviceStats struct {
-	RdBytes                int64                   `json:"rd_bytes"`
-	WrBytes                int64                   `json:"wr_bytes"`
-	RdOperations           int64                   `json:"rd_operations"`
-	WrOperations           int64                   `json:"wr_operations"`
-	FlushOperations        int64                   `json:"flush_operations"`
-	FlushTotalTimeNs       int64                   `json:"flush_total_time_ns"`
-	WrTotalTimeNs          int64                   `json:"wr_total_time_ns"`
-	RdTotalTimeNs          int64                   `json:"rd_total_time_ns"`
-	WrHighestOffset        int64                   `json:"wr_highest_offset"`
-	RdMerged               int64                   `json:"rd_merged"`
-	WrMerged               int64                   `json:"wr_merged"`
-	IdleTimeNs             *int64                  `json:"idle_time_ns,omitempty"`
-	FailedRdOperations     int64                   `json:"failed_rd_operations"`
-	FailedWrOperations     int64                   `json:"failed_wr_operations"`
-	FailedFlushOperations  int64                   `json:"failed_flush_operations"`
-	InvalidRdOperations    int64                   `json:"invalid_rd_operations"`
-	InvalidWrOperations    int64                   `json:"invalid_wr_operations"`
-	InvalidFlushOperations int64                   `json:"invalid_flush_operations"`
-	AccountInvalid         bool                    `json:"account_invalid"`
-	AccountFailed          bool                    `json:"account_failed"`
-	TimedStats             []BlockDeviceTimedStats `json:"timed_stats"`
+	RdBytes                int64                      `json:"rd_bytes"`
+	WrBytes                int64                      `json:"wr_bytes"`
+	UnmapBytes             int64                      `json:"unmap_bytes"`
+	RdOperations           int64                      `json:"rd_operations"`
+	WrOperations           int64                      `json:"wr_operations"`
+	FlushOperations        int64                      `json:"flush_operations"`
+	UnmapOperations        int64                      `json:"unmap_operations"`
+	RdTotalTimeNs          int64                      `json:"rd_total_time_ns"`
+	WrTotalTimeNs          int64                      `json:"wr_total_time_ns"`
+	FlushTotalTimeNs       int64                      `json:"flush_total_time_ns"`
+	UnmapTotalTimeNs       int64                      `json:"unmap_total_time_ns"`
+	WrHighestOffset        int64                      `json:"wr_highest_offset"`
+	RdMerged               int64                      `json:"rd_merged"`
+	WrMerged               int64                      `json:"wr_merged"`
+	UnmapMerged            int64                      `json:"unmap_merged"`
+	IdleTimeNs             *int64                     `json:"idle_time_ns,omitempty"`
+	FailedRdOperations     int64                      `json:"failed_rd_operations"`
+	FailedWrOperations     int64                      `json:"failed_wr_operations"`
+	FailedFlushOperations  int64                      `json:"failed_flush_operations"`
+	FailedUnmapOperations  int64                      `json:"failed_unmap_operations"`
+	InvalidRdOperations    int64                      `json:"invalid_rd_operations"`
+	InvalidWrOperations    int64                      `json:"invalid_wr_operations"`
+	InvalidFlushOperations int64                      `json:"invalid_flush_operations"`
+	InvalidUnmapOperations int64                      `json:"invalid_unmap_operations"`
+	AccountInvalid         bool                       `json:"account_invalid"`
+	AccountFailed          bool                       `json:"account_failed"`
+	TimedStats             []BlockDeviceTimedStats    `json:"timed_stats"`
+	RdLatencyHistogram     *BlockLatencyHistogramInfo `json:"rd_latency_histogram,omitempty"`
+	WrLatencyHistogram     *BlockLatencyHistogramInfo `json:"wr_latency_histogram,omitempty"`
+	FlushLatencyHistogram  *BlockLatencyHistogramInfo `json:"flush_latency_histogram,omitempty"`
 }
 
 // BlockDeviceTimedStats -> BlockDeviceTimedStats (struct)
@@ -720,7 +933,51 @@ type BlockDirtyBitmapAdd struct {
 	Name        string  `json:"name"`
 	Granularity *uint32 `json:"granularity,omitempty"`
 	Persistent  *bool   `json:"persistent,omitempty"`
-	Autoload    *bool   `json:"autoload,omitempty"`
+	Disabled    *bool   `json:"disabled,omitempty"`
+}
+
+// BlockDirtyBitmapMerge -> BlockDirtyBitmapMerge (struct)
+
+// BlockDirtyBitmapMerge implements the "BlockDirtyBitmapMerge" QMP API type.
+type BlockDirtyBitmapMerge struct {
+	Node    string                  `json:"node"`
+	Target  string                  `json:"target"`
+	Bitmaps []BlockDirtyBitmapOrStr `json:"bitmaps"`
+}
+
+// BlockDirtyBitmapOrStr -> BlockDirtyBitmapOrStr (alternate)
+
+// BlockDirtyBitmapOrStr implements the "BlockDirtyBitmapOrStr" QMP API type.
+//
+// Can be one of:
+//   - BlockDirtyBitmapOrStrVariantExternal
+//   - BlockDirtyBitmapOrStrVariantLocal
+type BlockDirtyBitmapOrStr interface {
+	isBlockDirtyBitmapOrStr()
+}
+
+// BlockDirtyBitmapOrStrVariantExternal is an implementation of BlockDirtyBitmapOrStr
+type BlockDirtyBitmapOrStrVariantExternal BlockDirtyBitmap
+
+func (BlockDirtyBitmapOrStrVariantExternal) isBlockDirtyBitmapOrStr() {}
+
+// BlockDirtyBitmapOrStrVariantLocal is an implementation of BlockDirtyBitmapOrStr
+type BlockDirtyBitmapOrStrVariantLocal string
+
+func (BlockDirtyBitmapOrStrVariantLocal) isBlockDirtyBitmapOrStr() {}
+
+func decodeBlockDirtyBitmapOrStr(bs json.RawMessage) (BlockDirtyBitmapOrStr, error) {
+
+	var local BlockDirtyBitmapOrStrVariantLocal
+	if err := json.Unmarshal([]byte(bs), &local); err == nil {
+		return local, nil
+	}
+
+	var external BlockDirtyBitmapOrStrVariantExternal
+	if err := json.Unmarshal([]byte(bs), &external); err == nil {
+		return external, nil
+	}
+	return nil, fmt.Errorf("unable to decode %q as a BlockDirtyBitmapOrStr", string(bs))
 }
 
 // BlockDirtyBitmapSha256 -> BlockDirtyBitmapSha256 (struct)
@@ -734,10 +991,13 @@ type BlockDirtyBitmapSha256 struct {
 
 // BlockDirtyInfo implements the "BlockDirtyInfo" QMP API type.
 type BlockDirtyInfo struct {
-	Name        *string           `json:"name,omitempty"`
-	Count       int64             `json:"count"`
-	Granularity uint32            `json:"granularity"`
-	Status      DirtyBitmapStatus `json:"status"`
+	Name         *string `json:"name,omitempty"`
+	Count        int64   `json:"count"`
+	Granularity  uint32  `json:"granularity"`
+	Recording    bool    `json:"recording"`
+	Busy         bool    `json:"busy"`
+	Persistent   bool    `json:"persistent"`
+	Inconsistent *bool   `json:"inconsistent,omitempty"`
 }
 
 // BlockErrorAction -> BlockErrorAction (enum)
@@ -799,6 +1059,285 @@ func (e *BlockErrorAction) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// BlockExportInfo -> BlockExportInfo (struct)
+
+// BlockExportInfo implements the "BlockExportInfo" QMP API type.
+type BlockExportInfo struct {
+	ID           string          `json:"id"`
+	Type         BlockExportType `json:"type"`
+	NodeName     string          `json:"node-name"`
+	ShuttingDown bool            `json:"shutting-down"`
+}
+
+// BlockExportOptions -> BlockExportOptions (flat union)
+
+// BlockExportOptions implements the "BlockExportOptions" QMP API type.
+//
+// Can be one of:
+//   - BlockExportOptionsVariantFuse
+//   - BlockExportOptionsVariantNBD
+//   - BlockExportOptionsVariantVduseBlk
+//   - BlockExportOptionsVariantVhostUserBlk
+type BlockExportOptions interface {
+	isBlockExportOptions()
+}
+
+// BlockExportOptionsVariantFuse is an implementation of BlockExportOptions.
+type BlockExportOptionsVariantFuse struct {
+	ID            string                `json:"id"`
+	FixedIothread *bool                 `json:"fixed-iothread,omitempty"`
+	Iothread      *string               `json:"iothread,omitempty"`
+	NodeName      string                `json:"node-name"`
+	Writable      *bool                 `json:"writable,omitempty"`
+	Writethrough  *bool                 `json:"writethrough,omitempty"`
+	Mountpoint    string                `json:"mountpoint"`
+	Growable      *bool                 `json:"growable,omitempty"`
+	AllowOther    *FuseExportAllowOther `json:"allow-other,omitempty"`
+}
+
+func (BlockExportOptionsVariantFuse) isBlockExportOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockExportOptionsVariantFuse) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type BlockExportType `json:"type"`
+		BlockExportOptionsVariantFuse
+	}{
+		BlockExportTypeFuse,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockExportOptionsVariantNBD is an implementation of BlockExportOptions.
+type BlockExportOptionsVariantNBD struct {
+	ID              string                  `json:"id"`
+	FixedIothread   *bool                   `json:"fixed-iothread,omitempty"`
+	Iothread        *string                 `json:"iothread,omitempty"`
+	NodeName        string                  `json:"node-name"`
+	Writable        *bool                   `json:"writable,omitempty"`
+	Writethrough    *bool                   `json:"writethrough,omitempty"`
+	Bitmaps         []BlockDirtyBitmapOrStr `json:"bitmaps,omitempty"`
+	AllocationDepth *bool                   `json:"allocation-depth,omitempty"`
+}
+
+func (BlockExportOptionsVariantNBD) isBlockExportOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockExportOptionsVariantNBD) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type BlockExportType `json:"type"`
+		BlockExportOptionsVariantNBD
+	}{
+		BlockExportTypeNBD,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockExportOptionsVariantVduseBlk is an implementation of BlockExportOptions.
+type BlockExportOptionsVariantVduseBlk struct {
+	ID               string  `json:"id"`
+	FixedIothread    *bool   `json:"fixed-iothread,omitempty"`
+	Iothread         *string `json:"iothread,omitempty"`
+	NodeName         string  `json:"node-name"`
+	Writable         *bool   `json:"writable,omitempty"`
+	Writethrough     *bool   `json:"writethrough,omitempty"`
+	Name             string  `json:"name"`
+	NumQueues        *uint16 `json:"num-queues,omitempty"`
+	QueueSize        *uint16 `json:"queue-size,omitempty"`
+	LogicalBlockSize *uint64 `json:"logical-block-size,omitempty"`
+	Serial           *string `json:"serial,omitempty"`
+}
+
+func (BlockExportOptionsVariantVduseBlk) isBlockExportOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockExportOptionsVariantVduseBlk) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type BlockExportType `json:"type"`
+		BlockExportOptionsVariantVduseBlk
+	}{
+		BlockExportTypeVduseBlk,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockExportOptionsVariantVhostUserBlk is an implementation of BlockExportOptions.
+type BlockExportOptionsVariantVhostUserBlk struct {
+	ID               string        `json:"id"`
+	FixedIothread    *bool         `json:"fixed-iothread,omitempty"`
+	Iothread         *string       `json:"iothread,omitempty"`
+	NodeName         string        `json:"node-name"`
+	Writable         *bool         `json:"writable,omitempty"`
+	Writethrough     *bool         `json:"writethrough,omitempty"`
+	Addr             SocketAddress `json:"addr"`
+	LogicalBlockSize *uint64       `json:"logical-block-size,omitempty"`
+	NumQueues        *uint16       `json:"num-queues,omitempty"`
+}
+
+func (BlockExportOptionsVariantVhostUserBlk) isBlockExportOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockExportOptionsVariantVhostUserBlk) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type BlockExportType `json:"type"`
+		BlockExportOptionsVariantVhostUserBlk
+	}{
+		BlockExportTypeVhostUserBlk,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeBlockExportOptions(bs json.RawMessage) (BlockExportOptions, error) {
+	v := struct {
+		Type BlockExportType `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case BlockExportTypeFuse:
+		var ret BlockExportOptionsVariantFuse
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockExportTypeNBD:
+		var ret BlockExportOptionsVariantNBD
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockExportTypeVduseBlk:
+		var ret BlockExportOptionsVariantVduseBlk
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockExportTypeVhostUserBlk:
+		var ret BlockExportOptionsVariantVhostUserBlk
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union BlockExportOptions", v.Type)
+	}
+}
+
+// BlockExportRemoveMode -> BlockExportRemoveMode (enum)
+
+// BlockExportRemoveMode implements the "BlockExportRemoveMode" QMP API type.
+type BlockExportRemoveMode int
+
+// Known values of BlockExportRemoveMode.
+const (
+	BlockExportRemoveModeSafe BlockExportRemoveMode = iota
+	BlockExportRemoveModeHard
+)
+
+// String implements fmt.Stringer.
+func (e BlockExportRemoveMode) String() string {
+	switch e {
+	case BlockExportRemoveModeSafe:
+		return "safe"
+	case BlockExportRemoveModeHard:
+		return "hard"
+	default:
+		return fmt.Sprintf("BlockExportRemoveMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockExportRemoveMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockExportRemoveModeSafe:
+		return json.Marshal("safe")
+	case BlockExportRemoveModeHard:
+		return json.Marshal("hard")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockExportRemoveMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockExportRemoveMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "safe":
+		*e = BlockExportRemoveModeSafe
+	case "hard":
+		*e = BlockExportRemoveModeHard
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockExportRemoveMode", s)
+	}
+	return nil
+}
+
+// BlockExportType -> BlockExportType (enum)
+
+// BlockExportType implements the "BlockExportType" QMP API type.
+type BlockExportType int
+
+// Known values of BlockExportType.
+const (
+	BlockExportTypeNBD BlockExportType = iota
+	BlockExportTypeVhostUserBlk
+	BlockExportTypeFuse
+	BlockExportTypeVduseBlk
+)
+
+// String implements fmt.Stringer.
+func (e BlockExportType) String() string {
+	switch e {
+	case BlockExportTypeNBD:
+		return "nbd"
+	case BlockExportTypeVhostUserBlk:
+		return "vhost-user-blk"
+	case BlockExportTypeFuse:
+		return "fuse"
+	case BlockExportTypeVduseBlk:
+		return "vduse-blk"
+	default:
+		return fmt.Sprintf("BlockExportType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockExportType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockExportTypeNBD:
+		return json.Marshal("nbd")
+	case BlockExportTypeVhostUserBlk:
+		return json.Marshal("vhost-user-blk")
+	case BlockExportTypeFuse:
+		return json.Marshal("fuse")
+	case BlockExportTypeVduseBlk:
+		return json.Marshal("vduse-blk")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockExportType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockExportType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "nbd":
+		*e = BlockExportTypeNBD
+	case "vhost-user-blk":
+		*e = BlockExportTypeVhostUserBlk
+	case "fuse":
+		*e = BlockExportTypeFuse
+	case "vduse-blk":
+		*e = BlockExportTypeVduseBlk
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockExportType", s)
+	}
+	return nil
+}
+
 // BlockIOThrottle -> BlockIOThrottle (struct)
 
 // BlockIOThrottle implements the "BlockIOThrottle" QMP API type.
@@ -831,94 +1370,105 @@ type BlockIOThrottle struct {
 
 // BlockInfo implements the "BlockInfo" QMP API type.
 type BlockInfo struct {
-	Device       string               `json:"device"`
-	Qdev         *string              `json:"qdev,omitempty"`
-	Type         string               `json:"type"`
-	Removable    bool                 `json:"removable"`
-	Locked       bool                 `json:"locked"`
-	Inserted     *BlockDeviceInfo     `json:"inserted,omitempty"`
-	TrayOpen     *bool                `json:"tray_open,omitempty"`
-	IOStatus     *BlockDeviceIOStatus `json:"io-status,omitempty"`
-	DirtyBitmaps []BlockDirtyInfo     `json:"dirty-bitmaps,omitempty"`
+	Device    string               `json:"device"`
+	Qdev      *string              `json:"qdev,omitempty"`
+	Type      string               `json:"type"`
+	Removable bool                 `json:"removable"`
+	Locked    bool                 `json:"locked"`
+	Inserted  *BlockDeviceInfo     `json:"inserted,omitempty"`
+	TrayOpen  *bool                `json:"tray_open,omitempty"`
+	IOStatus  *BlockDeviceIOStatus `json:"io-status,omitempty"`
 }
 
 // BlockJobInfo -> BlockJobInfo (struct)
 
 // BlockJobInfo implements the "BlockJobInfo" QMP API type.
 type BlockJobInfo struct {
-	Type     string              `json:"type"`
-	Device   string              `json:"device"`
-	Len      int64               `json:"len"`
-	Offset   int64               `json:"offset"`
-	Busy     bool                `json:"busy"`
-	Paused   bool                `json:"paused"`
-	Speed    int64               `json:"speed"`
-	IOStatus BlockDeviceIOStatus `json:"io-status"`
-	Ready    bool                `json:"ready"`
+	Type         string              `json:"type"`
+	Device       string              `json:"device"`
+	Len          int64               `json:"len"`
+	Offset       int64               `json:"offset"`
+	Busy         bool                `json:"busy"`
+	Paused       bool                `json:"paused"`
+	Speed        int64               `json:"speed"`
+	IOStatus     BlockDeviceIOStatus `json:"io-status"`
+	Ready        bool                `json:"ready"`
+	Status       JobStatus           `json:"status"`
+	AutoFinalize bool                `json:"auto-finalize"`
+	AutoDismiss  bool                `json:"auto-dismiss"`
+	Error        *string             `json:"error,omitempty"`
 }
 
-// BlockJobType -> BlockJobType (enum)
+// BlockLatencyHistogramInfo -> BlockLatencyHistogramInfo (struct)
 
-// BlockJobType implements the "BlockJobType" QMP API type.
-type BlockJobType int
+// BlockLatencyHistogramInfo implements the "BlockLatencyHistogramInfo" QMP API type.
+type BlockLatencyHistogramInfo struct {
+	Boundaries []uint64 `json:"boundaries"`
+	Bins       []uint64 `json:"bins"`
+}
 
-// Known values of BlockJobType.
+// BlockPermission -> BlockPermission (enum)
+
+// BlockPermission implements the "BlockPermission" QMP API type.
+type BlockPermission int
+
+// Known values of BlockPermission.
 const (
-	BlockJobTypeCommit BlockJobType = iota
-	BlockJobTypeStream
-	BlockJobTypeMirror
-	BlockJobTypeBackup
+	BlockPermissionConsistentRead BlockPermission = iota
+	BlockPermissionWrite
+	BlockPermissionWriteUnchanged
+	BlockPermissionResize
 )
 
 // String implements fmt.Stringer.
-func (e BlockJobType) String() string {
+func (e BlockPermission) String() string {
 	switch e {
-	case BlockJobTypeCommit:
-		return "commit"
-	case BlockJobTypeStream:
-		return "stream"
-	case BlockJobTypeMirror:
-		return "mirror"
-	case BlockJobTypeBackup:
-		return "backup"
+	case BlockPermissionConsistentRead:
+		return "consistent-read"
+	case BlockPermissionWrite:
+		return "write"
+	case BlockPermissionWriteUnchanged:
+		return "write-unchanged"
+	case BlockPermissionResize:
+		return "resize"
 	default:
-		return fmt.Sprintf("BlockJobType(%d)", e)
+		return fmt.Sprintf("BlockPermission(%d)", e)
 	}
 }
 
 // MarshalJSON implements json.Marshaler.
-func (e BlockJobType) MarshalJSON() ([]byte, error) {
+func (e BlockPermission) MarshalJSON() ([]byte, error) {
 	switch e {
-	case BlockJobTypeCommit:
-		return json.Marshal("commit")
-	case BlockJobTypeStream:
-		return json.Marshal("stream")
-	case BlockJobTypeMirror:
-		return json.Marshal("mirror")
-	case BlockJobTypeBackup:
-		return json.Marshal("backup")
+	case BlockPermissionConsistentRead:
+		return json.Marshal("consistent-read")
+	case BlockPermissionWrite:
+		return json.Marshal("write")
+	case BlockPermissionWriteUnchanged:
+		return json.Marshal("write-unchanged")
+	case BlockPermissionResize:
+		return json.Marshal("resize")
 	default:
-		return nil, fmt.Errorf("unknown enum value %q for BlockJobType", e)
+		return nil, fmt.Errorf("unknown enum value %q for BlockPermission", e)
 	}
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (e *BlockJobType) UnmarshalJSON(bs []byte) error {
+func (e *BlockPermission) UnmarshalJSON(bs []byte) error {
 	var s string
 	if err := json.Unmarshal(bs, &s); err != nil {
 		return err
 	}
 	switch s {
-	case "commit":
-		*e = BlockJobTypeCommit
-	case "stream":
-		*e = BlockJobTypeStream
-	case "mirror":
-		*e = BlockJobTypeMirror
-	case "backup":
-		*e = BlockJobTypeBackup
+	case "consistent-read":
+		*e = BlockPermissionConsistentRead
+	case "write":
+		*e = BlockPermissionWrite
+	case "write-unchanged":
+		*e = BlockPermissionWriteUnchanged
+	case "resize":
+		*e = BlockPermissionResize
 	default:
-		return fmt.Errorf("unknown enum value %q for BlockJobType", s)
+		return fmt.Errorf("unknown enum value %q for BlockPermission", s)
 	}
 	return nil
 }
@@ -927,11 +1477,113 @@ func (e *BlockJobType) UnmarshalJSON(bs []byte) error {
 
 // BlockStats implements the "BlockStats" QMP API type.
 type BlockStats struct {
-	Device   *string          `json:"device,omitempty"`
-	NodeName *string          `json:"node-name,omitempty"`
-	Stats    BlockDeviceStats `json:"stats"`
-	Parent   *BlockStats      `json:"parent,omitempty"`
-	Backing  *BlockStats      `json:"backing,omitempty"`
+	Device         *string             `json:"device,omitempty"`
+	Qdev           *string             `json:"qdev,omitempty"`
+	NodeName       *string             `json:"node-name,omitempty"`
+	Stats          BlockDeviceStats    `json:"stats"`
+	DriverSpecific *BlockStatsSpecific `json:"driver-specific,omitempty"`
+	Parent         *BlockStats         `json:"parent,omitempty"`
+	Backing        *BlockStats         `json:"backing,omitempty"`
+}
+
+// BlockStatsSpecific -> BlockStatsSpecific (flat union)
+
+// BlockStatsSpecific implements the "BlockStatsSpecific" QMP API type.
+//
+// Can be one of:
+//   - BlockStatsSpecificVariantFile
+//   - BlockStatsSpecificVariantHostDevice
+//   - BlockStatsSpecificVariantNvme
+type BlockStatsSpecific interface {
+	isBlockStatsSpecific()
+}
+
+// BlockStatsSpecificVariantFile is an implementation of BlockStatsSpecific.
+type BlockStatsSpecificVariantFile struct {
+	DiscardNbOK     uint64 `json:"discard-nb-ok"`
+	DiscardNbFailed uint64 `json:"discard-nb-failed"`
+	DiscardBytesOK  uint64 `json:"discard-bytes-ok"`
+}
+
+func (BlockStatsSpecificVariantFile) isBlockStatsSpecific() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockStatsSpecificVariantFile) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockStatsSpecificVariantFile
+	}{
+		BlockdevDriverFile,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockStatsSpecificVariantHostDevice is an implementation of BlockStatsSpecific.
+type BlockStatsSpecificVariantHostDevice struct {
+	DiscardNbOK     uint64 `json:"discard-nb-ok"`
+	DiscardNbFailed uint64 `json:"discard-nb-failed"`
+	DiscardBytesOK  uint64 `json:"discard-bytes-ok"`
+}
+
+func (BlockStatsSpecificVariantHostDevice) isBlockStatsSpecific() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockStatsSpecificVariantHostDevice) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockStatsSpecificVariantHostDevice
+	}{
+		BlockdevDriverHostDevice,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockStatsSpecificVariantNvme is an implementation of BlockStatsSpecific.
+type BlockStatsSpecificVariantNvme struct {
+	CompletionErrors  uint64 `json:"completion-errors"`
+	AlignedAccesses   uint64 `json:"aligned-accesses"`
+	UnalignedAccesses uint64 `json:"unaligned-accesses"`
+}
+
+func (BlockStatsSpecificVariantNvme) isBlockStatsSpecific() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockStatsSpecificVariantNvme) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockStatsSpecificVariantNvme
+	}{
+		BlockdevDriverNvme,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeBlockStatsSpecific(bs json.RawMessage) (BlockStatsSpecific, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Driver {
+	case BlockdevDriverFile:
+		var ret BlockStatsSpecificVariantFile
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverHostDevice:
+		var ret BlockStatsSpecificVariantHostDevice
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverNvme:
+		var ret BlockStatsSpecificVariantNvme
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union BlockStatsSpecific", v.Driver)
+	}
 }
 
 // BlockdevAioOptions -> BlockdevAIOOptions (enum)
@@ -943,6 +1595,7 @@ type BlockdevAIOOptions int
 const (
 	BlockdevAIOOptionsThreads BlockdevAIOOptions = iota
 	BlockdevAIOOptionsNative
+	BlockdevAIOOptionsIOUring
 )
 
 // String implements fmt.Stringer.
@@ -952,6 +1605,8 @@ func (e BlockdevAIOOptions) String() string {
 		return "threads"
 	case BlockdevAIOOptionsNative:
 		return "native"
+	case BlockdevAIOOptionsIOUring:
+		return "io_uring"
 	default:
 		return fmt.Sprintf("BlockdevAIOOptions(%d)", e)
 	}
@@ -964,6 +1619,8 @@ func (e BlockdevAIOOptions) MarshalJSON() ([]byte, error) {
 		return json.Marshal("threads")
 	case BlockdevAIOOptionsNative:
 		return json.Marshal("native")
+	case BlockdevAIOOptionsIOUring:
+		return json.Marshal("io_uring")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for BlockdevAIOOptions", e)
 	}
@@ -980,24 +1637,101 @@ func (e *BlockdevAIOOptions) UnmarshalJSON(bs []byte) error {
 		*e = BlockdevAIOOptionsThreads
 	case "native":
 		*e = BlockdevAIOOptionsNative
+	case "io_uring":
+		*e = BlockdevAIOOptionsIOUring
 	default:
 		return fmt.Errorf("unknown enum value %q for BlockdevAIOOptions", s)
 	}
 	return nil
 }
 
+// BlockdevAmendOptions -> BlockdevAmendOptions (flat union)
+
+// BlockdevAmendOptions implements the "BlockdevAmendOptions" QMP API type.
+//
+// Can be one of:
+//   - BlockdevAmendOptionsVariantLUKS
+//   - BlockdevAmendOptionsVariantQcow2
+type BlockdevAmendOptions interface {
+	isBlockdevAmendOptions()
+}
+
+// BlockdevAmendOptionsVariantLUKS is an implementation of BlockdevAmendOptions.
+type BlockdevAmendOptionsVariantLUKS struct {
+}
+
+func (BlockdevAmendOptionsVariantLUKS) isBlockdevAmendOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevAmendOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevAmendOptionsVariantLUKS
+	}{
+		BlockdevDriverLUKS,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevAmendOptionsVariantQcow2 is an implementation of BlockdevAmendOptions.
+type BlockdevAmendOptionsVariantQcow2 struct {
+	Encrypt *QCryptoBlockAmendOptions `json:"encrypt,omitempty"`
+}
+
+func (BlockdevAmendOptionsVariantQcow2) isBlockdevAmendOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevAmendOptionsVariantQcow2) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevAmendOptionsVariantQcow2
+	}{
+		BlockdevDriverQcow2,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeBlockdevAmendOptions(bs json.RawMessage) (BlockdevAmendOptions, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Driver {
+	case BlockdevDriverLUKS:
+		var ret BlockdevAmendOptionsVariantLUKS
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverQcow2:
+		var ret BlockdevAmendOptionsVariantQcow2
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union BlockdevAmendOptions", v.Driver)
+	}
+}
+
 // BlockdevBackup -> BlockdevBackup (struct)
 
 // BlockdevBackup implements the "BlockdevBackup" QMP API type.
 type BlockdevBackup struct {
-	JobID         *string          `json:"job-id,omitempty"`
-	Device        string           `json:"device"`
-	Target        string           `json:"target"`
-	Sync          MirrorSyncMode   `json:"sync"`
-	Speed         *int64           `json:"speed,omitempty"`
-	Compress      *bool            `json:"compress,omitempty"`
-	OnSourceError *BlockdevOnError `json:"on-source-error,omitempty"`
-	OnTargetError *BlockdevOnError `json:"on-target-error,omitempty"`
+	JobID          *string          `json:"job-id,omitempty"`
+	Device         string           `json:"device"`
+	Sync           MirrorSyncMode   `json:"sync"`
+	Speed          *int64           `json:"speed,omitempty"`
+	Bitmap         *string          `json:"bitmap,omitempty"`
+	BitmapMode     *BitmapSyncMode  `json:"bitmap-mode,omitempty"`
+	Compress       *bool            `json:"compress,omitempty"`
+	OnSourceError  *BlockdevOnError `json:"on-source-error,omitempty"`
+	OnTargetError  *BlockdevOnError `json:"on-target-error,omitempty"`
+	AutoFinalize   *bool            `json:"auto-finalize,omitempty"`
+	AutoDismiss    *bool            `json:"auto-dismiss,omitempty"`
+	FilterNodeName *string          `json:"filter-node-name,omitempty"`
+	XPerf          *BackupPerf      `json:"x-perf,omitempty"`
+	Target         string           `json:"target"`
 }
 
 // BlockdevCacheInfo -> BlockdevCacheInfo (struct)
@@ -1074,6 +1808,418 @@ func (e *BlockdevChangeReadOnlyMode) UnmarshalJSON(bs []byte) error {
 		return fmt.Errorf("unknown enum value %q for BlockdevChangeReadOnlyMode", s)
 	}
 	return nil
+}
+
+// BlockdevCreateOptions -> BlockdevCreateOptions (flat union)
+
+// BlockdevCreateOptions implements the "BlockdevCreateOptions" QMP API type.
+//
+// Can be one of:
+//   - BlockdevCreateOptionsVariantFile
+//   - BlockdevCreateOptionsVariantGluster
+//   - BlockdevCreateOptionsVariantLUKS
+//   - BlockdevCreateOptionsVariantNfs
+//   - BlockdevCreateOptionsVariantParallels
+//   - BlockdevCreateOptionsVariantQcow
+//   - BlockdevCreateOptionsVariantQcow2
+//   - BlockdevCreateOptionsVariantQed
+//   - BlockdevCreateOptionsVariantRbd
+//   - BlockdevCreateOptionsVariantSSH
+//   - BlockdevCreateOptionsVariantVdi
+//   - BlockdevCreateOptionsVariantVhdx
+//   - BlockdevCreateOptionsVariantVMDK
+//   - BlockdevCreateOptionsVariantVpc
+type BlockdevCreateOptions interface {
+	isBlockdevCreateOptions()
+}
+
+// BlockdevCreateOptionsVariantFile is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantFile struct {
+	Filename       string        `json:"filename"`
+	Size           uint64        `json:"size"`
+	Preallocation  *PreallocMode `json:"preallocation,omitempty"`
+	Nocow          *bool         `json:"nocow,omitempty"`
+	ExtentSizeHint *uint64       `json:"extent-size-hint,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantFile) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantFile) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantFile
+	}{
+		BlockdevDriverFile,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantGluster is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantGluster struct {
+	Location      BlockdevOptionsGluster `json:"location"`
+	Size          uint64                 `json:"size"`
+	Preallocation *PreallocMode          `json:"preallocation,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantGluster) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantGluster) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantGluster
+	}{
+		BlockdevDriverGluster,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantLUKS is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantLUKS struct {
+	File          BlockdevRef   `json:"file"`
+	Size          uint64        `json:"size"`
+	Preallocation *PreallocMode `json:"preallocation,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantLUKS) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantLUKS
+	}{
+		BlockdevDriverLUKS,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantNfs is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantNfs struct {
+	Location BlockdevOptionsNfs `json:"location"`
+	Size     uint64             `json:"size"`
+}
+
+func (BlockdevCreateOptionsVariantNfs) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantNfs) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantNfs
+	}{
+		BlockdevDriverNfs,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantParallels is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantParallels struct {
+	File        BlockdevRef `json:"file"`
+	Size        uint64      `json:"size"`
+	ClusterSize *uint64     `json:"cluster-size,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantParallels) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantParallels) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantParallels
+	}{
+		BlockdevDriverParallels,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantQcow is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantQcow struct {
+	File        BlockdevRef                `json:"file"`
+	Size        uint64                     `json:"size"`
+	BackingFile *string                    `json:"backing-file,omitempty"`
+	Encrypt     *QCryptoBlockCreateOptions `json:"encrypt,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantQcow) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantQcow) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantQcow
+	}{
+		BlockdevDriverQcow,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantQcow2 is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantQcow2 struct {
+	File            BlockdevRef                `json:"file"`
+	DataFile        *BlockdevRef               `json:"data-file,omitempty"`
+	DataFileRaw     *bool                      `json:"data-file-raw,omitempty"`
+	ExtendedL2      *bool                      `json:"extended-l2,omitempty"`
+	Size            uint64                     `json:"size"`
+	Version         *BlockdevQcow2Version      `json:"version,omitempty"`
+	BackingFile     *string                    `json:"backing-file,omitempty"`
+	BackingFmt      *BlockdevDriver            `json:"backing-fmt,omitempty"`
+	Encrypt         *QCryptoBlockCreateOptions `json:"encrypt,omitempty"`
+	ClusterSize     *uint64                    `json:"cluster-size,omitempty"`
+	Preallocation   *PreallocMode              `json:"preallocation,omitempty"`
+	LazyRefcounts   *bool                      `json:"lazy-refcounts,omitempty"`
+	RefcountBits    *int64                     `json:"refcount-bits,omitempty"`
+	CompressionType *Qcow2CompressionType      `json:"compression-type,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantQcow2) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantQcow2) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantQcow2
+	}{
+		BlockdevDriverQcow2,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantQed is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantQed struct {
+	File        BlockdevRef     `json:"file"`
+	Size        uint64          `json:"size"`
+	BackingFile *string         `json:"backing-file,omitempty"`
+	BackingFmt  *BlockdevDriver `json:"backing-fmt,omitempty"`
+	ClusterSize *uint64         `json:"cluster-size,omitempty"`
+	TableSize   *int64          `json:"table-size,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantQed) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantQed) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantQed
+	}{
+		BlockdevDriverQed,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantRbd is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantRbd struct {
+	Location    BlockdevOptionsRbd          `json:"location"`
+	Size        uint64                      `json:"size"`
+	ClusterSize *uint64                     `json:"cluster-size,omitempty"`
+	Encrypt     *RbdEncryptionCreateOptions `json:"encrypt,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantRbd) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantRbd) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantRbd
+	}{
+		BlockdevDriverRbd,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantSSH is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantSSH struct {
+	Location BlockdevOptionsSSH `json:"location"`
+	Size     uint64             `json:"size"`
+}
+
+func (BlockdevCreateOptionsVariantSSH) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantSSH) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantSSH
+	}{
+		BlockdevDriverSSH,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantVdi is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantVdi struct {
+	File          BlockdevRef   `json:"file"`
+	Size          uint64        `json:"size"`
+	Preallocation *PreallocMode `json:"preallocation,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantVdi) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantVdi) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantVdi
+	}{
+		BlockdevDriverVdi,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantVhdx is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantVhdx struct {
+	File           BlockdevRef            `json:"file"`
+	Size           uint64                 `json:"size"`
+	LogSize        *uint64                `json:"log-size,omitempty"`
+	BlockSize      *uint64                `json:"block-size,omitempty"`
+	Subformat      *BlockdevVhdxSubformat `json:"subformat,omitempty"`
+	BlockStateZero *bool                  `json:"block-state-zero,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantVhdx) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantVhdx) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantVhdx
+	}{
+		BlockdevDriverVhdx,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantVMDK is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantVMDK struct {
+	File         BlockdevRef              `json:"file"`
+	Size         uint64                   `json:"size"`
+	Extents      []BlockdevRef            `json:"extents,omitempty"`
+	Subformat    *BlockdevVMDKSubformat   `json:"subformat,omitempty"`
+	BackingFile  *string                  `json:"backing-file,omitempty"`
+	AdapterType  *BlockdevVMDKAdapterType `json:"adapter-type,omitempty"`
+	Hwversion    *string                  `json:"hwversion,omitempty"`
+	Toolsversion *string                  `json:"toolsversion,omitempty"`
+	ZeroedGrain  *bool                    `json:"zeroed-grain,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantVMDK) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantVMDK) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantVMDK
+	}{
+		BlockdevDriverVMDK,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevCreateOptionsVariantVpc is an implementation of BlockdevCreateOptions.
+type BlockdevCreateOptionsVariantVpc struct {
+	File      BlockdevRef           `json:"file"`
+	Size      uint64                `json:"size"`
+	Subformat *BlockdevVpcSubformat `json:"subformat,omitempty"`
+	ForceSize *bool                 `json:"force-size,omitempty"`
+}
+
+func (BlockdevCreateOptionsVariantVpc) isBlockdevCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevCreateOptionsVariantVpc) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevCreateOptionsVariantVpc
+	}{
+		BlockdevDriverVpc,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeBlockdevCreateOptions(bs json.RawMessage) (BlockdevCreateOptions, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Driver {
+	case BlockdevDriverFile:
+		var ret BlockdevCreateOptionsVariantFile
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverGluster:
+		var ret BlockdevCreateOptionsVariantGluster
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverLUKS:
+		var ret BlockdevCreateOptionsVariantLUKS
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverNfs:
+		var ret BlockdevCreateOptionsVariantNfs
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverParallels:
+		var ret BlockdevCreateOptionsVariantParallels
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverQcow:
+		var ret BlockdevCreateOptionsVariantQcow
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverQcow2:
+		var ret BlockdevCreateOptionsVariantQcow2
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverQed:
+		var ret BlockdevCreateOptionsVariantQed
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverRbd:
+		var ret BlockdevCreateOptionsVariantRbd
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverSSH:
+		var ret BlockdevCreateOptionsVariantSSH
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverVdi:
+		var ret BlockdevCreateOptionsVariantVdi
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverVhdx:
+		var ret BlockdevCreateOptionsVariantVhdx
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverVMDK:
+		var ret BlockdevCreateOptionsVariantVMDK
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverVpc:
+		var ret BlockdevCreateOptionsVariantVpc
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union BlockdevCreateOptions", v.Driver)
+	}
 }
 
 // BlockdevDetectZeroesOptions -> BlockdevDetectZeroesOptions (enum)
@@ -1195,11 +2341,17 @@ type BlockdevDriver int
 // Known values of BlockdevDriver.
 const (
 	BlockdevDriverBlkdebug BlockdevDriver = iota
+	BlockdevDriverBlklogwrites
+	BlockdevDriverBlkreplay
 	BlockdevDriverBlkverify
 	BlockdevDriverBochs
 	BlockdevDriverCloop
+	BlockdevDriverCompress
+	BlockdevDriverCopyBeforeWrite
+	BlockdevDriverCopyOnRead
 	BlockdevDriverDmg
 	BlockdevDriverFile
+	BlockdevDriverSnapshotAccess
 	BlockdevDriverFTP
 	BlockdevDriverFTPS
 	BlockdevDriverGluster
@@ -1213,7 +2365,9 @@ const (
 	BlockdevDriverNfs
 	BlockdevDriverNullAIO
 	BlockdevDriverNullCo
+	BlockdevDriverNvme
 	BlockdevDriverParallels
+	BlockdevDriverPreallocate
 	BlockdevDriverQcow
 	BlockdevDriverQcow2
 	BlockdevDriverQed
@@ -1221,7 +2375,6 @@ const (
 	BlockdevDriverRaw
 	BlockdevDriverRbd
 	BlockdevDriverReplication
-	BlockdevDriverSheepdog
 	BlockdevDriverSSH
 	BlockdevDriverThrottle
 	BlockdevDriverVdi
@@ -1229,7 +2382,6 @@ const (
 	BlockdevDriverVMDK
 	BlockdevDriverVpc
 	BlockdevDriverVvfat
-	BlockdevDriverVxhs
 )
 
 // String implements fmt.Stringer.
@@ -1237,16 +2389,28 @@ func (e BlockdevDriver) String() string {
 	switch e {
 	case BlockdevDriverBlkdebug:
 		return "blkdebug"
+	case BlockdevDriverBlklogwrites:
+		return "blklogwrites"
+	case BlockdevDriverBlkreplay:
+		return "blkreplay"
 	case BlockdevDriverBlkverify:
 		return "blkverify"
 	case BlockdevDriverBochs:
 		return "bochs"
 	case BlockdevDriverCloop:
 		return "cloop"
+	case BlockdevDriverCompress:
+		return "compress"
+	case BlockdevDriverCopyBeforeWrite:
+		return "copy-before-write"
+	case BlockdevDriverCopyOnRead:
+		return "copy-on-read"
 	case BlockdevDriverDmg:
 		return "dmg"
 	case BlockdevDriverFile:
 		return "file"
+	case BlockdevDriverSnapshotAccess:
+		return "snapshot-access"
 	case BlockdevDriverFTP:
 		return "ftp"
 	case BlockdevDriverFTPS:
@@ -1273,8 +2437,12 @@ func (e BlockdevDriver) String() string {
 		return "null-aio"
 	case BlockdevDriverNullCo:
 		return "null-co"
+	case BlockdevDriverNvme:
+		return "nvme"
 	case BlockdevDriverParallels:
 		return "parallels"
+	case BlockdevDriverPreallocate:
+		return "preallocate"
 	case BlockdevDriverQcow:
 		return "qcow"
 	case BlockdevDriverQcow2:
@@ -1289,8 +2457,6 @@ func (e BlockdevDriver) String() string {
 		return "rbd"
 	case BlockdevDriverReplication:
 		return "replication"
-	case BlockdevDriverSheepdog:
-		return "sheepdog"
 	case BlockdevDriverSSH:
 		return "ssh"
 	case BlockdevDriverThrottle:
@@ -1305,8 +2471,6 @@ func (e BlockdevDriver) String() string {
 		return "vpc"
 	case BlockdevDriverVvfat:
 		return "vvfat"
-	case BlockdevDriverVxhs:
-		return "vxhs"
 	default:
 		return fmt.Sprintf("BlockdevDriver(%d)", e)
 	}
@@ -1317,16 +2481,28 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 	switch e {
 	case BlockdevDriverBlkdebug:
 		return json.Marshal("blkdebug")
+	case BlockdevDriverBlklogwrites:
+		return json.Marshal("blklogwrites")
+	case BlockdevDriverBlkreplay:
+		return json.Marshal("blkreplay")
 	case BlockdevDriverBlkverify:
 		return json.Marshal("blkverify")
 	case BlockdevDriverBochs:
 		return json.Marshal("bochs")
 	case BlockdevDriverCloop:
 		return json.Marshal("cloop")
+	case BlockdevDriverCompress:
+		return json.Marshal("compress")
+	case BlockdevDriverCopyBeforeWrite:
+		return json.Marshal("copy-before-write")
+	case BlockdevDriverCopyOnRead:
+		return json.Marshal("copy-on-read")
 	case BlockdevDriverDmg:
 		return json.Marshal("dmg")
 	case BlockdevDriverFile:
 		return json.Marshal("file")
+	case BlockdevDriverSnapshotAccess:
+		return json.Marshal("snapshot-access")
 	case BlockdevDriverFTP:
 		return json.Marshal("ftp")
 	case BlockdevDriverFTPS:
@@ -1353,8 +2529,12 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("null-aio")
 	case BlockdevDriverNullCo:
 		return json.Marshal("null-co")
+	case BlockdevDriverNvme:
+		return json.Marshal("nvme")
 	case BlockdevDriverParallels:
 		return json.Marshal("parallels")
+	case BlockdevDriverPreallocate:
+		return json.Marshal("preallocate")
 	case BlockdevDriverQcow:
 		return json.Marshal("qcow")
 	case BlockdevDriverQcow2:
@@ -1369,8 +2549,6 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("rbd")
 	case BlockdevDriverReplication:
 		return json.Marshal("replication")
-	case BlockdevDriverSheepdog:
-		return json.Marshal("sheepdog")
 	case BlockdevDriverSSH:
 		return json.Marshal("ssh")
 	case BlockdevDriverThrottle:
@@ -1385,8 +2563,6 @@ func (e BlockdevDriver) MarshalJSON() ([]byte, error) {
 		return json.Marshal("vpc")
 	case BlockdevDriverVvfat:
 		return json.Marshal("vvfat")
-	case BlockdevDriverVxhs:
-		return json.Marshal("vxhs")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for BlockdevDriver", e)
 	}
@@ -1401,16 +2577,28 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 	switch s {
 	case "blkdebug":
 		*e = BlockdevDriverBlkdebug
+	case "blklogwrites":
+		*e = BlockdevDriverBlklogwrites
+	case "blkreplay":
+		*e = BlockdevDriverBlkreplay
 	case "blkverify":
 		*e = BlockdevDriverBlkverify
 	case "bochs":
 		*e = BlockdevDriverBochs
 	case "cloop":
 		*e = BlockdevDriverCloop
+	case "compress":
+		*e = BlockdevDriverCompress
+	case "copy-before-write":
+		*e = BlockdevDriverCopyBeforeWrite
+	case "copy-on-read":
+		*e = BlockdevDriverCopyOnRead
 	case "dmg":
 		*e = BlockdevDriverDmg
 	case "file":
 		*e = BlockdevDriverFile
+	case "snapshot-access":
+		*e = BlockdevDriverSnapshotAccess
 	case "ftp":
 		*e = BlockdevDriverFTP
 	case "ftps":
@@ -1437,8 +2625,12 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 		*e = BlockdevDriverNullAIO
 	case "null-co":
 		*e = BlockdevDriverNullCo
+	case "nvme":
+		*e = BlockdevDriverNvme
 	case "parallels":
 		*e = BlockdevDriverParallels
+	case "preallocate":
+		*e = BlockdevDriverPreallocate
 	case "qcow":
 		*e = BlockdevDriverQcow
 	case "qcow2":
@@ -1453,8 +2645,6 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 		*e = BlockdevDriverRbd
 	case "replication":
 		*e = BlockdevDriverReplication
-	case "sheepdog":
-		*e = BlockdevDriverSheepdog
 	case "ssh":
 		*e = BlockdevDriverSSH
 	case "throttle":
@@ -1469,8 +2659,6 @@ func (e *BlockdevDriver) UnmarshalJSON(bs []byte) error {
 		*e = BlockdevDriverVpc
 	case "vvfat":
 		*e = BlockdevDriverVvfat
-	case "vxhs":
-		*e = BlockdevDriverVxhs
 	default:
 		return fmt.Errorf("unknown enum value %q for BlockdevDriver", s)
 	}
@@ -1556,9 +2744,14 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //
 // Can be one of:
 //   - BlockdevOptionsVariantBlkdebug
+//   - BlockdevOptionsVariantBlklogwrites
+//   - BlockdevOptionsVariantBlkreplay
 //   - BlockdevOptionsVariantBlkverify
 //   - BlockdevOptionsVariantBochs
 //   - BlockdevOptionsVariantCloop
+//   - BlockdevOptionsVariantCompress
+//   - BlockdevOptionsVariantCopyBeforeWrite
+//   - BlockdevOptionsVariantCopyOnRead
 //   - BlockdevOptionsVariantDmg
 //   - BlockdevOptionsVariantFile
 //   - BlockdevOptionsVariantFTP
@@ -1574,7 +2767,9 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsVariantNfs
 //   - BlockdevOptionsVariantNullAIO
 //   - BlockdevOptionsVariantNullCo
+//   - BlockdevOptionsVariantNvme
 //   - BlockdevOptionsVariantParallels
+//   - BlockdevOptionsVariantPreallocate
 //   - BlockdevOptionsVariantQcow
 //   - BlockdevOptionsVariantQcow2
 //   - BlockdevOptionsVariantQed
@@ -1582,7 +2777,7 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsVariantRaw
 //   - BlockdevOptionsVariantRbd
 //   - BlockdevOptionsVariantReplication
-//   - BlockdevOptionsVariantSheepdog
+//   - BlockdevOptionsVariantSnapshotAccess
 //   - BlockdevOptionsVariantSSH
 //   - BlockdevOptionsVariantThrottle
 //   - BlockdevOptionsVariantVdi
@@ -1590,29 +2785,31 @@ func (e *BlockdevOnError) UnmarshalJSON(bs []byte) error {
 //   - BlockdevOptionsVariantVMDK
 //   - BlockdevOptionsVariantVpc
 //   - BlockdevOptionsVariantVvfat
-//   - BlockdevOptionsVariantVxhs
 type BlockdevOptions interface {
 	isBlockdevOptions()
 }
 
 // BlockdevOptionsVariantBlkdebug is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantBlkdebug struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Image        BlockdevRef                  `json:"image"`
-	Config       *string                      `json:"config,omitempty"`
-	Align        *int64                       `json:"align,omitempty"`
-	MaxTransfer  *int32                       `json:"max-transfer,omitempty"`
-	OptWriteZero *int32                       `json:"opt-write-zero,omitempty"`
-	MaxWriteZero *int32                       `json:"max-write-zero,omitempty"`
-	OptDiscard   *int32                       `json:"opt-discard,omitempty"`
-	MaxDiscard   *int32                       `json:"max-discard,omitempty"`
-	InjectError  []BlkdebugInjectErrorOptions `json:"inject-error,omitempty"`
-	SetState     []BlkdebugSetStateOptions    `json:"set-state,omitempty"`
+	NodeName          *string                      `json:"node-name,omitempty"`
+	Discard           *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache             *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly          *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly      *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare        *bool                        `json:"force-share,omitempty"`
+	DetectZeroes      *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Image             BlockdevRef                  `json:"image"`
+	Config            *string                      `json:"config,omitempty"`
+	Align             *int64                       `json:"align,omitempty"`
+	MaxTransfer       *int32                       `json:"max-transfer,omitempty"`
+	OptWriteZero      *int32                       `json:"opt-write-zero,omitempty"`
+	MaxWriteZero      *int32                       `json:"max-write-zero,omitempty"`
+	OptDiscard        *int32                       `json:"opt-discard,omitempty"`
+	MaxDiscard        *int32                       `json:"max-discard,omitempty"`
+	InjectError       []BlkdebugInjectErrorOptions `json:"inject-error,omitempty"`
+	SetState          []BlkdebugSetStateOptions    `json:"set-state,omitempty"`
+	TakeChildPerms    []BlockPermission            `json:"take-child-perms,omitempty"`
+	UnshareChildPerms []BlockPermission            `json:"unshare-child-perms,omitempty"`
 }
 
 func (BlockdevOptionsVariantBlkdebug) isBlockdevOptions() {}
@@ -1629,12 +2826,69 @@ func (s BlockdevOptionsVariantBlkdebug) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// BlockdevOptionsVariantBlklogwrites is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantBlklogwrites struct {
+	NodeName               *string                      `json:"node-name,omitempty"`
+	Discard                *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache                  *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly               *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly           *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare             *bool                        `json:"force-share,omitempty"`
+	DetectZeroes           *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	File                   BlockdevRef                  `json:"file"`
+	Log                    BlockdevRef                  `json:"log"`
+	LogSectorSize          *uint32                      `json:"log-sector-size,omitempty"`
+	LogAppend              *bool                        `json:"log-append,omitempty"`
+	LogSuperUpdateInterval *uint64                      `json:"log-super-update-interval,omitempty"`
+}
+
+func (BlockdevOptionsVariantBlklogwrites) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantBlklogwrites) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantBlklogwrites
+	}{
+		BlockdevDriverBlklogwrites,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevOptionsVariantBlkreplay is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantBlkreplay struct {
+	NodeName     *string                      `json:"node-name,omitempty"`
+	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare   *bool                        `json:"force-share,omitempty"`
+	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Image        BlockdevRef                  `json:"image"`
+}
+
+func (BlockdevOptionsVariantBlkreplay) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantBlkreplay) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantBlkreplay
+	}{
+		BlockdevDriverBlkreplay,
+		s,
+	}
+	return json.Marshal(v)
+}
+
 // BlockdevOptionsVariantBlkverify is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantBlkverify struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Test         BlockdevRef                  `json:"test"`
@@ -1661,6 +2915,7 @@ type BlockdevOptionsVariantBochs struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1686,6 +2941,7 @@ type BlockdevOptionsVariantCloop struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1705,12 +2961,94 @@ func (s BlockdevOptionsVariantCloop) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// BlockdevOptionsVariantCompress is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantCompress struct {
+	NodeName     *string                      `json:"node-name,omitempty"`
+	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare   *bool                        `json:"force-share,omitempty"`
+	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	File         BlockdevRef                  `json:"file"`
+}
+
+func (BlockdevOptionsVariantCompress) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantCompress) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantCompress
+	}{
+		BlockdevDriverCompress,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevOptionsVariantCopyBeforeWrite is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantCopyBeforeWrite struct {
+	NodeName     *string                      `json:"node-name,omitempty"`
+	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare   *bool                        `json:"force-share,omitempty"`
+	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Target       BlockdevRef                  `json:"target"`
+	Bitmap       *BlockDirtyBitmap            `json:"bitmap,omitempty"`
+	OnCbwError   *OnCbwError                  `json:"on-cbw-error,omitempty"`
+	CbwTimeout   *uint32                      `json:"cbw-timeout,omitempty"`
+}
+
+func (BlockdevOptionsVariantCopyBeforeWrite) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantCopyBeforeWrite) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantCopyBeforeWrite
+	}{
+		BlockdevDriverCopyBeforeWrite,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// BlockdevOptionsVariantCopyOnRead is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantCopyOnRead struct {
+	NodeName     *string                      `json:"node-name,omitempty"`
+	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare   *bool                        `json:"force-share,omitempty"`
+	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Bottom       *string                      `json:"bottom,omitempty"`
+}
+
+func (BlockdevOptionsVariantCopyOnRead) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantCopyOnRead) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantCopyOnRead
+	}{
+		BlockdevDriverCopyOnRead,
+		s,
+	}
+	return json.Marshal(v)
+}
+
 // BlockdevOptionsVariantDmg is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantDmg struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -1732,16 +3070,20 @@ func (s BlockdevOptionsVariantDmg) MarshalJSON() ([]byte, error) {
 
 // BlockdevOptionsVariantFile is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantFile struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Filename     string                       `json:"filename"`
-	PrManager    *string                      `json:"pr-manager,omitempty"`
-	Locking      *OnOffAuto                   `json:"locking,omitempty"`
-	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
+	NodeName           *string                      `json:"node-name,omitempty"`
+	Discard            *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache              *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly           *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly       *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare         *bool                        `json:"force-share,omitempty"`
+	DetectZeroes       *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Filename           string                       `json:"filename"`
+	PrManager          *string                      `json:"pr-manager,omitempty"`
+	Locking            *OnOffAuto                   `json:"locking,omitempty"`
+	AIO                *BlockdevAIOOptions          `json:"aio,omitempty"`
+	AIOMaxBatch        *int64                       `json:"aio-max-batch,omitempty"`
+	DropCache          *bool                        `json:"drop-cache,omitempty"`
+	XCheckCacheDropped *bool                        `json:"x-check-cache-dropped,omitempty"`
 }
 
 func (BlockdevOptionsVariantFile) isBlockdevOptions() {}
@@ -1764,6 +3106,7 @@ type BlockdevOptionsVariantFTP struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 }
@@ -1788,6 +3131,7 @@ type BlockdevOptionsVariantFTPS struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Sslverify    *bool                        `json:"sslverify,omitempty"`
@@ -1813,6 +3157,7 @@ type BlockdevOptionsVariantGluster struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Volume       string                       `json:"volume"`
@@ -1838,16 +3183,20 @@ func (s BlockdevOptionsVariantGluster) MarshalJSON() ([]byte, error) {
 
 // BlockdevOptionsVariantHostCdrom is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantHostCdrom struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Filename     string                       `json:"filename"`
-	PrManager    *string                      `json:"pr-manager,omitempty"`
-	Locking      *OnOffAuto                   `json:"locking,omitempty"`
-	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
+	NodeName           *string                      `json:"node-name,omitempty"`
+	Discard            *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache              *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly           *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly       *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare         *bool                        `json:"force-share,omitempty"`
+	DetectZeroes       *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Filename           string                       `json:"filename"`
+	PrManager          *string                      `json:"pr-manager,omitempty"`
+	Locking            *OnOffAuto                   `json:"locking,omitempty"`
+	AIO                *BlockdevAIOOptions          `json:"aio,omitempty"`
+	AIOMaxBatch        *int64                       `json:"aio-max-batch,omitempty"`
+	DropCache          *bool                        `json:"drop-cache,omitempty"`
+	XCheckCacheDropped *bool                        `json:"x-check-cache-dropped,omitempty"`
 }
 
 func (BlockdevOptionsVariantHostCdrom) isBlockdevOptions() {}
@@ -1866,16 +3215,20 @@ func (s BlockdevOptionsVariantHostCdrom) MarshalJSON() ([]byte, error) {
 
 // BlockdevOptionsVariantHostDevice is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantHostDevice struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Filename     string                       `json:"filename"`
-	PrManager    *string                      `json:"pr-manager,omitempty"`
-	Locking      *OnOffAuto                   `json:"locking,omitempty"`
-	AIO          *BlockdevAIOOptions          `json:"aio,omitempty"`
+	NodeName           *string                      `json:"node-name,omitempty"`
+	Discard            *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache              *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly           *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly       *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare         *bool                        `json:"force-share,omitempty"`
+	DetectZeroes       *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Filename           string                       `json:"filename"`
+	PrManager          *string                      `json:"pr-manager,omitempty"`
+	Locking            *OnOffAuto                   `json:"locking,omitempty"`
+	AIO                *BlockdevAIOOptions          `json:"aio,omitempty"`
+	AIOMaxBatch        *int64                       `json:"aio-max-batch,omitempty"`
+	DropCache          *bool                        `json:"drop-cache,omitempty"`
+	XCheckCacheDropped *bool                        `json:"x-check-cache-dropped,omitempty"`
 }
 
 func (BlockdevOptionsVariantHostDevice) isBlockdevOptions() {}
@@ -1898,6 +3251,7 @@ type BlockdevOptionsVariantHTTP struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Cookie       *string                      `json:"cookie,omitempty"`
@@ -1924,6 +3278,7 @@ type BlockdevOptionsVariantHTTPS struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Cookie       *string                      `json:"cookie,omitempty"`
@@ -1951,6 +3306,7 @@ type BlockdevOptionsVariantIscsi struct {
 	Discard        *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache          *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly       *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly   *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare     *bool                        `json:"force-share,omitempty"`
 	DetectZeroes   *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Transport      IscsiTransport               `json:"transport"`
@@ -1984,6 +3340,7 @@ type BlockdevOptionsVariantLUKS struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	KeySecret    *string                      `json:"key-secret,omitempty"`
@@ -2005,15 +3362,20 @@ func (s BlockdevOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
 
 // BlockdevOptionsVariantNBD is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantNBD struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Server       SocketAddress                `json:"server"`
-	Export       *string                      `json:"export,omitempty"`
-	TLSCreds     *string                      `json:"tls-creds,omitempty"`
+	NodeName       *string                      `json:"node-name,omitempty"`
+	Discard        *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache          *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly       *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly   *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare     *bool                        `json:"force-share,omitempty"`
+	DetectZeroes   *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Server         SocketAddress                `json:"server"`
+	Export         *string                      `json:"export,omitempty"`
+	TLSCreds       *string                      `json:"tls-creds,omitempty"`
+	TLSHostname    *string                      `json:"tls-hostname,omitempty"`
+	XDirtyBitmap   *string                      `json:"x-dirty-bitmap,omitempty"`
+	ReconnectDelay *uint32                      `json:"reconnect-delay,omitempty"`
+	OpenTimeout    *uint32                      `json:"open-timeout,omitempty"`
 }
 
 func (BlockdevOptionsVariantNBD) isBlockdevOptions() {}
@@ -2036,6 +3398,7 @@ type BlockdevOptionsVariantNfs struct {
 	Discard       *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache         *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly      *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly  *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare    *bool                        `json:"force-share,omitempty"`
 	DetectZeroes  *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Server        NfsServer                    `json:"server"`
@@ -2068,10 +3431,12 @@ type BlockdevOptionsVariantNullAIO struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Size         *int64                       `json:"size,omitempty"`
 	LatencyNs    *uint64                      `json:"latency-ns,omitempty"`
+	ReadZeroes   *bool                        `json:"read-zeroes,omitempty"`
 }
 
 func (BlockdevOptionsVariantNullAIO) isBlockdevOptions() {}
@@ -2094,10 +3459,12 @@ type BlockdevOptionsVariantNullCo struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Size         *int64                       `json:"size,omitempty"`
 	LatencyNs    *uint64                      `json:"latency-ns,omitempty"`
+	ReadZeroes   *bool                        `json:"read-zeroes,omitempty"`
 }
 
 func (BlockdevOptionsVariantNullCo) isBlockdevOptions() {}
@@ -2114,12 +3481,40 @@ func (s BlockdevOptionsVariantNullCo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// BlockdevOptionsVariantNvme is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantNvme struct {
+	NodeName     *string                      `json:"node-name,omitempty"`
+	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare   *bool                        `json:"force-share,omitempty"`
+	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Device       string                       `json:"device"`
+	Namespace    int64                        `json:"namespace"`
+}
+
+func (BlockdevOptionsVariantNvme) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantNvme) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantNvme
+	}{
+		BlockdevDriverNvme,
+		s,
+	}
+	return json.Marshal(v)
+}
+
 // BlockdevOptionsVariantParallels is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantParallels struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -2139,12 +3534,40 @@ func (s BlockdevOptionsVariantParallels) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// BlockdevOptionsVariantPreallocate is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantPreallocate struct {
+	NodeName      *string                      `json:"node-name,omitempty"`
+	Discard       *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache         *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly      *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly  *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare    *bool                        `json:"force-share,omitempty"`
+	DetectZeroes  *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	PreallocAlign *int64                       `json:"prealloc-align,omitempty"`
+	PreallocSize  *int64                       `json:"prealloc-size,omitempty"`
+}
+
+func (BlockdevOptionsVariantPreallocate) isBlockdevOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s BlockdevOptionsVariantPreallocate) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Driver BlockdevDriver `json:"driver"`
+		BlockdevOptionsVariantPreallocate
+	}{
+		BlockdevDriverPreallocate,
+		s,
+	}
+	return json.Marshal(v)
+}
+
 // BlockdevOptionsVariantQcow is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantQcow struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Encrypt      *BlockdevQcowEncryption      `json:"encrypt,omitempty"`
@@ -2170,6 +3593,7 @@ type BlockdevOptionsVariantQcow2 struct {
 	Discard             *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache               *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly            *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly        *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare          *bool                        `json:"force-share,omitempty"`
 	DetectZeroes        *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	LazyRefcounts       *bool                        `json:"lazy-refcounts,omitempty"`
@@ -2179,9 +3603,11 @@ type BlockdevOptionsVariantQcow2 struct {
 	OverlapCheck        *Qcow2OverlapChecks          `json:"overlap-check,omitempty"`
 	CacheSize           *int64                       `json:"cache-size,omitempty"`
 	L2CacheSize         *int64                       `json:"l2-cache-size,omitempty"`
+	L2CacheEntrySize    *int64                       `json:"l2-cache-entry-size,omitempty"`
 	RefcountCacheSize   *int64                       `json:"refcount-cache-size,omitempty"`
 	CacheCleanInterval  *int64                       `json:"cache-clean-interval,omitempty"`
 	Encrypt             *BlockdevQcow2Encryption     `json:"encrypt,omitempty"`
+	DataFile            *BlockdevRef                 `json:"data-file,omitempty"`
 }
 
 func (BlockdevOptionsVariantQcow2) isBlockdevOptions() {}
@@ -2204,6 +3630,7 @@ type BlockdevOptionsVariantQed struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Backing      *BlockdevRefOrNull           `json:"backing,omitempty"`
@@ -2229,6 +3656,7 @@ type BlockdevOptionsVariantQuorum struct {
 	Discard          *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache            *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly         *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly     *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare       *bool                        `json:"force-share,omitempty"`
 	DetectZeroes     *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Blkverify        *bool                        `json:"blkverify,omitempty"`
@@ -2258,6 +3686,7 @@ type BlockdevOptionsVariantRaw struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Offset       *int64                       `json:"offset,omitempty"`
@@ -2280,18 +3709,23 @@ func (s BlockdevOptionsVariantRaw) MarshalJSON() ([]byte, error) {
 
 // BlockdevOptionsVariantRbd is an implementation of BlockdevOptions.
 type BlockdevOptionsVariantRbd struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Pool         string                       `json:"pool"`
-	Image        string                       `json:"image"`
-	Conf         *string                      `json:"conf,omitempty"`
-	Snapshot     *string                      `json:"snapshot,omitempty"`
-	User         *string                      `json:"user,omitempty"`
-	Server       []InetSocketAddressBase      `json:"server,omitempty"`
+	NodeName           *string                      `json:"node-name,omitempty"`
+	Discard            *BlockdevDiscardOptions      `json:"discard,omitempty"`
+	Cache              *BlockdevCacheOptions        `json:"cache,omitempty"`
+	ReadOnly           *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly       *bool                        `json:"auto-read-only,omitempty"`
+	ForceShare         *bool                        `json:"force-share,omitempty"`
+	DetectZeroes       *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
+	Pool               string                       `json:"pool"`
+	Namespace          *string                      `json:"namespace,omitempty"`
+	Image              string                       `json:"image"`
+	Conf               *string                      `json:"conf,omitempty"`
+	Snapshot           *string                      `json:"snapshot,omitempty"`
+	Encrypt            *RbdEncryptionOptions        `json:"encrypt,omitempty"`
+	User               *string                      `json:"user,omitempty"`
+	AuthClientRequired []RbdAuthMode                `json:"auth-client-required,omitempty"`
+	KeySecret          *string                      `json:"key-secret,omitempty"`
+	Server             []InetSocketAddressBase      `json:"server,omitempty"`
 }
 
 func (BlockdevOptionsVariantRbd) isBlockdevOptions() {}
@@ -2314,6 +3748,7 @@ type BlockdevOptionsVariantReplication struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Mode         ReplicationMode              `json:"mode"`
@@ -2334,29 +3769,27 @@ func (s BlockdevOptionsVariantReplication) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// BlockdevOptionsVariantSheepdog is an implementation of BlockdevOptions.
-type BlockdevOptionsVariantSheepdog struct {
+// BlockdevOptionsVariantSnapshotAccess is an implementation of BlockdevOptions.
+type BlockdevOptionsVariantSnapshotAccess struct {
 	NodeName     *string                      `json:"node-name,omitempty"`
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	Server       SocketAddress                `json:"server"`
-	Vdi          string                       `json:"vdi"`
-	SnapID       *uint32                      `json:"snap-id,omitempty"`
-	Tag          *string                      `json:"tag,omitempty"`
+	File         BlockdevRef                  `json:"file"`
 }
 
-func (BlockdevOptionsVariantSheepdog) isBlockdevOptions() {}
+func (BlockdevOptionsVariantSnapshotAccess) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
-func (s BlockdevOptionsVariantSheepdog) MarshalJSON() ([]byte, error) {
+func (s BlockdevOptionsVariantSnapshotAccess) MarshalJSON() ([]byte, error) {
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVariantSheepdog
+		BlockdevOptionsVariantSnapshotAccess
 	}{
-		BlockdevDriverSheepdog,
+		BlockdevDriverSnapshotAccess,
 		s,
 	}
 	return json.Marshal(v)
@@ -2368,11 +3801,13 @@ type BlockdevOptionsVariantSSH struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Server       InetSocketAddress            `json:"server"`
 	Path         string                       `json:"path"`
 	User         *string                      `json:"user,omitempty"`
+	HostKeyCheck *SSHHostKeyCheck             `json:"host-key-check,omitempty"`
 }
 
 func (BlockdevOptionsVariantSSH) isBlockdevOptions() {}
@@ -2395,6 +3830,7 @@ type BlockdevOptionsVariantThrottle struct {
 	Discard       *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache         *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly      *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly  *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare    *bool                        `json:"force-share,omitempty"`
 	DetectZeroes  *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	ThrottleGroup string                       `json:"throttle-group"`
@@ -2421,6 +3857,7 @@ type BlockdevOptionsVariantVdi struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -2446,6 +3883,7 @@ type BlockdevOptionsVariantVhdx struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -2471,6 +3909,7 @@ type BlockdevOptionsVariantVMDK struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Backing      *BlockdevRefOrNull           `json:"backing,omitempty"`
@@ -2496,6 +3935,7 @@ type BlockdevOptionsVariantVpc struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	File         BlockdevRef                  `json:"file"`
@@ -2521,6 +3961,7 @@ type BlockdevOptionsVariantVvfat struct {
 	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
 	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
 	ReadOnly     *bool                        `json:"read-only,omitempty"`
+	AutoReadOnly *bool                        `json:"auto-read-only,omitempty"`
 	ForceShare   *bool                        `json:"force-share,omitempty"`
 	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
 	Dir          string                       `json:"dir"`
@@ -2544,33 +3985,6 @@ func (s BlockdevOptionsVariantVvfat) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// BlockdevOptionsVariantVxhs is an implementation of BlockdevOptions.
-type BlockdevOptionsVariantVxhs struct {
-	NodeName     *string                      `json:"node-name,omitempty"`
-	Discard      *BlockdevDiscardOptions      `json:"discard,omitempty"`
-	Cache        *BlockdevCacheOptions        `json:"cache,omitempty"`
-	ReadOnly     *bool                        `json:"read-only,omitempty"`
-	ForceShare   *bool                        `json:"force-share,omitempty"`
-	DetectZeroes *BlockdevDetectZeroesOptions `json:"detect-zeroes,omitempty"`
-	VdiskID      string                       `json:"vdisk-id"`
-	Server       InetSocketAddressBase        `json:"server"`
-	TLSCreds     *string                      `json:"tls-creds,omitempty"`
-}
-
-func (BlockdevOptionsVariantVxhs) isBlockdevOptions() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s BlockdevOptionsVariantVxhs) MarshalJSON() ([]byte, error) {
-	v := struct {
-		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVariantVxhs
-	}{
-		BlockdevDriverVxhs,
-		s,
-	}
-	return json.Marshal(v)
-}
-
 func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
@@ -2583,6 +3997,14 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsVariantBlkdebug
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
+	case BlockdevDriverBlklogwrites:
+		var ret BlockdevOptionsVariantBlklogwrites
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverBlkreplay:
+		var ret BlockdevOptionsVariantBlkreplay
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverBlkverify:
 		var ret BlockdevOptionsVariantBlkverify
 		err := json.Unmarshal([]byte(bs), &ret)
@@ -2593,6 +4015,18 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		return ret, err
 	case BlockdevDriverCloop:
 		var ret BlockdevOptionsVariantCloop
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverCompress:
+		var ret BlockdevOptionsVariantCompress
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverCopyBeforeWrite:
+		var ret BlockdevOptionsVariantCopyBeforeWrite
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverCopyOnRead:
+		var ret BlockdevOptionsVariantCopyOnRead
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverDmg:
@@ -2655,8 +4089,16 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsVariantNullCo
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
+	case BlockdevDriverNvme:
+		var ret BlockdevOptionsVariantNvme
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	case BlockdevDriverParallels:
 		var ret BlockdevOptionsVariantParallels
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case BlockdevDriverPreallocate:
+		var ret BlockdevOptionsVariantPreallocate
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverQcow:
@@ -2687,8 +4129,8 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsVariantReplication
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
-	case BlockdevDriverSheepdog:
-		var ret BlockdevOptionsVariantSheepdog
+	case BlockdevDriverSnapshotAccess:
+		var ret BlockdevOptionsVariantSnapshotAccess
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	case BlockdevDriverSSH:
@@ -2719,13 +4161,60 @@ func decodeBlockdevOptions(bs json.RawMessage) (BlockdevOptions, error) {
 		var ret BlockdevOptionsVariantVvfat
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
-	case BlockdevDriverVxhs:
-		var ret BlockdevOptionsVariantVxhs
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
 	default:
 		return nil, fmt.Errorf("unknown flat union subtype %q for flat union BlockdevOptions", v.Driver)
 	}
+}
+
+// BlockdevOptionsGluster -> BlockdevOptionsGluster (struct)
+
+// BlockdevOptionsGluster implements the "BlockdevOptionsGluster" QMP API type.
+type BlockdevOptionsGluster struct {
+	Volume  string          `json:"volume"`
+	Path    string          `json:"path"`
+	Server  []SocketAddress `json:"server"`
+	Debug   *int64          `json:"debug,omitempty"`
+	Logfile *string         `json:"logfile,omitempty"`
+}
+
+// BlockdevOptionsNfs -> BlockdevOptionsNfs (struct)
+
+// BlockdevOptionsNfs implements the "BlockdevOptionsNfs" QMP API type.
+type BlockdevOptionsNfs struct {
+	Server        NfsServer `json:"server"`
+	Path          string    `json:"path"`
+	User          *int64    `json:"user,omitempty"`
+	Group         *int64    `json:"group,omitempty"`
+	TCPSynCount   *int64    `json:"tcp-syn-count,omitempty"`
+	ReadaheadSize *int64    `json:"readahead-size,omitempty"`
+	PageCacheSize *int64    `json:"page-cache-size,omitempty"`
+	Debug         *int64    `json:"debug,omitempty"`
+}
+
+// BlockdevOptionsRbd -> BlockdevOptionsRbd (struct)
+
+// BlockdevOptionsRbd implements the "BlockdevOptionsRbd" QMP API type.
+type BlockdevOptionsRbd struct {
+	Pool               string                  `json:"pool"`
+	Namespace          *string                 `json:"namespace,omitempty"`
+	Image              string                  `json:"image"`
+	Conf               *string                 `json:"conf,omitempty"`
+	Snapshot           *string                 `json:"snapshot,omitempty"`
+	Encrypt            *RbdEncryptionOptions   `json:"encrypt,omitempty"`
+	User               *string                 `json:"user,omitempty"`
+	AuthClientRequired []RbdAuthMode           `json:"auth-client-required,omitempty"`
+	KeySecret          *string                 `json:"key-secret,omitempty"`
+	Server             []InetSocketAddressBase `json:"server,omitempty"`
+}
+
+// BlockdevOptionsSsh -> BlockdevOptionsSSH (struct)
+
+// BlockdevOptionsSSH implements the "BlockdevOptionsSsh" QMP API type.
+type BlockdevOptionsSSH struct {
+	Server       InetSocketAddress `json:"server"`
+	Path         string            `json:"path"`
+	User         *string           `json:"user,omitempty"`
+	HostKeyCheck *SSHHostKeyCheck  `json:"host-key-check,omitempty"`
 }
 
 // BlockdevQcow2Encryption -> BlockdevQcow2Encryption (flat union)
@@ -2850,6 +4339,58 @@ func (e *BlockdevQcow2EncryptionFormat) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// BlockdevQcow2Version -> BlockdevQcow2Version (enum)
+
+// BlockdevQcow2Version implements the "BlockdevQcow2Version" QMP API type.
+type BlockdevQcow2Version int
+
+// Known values of BlockdevQcow2Version.
+const (
+	BlockdevQcow2VersionV2 BlockdevQcow2Version = iota
+	BlockdevQcow2VersionV3
+)
+
+// String implements fmt.Stringer.
+func (e BlockdevQcow2Version) String() string {
+	switch e {
+	case BlockdevQcow2VersionV2:
+		return "v2"
+	case BlockdevQcow2VersionV3:
+		return "v3"
+	default:
+		return fmt.Sprintf("BlockdevQcow2Version(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockdevQcow2Version) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockdevQcow2VersionV2:
+		return json.Marshal("v2")
+	case BlockdevQcow2VersionV3:
+		return json.Marshal("v3")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockdevQcow2Version", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockdevQcow2Version) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "v2":
+		*e = BlockdevQcow2VersionV2
+	case "v3":
+		*e = BlockdevQcow2VersionV3
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockdevQcow2Version", s)
+	}
+	return nil
+}
+
 // BlockdevQcowEncryption -> BlockdevQcowEncryption (flat union)
 
 // BlockdevQcowEncryption implements the "BlockdevQcowEncryption" QMP API type.
@@ -2955,42 +4496,48 @@ type BlockdevRef interface {
 // BlockdevRefVariantDefinition is an implementation of BlockdevRef
 type BlockdevRefVariantDefinition BlockdevOptions
 
-func (BlockdevOptionsVariantBlkdebug) isBlockdevRef()    {}
-func (BlockdevOptionsVariantBlkverify) isBlockdevRef()   {}
-func (BlockdevOptionsVariantBochs) isBlockdevRef()       {}
-func (BlockdevOptionsVariantCloop) isBlockdevRef()       {}
-func (BlockdevOptionsVariantDmg) isBlockdevRef()         {}
-func (BlockdevOptionsVariantFile) isBlockdevRef()        {}
-func (BlockdevOptionsVariantFTP) isBlockdevRef()         {}
-func (BlockdevOptionsVariantFTPS) isBlockdevRef()        {}
-func (BlockdevOptionsVariantGluster) isBlockdevRef()     {}
-func (BlockdevOptionsVariantHostCdrom) isBlockdevRef()   {}
-func (BlockdevOptionsVariantHostDevice) isBlockdevRef()  {}
-func (BlockdevOptionsVariantHTTP) isBlockdevRef()        {}
-func (BlockdevOptionsVariantHTTPS) isBlockdevRef()       {}
-func (BlockdevOptionsVariantIscsi) isBlockdevRef()       {}
-func (BlockdevOptionsVariantLUKS) isBlockdevRef()        {}
-func (BlockdevOptionsVariantNBD) isBlockdevRef()         {}
-func (BlockdevOptionsVariantNfs) isBlockdevRef()         {}
-func (BlockdevOptionsVariantNullAIO) isBlockdevRef()     {}
-func (BlockdevOptionsVariantNullCo) isBlockdevRef()      {}
-func (BlockdevOptionsVariantParallels) isBlockdevRef()   {}
-func (BlockdevOptionsVariantQcow) isBlockdevRef()        {}
-func (BlockdevOptionsVariantQcow2) isBlockdevRef()       {}
-func (BlockdevOptionsVariantQed) isBlockdevRef()         {}
-func (BlockdevOptionsVariantQuorum) isBlockdevRef()      {}
-func (BlockdevOptionsVariantRaw) isBlockdevRef()         {}
-func (BlockdevOptionsVariantRbd) isBlockdevRef()         {}
-func (BlockdevOptionsVariantReplication) isBlockdevRef() {}
-func (BlockdevOptionsVariantSheepdog) isBlockdevRef()    {}
-func (BlockdevOptionsVariantSSH) isBlockdevRef()         {}
-func (BlockdevOptionsVariantThrottle) isBlockdevRef()    {}
-func (BlockdevOptionsVariantVdi) isBlockdevRef()         {}
-func (BlockdevOptionsVariantVhdx) isBlockdevRef()        {}
-func (BlockdevOptionsVariantVMDK) isBlockdevRef()        {}
-func (BlockdevOptionsVariantVpc) isBlockdevRef()         {}
-func (BlockdevOptionsVariantVvfat) isBlockdevRef()       {}
-func (BlockdevOptionsVariantVxhs) isBlockdevRef()        {}
+func (BlockdevOptionsVariantBlkdebug) isBlockdevRef()        {}
+func (BlockdevOptionsVariantBlklogwrites) isBlockdevRef()    {}
+func (BlockdevOptionsVariantBlkreplay) isBlockdevRef()       {}
+func (BlockdevOptionsVariantBlkverify) isBlockdevRef()       {}
+func (BlockdevOptionsVariantBochs) isBlockdevRef()           {}
+func (BlockdevOptionsVariantCloop) isBlockdevRef()           {}
+func (BlockdevOptionsVariantCompress) isBlockdevRef()        {}
+func (BlockdevOptionsVariantCopyBeforeWrite) isBlockdevRef() {}
+func (BlockdevOptionsVariantCopyOnRead) isBlockdevRef()      {}
+func (BlockdevOptionsVariantDmg) isBlockdevRef()             {}
+func (BlockdevOptionsVariantFile) isBlockdevRef()            {}
+func (BlockdevOptionsVariantFTP) isBlockdevRef()             {}
+func (BlockdevOptionsVariantFTPS) isBlockdevRef()            {}
+func (BlockdevOptionsVariantGluster) isBlockdevRef()         {}
+func (BlockdevOptionsVariantHostCdrom) isBlockdevRef()       {}
+func (BlockdevOptionsVariantHostDevice) isBlockdevRef()      {}
+func (BlockdevOptionsVariantHTTP) isBlockdevRef()            {}
+func (BlockdevOptionsVariantHTTPS) isBlockdevRef()           {}
+func (BlockdevOptionsVariantIscsi) isBlockdevRef()           {}
+func (BlockdevOptionsVariantLUKS) isBlockdevRef()            {}
+func (BlockdevOptionsVariantNBD) isBlockdevRef()             {}
+func (BlockdevOptionsVariantNfs) isBlockdevRef()             {}
+func (BlockdevOptionsVariantNullAIO) isBlockdevRef()         {}
+func (BlockdevOptionsVariantNullCo) isBlockdevRef()          {}
+func (BlockdevOptionsVariantNvme) isBlockdevRef()            {}
+func (BlockdevOptionsVariantParallels) isBlockdevRef()       {}
+func (BlockdevOptionsVariantPreallocate) isBlockdevRef()     {}
+func (BlockdevOptionsVariantQcow) isBlockdevRef()            {}
+func (BlockdevOptionsVariantQcow2) isBlockdevRef()           {}
+func (BlockdevOptionsVariantQed) isBlockdevRef()             {}
+func (BlockdevOptionsVariantQuorum) isBlockdevRef()          {}
+func (BlockdevOptionsVariantRaw) isBlockdevRef()             {}
+func (BlockdevOptionsVariantRbd) isBlockdevRef()             {}
+func (BlockdevOptionsVariantReplication) isBlockdevRef()     {}
+func (BlockdevOptionsVariantSnapshotAccess) isBlockdevRef()  {}
+func (BlockdevOptionsVariantSSH) isBlockdevRef()             {}
+func (BlockdevOptionsVariantThrottle) isBlockdevRef()        {}
+func (BlockdevOptionsVariantVdi) isBlockdevRef()             {}
+func (BlockdevOptionsVariantVhdx) isBlockdevRef()            {}
+func (BlockdevOptionsVariantVMDK) isBlockdevRef()            {}
+func (BlockdevOptionsVariantVpc) isBlockdevRef()             {}
+func (BlockdevOptionsVariantVvfat) isBlockdevRef()           {}
 
 // BlockdevRefVariantReference is an implementation of BlockdevRef
 type BlockdevRefVariantReference string
@@ -3008,11 +4555,21 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 		switch impl := definition.(type) {
 		case BlockdevOptionsVariantBlkdebug:
 			return impl, nil
+		case BlockdevOptionsVariantBlklogwrites:
+			return impl, nil
+		case BlockdevOptionsVariantBlkreplay:
+			return impl, nil
 		case BlockdevOptionsVariantBlkverify:
 			return impl, nil
 		case BlockdevOptionsVariantBochs:
 			return impl, nil
 		case BlockdevOptionsVariantCloop:
+			return impl, nil
+		case BlockdevOptionsVariantCompress:
+			return impl, nil
+		case BlockdevOptionsVariantCopyBeforeWrite:
+			return impl, nil
+		case BlockdevOptionsVariantCopyOnRead:
 			return impl, nil
 		case BlockdevOptionsVariantDmg:
 			return impl, nil
@@ -3044,7 +4601,11 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsVariantNullCo:
 			return impl, nil
+		case BlockdevOptionsVariantNvme:
+			return impl, nil
 		case BlockdevOptionsVariantParallels:
+			return impl, nil
+		case BlockdevOptionsVariantPreallocate:
 			return impl, nil
 		case BlockdevOptionsVariantQcow:
 			return impl, nil
@@ -3060,7 +4621,7 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 			return impl, nil
 		case BlockdevOptionsVariantReplication:
 			return impl, nil
-		case BlockdevOptionsVariantSheepdog:
+		case BlockdevOptionsVariantSnapshotAccess:
 			return impl, nil
 		case BlockdevOptionsVariantSSH:
 			return impl, nil
@@ -3075,8 +4636,6 @@ func decodeBlockdevRef(bs json.RawMessage) (BlockdevRef, error) {
 		case BlockdevOptionsVariantVpc:
 			return impl, nil
 		case BlockdevOptionsVariantVvfat:
-			return impl, nil
-		case BlockdevOptionsVariantVxhs:
 			return impl, nil
 		}
 	}
@@ -3098,42 +4657,48 @@ type BlockdevRefOrNull interface {
 // BlockdevRefOrNullVariantDefinition is an implementation of BlockdevRefOrNull
 type BlockdevRefOrNullVariantDefinition BlockdevOptions
 
-func (BlockdevOptionsVariantBlkdebug) isBlockdevRefOrNull()    {}
-func (BlockdevOptionsVariantBlkverify) isBlockdevRefOrNull()   {}
-func (BlockdevOptionsVariantBochs) isBlockdevRefOrNull()       {}
-func (BlockdevOptionsVariantCloop) isBlockdevRefOrNull()       {}
-func (BlockdevOptionsVariantDmg) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantFile) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantFTP) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantFTPS) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantGluster) isBlockdevRefOrNull()     {}
-func (BlockdevOptionsVariantHostCdrom) isBlockdevRefOrNull()   {}
-func (BlockdevOptionsVariantHostDevice) isBlockdevRefOrNull()  {}
-func (BlockdevOptionsVariantHTTP) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantHTTPS) isBlockdevRefOrNull()       {}
-func (BlockdevOptionsVariantIscsi) isBlockdevRefOrNull()       {}
-func (BlockdevOptionsVariantLUKS) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantNBD) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantNfs) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantNullAIO) isBlockdevRefOrNull()     {}
-func (BlockdevOptionsVariantNullCo) isBlockdevRefOrNull()      {}
-func (BlockdevOptionsVariantParallels) isBlockdevRefOrNull()   {}
-func (BlockdevOptionsVariantQcow) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantQcow2) isBlockdevRefOrNull()       {}
-func (BlockdevOptionsVariantQed) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantQuorum) isBlockdevRefOrNull()      {}
-func (BlockdevOptionsVariantRaw) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantRbd) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantReplication) isBlockdevRefOrNull() {}
-func (BlockdevOptionsVariantSheepdog) isBlockdevRefOrNull()    {}
-func (BlockdevOptionsVariantSSH) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantThrottle) isBlockdevRefOrNull()    {}
-func (BlockdevOptionsVariantVdi) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantVhdx) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantVMDK) isBlockdevRefOrNull()        {}
-func (BlockdevOptionsVariantVpc) isBlockdevRefOrNull()         {}
-func (BlockdevOptionsVariantVvfat) isBlockdevRefOrNull()       {}
-func (BlockdevOptionsVariantVxhs) isBlockdevRefOrNull()        {}
+func (BlockdevOptionsVariantBlkdebug) isBlockdevRefOrNull()        {}
+func (BlockdevOptionsVariantBlklogwrites) isBlockdevRefOrNull()    {}
+func (BlockdevOptionsVariantBlkreplay) isBlockdevRefOrNull()       {}
+func (BlockdevOptionsVariantBlkverify) isBlockdevRefOrNull()       {}
+func (BlockdevOptionsVariantBochs) isBlockdevRefOrNull()           {}
+func (BlockdevOptionsVariantCloop) isBlockdevRefOrNull()           {}
+func (BlockdevOptionsVariantCompress) isBlockdevRefOrNull()        {}
+func (BlockdevOptionsVariantCopyBeforeWrite) isBlockdevRefOrNull() {}
+func (BlockdevOptionsVariantCopyOnRead) isBlockdevRefOrNull()      {}
+func (BlockdevOptionsVariantDmg) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantFile) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantFTP) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantFTPS) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantGluster) isBlockdevRefOrNull()         {}
+func (BlockdevOptionsVariantHostCdrom) isBlockdevRefOrNull()       {}
+func (BlockdevOptionsVariantHostDevice) isBlockdevRefOrNull()      {}
+func (BlockdevOptionsVariantHTTP) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantHTTPS) isBlockdevRefOrNull()           {}
+func (BlockdevOptionsVariantIscsi) isBlockdevRefOrNull()           {}
+func (BlockdevOptionsVariantLUKS) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantNBD) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantNfs) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantNullAIO) isBlockdevRefOrNull()         {}
+func (BlockdevOptionsVariantNullCo) isBlockdevRefOrNull()          {}
+func (BlockdevOptionsVariantNvme) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantParallels) isBlockdevRefOrNull()       {}
+func (BlockdevOptionsVariantPreallocate) isBlockdevRefOrNull()     {}
+func (BlockdevOptionsVariantQcow) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantQcow2) isBlockdevRefOrNull()           {}
+func (BlockdevOptionsVariantQed) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantQuorum) isBlockdevRefOrNull()          {}
+func (BlockdevOptionsVariantRaw) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantRbd) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantReplication) isBlockdevRefOrNull()     {}
+func (BlockdevOptionsVariantSnapshotAccess) isBlockdevRefOrNull()  {}
+func (BlockdevOptionsVariantSSH) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantThrottle) isBlockdevRefOrNull()        {}
+func (BlockdevOptionsVariantVdi) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantVhdx) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantVMDK) isBlockdevRefOrNull()            {}
+func (BlockdevOptionsVariantVpc) isBlockdevRefOrNull()             {}
+func (BlockdevOptionsVariantVvfat) isBlockdevRefOrNull()           {}
 
 // BlockdevRefOrNullVariantNull is a JSON null type, so it must
 // also implement the isNullable interface.
@@ -3167,11 +4732,21 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 		switch impl := definition.(type) {
 		case BlockdevOptionsVariantBlkdebug:
 			return impl, nil
+		case BlockdevOptionsVariantBlklogwrites:
+			return impl, nil
+		case BlockdevOptionsVariantBlkreplay:
+			return impl, nil
 		case BlockdevOptionsVariantBlkverify:
 			return impl, nil
 		case BlockdevOptionsVariantBochs:
 			return impl, nil
 		case BlockdevOptionsVariantCloop:
+			return impl, nil
+		case BlockdevOptionsVariantCompress:
+			return impl, nil
+		case BlockdevOptionsVariantCopyBeforeWrite:
+			return impl, nil
+		case BlockdevOptionsVariantCopyOnRead:
 			return impl, nil
 		case BlockdevOptionsVariantDmg:
 			return impl, nil
@@ -3203,7 +4778,11 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 			return impl, nil
 		case BlockdevOptionsVariantNullCo:
 			return impl, nil
+		case BlockdevOptionsVariantNvme:
+			return impl, nil
 		case BlockdevOptionsVariantParallels:
+			return impl, nil
+		case BlockdevOptionsVariantPreallocate:
 			return impl, nil
 		case BlockdevOptionsVariantQcow:
 			return impl, nil
@@ -3219,7 +4798,7 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 			return impl, nil
 		case BlockdevOptionsVariantReplication:
 			return impl, nil
-		case BlockdevOptionsVariantSheepdog:
+		case BlockdevOptionsVariantSnapshotAccess:
 			return impl, nil
 		case BlockdevOptionsVariantSSH:
 			return impl, nil
@@ -3234,8 +4813,6 @@ func decodeBlockdevRefOrNull(bs json.RawMessage) (BlockdevRefOrNull, error) {
 		case BlockdevOptionsVariantVpc:
 			return impl, nil
 		case BlockdevOptionsVariantVvfat:
-			return impl, nil
-		case BlockdevOptionsVariantVxhs:
 			return impl, nil
 		}
 	}
@@ -3270,13 +4847,393 @@ type BlockdevSnapshotSync struct {
 	Mode             *NewImageMode `json:"mode,omitempty"`
 }
 
-// ChardevBackend -> ChardevBackend (simple union)
+// BlockdevVhdxSubformat -> BlockdevVhdxSubformat (enum)
+
+// BlockdevVhdxSubformat implements the "BlockdevVhdxSubformat" QMP API type.
+type BlockdevVhdxSubformat int
+
+// Known values of BlockdevVhdxSubformat.
+const (
+	BlockdevVhdxSubformatDynamic BlockdevVhdxSubformat = iota
+	BlockdevVhdxSubformatFixed
+)
+
+// String implements fmt.Stringer.
+func (e BlockdevVhdxSubformat) String() string {
+	switch e {
+	case BlockdevVhdxSubformatDynamic:
+		return "dynamic"
+	case BlockdevVhdxSubformatFixed:
+		return "fixed"
+	default:
+		return fmt.Sprintf("BlockdevVhdxSubformat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockdevVhdxSubformat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockdevVhdxSubformatDynamic:
+		return json.Marshal("dynamic")
+	case BlockdevVhdxSubformatFixed:
+		return json.Marshal("fixed")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockdevVhdxSubformat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockdevVhdxSubformat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "dynamic":
+		*e = BlockdevVhdxSubformatDynamic
+	case "fixed":
+		*e = BlockdevVhdxSubformatFixed
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockdevVhdxSubformat", s)
+	}
+	return nil
+}
+
+// BlockdevVmdkAdapterType -> BlockdevVMDKAdapterType (enum)
+
+// BlockdevVMDKAdapterType implements the "BlockdevVmdkAdapterType" QMP API type.
+type BlockdevVMDKAdapterType int
+
+// Known values of BlockdevVMDKAdapterType.
+const (
+	BlockdevVMDKAdapterTypeIde BlockdevVMDKAdapterType = iota
+	BlockdevVMDKAdapterTypeBuslogic
+	BlockdevVMDKAdapterTypeLsilogic
+	BlockdevVMDKAdapterTypeLegacyEsx
+)
+
+// String implements fmt.Stringer.
+func (e BlockdevVMDKAdapterType) String() string {
+	switch e {
+	case BlockdevVMDKAdapterTypeIde:
+		return "ide"
+	case BlockdevVMDKAdapterTypeBuslogic:
+		return "buslogic"
+	case BlockdevVMDKAdapterTypeLsilogic:
+		return "lsilogic"
+	case BlockdevVMDKAdapterTypeLegacyEsx:
+		return "legacyESX"
+	default:
+		return fmt.Sprintf("BlockdevVMDKAdapterType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockdevVMDKAdapterType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockdevVMDKAdapterTypeIde:
+		return json.Marshal("ide")
+	case BlockdevVMDKAdapterTypeBuslogic:
+		return json.Marshal("buslogic")
+	case BlockdevVMDKAdapterTypeLsilogic:
+		return json.Marshal("lsilogic")
+	case BlockdevVMDKAdapterTypeLegacyEsx:
+		return json.Marshal("legacyESX")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockdevVMDKAdapterType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockdevVMDKAdapterType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "ide":
+		*e = BlockdevVMDKAdapterTypeIde
+	case "buslogic":
+		*e = BlockdevVMDKAdapterTypeBuslogic
+	case "lsilogic":
+		*e = BlockdevVMDKAdapterTypeLsilogic
+	case "legacyESX":
+		*e = BlockdevVMDKAdapterTypeLegacyEsx
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockdevVMDKAdapterType", s)
+	}
+	return nil
+}
+
+// BlockdevVmdkSubformat -> BlockdevVMDKSubformat (enum)
+
+// BlockdevVMDKSubformat implements the "BlockdevVmdkSubformat" QMP API type.
+type BlockdevVMDKSubformat int
+
+// Known values of BlockdevVMDKSubformat.
+const (
+	BlockdevVMDKSubformatMonolithicSparse BlockdevVMDKSubformat = iota
+	BlockdevVMDKSubformatMonolithicFlat
+	BlockdevVMDKSubformatTwoGbMaxExtentSparse
+	BlockdevVMDKSubformatTwoGbMaxExtentFlat
+	BlockdevVMDKSubformatStreamOptimized
+)
+
+// String implements fmt.Stringer.
+func (e BlockdevVMDKSubformat) String() string {
+	switch e {
+	case BlockdevVMDKSubformatMonolithicSparse:
+		return "monolithicSparse"
+	case BlockdevVMDKSubformatMonolithicFlat:
+		return "monolithicFlat"
+	case BlockdevVMDKSubformatTwoGbMaxExtentSparse:
+		return "twoGbMaxExtentSparse"
+	case BlockdevVMDKSubformatTwoGbMaxExtentFlat:
+		return "twoGbMaxExtentFlat"
+	case BlockdevVMDKSubformatStreamOptimized:
+		return "streamOptimized"
+	default:
+		return fmt.Sprintf("BlockdevVMDKSubformat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockdevVMDKSubformat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockdevVMDKSubformatMonolithicSparse:
+		return json.Marshal("monolithicSparse")
+	case BlockdevVMDKSubformatMonolithicFlat:
+		return json.Marshal("monolithicFlat")
+	case BlockdevVMDKSubformatTwoGbMaxExtentSparse:
+		return json.Marshal("twoGbMaxExtentSparse")
+	case BlockdevVMDKSubformatTwoGbMaxExtentFlat:
+		return json.Marshal("twoGbMaxExtentFlat")
+	case BlockdevVMDKSubformatStreamOptimized:
+		return json.Marshal("streamOptimized")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockdevVMDKSubformat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockdevVMDKSubformat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "monolithicSparse":
+		*e = BlockdevVMDKSubformatMonolithicSparse
+	case "monolithicFlat":
+		*e = BlockdevVMDKSubformatMonolithicFlat
+	case "twoGbMaxExtentSparse":
+		*e = BlockdevVMDKSubformatTwoGbMaxExtentSparse
+	case "twoGbMaxExtentFlat":
+		*e = BlockdevVMDKSubformatTwoGbMaxExtentFlat
+	case "streamOptimized":
+		*e = BlockdevVMDKSubformatStreamOptimized
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockdevVMDKSubformat", s)
+	}
+	return nil
+}
+
+// BlockdevVpcSubformat -> BlockdevVpcSubformat (enum)
+
+// BlockdevVpcSubformat implements the "BlockdevVpcSubformat" QMP API type.
+type BlockdevVpcSubformat int
+
+// Known values of BlockdevVpcSubformat.
+const (
+	BlockdevVpcSubformatDynamic BlockdevVpcSubformat = iota
+	BlockdevVpcSubformatFixed
+)
+
+// String implements fmt.Stringer.
+func (e BlockdevVpcSubformat) String() string {
+	switch e {
+	case BlockdevVpcSubformatDynamic:
+		return "dynamic"
+	case BlockdevVpcSubformatFixed:
+		return "fixed"
+	default:
+		return fmt.Sprintf("BlockdevVpcSubformat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e BlockdevVpcSubformat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case BlockdevVpcSubformatDynamic:
+		return json.Marshal("dynamic")
+	case BlockdevVpcSubformatFixed:
+		return json.Marshal("fixed")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for BlockdevVpcSubformat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *BlockdevVpcSubformat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "dynamic":
+		*e = BlockdevVpcSubformatDynamic
+	case "fixed":
+		*e = BlockdevVpcSubformatFixed
+	default:
+		return fmt.Errorf("unknown enum value %q for BlockdevVpcSubformat", s)
+	}
+	return nil
+}
+
+// COLOExitReason -> ColoExitReason (enum)
+
+// ColoExitReason implements the "COLOExitReason" QMP API type.
+type ColoExitReason int
+
+// Known values of ColoExitReason.
+const (
+	ColoExitReasonNone ColoExitReason = iota
+	ColoExitReasonRequest
+	ColoExitReasonError
+	ColoExitReasonProcessing
+)
+
+// String implements fmt.Stringer.
+func (e ColoExitReason) String() string {
+	switch e {
+	case ColoExitReasonNone:
+		return "none"
+	case ColoExitReasonRequest:
+		return "request"
+	case ColoExitReasonError:
+		return "error"
+	case ColoExitReasonProcessing:
+		return "processing"
+	default:
+		return fmt.Sprintf("ColoExitReason(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ColoExitReason) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ColoExitReasonNone:
+		return json.Marshal("none")
+	case ColoExitReasonRequest:
+		return json.Marshal("request")
+	case ColoExitReasonError:
+		return json.Marshal("error")
+	case ColoExitReasonProcessing:
+		return json.Marshal("processing")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ColoExitReason", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ColoExitReason) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = ColoExitReasonNone
+	case "request":
+		*e = ColoExitReasonRequest
+	case "error":
+		*e = ColoExitReasonError
+	case "processing":
+		*e = ColoExitReasonProcessing
+	default:
+		return fmt.Errorf("unknown enum value %q for ColoExitReason", s)
+	}
+	return nil
+}
+
+// COLOMode -> ColoMode (enum)
+
+// ColoMode implements the "COLOMode" QMP API type.
+type ColoMode int
+
+// Known values of ColoMode.
+const (
+	ColoModeNone ColoMode = iota
+	ColoModePrimary
+	ColoModeSecondary
+)
+
+// String implements fmt.Stringer.
+func (e ColoMode) String() string {
+	switch e {
+	case ColoModeNone:
+		return "none"
+	case ColoModePrimary:
+		return "primary"
+	case ColoModeSecondary:
+		return "secondary"
+	default:
+		return fmt.Sprintf("ColoMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ColoMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ColoModeNone:
+		return json.Marshal("none")
+	case ColoModePrimary:
+		return json.Marshal("primary")
+	case ColoModeSecondary:
+		return json.Marshal("secondary")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ColoMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ColoMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = ColoModeNone
+	case "primary":
+		*e = ColoModePrimary
+	case "secondary":
+		*e = ColoModeSecondary
+	default:
+		return fmt.Errorf("unknown enum value %q for ColoMode", s)
+	}
+	return nil
+}
+
+// COLOStatus -> ColoStatus (struct)
+
+// ColoStatus implements the "COLOStatus" QMP API type.
+type ColoStatus struct {
+	Mode     ColoMode       `json:"mode"`
+	LastMode ColoMode       `json:"last-mode"`
+	Reason   ColoExitReason `json:"reason"`
+}
+
+// EVENT COLO_EXIT
+
+// ChardevBackend -> ChardevBackend (flat union)
 
 // ChardevBackend implements the "ChardevBackend" QMP API type.
 //
 // Can be one of:
 //   - ChardevBackendVariantBraille
 //   - ChardevBackendVariantConsole
+//   - ChardevBackendVariantDbus
 //   - ChardevBackendVariantFile
 //   - ChardevBackendVariantMemory
 //   - ChardevBackendVariantMsmouse
@@ -3285,6 +5242,7 @@ type BlockdevSnapshotSync struct {
 //   - ChardevBackendVariantParallel
 //   - ChardevBackendVariantPipe
 //   - ChardevBackendVariantPty
+//   - ChardevBackendVariantQemuVdagent
 //   - ChardevBackendVariantRingbuf
 //   - ChardevBackendVariantSerial
 //   - ChardevBackendVariantSocket
@@ -3300,416 +5258,521 @@ type ChardevBackend interface {
 }
 
 // ChardevBackendVariantBraille is an implementation of ChardevBackend.
-type ChardevBackendVariantBraille ChardevCommon
+type ChardevBackendVariantBraille struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantBraille) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantBraille) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "braille",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantBraille
+	}{
+		ChardevBackendKindBraille,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantConsole is an implementation of ChardevBackend.
-type ChardevBackendVariantConsole ChardevCommon
+type ChardevBackendVariantConsole struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantConsole) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantConsole) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "console",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantConsole
+	}{
+		ChardevBackendKindConsole,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ChardevBackendVariantDbus is an implementation of ChardevBackend.
+type ChardevBackendVariantDbus struct {
+	Data ChardevDBus `json:"data"`
+}
+
+func (ChardevBackendVariantDbus) isChardevBackend() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ChardevBackendVariantDbus) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantDbus
+	}{
+		ChardevBackendKindDbus,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantFile is an implementation of ChardevBackend.
-type ChardevBackendVariantFile ChardevFile
+type ChardevBackendVariantFile struct {
+	Data ChardevFile `json:"data"`
+}
 
 func (ChardevBackendVariantFile) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantFile) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "file",
-		"data": ChardevFile(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantFile
+	}{
+		ChardevBackendKindFile,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantMemory is an implementation of ChardevBackend.
-type ChardevBackendVariantMemory ChardevRingbuf
+type ChardevBackendVariantMemory struct {
+	Data ChardevRingbuf `json:"data"`
+}
 
 func (ChardevBackendVariantMemory) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantMemory) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "memory",
-		"data": ChardevRingbuf(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantMemory
+	}{
+		ChardevBackendKindMemory,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantMsmouse is an implementation of ChardevBackend.
-type ChardevBackendVariantMsmouse ChardevCommon
+type ChardevBackendVariantMsmouse struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantMsmouse) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantMsmouse) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "msmouse",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantMsmouse
+	}{
+		ChardevBackendKindMsmouse,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantMux is an implementation of ChardevBackend.
-type ChardevBackendVariantMux ChardevMux
+type ChardevBackendVariantMux struct {
+	Data ChardevMux `json:"data"`
+}
 
 func (ChardevBackendVariantMux) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantMux) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "mux",
-		"data": ChardevMux(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantMux
+	}{
+		ChardevBackendKindMux,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantNull is an implementation of ChardevBackend.
-type ChardevBackendVariantNull ChardevCommon
+type ChardevBackendVariantNull struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantNull) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantNull) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "null",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantNull
+	}{
+		ChardevBackendKindNull,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantParallel is an implementation of ChardevBackend.
-type ChardevBackendVariantParallel ChardevHostdev
+type ChardevBackendVariantParallel struct {
+	Data ChardevHostdev `json:"data"`
+}
 
 func (ChardevBackendVariantParallel) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantParallel) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "parallel",
-		"data": ChardevHostdev(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantParallel
+	}{
+		ChardevBackendKindParallel,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantPipe is an implementation of ChardevBackend.
-type ChardevBackendVariantPipe ChardevHostdev
+type ChardevBackendVariantPipe struct {
+	Data ChardevHostdev `json:"data"`
+}
 
 func (ChardevBackendVariantPipe) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantPipe) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "pipe",
-		"data": ChardevHostdev(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantPipe
+	}{
+		ChardevBackendKindPipe,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantPty is an implementation of ChardevBackend.
-type ChardevBackendVariantPty ChardevCommon
+type ChardevBackendVariantPty struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantPty) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantPty) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "pty",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantPty
+	}{
+		ChardevBackendKindPty,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ChardevBackendVariantQemuVdagent is an implementation of ChardevBackend.
+type ChardevBackendVariantQemuVdagent struct {
+	Data ChardevQemuVdAgent `json:"data"`
+}
+
+func (ChardevBackendVariantQemuVdagent) isChardevBackend() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ChardevBackendVariantQemuVdagent) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantQemuVdagent
+	}{
+		ChardevBackendKindQemuVdagent,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantRingbuf is an implementation of ChardevBackend.
-type ChardevBackendVariantRingbuf ChardevRingbuf
+type ChardevBackendVariantRingbuf struct {
+	Data ChardevRingbuf `json:"data"`
+}
 
 func (ChardevBackendVariantRingbuf) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantRingbuf) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "ringbuf",
-		"data": ChardevRingbuf(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantRingbuf
+	}{
+		ChardevBackendKindRingbuf,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantSerial is an implementation of ChardevBackend.
-type ChardevBackendVariantSerial ChardevHostdev
+type ChardevBackendVariantSerial struct {
+	Data ChardevHostdev `json:"data"`
+}
 
 func (ChardevBackendVariantSerial) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantSerial) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "serial",
-		"data": ChardevHostdev(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantSerial
+	}{
+		ChardevBackendKindSerial,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantSocket is an implementation of ChardevBackend.
-type ChardevBackendVariantSocket ChardevSocket
+type ChardevBackendVariantSocket struct {
+	Data ChardevSocket `json:"data"`
+}
 
 func (ChardevBackendVariantSocket) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantSocket) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "socket",
-		"data": ChardevSocket(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantSocket
+	}{
+		ChardevBackendKindSocket,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantSpiceport is an implementation of ChardevBackend.
-type ChardevBackendVariantSpiceport ChardevSpicePort
+type ChardevBackendVariantSpiceport struct {
+	Data ChardevSpicePort `json:"data"`
+}
 
 func (ChardevBackendVariantSpiceport) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantSpiceport) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "spiceport",
-		"data": ChardevSpicePort(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantSpiceport
+	}{
+		ChardevBackendKindSpiceport,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantSpicevmc is an implementation of ChardevBackend.
-type ChardevBackendVariantSpicevmc ChardevSpiceChannel
+type ChardevBackendVariantSpicevmc struct {
+	Data ChardevSpiceChannel `json:"data"`
+}
 
 func (ChardevBackendVariantSpicevmc) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantSpicevmc) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "spicevmc",
-		"data": ChardevSpiceChannel(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantSpicevmc
+	}{
+		ChardevBackendKindSpicevmc,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantStdio is an implementation of ChardevBackend.
-type ChardevBackendVariantStdio ChardevStdio
+type ChardevBackendVariantStdio struct {
+	Data ChardevStdio `json:"data"`
+}
 
 func (ChardevBackendVariantStdio) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantStdio) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "stdio",
-		"data": ChardevStdio(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantStdio
+	}{
+		ChardevBackendKindStdio,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantTestdev is an implementation of ChardevBackend.
-type ChardevBackendVariantTestdev ChardevCommon
+type ChardevBackendVariantTestdev struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantTestdev) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantTestdev) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "testdev",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantTestdev
+	}{
+		ChardevBackendKindTestdev,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantUDP is an implementation of ChardevBackend.
-type ChardevBackendVariantUDP ChardevUDP
+type ChardevBackendVariantUDP struct {
+	Data ChardevUDP `json:"data"`
+}
 
 func (ChardevBackendVariantUDP) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantUDP) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "udp",
-		"data": ChardevUDP(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantUDP
+	}{
+		ChardevBackendKindUDP,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantVc is an implementation of ChardevBackend.
-type ChardevBackendVariantVc ChardevVc
+type ChardevBackendVariantVc struct {
+	Data ChardevVc `json:"data"`
+}
 
 func (ChardevBackendVariantVc) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantVc) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "vc",
-		"data": ChardevVc(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantVc
+	}{
+		ChardevBackendKindVc,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ChardevBackendVariantWctablet is an implementation of ChardevBackend.
-type ChardevBackendVariantWctablet ChardevCommon
+type ChardevBackendVariantWctablet struct {
+	Data ChardevCommon `json:"data"`
+}
 
 func (ChardevBackendVariantWctablet) isChardevBackend() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ChardevBackendVariantWctablet) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "wctablet",
-		"data": ChardevCommon(s),
+	v := struct {
+		Type ChardevBackendKind `json:"type"`
+		ChardevBackendVariantWctablet
+	}{
+		ChardevBackendKindWctablet,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeChardevBackend(bs json.RawMessage) (ChardevBackend, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type ChardevBackendKind `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "braille":
+	switch v.Type {
+	case ChardevBackendKindBraille:
 		var ret ChardevBackendVariantBraille
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "console":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindConsole:
 		var ret ChardevBackendVariantConsole
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "file":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindDbus:
+		var ret ChardevBackendVariantDbus
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindFile:
 		var ret ChardevBackendVariantFile
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "memory":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindMemory:
 		var ret ChardevBackendVariantMemory
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "msmouse":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindMsmouse:
 		var ret ChardevBackendVariantMsmouse
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "mux":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindMux:
 		var ret ChardevBackendVariantMux
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "null":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindNull:
 		var ret ChardevBackendVariantNull
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "parallel":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindParallel:
 		var ret ChardevBackendVariantParallel
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "pipe":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindPipe:
 		var ret ChardevBackendVariantPipe
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "pty":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindPty:
 		var ret ChardevBackendVariantPty
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "ringbuf":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindQemuVdagent:
+		var ret ChardevBackendVariantQemuVdagent
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindRingbuf:
 		var ret ChardevBackendVariantRingbuf
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "serial":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindSerial:
 		var ret ChardevBackendVariantSerial
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "socket":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindSocket:
 		var ret ChardevBackendVariantSocket
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "spiceport":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindSpiceport:
 		var ret ChardevBackendVariantSpiceport
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "spicevmc":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindSpicevmc:
 		var ret ChardevBackendVariantSpicevmc
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "stdio":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindStdio:
 		var ret ChardevBackendVariantStdio
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "testdev":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindTestdev:
 		var ret ChardevBackendVariantTestdev
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "udp":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindUDP:
 		var ret ChardevBackendVariantUDP
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "vc":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindVc:
 		var ret ChardevBackendVariantVc
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "wctablet":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ChardevBackendKindWctablet:
 		var ret ChardevBackendVariantWctablet
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union ChardevBackend", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union ChardevBackend", v.Type)
 	}
 }
 
@@ -3720,12 +5783,213 @@ type ChardevBackendInfo struct {
 	Name string `json:"name"`
 }
 
+// ChardevBackendKind -> ChardevBackendKind (enum)
+
+// ChardevBackendKind implements the "ChardevBackendKind" QMP API type.
+type ChardevBackendKind int
+
+// Known values of ChardevBackendKind.
+const (
+	ChardevBackendKindFile ChardevBackendKind = iota
+	ChardevBackendKindSerial
+	ChardevBackendKindParallel
+	ChardevBackendKindPipe
+	ChardevBackendKindSocket
+	ChardevBackendKindUDP
+	ChardevBackendKindPty
+	ChardevBackendKindNull
+	ChardevBackendKindMux
+	ChardevBackendKindMsmouse
+	ChardevBackendKindWctablet
+	ChardevBackendKindBraille
+	ChardevBackendKindTestdev
+	ChardevBackendKindStdio
+	ChardevBackendKindConsole
+	ChardevBackendKindSpicevmc
+	ChardevBackendKindSpiceport
+	ChardevBackendKindQemuVdagent
+	ChardevBackendKindDbus
+	ChardevBackendKindVc
+	ChardevBackendKindRingbuf
+	ChardevBackendKindMemory
+)
+
+// String implements fmt.Stringer.
+func (e ChardevBackendKind) String() string {
+	switch e {
+	case ChardevBackendKindFile:
+		return "file"
+	case ChardevBackendKindSerial:
+		return "serial"
+	case ChardevBackendKindParallel:
+		return "parallel"
+	case ChardevBackendKindPipe:
+		return "pipe"
+	case ChardevBackendKindSocket:
+		return "socket"
+	case ChardevBackendKindUDP:
+		return "udp"
+	case ChardevBackendKindPty:
+		return "pty"
+	case ChardevBackendKindNull:
+		return "null"
+	case ChardevBackendKindMux:
+		return "mux"
+	case ChardevBackendKindMsmouse:
+		return "msmouse"
+	case ChardevBackendKindWctablet:
+		return "wctablet"
+	case ChardevBackendKindBraille:
+		return "braille"
+	case ChardevBackendKindTestdev:
+		return "testdev"
+	case ChardevBackendKindStdio:
+		return "stdio"
+	case ChardevBackendKindConsole:
+		return "console"
+	case ChardevBackendKindSpicevmc:
+		return "spicevmc"
+	case ChardevBackendKindSpiceport:
+		return "spiceport"
+	case ChardevBackendKindQemuVdagent:
+		return "qemu-vdagent"
+	case ChardevBackendKindDbus:
+		return "dbus"
+	case ChardevBackendKindVc:
+		return "vc"
+	case ChardevBackendKindRingbuf:
+		return "ringbuf"
+	case ChardevBackendKindMemory:
+		return "memory"
+	default:
+		return fmt.Sprintf("ChardevBackendKind(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ChardevBackendKind) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ChardevBackendKindFile:
+		return json.Marshal("file")
+	case ChardevBackendKindSerial:
+		return json.Marshal("serial")
+	case ChardevBackendKindParallel:
+		return json.Marshal("parallel")
+	case ChardevBackendKindPipe:
+		return json.Marshal("pipe")
+	case ChardevBackendKindSocket:
+		return json.Marshal("socket")
+	case ChardevBackendKindUDP:
+		return json.Marshal("udp")
+	case ChardevBackendKindPty:
+		return json.Marshal("pty")
+	case ChardevBackendKindNull:
+		return json.Marshal("null")
+	case ChardevBackendKindMux:
+		return json.Marshal("mux")
+	case ChardevBackendKindMsmouse:
+		return json.Marshal("msmouse")
+	case ChardevBackendKindWctablet:
+		return json.Marshal("wctablet")
+	case ChardevBackendKindBraille:
+		return json.Marshal("braille")
+	case ChardevBackendKindTestdev:
+		return json.Marshal("testdev")
+	case ChardevBackendKindStdio:
+		return json.Marshal("stdio")
+	case ChardevBackendKindConsole:
+		return json.Marshal("console")
+	case ChardevBackendKindSpicevmc:
+		return json.Marshal("spicevmc")
+	case ChardevBackendKindSpiceport:
+		return json.Marshal("spiceport")
+	case ChardevBackendKindQemuVdagent:
+		return json.Marshal("qemu-vdagent")
+	case ChardevBackendKindDbus:
+		return json.Marshal("dbus")
+	case ChardevBackendKindVc:
+		return json.Marshal("vc")
+	case ChardevBackendKindRingbuf:
+		return json.Marshal("ringbuf")
+	case ChardevBackendKindMemory:
+		return json.Marshal("memory")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ChardevBackendKind", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ChardevBackendKind) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "file":
+		*e = ChardevBackendKindFile
+	case "serial":
+		*e = ChardevBackendKindSerial
+	case "parallel":
+		*e = ChardevBackendKindParallel
+	case "pipe":
+		*e = ChardevBackendKindPipe
+	case "socket":
+		*e = ChardevBackendKindSocket
+	case "udp":
+		*e = ChardevBackendKindUDP
+	case "pty":
+		*e = ChardevBackendKindPty
+	case "null":
+		*e = ChardevBackendKindNull
+	case "mux":
+		*e = ChardevBackendKindMux
+	case "msmouse":
+		*e = ChardevBackendKindMsmouse
+	case "wctablet":
+		*e = ChardevBackendKindWctablet
+	case "braille":
+		*e = ChardevBackendKindBraille
+	case "testdev":
+		*e = ChardevBackendKindTestdev
+	case "stdio":
+		*e = ChardevBackendKindStdio
+	case "console":
+		*e = ChardevBackendKindConsole
+	case "spicevmc":
+		*e = ChardevBackendKindSpicevmc
+	case "spiceport":
+		*e = ChardevBackendKindSpiceport
+	case "qemu-vdagent":
+		*e = ChardevBackendKindQemuVdagent
+	case "dbus":
+		*e = ChardevBackendKindDbus
+	case "vc":
+		*e = ChardevBackendKindVc
+	case "ringbuf":
+		*e = ChardevBackendKindRingbuf
+	case "memory":
+		*e = ChardevBackendKindMemory
+	default:
+		return fmt.Errorf("unknown enum value %q for ChardevBackendKind", s)
+	}
+	return nil
+}
+
 // ChardevCommon -> ChardevCommon (struct)
 
 // ChardevCommon implements the "ChardevCommon" QMP API type.
 type ChardevCommon struct {
 	Logfile   *string `json:"logfile,omitempty"`
 	Logappend *bool   `json:"logappend,omitempty"`
+}
+
+// ChardevDBus -> ChardevDBus (struct)
+
+// ChardevDBus implements the "ChardevDBus" QMP API type.
+type ChardevDBus struct {
+	Logfile   *string `json:"logfile,omitempty"`
+	Logappend *bool   `json:"logappend,omitempty"`
+	Name      string  `json:"name"`
 }
 
 // ChardevFile -> ChardevFile (struct)
@@ -3766,6 +6030,16 @@ type ChardevMux struct {
 	Chardev   string  `json:"chardev"`
 }
 
+// ChardevQemuVDAgent -> ChardevQemuVdAgent (struct)
+
+// ChardevQemuVdAgent implements the "ChardevQemuVDAgent" QMP API type.
+type ChardevQemuVdAgent struct {
+	Logfile   *string `json:"logfile,omitempty"`
+	Logappend *bool   `json:"logappend,omitempty"`
+	Mouse     *bool   `json:"mouse,omitempty"`
+	Clipboard *bool   `json:"clipboard,omitempty"`
+}
+
 // ChardevReturn -> ChardevReturn (struct)
 
 // ChardevReturn implements the "ChardevReturn" QMP API type.
@@ -3790,11 +6064,13 @@ type ChardevSocket struct {
 	Logappend *bool               `json:"logappend,omitempty"`
 	Addr      SocketAddressLegacy `json:"addr"`
 	TLSCreds  *string             `json:"tls-creds,omitempty"`
+	TLSAuthz  *string             `json:"tls-authz,omitempty"`
 	Server    *bool               `json:"server,omitempty"`
 	Wait      *bool               `json:"wait,omitempty"`
 	Nodelay   *bool               `json:"nodelay,omitempty"`
 	Telnet    *bool               `json:"telnet,omitempty"`
 	Tn3270    *bool               `json:"tn3270,omitempty"`
+	Websocket *bool               `json:"websocket,omitempty"`
 	Reconnect *int64              `json:"reconnect,omitempty"`
 }
 
@@ -3938,6 +6214,17 @@ func (e *CommandLineParameterType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// CompressionStats -> CompressionStats (struct)
+
+// CompressionStats implements the "CompressionStats" QMP API type.
+type CompressionStats struct {
+	Pages           int64   `json:"pages"`
+	Busy            int64   `json:"busy"`
+	BusyRate        float64 `json:"busy-rate"`
+	CompressedSize  int64   `json:"compressed-size"`
+	CompressionRate float64 `json:"compression-rate"`
+}
+
 // CpuDefinitionInfo -> CPUDefinitionInfo (struct)
 
 // CPUDefinitionInfo implements the "CpuDefinitionInfo" QMP API type.
@@ -3947,298 +6234,70 @@ type CPUDefinitionInfo struct {
 	Static              bool     `json:"static"`
 	UnavailableFeatures []string `json:"unavailable-features,omitempty"`
 	Typename            string   `json:"typename"`
+	AliasOf             *string  `json:"alias-of,omitempty"`
+	Deprecated          bool     `json:"deprecated"`
 }
 
-// CpuInfo -> CPUInfo (flat union)
+// CpuInfoFast -> CPUInfoFast (flat union)
 
-// CPUInfo implements the "CpuInfo" QMP API type.
+// CPUInfoFast implements the "CpuInfoFast" QMP API type.
 //
 // Can be one of:
-//   - CPUInfoVariantMIPS
-//   - CPUInfoVariantOther
-//   - CPUInfoVariantPPC
-//   - CPUInfoVariantSPARC
-//   - CPUInfoVariantTricore
-//   - CPUInfoVariantX86
-type CPUInfo interface {
-	isCPUInfo()
+//   - CPUInfoFastVariantS390X
+type CPUInfoFast interface {
+	isCPUInfoFast()
 }
 
-// CPUInfoVariantMIPS is an implementation of CPUInfo.
-type CPUInfoVariantMIPS struct {
-	CPU      int64                  `json:"CPU"`
-	Current  bool                   `json:"current"`
-	Halted   bool                   `json:"halted"`
-	QomPath  string                 `json:"qom_path"`
-	ThreadID int64                  `json:"thread_id"`
+// CPUInfoFastVariantS390X is an implementation of CPUInfoFast.
+type CPUInfoFastVariantS390X struct {
+	CPUIndex int64                  `json:"cpu-index"`
+	QomPath  string                 `json:"qom-path"`
+	ThreadID int64                  `json:"thread-id"`
 	Props    *CPUInstanceProperties `json:"props,omitempty"`
-	Pc       int64                  `json:"PC"`
+	CPUState CPUS390State           `json:"cpu-state"`
 }
 
-func (CPUInfoVariantMIPS) isCPUInfo() {}
+func (CPUInfoFastVariantS390X) isCPUInfoFast() {}
 
 // MarshalJSON implements json.Marshaler.
-func (s CPUInfoVariantMIPS) MarshalJSON() ([]byte, error) {
+func (s CPUInfoFastVariantS390X) MarshalJSON() ([]byte, error) {
 	v := struct {
-		Arch CPUInfoArch `json:"arch"`
-		CPUInfoVariantMIPS
+		Target SysEmuTarget `json:"target"`
+		CPUInfoFastVariantS390X
 	}{
-		CPUInfoArchMIPS,
+		SysEmuTargetS390X,
 		s,
 	}
 	return json.Marshal(v)
 }
 
-// CPUInfoVariantOther is an implementation of CPUInfo.
-type CPUInfoVariantOther struct {
-	CPU      int64                  `json:"CPU"`
-	Current  bool                   `json:"current"`
-	Halted   bool                   `json:"halted"`
-	QomPath  string                 `json:"qom_path"`
-	ThreadID int64                  `json:"thread_id"`
-	Props    *CPUInstanceProperties `json:"props,omitempty"`
-}
-
-func (CPUInfoVariantOther) isCPUInfo() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s CPUInfoVariantOther) MarshalJSON() ([]byte, error) {
+func decodeCPUInfoFast(bs json.RawMessage) (CPUInfoFast, error) {
 	v := struct {
-		Arch CPUInfoArch `json:"arch"`
-		CPUInfoVariantOther
-	}{
-		CPUInfoArchOther,
-		s,
-	}
-	return json.Marshal(v)
-}
-
-// CPUInfoVariantPPC is an implementation of CPUInfo.
-type CPUInfoVariantPPC struct {
-	CPU      int64                  `json:"CPU"`
-	Current  bool                   `json:"current"`
-	Halted   bool                   `json:"halted"`
-	QomPath  string                 `json:"qom_path"`
-	ThreadID int64                  `json:"thread_id"`
-	Props    *CPUInstanceProperties `json:"props,omitempty"`
-	Nip      int64                  `json:"nip"`
-}
-
-func (CPUInfoVariantPPC) isCPUInfo() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s CPUInfoVariantPPC) MarshalJSON() ([]byte, error) {
-	v := struct {
-		Arch CPUInfoArch `json:"arch"`
-		CPUInfoVariantPPC
-	}{
-		CPUInfoArchPPC,
-		s,
-	}
-	return json.Marshal(v)
-}
-
-// CPUInfoVariantSPARC is an implementation of CPUInfo.
-type CPUInfoVariantSPARC struct {
-	CPU      int64                  `json:"CPU"`
-	Current  bool                   `json:"current"`
-	Halted   bool                   `json:"halted"`
-	QomPath  string                 `json:"qom_path"`
-	ThreadID int64                  `json:"thread_id"`
-	Props    *CPUInstanceProperties `json:"props,omitempty"`
-	Pc       int64                  `json:"pc"`
-	Npc      int64                  `json:"npc"`
-}
-
-func (CPUInfoVariantSPARC) isCPUInfo() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s CPUInfoVariantSPARC) MarshalJSON() ([]byte, error) {
-	v := struct {
-		Arch CPUInfoArch `json:"arch"`
-		CPUInfoVariantSPARC
-	}{
-		CPUInfoArchSPARC,
-		s,
-	}
-	return json.Marshal(v)
-}
-
-// CPUInfoVariantTricore is an implementation of CPUInfo.
-type CPUInfoVariantTricore struct {
-	CPU      int64                  `json:"CPU"`
-	Current  bool                   `json:"current"`
-	Halted   bool                   `json:"halted"`
-	QomPath  string                 `json:"qom_path"`
-	ThreadID int64                  `json:"thread_id"`
-	Props    *CPUInstanceProperties `json:"props,omitempty"`
-	Pc       int64                  `json:"PC"`
-}
-
-func (CPUInfoVariantTricore) isCPUInfo() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s CPUInfoVariantTricore) MarshalJSON() ([]byte, error) {
-	v := struct {
-		Arch CPUInfoArch `json:"arch"`
-		CPUInfoVariantTricore
-	}{
-		CPUInfoArchTricore,
-		s,
-	}
-	return json.Marshal(v)
-}
-
-// CPUInfoVariantX86 is an implementation of CPUInfo.
-type CPUInfoVariantX86 struct {
-	CPU      int64                  `json:"CPU"`
-	Current  bool                   `json:"current"`
-	Halted   bool                   `json:"halted"`
-	QomPath  string                 `json:"qom_path"`
-	ThreadID int64                  `json:"thread_id"`
-	Props    *CPUInstanceProperties `json:"props,omitempty"`
-	Pc       int64                  `json:"pc"`
-}
-
-func (CPUInfoVariantX86) isCPUInfo() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s CPUInfoVariantX86) MarshalJSON() ([]byte, error) {
-	v := struct {
-		Arch CPUInfoArch `json:"arch"`
-		CPUInfoVariantX86
-	}{
-		CPUInfoArchX86,
-		s,
-	}
-	return json.Marshal(v)
-}
-
-func decodeCPUInfo(bs json.RawMessage) (CPUInfo, error) {
-	v := struct {
-		Arch CPUInfoArch `json:"arch"`
+		Target SysEmuTarget `json:"target"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.Arch {
-	case CPUInfoArchMIPS:
-		var ret CPUInfoVariantMIPS
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
-	case CPUInfoArchOther:
-		var ret CPUInfoVariantOther
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
-	case CPUInfoArchPPC:
-		var ret CPUInfoVariantPPC
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
-	case CPUInfoArchSPARC:
-		var ret CPUInfoVariantSPARC
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
-	case CPUInfoArchTricore:
-		var ret CPUInfoVariantTricore
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
-	case CPUInfoArchX86:
-		var ret CPUInfoVariantX86
+	switch v.Target {
+	case SysEmuTargetS390X:
+		var ret CPUInfoFastVariantS390X
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown flat union subtype %q for flat union CPUInfo", v.Arch)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union CPUInfoFast", v.Target)
 	}
-}
-
-// CpuInfoArch -> CPUInfoArch (enum)
-
-// CPUInfoArch implements the "CpuInfoArch" QMP API type.
-type CPUInfoArch int
-
-// Known values of CPUInfoArch.
-const (
-	CPUInfoArchX86 CPUInfoArch = iota
-	CPUInfoArchSPARC
-	CPUInfoArchPPC
-	CPUInfoArchMIPS
-	CPUInfoArchTricore
-	CPUInfoArchOther
-)
-
-// String implements fmt.Stringer.
-func (e CPUInfoArch) String() string {
-	switch e {
-	case CPUInfoArchX86:
-		return "x86"
-	case CPUInfoArchSPARC:
-		return "sparc"
-	case CPUInfoArchPPC:
-		return "ppc"
-	case CPUInfoArchMIPS:
-		return "mips"
-	case CPUInfoArchTricore:
-		return "tricore"
-	case CPUInfoArchOther:
-		return "other"
-	default:
-		return fmt.Sprintf("CPUInfoArch(%d)", e)
-	}
-}
-
-// MarshalJSON implements json.Marshaler.
-func (e CPUInfoArch) MarshalJSON() ([]byte, error) {
-	switch e {
-	case CPUInfoArchX86:
-		return json.Marshal("x86")
-	case CPUInfoArchSPARC:
-		return json.Marshal("sparc")
-	case CPUInfoArchPPC:
-		return json.Marshal("ppc")
-	case CPUInfoArchMIPS:
-		return json.Marshal("mips")
-	case CPUInfoArchTricore:
-		return json.Marshal("tricore")
-	case CPUInfoArchOther:
-		return json.Marshal("other")
-	default:
-		return nil, fmt.Errorf("unknown enum value %q for CPUInfoArch", e)
-	}
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (e *CPUInfoArch) UnmarshalJSON(bs []byte) error {
-	var s string
-	if err := json.Unmarshal(bs, &s); err != nil {
-		return err
-	}
-	switch s {
-	case "x86":
-		*e = CPUInfoArchX86
-	case "sparc":
-		*e = CPUInfoArchSPARC
-	case "ppc":
-		*e = CPUInfoArchPPC
-	case "mips":
-		*e = CPUInfoArchMIPS
-	case "tricore":
-		*e = CPUInfoArchTricore
-	case "other":
-		*e = CPUInfoArchOther
-	default:
-		return fmt.Errorf("unknown enum value %q for CPUInfoArch", s)
-	}
-	return nil
 }
 
 // CpuInstanceProperties -> CPUInstanceProperties (struct)
 
 // CPUInstanceProperties implements the "CpuInstanceProperties" QMP API type.
 type CPUInstanceProperties struct {
-	NodeID   *int64 `json:"node-id,omitempty"`
-	SocketID *int64 `json:"socket-id,omitempty"`
-	CoreID   *int64 `json:"core-id,omitempty"`
-	ThreadID *int64 `json:"thread-id,omitempty"`
+	NodeID    *int64 `json:"node-id,omitempty"`
+	SocketID  *int64 `json:"socket-id,omitempty"`
+	DieID     *int64 `json:"die-id,omitempty"`
+	ClusterID *int64 `json:"cluster-id,omitempty"`
+	CoreID    *int64 `json:"core-id,omitempty"`
+	ThreadID  *int64 `json:"thread-id,omitempty"`
 }
 
 // CpuModelBaselineInfo -> CPUModelBaselineInfo (struct)
@@ -4389,9 +6448,91 @@ type CPUModelInfo struct {
 	Props *interface{} `json:"props,omitempty"`
 }
 
+// CpuS390State -> CPUS390State (enum)
+
+// CPUS390State implements the "CpuS390State" QMP API type.
+type CPUS390State int
+
+// Known values of CPUS390State.
+const (
+	CPUS390StateUninitialized CPUS390State = iota
+	CPUS390StateStopped
+	CPUS390StateCheckStop
+	CPUS390StateOperating
+	CPUS390StateLoad
+)
+
+// String implements fmt.Stringer.
+func (e CPUS390State) String() string {
+	switch e {
+	case CPUS390StateUninitialized:
+		return "uninitialized"
+	case CPUS390StateStopped:
+		return "stopped"
+	case CPUS390StateCheckStop:
+		return "check-stop"
+	case CPUS390StateOperating:
+		return "operating"
+	case CPUS390StateLoad:
+		return "load"
+	default:
+		return fmt.Sprintf("CPUS390State(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e CPUS390State) MarshalJSON() ([]byte, error) {
+	switch e {
+	case CPUS390StateUninitialized:
+		return json.Marshal("uninitialized")
+	case CPUS390StateStopped:
+		return json.Marshal("stopped")
+	case CPUS390StateCheckStop:
+		return json.Marshal("check-stop")
+	case CPUS390StateOperating:
+		return json.Marshal("operating")
+	case CPUS390StateLoad:
+		return json.Marshal("load")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for CPUS390State", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *CPUS390State) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "uninitialized":
+		*e = CPUS390StateUninitialized
+	case "stopped":
+		*e = CPUS390StateStopped
+	case "check-stop":
+		*e = CPUS390StateCheckStop
+	case "operating":
+		*e = CPUS390StateOperating
+	case "load":
+		*e = CPUS390StateLoad
+	default:
+		return fmt.Errorf("unknown enum value %q for CPUS390State", s)
+	}
+	return nil
+}
+
+// CurrentMachineParams -> CurrentMachineParams (struct)
+
+// CurrentMachineParams implements the "CurrentMachineParams" QMP API type.
+type CurrentMachineParams struct {
+	WakeupSuspendSupport bool `json:"wakeup-suspend-support"`
+}
+
 // EVENT DEVICE_DELETED
 
 // EVENT DEVICE_TRAY_MOVED
+
+// EVENT DEVICE_UNPLUG_GUEST_ERROR
 
 // EVENT DUMP_COMPLETED
 
@@ -4447,70 +6588,748 @@ func (e *DataFormat) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// DevicePropertyInfo -> DevicePropertyInfo (struct)
+// DirtyLimitInfo -> DirtyLimitInfo (struct)
 
-// DevicePropertyInfo implements the "DevicePropertyInfo" QMP API type.
-type DevicePropertyInfo struct {
-	Name        string  `json:"name"`
-	Type        string  `json:"type"`
-	Description *string `json:"description,omitempty"`
+// DirtyLimitInfo implements the "DirtyLimitInfo" QMP API type.
+type DirtyLimitInfo struct {
+	CPUIndex    int64  `json:"cpu-index"`
+	LimitRate   uint64 `json:"limit-rate"`
+	CurrentRate uint64 `json:"current-rate"`
 }
 
-// DirtyBitmapStatus -> DirtyBitmapStatus (enum)
+// DirtyRateInfo -> DirtyRateInfo (struct)
 
-// DirtyBitmapStatus implements the "DirtyBitmapStatus" QMP API type.
-type DirtyBitmapStatus int
+// DirtyRateInfo implements the "DirtyRateInfo" QMP API type.
+type DirtyRateInfo struct {
+	DirtyRate     *int64               `json:"dirty-rate,omitempty"`
+	Status        DirtyRateStatus      `json:"status"`
+	StartTime     int64                `json:"start-time"`
+	CalcTime      int64                `json:"calc-time"`
+	SamplePages   uint64               `json:"sample-pages"`
+	Mode          DirtyRateMeasureMode `json:"mode"`
+	VcpuDirtyRate []DirtyRateVcpu      `json:"vcpu-dirty-rate,omitempty"`
+}
 
-// Known values of DirtyBitmapStatus.
+// DirtyRateMeasureMode -> DirtyRateMeasureMode (enum)
+
+// DirtyRateMeasureMode implements the "DirtyRateMeasureMode" QMP API type.
+type DirtyRateMeasureMode int
+
+// Known values of DirtyRateMeasureMode.
 const (
-	DirtyBitmapStatusActive DirtyBitmapStatus = iota
-	DirtyBitmapStatusDisabled
-	DirtyBitmapStatusFrozen
+	DirtyRateMeasureModePageSampling DirtyRateMeasureMode = iota
+	DirtyRateMeasureModeDirtyRing
+	DirtyRateMeasureModeDirtyBitmap
 )
 
 // String implements fmt.Stringer.
-func (e DirtyBitmapStatus) String() string {
+func (e DirtyRateMeasureMode) String() string {
 	switch e {
-	case DirtyBitmapStatusActive:
-		return "active"
-	case DirtyBitmapStatusDisabled:
-		return "disabled"
-	case DirtyBitmapStatusFrozen:
-		return "frozen"
+	case DirtyRateMeasureModePageSampling:
+		return "page-sampling"
+	case DirtyRateMeasureModeDirtyRing:
+		return "dirty-ring"
+	case DirtyRateMeasureModeDirtyBitmap:
+		return "dirty-bitmap"
 	default:
-		return fmt.Sprintf("DirtyBitmapStatus(%d)", e)
+		return fmt.Sprintf("DirtyRateMeasureMode(%d)", e)
 	}
 }
 
 // MarshalJSON implements json.Marshaler.
-func (e DirtyBitmapStatus) MarshalJSON() ([]byte, error) {
+func (e DirtyRateMeasureMode) MarshalJSON() ([]byte, error) {
 	switch e {
-	case DirtyBitmapStatusActive:
-		return json.Marshal("active")
-	case DirtyBitmapStatusDisabled:
-		return json.Marshal("disabled")
-	case DirtyBitmapStatusFrozen:
-		return json.Marshal("frozen")
+	case DirtyRateMeasureModePageSampling:
+		return json.Marshal("page-sampling")
+	case DirtyRateMeasureModeDirtyRing:
+		return json.Marshal("dirty-ring")
+	case DirtyRateMeasureModeDirtyBitmap:
+		return json.Marshal("dirty-bitmap")
 	default:
-		return nil, fmt.Errorf("unknown enum value %q for DirtyBitmapStatus", e)
+		return nil, fmt.Errorf("unknown enum value %q for DirtyRateMeasureMode", e)
 	}
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (e *DirtyBitmapStatus) UnmarshalJSON(bs []byte) error {
+func (e *DirtyRateMeasureMode) UnmarshalJSON(bs []byte) error {
 	var s string
 	if err := json.Unmarshal(bs, &s); err != nil {
 		return err
 	}
 	switch s {
-	case "active":
-		*e = DirtyBitmapStatusActive
-	case "disabled":
-		*e = DirtyBitmapStatusDisabled
-	case "frozen":
-		*e = DirtyBitmapStatusFrozen
+	case "page-sampling":
+		*e = DirtyRateMeasureModePageSampling
+	case "dirty-ring":
+		*e = DirtyRateMeasureModeDirtyRing
+	case "dirty-bitmap":
+		*e = DirtyRateMeasureModeDirtyBitmap
 	default:
-		return fmt.Errorf("unknown enum value %q for DirtyBitmapStatus", s)
+		return fmt.Errorf("unknown enum value %q for DirtyRateMeasureMode", s)
+	}
+	return nil
+}
+
+// DirtyRateStatus -> DirtyRateStatus (enum)
+
+// DirtyRateStatus implements the "DirtyRateStatus" QMP API type.
+type DirtyRateStatus int
+
+// Known values of DirtyRateStatus.
+const (
+	DirtyRateStatusUnstarted DirtyRateStatus = iota
+	DirtyRateStatusMeasuring
+	DirtyRateStatusMeasured
+)
+
+// String implements fmt.Stringer.
+func (e DirtyRateStatus) String() string {
+	switch e {
+	case DirtyRateStatusUnstarted:
+		return "unstarted"
+	case DirtyRateStatusMeasuring:
+		return "measuring"
+	case DirtyRateStatusMeasured:
+		return "measured"
+	default:
+		return fmt.Sprintf("DirtyRateStatus(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e DirtyRateStatus) MarshalJSON() ([]byte, error) {
+	switch e {
+	case DirtyRateStatusUnstarted:
+		return json.Marshal("unstarted")
+	case DirtyRateStatusMeasuring:
+		return json.Marshal("measuring")
+	case DirtyRateStatusMeasured:
+		return json.Marshal("measured")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for DirtyRateStatus", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *DirtyRateStatus) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "unstarted":
+		*e = DirtyRateStatusUnstarted
+	case "measuring":
+		*e = DirtyRateStatusMeasuring
+	case "measured":
+		*e = DirtyRateStatusMeasured
+	default:
+		return fmt.Errorf("unknown enum value %q for DirtyRateStatus", s)
+	}
+	return nil
+}
+
+// DirtyRateVcpu -> DirtyRateVcpu (struct)
+
+// DirtyRateVcpu implements the "DirtyRateVcpu" QMP API type.
+type DirtyRateVcpu struct {
+	ID        int64 `json:"id"`
+	DirtyRate int64 `json:"dirty-rate"`
+}
+
+// DisplayGLMode -> DisplayGlMode (enum)
+
+// DisplayGlMode implements the "DisplayGLMode" QMP API type.
+type DisplayGlMode int
+
+// Known values of DisplayGlMode.
+const (
+	DisplayGlModeOff DisplayGlMode = iota
+	DisplayGlModeOn
+	DisplayGlModeCore
+	DisplayGlModeEs
+)
+
+// String implements fmt.Stringer.
+func (e DisplayGlMode) String() string {
+	switch e {
+	case DisplayGlModeOff:
+		return "off"
+	case DisplayGlModeOn:
+		return "on"
+	case DisplayGlModeCore:
+		return "core"
+	case DisplayGlModeEs:
+		return "es"
+	default:
+		return fmt.Sprintf("DisplayGlMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e DisplayGlMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case DisplayGlModeOff:
+		return json.Marshal("off")
+	case DisplayGlModeOn:
+		return json.Marshal("on")
+	case DisplayGlModeCore:
+		return json.Marshal("core")
+	case DisplayGlModeEs:
+		return json.Marshal("es")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for DisplayGlMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *DisplayGlMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "off":
+		*e = DisplayGlModeOff
+	case "on":
+		*e = DisplayGlModeOn
+	case "core":
+		*e = DisplayGlModeCore
+	case "es":
+		*e = DisplayGlModeEs
+	default:
+		return fmt.Errorf("unknown enum value %q for DisplayGlMode", s)
+	}
+	return nil
+}
+
+// DisplayOptions -> DisplayOptions (flat union)
+
+// DisplayOptions implements the "DisplayOptions" QMP API type.
+//
+// Can be one of:
+//   - DisplayOptionsVariantCocoa
+//   - DisplayOptionsVariantCurses
+//   - DisplayOptionsVariantDbus
+//   - DisplayOptionsVariantEglHeadless
+//   - DisplayOptionsVariantGtk
+//   - DisplayOptionsVariantSdl
+type DisplayOptions interface {
+	isDisplayOptions()
+}
+
+// DisplayOptionsVariantCocoa is an implementation of DisplayOptions.
+type DisplayOptionsVariantCocoa struct {
+	FullScreen     *bool          `json:"full-screen,omitempty"`
+	WindowClose    *bool          `json:"window-close,omitempty"`
+	ShowCursor     *bool          `json:"show-cursor,omitempty"`
+	Gl             *DisplayGlMode `json:"gl,omitempty"`
+	LeftCommandKey *bool          `json:"left-command-key,omitempty"`
+	FullGrab       *bool          `json:"full-grab,omitempty"`
+	SwapOptCmd     *bool          `json:"swap-opt-cmd,omitempty"`
+}
+
+func (DisplayOptionsVariantCocoa) isDisplayOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayOptionsVariantCocoa) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+		DisplayOptionsVariantCocoa
+	}{
+		DisplayTypeCocoa,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// DisplayOptionsVariantCurses is an implementation of DisplayOptions.
+type DisplayOptionsVariantCurses struct {
+	FullScreen  *bool          `json:"full-screen,omitempty"`
+	WindowClose *bool          `json:"window-close,omitempty"`
+	ShowCursor  *bool          `json:"show-cursor,omitempty"`
+	Gl          *DisplayGlMode `json:"gl,omitempty"`
+	Charset     *string        `json:"charset,omitempty"`
+}
+
+func (DisplayOptionsVariantCurses) isDisplayOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayOptionsVariantCurses) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+		DisplayOptionsVariantCurses
+	}{
+		DisplayTypeCurses,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// DisplayOptionsVariantDbus is an implementation of DisplayOptions.
+type DisplayOptionsVariantDbus struct {
+	FullScreen  *bool          `json:"full-screen,omitempty"`
+	WindowClose *bool          `json:"window-close,omitempty"`
+	ShowCursor  *bool          `json:"show-cursor,omitempty"`
+	Gl          *DisplayGlMode `json:"gl,omitempty"`
+	Rendernode  *string        `json:"rendernode,omitempty"`
+	Addr        *string        `json:"addr,omitempty"`
+	P2P         *bool          `json:"p2p,omitempty"`
+	Audiodev    *string        `json:"audiodev,omitempty"`
+}
+
+func (DisplayOptionsVariantDbus) isDisplayOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayOptionsVariantDbus) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+		DisplayOptionsVariantDbus
+	}{
+		DisplayTypeDbus,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// DisplayOptionsVariantEglHeadless is an implementation of DisplayOptions.
+type DisplayOptionsVariantEglHeadless struct {
+	FullScreen  *bool          `json:"full-screen,omitempty"`
+	WindowClose *bool          `json:"window-close,omitempty"`
+	ShowCursor  *bool          `json:"show-cursor,omitempty"`
+	Gl          *DisplayGlMode `json:"gl,omitempty"`
+	Rendernode  *string        `json:"rendernode,omitempty"`
+}
+
+func (DisplayOptionsVariantEglHeadless) isDisplayOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayOptionsVariantEglHeadless) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+		DisplayOptionsVariantEglHeadless
+	}{
+		DisplayTypeEglHeadless,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// DisplayOptionsVariantGtk is an implementation of DisplayOptions.
+type DisplayOptionsVariantGtk struct {
+	FullScreen  *bool          `json:"full-screen,omitempty"`
+	WindowClose *bool          `json:"window-close,omitempty"`
+	ShowCursor  *bool          `json:"show-cursor,omitempty"`
+	Gl          *DisplayGlMode `json:"gl,omitempty"`
+	GrabOnHover *bool          `json:"grab-on-hover,omitempty"`
+	ZoomToFit   *bool          `json:"zoom-to-fit,omitempty"`
+	ShowTabs    *bool          `json:"show-tabs,omitempty"`
+}
+
+func (DisplayOptionsVariantGtk) isDisplayOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayOptionsVariantGtk) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+		DisplayOptionsVariantGtk
+	}{
+		DisplayTypeGtk,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// DisplayOptionsVariantSdl is an implementation of DisplayOptions.
+type DisplayOptionsVariantSdl struct {
+	FullScreen  *bool          `json:"full-screen,omitempty"`
+	WindowClose *bool          `json:"window-close,omitempty"`
+	ShowCursor  *bool          `json:"show-cursor,omitempty"`
+	Gl          *DisplayGlMode `json:"gl,omitempty"`
+	GrabMod     *HotKeyMod     `json:"grab-mod,omitempty"`
+}
+
+func (DisplayOptionsVariantSdl) isDisplayOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayOptionsVariantSdl) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+		DisplayOptionsVariantSdl
+	}{
+		DisplayTypeSdl,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeDisplayOptions(bs json.RawMessage) (DisplayOptions, error) {
+	v := struct {
+		Type DisplayType `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case DisplayTypeCocoa:
+		var ret DisplayOptionsVariantCocoa
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case DisplayTypeCurses:
+		var ret DisplayOptionsVariantCurses
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case DisplayTypeDbus:
+		var ret DisplayOptionsVariantDbus
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case DisplayTypeEglHeadless:
+		var ret DisplayOptionsVariantEglHeadless
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case DisplayTypeGtk:
+		var ret DisplayOptionsVariantGtk
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case DisplayTypeSdl:
+		var ret DisplayOptionsVariantSdl
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union DisplayOptions", v.Type)
+	}
+}
+
+// DisplayProtocol -> DisplayProtocol (enum)
+
+// DisplayProtocol implements the "DisplayProtocol" QMP API type.
+type DisplayProtocol int
+
+// Known values of DisplayProtocol.
+const (
+	DisplayProtocolVNC DisplayProtocol = iota
+	DisplayProtocolSpice
+)
+
+// String implements fmt.Stringer.
+func (e DisplayProtocol) String() string {
+	switch e {
+	case DisplayProtocolVNC:
+		return "vnc"
+	case DisplayProtocolSpice:
+		return "spice"
+	default:
+		return fmt.Sprintf("DisplayProtocol(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e DisplayProtocol) MarshalJSON() ([]byte, error) {
+	switch e {
+	case DisplayProtocolVNC:
+		return json.Marshal("vnc")
+	case DisplayProtocolSpice:
+		return json.Marshal("spice")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for DisplayProtocol", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *DisplayProtocol) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "vnc":
+		*e = DisplayProtocolVNC
+	case "spice":
+		*e = DisplayProtocolSpice
+	default:
+		return fmt.Errorf("unknown enum value %q for DisplayProtocol", s)
+	}
+	return nil
+}
+
+// DisplayReloadOptions -> DisplayReloadOptions (flat union)
+
+// DisplayReloadOptions implements the "DisplayReloadOptions" QMP API type.
+//
+// Can be one of:
+//   - DisplayReloadOptionsVariantVNC
+type DisplayReloadOptions interface {
+	isDisplayReloadOptions()
+}
+
+// DisplayReloadOptionsVariantVNC is an implementation of DisplayReloadOptions.
+type DisplayReloadOptionsVariantVNC struct {
+	TLSCerts *bool `json:"tls-certs,omitempty"`
+}
+
+func (DisplayReloadOptionsVariantVNC) isDisplayReloadOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayReloadOptionsVariantVNC) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayReloadType `json:"type"`
+		DisplayReloadOptionsVariantVNC
+	}{
+		DisplayReloadTypeVNC,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeDisplayReloadOptions(bs json.RawMessage) (DisplayReloadOptions, error) {
+	v := struct {
+		Type DisplayReloadType `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case DisplayReloadTypeVNC:
+		var ret DisplayReloadOptionsVariantVNC
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union DisplayReloadOptions", v.Type)
+	}
+}
+
+// DisplayReloadType -> DisplayReloadType (enum)
+
+// DisplayReloadType implements the "DisplayReloadType" QMP API type.
+type DisplayReloadType int
+
+// Known values of DisplayReloadType.
+const (
+	DisplayReloadTypeVNC DisplayReloadType = iota
+)
+
+// String implements fmt.Stringer.
+func (e DisplayReloadType) String() string {
+	switch e {
+	case DisplayReloadTypeVNC:
+		return "vnc"
+	default:
+		return fmt.Sprintf("DisplayReloadType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e DisplayReloadType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case DisplayReloadTypeVNC:
+		return json.Marshal("vnc")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for DisplayReloadType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *DisplayReloadType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "vnc":
+		*e = DisplayReloadTypeVNC
+	default:
+		return fmt.Errorf("unknown enum value %q for DisplayReloadType", s)
+	}
+	return nil
+}
+
+// DisplayType -> DisplayType (enum)
+
+// DisplayType implements the "DisplayType" QMP API type.
+type DisplayType int
+
+// Known values of DisplayType.
+const (
+	DisplayTypeDefault DisplayType = iota
+	DisplayTypeNone
+	DisplayTypeGtk
+	DisplayTypeSdl
+	DisplayTypeEglHeadless
+	DisplayTypeCurses
+	DisplayTypeCocoa
+	DisplayTypeSpiceApp
+	DisplayTypeDbus
+)
+
+// String implements fmt.Stringer.
+func (e DisplayType) String() string {
+	switch e {
+	case DisplayTypeDefault:
+		return "default"
+	case DisplayTypeNone:
+		return "none"
+	case DisplayTypeGtk:
+		return "gtk"
+	case DisplayTypeSdl:
+		return "sdl"
+	case DisplayTypeEglHeadless:
+		return "egl-headless"
+	case DisplayTypeCurses:
+		return "curses"
+	case DisplayTypeCocoa:
+		return "cocoa"
+	case DisplayTypeSpiceApp:
+		return "spice-app"
+	case DisplayTypeDbus:
+		return "dbus"
+	default:
+		return fmt.Sprintf("DisplayType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e DisplayType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case DisplayTypeDefault:
+		return json.Marshal("default")
+	case DisplayTypeNone:
+		return json.Marshal("none")
+	case DisplayTypeGtk:
+		return json.Marshal("gtk")
+	case DisplayTypeSdl:
+		return json.Marshal("sdl")
+	case DisplayTypeEglHeadless:
+		return json.Marshal("egl-headless")
+	case DisplayTypeCurses:
+		return json.Marshal("curses")
+	case DisplayTypeCocoa:
+		return json.Marshal("cocoa")
+	case DisplayTypeSpiceApp:
+		return json.Marshal("spice-app")
+	case DisplayTypeDbus:
+		return json.Marshal("dbus")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for DisplayType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *DisplayType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "default":
+		*e = DisplayTypeDefault
+	case "none":
+		*e = DisplayTypeNone
+	case "gtk":
+		*e = DisplayTypeGtk
+	case "sdl":
+		*e = DisplayTypeSdl
+	case "egl-headless":
+		*e = DisplayTypeEglHeadless
+	case "curses":
+		*e = DisplayTypeCurses
+	case "cocoa":
+		*e = DisplayTypeCocoa
+	case "spice-app":
+		*e = DisplayTypeSpiceApp
+	case "dbus":
+		*e = DisplayTypeDbus
+	default:
+		return fmt.Errorf("unknown enum value %q for DisplayType", s)
+	}
+	return nil
+}
+
+// DisplayUpdateOptions -> DisplayUpdateOptions (flat union)
+
+// DisplayUpdateOptions implements the "DisplayUpdateOptions" QMP API type.
+//
+// Can be one of:
+//   - DisplayUpdateOptionsVariantVNC
+type DisplayUpdateOptions interface {
+	isDisplayUpdateOptions()
+}
+
+// DisplayUpdateOptionsVariantVNC is an implementation of DisplayUpdateOptions.
+type DisplayUpdateOptionsVariantVNC struct {
+	Addresses []SocketAddress `json:"addresses,omitempty"`
+}
+
+func (DisplayUpdateOptionsVariantVNC) isDisplayUpdateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s DisplayUpdateOptionsVariantVNC) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type DisplayUpdateType `json:"type"`
+		DisplayUpdateOptionsVariantVNC
+	}{
+		DisplayUpdateTypeVNC,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeDisplayUpdateOptions(bs json.RawMessage) (DisplayUpdateOptions, error) {
+	v := struct {
+		Type DisplayUpdateType `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case DisplayUpdateTypeVNC:
+		var ret DisplayUpdateOptionsVariantVNC
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union DisplayUpdateOptions", v.Type)
+	}
+}
+
+// DisplayUpdateType -> DisplayUpdateType (enum)
+
+// DisplayUpdateType implements the "DisplayUpdateType" QMP API type.
+type DisplayUpdateType int
+
+// Known values of DisplayUpdateType.
+const (
+	DisplayUpdateTypeVNC DisplayUpdateType = iota
+)
+
+// String implements fmt.Stringer.
+func (e DisplayUpdateType) String() string {
+	switch e {
+	case DisplayUpdateTypeVNC:
+		return "vnc"
+	default:
+		return fmt.Sprintf("DisplayUpdateType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e DisplayUpdateType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case DisplayUpdateTypeVNC:
+		return json.Marshal("vnc")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for DisplayUpdateType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *DisplayUpdateType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "vnc":
+		*e = DisplayUpdateTypeVNC
+	default:
+		return fmt.Errorf("unknown enum value %q for DisplayUpdateType", s)
 	}
 	return nil
 }
@@ -4519,17 +7338,22 @@ func (e *DirtyBitmapStatus) UnmarshalJSON(bs []byte) error {
 
 // DriveBackup implements the "DriveBackup" QMP API type.
 type DriveBackup struct {
-	JobID         *string          `json:"job-id,omitempty"`
-	Device        string           `json:"device"`
-	Target        string           `json:"target"`
-	Format        *string          `json:"format,omitempty"`
-	Sync          MirrorSyncMode   `json:"sync"`
-	Mode          *NewImageMode    `json:"mode,omitempty"`
-	Speed         *int64           `json:"speed,omitempty"`
-	Bitmap        *string          `json:"bitmap,omitempty"`
-	Compress      *bool            `json:"compress,omitempty"`
-	OnSourceError *BlockdevOnError `json:"on-source-error,omitempty"`
-	OnTargetError *BlockdevOnError `json:"on-target-error,omitempty"`
+	JobID          *string          `json:"job-id,omitempty"`
+	Device         string           `json:"device"`
+	Sync           MirrorSyncMode   `json:"sync"`
+	Speed          *int64           `json:"speed,omitempty"`
+	Bitmap         *string          `json:"bitmap,omitempty"`
+	BitmapMode     *BitmapSyncMode  `json:"bitmap-mode,omitempty"`
+	Compress       *bool            `json:"compress,omitempty"`
+	OnSourceError  *BlockdevOnError `json:"on-source-error,omitempty"`
+	OnTargetError  *BlockdevOnError `json:"on-target-error,omitempty"`
+	AutoFinalize   *bool            `json:"auto-finalize,omitempty"`
+	AutoDismiss    *bool            `json:"auto-dismiss,omitempty"`
+	FilterNodeName *string          `json:"filter-node-name,omitempty"`
+	XPerf          *BackupPerf      `json:"x-perf,omitempty"`
+	Target         string           `json:"target"`
+	Format         *string          `json:"format,omitempty"`
+	Mode           *NewImageMode    `json:"mode,omitempty"`
 }
 
 // DriveMirror -> DriveMirror (struct)
@@ -4550,6 +7374,9 @@ type DriveMirror struct {
 	OnSourceError *BlockdevOnError `json:"on-source-error,omitempty"`
 	OnTargetError *BlockdevOnError `json:"on-target-error,omitempty"`
 	Unmap         *bool            `json:"unmap,omitempty"`
+	CopyMode      *MirrorCopyMode  `json:"copy-mode,omitempty"`
+	AutoFinalize  *bool            `json:"auto-finalize,omitempty"`
+	AutoDismiss   *bool            `json:"auto-dismiss,omitempty"`
 }
 
 // DumpGuestMemoryCapability -> DumpGuestMemoryCapability (struct)
@@ -4570,6 +7397,7 @@ const (
 	DumpGuestMemoryFormatKdumpZlib
 	DumpGuestMemoryFormatKdumpLzo
 	DumpGuestMemoryFormatKdumpSnappy
+	DumpGuestMemoryFormatWinDmp
 )
 
 // String implements fmt.Stringer.
@@ -4583,6 +7411,8 @@ func (e DumpGuestMemoryFormat) String() string {
 		return "kdump-lzo"
 	case DumpGuestMemoryFormatKdumpSnappy:
 		return "kdump-snappy"
+	case DumpGuestMemoryFormatWinDmp:
+		return "win-dmp"
 	default:
 		return fmt.Sprintf("DumpGuestMemoryFormat(%d)", e)
 	}
@@ -4599,6 +7429,8 @@ func (e DumpGuestMemoryFormat) MarshalJSON() ([]byte, error) {
 		return json.Marshal("kdump-lzo")
 	case DumpGuestMemoryFormatKdumpSnappy:
 		return json.Marshal("kdump-snappy")
+	case DumpGuestMemoryFormatWinDmp:
+		return json.Marshal("win-dmp")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for DumpGuestMemoryFormat", e)
 	}
@@ -4619,6 +7451,8 @@ func (e *DumpGuestMemoryFormat) UnmarshalJSON(bs []byte) error {
 		*e = DumpGuestMemoryFormatKdumpLzo
 	case "kdump-snappy":
 		*e = DumpGuestMemoryFormatKdumpSnappy
+	case "win-dmp":
+		*e = DumpGuestMemoryFormatWinDmp
 	default:
 		return fmt.Errorf("unknown enum value %q for DumpGuestMemoryFormat", s)
 	}
@@ -4700,12 +7534,54 @@ func (e *DumpStatus) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// EventInfo -> EventInfo (struct)
+// ExpirePasswordOptions -> ExpirePasswordOptions (flat union)
 
-// EventInfo implements the "EventInfo" QMP API type.
-type EventInfo struct {
-	Name string `json:"name"`
+// ExpirePasswordOptions implements the "ExpirePasswordOptions" QMP API type.
+//
+// Can be one of:
+//   - ExpirePasswordOptionsVariantVNC
+type ExpirePasswordOptions interface {
+	isExpirePasswordOptions()
 }
+
+// ExpirePasswordOptionsVariantVNC is an implementation of ExpirePasswordOptions.
+type ExpirePasswordOptionsVariantVNC struct {
+	Time    string  `json:"time"`
+	Display *string `json:"display,omitempty"`
+}
+
+func (ExpirePasswordOptionsVariantVNC) isExpirePasswordOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ExpirePasswordOptionsVariantVNC) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Protocol DisplayProtocol `json:"protocol"`
+		ExpirePasswordOptionsVariantVNC
+	}{
+		DisplayProtocolVNC,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeExpirePasswordOptions(bs json.RawMessage) (ExpirePasswordOptions, error) {
+	v := struct {
+		Protocol DisplayProtocol `json:"protocol"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Protocol {
+	case DisplayProtocolVNC:
+		var ret ExpirePasswordOptionsVariantVNC
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union ExpirePasswordOptions", v.Protocol)
+	}
+}
+
+// EVENT FAILOVER_NEGOTIATED
 
 // FdsetFdInfo -> FdsetFDInfo (struct)
 
@@ -4723,6 +7599,65 @@ type FdsetInfo struct {
 	Fds     []FdsetFDInfo `json:"fds"`
 }
 
+// FuseExportAllowOther -> FuseExportAllowOther (enum)
+
+// FuseExportAllowOther implements the "FuseExportAllowOther" QMP API type.
+type FuseExportAllowOther int
+
+// Known values of FuseExportAllowOther.
+const (
+	FuseExportAllowOtherOff FuseExportAllowOther = iota
+	FuseExportAllowOtherOn
+	FuseExportAllowOtherAuto
+)
+
+// String implements fmt.Stringer.
+func (e FuseExportAllowOther) String() string {
+	switch e {
+	case FuseExportAllowOtherOff:
+		return "off"
+	case FuseExportAllowOtherOn:
+		return "on"
+	case FuseExportAllowOtherAuto:
+		return "auto"
+	default:
+		return fmt.Sprintf("FuseExportAllowOther(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e FuseExportAllowOther) MarshalJSON() ([]byte, error) {
+	switch e {
+	case FuseExportAllowOtherOff:
+		return json.Marshal("off")
+	case FuseExportAllowOtherOn:
+		return json.Marshal("on")
+	case FuseExportAllowOtherAuto:
+		return json.Marshal("auto")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for FuseExportAllowOther", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *FuseExportAllowOther) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "off":
+		*e = FuseExportAllowOtherOff
+	case "on":
+		*e = FuseExportAllowOtherOn
+	case "auto":
+		*e = FuseExportAllowOtherAuto
+	default:
+		return fmt.Errorf("unknown enum value %q for FuseExportAllowOther", s)
+	}
+	return nil
+}
+
 // GICCapability -> GicCapability (struct)
 
 // GicCapability implements the "GICCapability" QMP API type.
@@ -4732,7 +7667,89 @@ type GicCapability struct {
 	Kernel   bool  `json:"kernel"`
 }
 
+// EVENT GUEST_CRASHLOADED
+
 // EVENT GUEST_PANICKED
+
+// GrabToggleKeys -> GrabToggleKeys (enum)
+
+// GrabToggleKeys implements the "GrabToggleKeys" QMP API type.
+type GrabToggleKeys int
+
+// Known values of GrabToggleKeys.
+const (
+	GrabToggleKeysCtrlCtrl GrabToggleKeys = iota
+	GrabToggleKeysAltAlt
+	GrabToggleKeysShiftShift
+	GrabToggleKeysMetaMeta
+	GrabToggleKeysScrolllock
+	GrabToggleKeysCtrlScrolllock
+)
+
+// String implements fmt.Stringer.
+func (e GrabToggleKeys) String() string {
+	switch e {
+	case GrabToggleKeysCtrlCtrl:
+		return "ctrl-ctrl"
+	case GrabToggleKeysAltAlt:
+		return "alt-alt"
+	case GrabToggleKeysShiftShift:
+		return "shift-shift"
+	case GrabToggleKeysMetaMeta:
+		return "meta-meta"
+	case GrabToggleKeysScrolllock:
+		return "scrolllock"
+	case GrabToggleKeysCtrlScrolllock:
+		return "ctrl-scrolllock"
+	default:
+		return fmt.Sprintf("GrabToggleKeys(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e GrabToggleKeys) MarshalJSON() ([]byte, error) {
+	switch e {
+	case GrabToggleKeysCtrlCtrl:
+		return json.Marshal("ctrl-ctrl")
+	case GrabToggleKeysAltAlt:
+		return json.Marshal("alt-alt")
+	case GrabToggleKeysShiftShift:
+		return json.Marshal("shift-shift")
+	case GrabToggleKeysMetaMeta:
+		return json.Marshal("meta-meta")
+	case GrabToggleKeysScrolllock:
+		return json.Marshal("scrolllock")
+	case GrabToggleKeysCtrlScrolllock:
+		return json.Marshal("ctrl-scrolllock")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for GrabToggleKeys", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *GrabToggleKeys) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "ctrl-ctrl":
+		*e = GrabToggleKeysCtrlCtrl
+	case "alt-alt":
+		*e = GrabToggleKeysAltAlt
+	case "shift-shift":
+		*e = GrabToggleKeysShiftShift
+	case "meta-meta":
+		*e = GrabToggleKeysMetaMeta
+	case "scrolllock":
+		*e = GrabToggleKeysScrolllock
+	case "ctrl-scrolllock":
+		*e = GrabToggleKeysCtrlScrolllock
+	default:
+		return fmt.Errorf("unknown enum value %q for GrabToggleKeys", s)
+	}
+	return nil
+}
 
 // GuestPanicAction -> GuestPanicAction (enum)
 
@@ -4743,6 +7760,7 @@ type GuestPanicAction int
 const (
 	GuestPanicActionPause GuestPanicAction = iota
 	GuestPanicActionPoweroff
+	GuestPanicActionRun
 )
 
 // String implements fmt.Stringer.
@@ -4752,6 +7770,8 @@ func (e GuestPanicAction) String() string {
 		return "pause"
 	case GuestPanicActionPoweroff:
 		return "poweroff"
+	case GuestPanicActionRun:
+		return "run"
 	default:
 		return fmt.Sprintf("GuestPanicAction(%d)", e)
 	}
@@ -4764,6 +7784,8 @@ func (e GuestPanicAction) MarshalJSON() ([]byte, error) {
 		return json.Marshal("pause")
 	case GuestPanicActionPoweroff:
 		return json.Marshal("poweroff")
+	case GuestPanicActionRun:
+		return json.Marshal("run")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for GuestPanicAction", e)
 	}
@@ -4780,6 +7802,8 @@ func (e *GuestPanicAction) UnmarshalJSON(bs []byte) error {
 		*e = GuestPanicActionPause
 	case "poweroff":
 		*e = GuestPanicActionPoweroff
+	case "run":
+		*e = GuestPanicActionRun
 	default:
 		return fmt.Errorf("unknown enum value %q for GuestPanicAction", s)
 	}
@@ -4792,6 +7816,7 @@ func (e *GuestPanicAction) UnmarshalJSON(bs []byte) error {
 //
 // Can be one of:
 //   - GuestPanicInformationVariantHyperV
+//   - GuestPanicInformationVariantS390
 type GuestPanicInformation interface {
 	isGuestPanicInformation()
 }
@@ -4819,6 +7844,28 @@ func (s GuestPanicInformationVariantHyperV) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// GuestPanicInformationVariantS390 is an implementation of GuestPanicInformation.
+type GuestPanicInformationVariantS390 struct {
+	Core    uint32          `json:"core"`
+	PswMask uint64          `json:"psw-mask"`
+	PswAddr uint64          `json:"psw-addr"`
+	Reason  S390CrashReason `json:"reason"`
+}
+
+func (GuestPanicInformationVariantS390) isGuestPanicInformation() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s GuestPanicInformationVariantS390) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type GuestPanicInformationType `json:"type"`
+		GuestPanicInformationVariantS390
+	}{
+		GuestPanicInformationTypeS390,
+		s,
+	}
+	return json.Marshal(v)
+}
+
 func decodeGuestPanicInformation(bs json.RawMessage) (GuestPanicInformation, error) {
 	v := struct {
 		Type GuestPanicInformationType `json:"type"`
@@ -4829,6 +7876,10 @@ func decodeGuestPanicInformation(bs json.RawMessage) (GuestPanicInformation, err
 	switch v.Type {
 	case GuestPanicInformationTypeHyperV:
 		var ret GuestPanicInformationVariantHyperV
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case GuestPanicInformationTypeS390:
+		var ret GuestPanicInformationVariantS390
 		err := json.Unmarshal([]byte(bs), &ret)
 		return ret, err
 	default:
@@ -4844,6 +7895,7 @@ type GuestPanicInformationType int
 // Known values of GuestPanicInformationType.
 const (
 	GuestPanicInformationTypeHyperV GuestPanicInformationType = iota
+	GuestPanicInformationTypeS390
 )
 
 // String implements fmt.Stringer.
@@ -4851,6 +7903,8 @@ func (e GuestPanicInformationType) String() string {
 	switch e {
 	case GuestPanicInformationTypeHyperV:
 		return "hyper-v"
+	case GuestPanicInformationTypeS390:
+		return "s390"
 	default:
 		return fmt.Sprintf("GuestPanicInformationType(%d)", e)
 	}
@@ -4861,6 +7915,8 @@ func (e GuestPanicInformationType) MarshalJSON() ([]byte, error) {
 	switch e {
 	case GuestPanicInformationTypeHyperV:
 		return json.Marshal("hyper-v")
+	case GuestPanicInformationTypeS390:
+		return json.Marshal("s390")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for GuestPanicInformationType", e)
 	}
@@ -4875,6 +7931,8 @@ func (e *GuestPanicInformationType) UnmarshalJSON(bs []byte) error {
 	switch s {
 	case "hyper-v":
 		*e = GuestPanicInformationTypeHyperV
+	case "s390":
+		*e = GuestPanicInformationTypeS390
 	default:
 		return fmt.Errorf("unknown enum value %q for GuestPanicInformationType", s)
 	}
@@ -4886,6 +7944,270 @@ func (e *GuestPanicInformationType) UnmarshalJSON(bs []byte) error {
 // GUIDInfo implements the "GuidInfo" QMP API type.
 type GUIDInfo struct {
 	GUID string `json:"guid"`
+}
+
+// HmatCacheAssociativity -> HmatCacheAssociativity (enum)
+
+// HmatCacheAssociativity implements the "HmatCacheAssociativity" QMP API type.
+type HmatCacheAssociativity int
+
+// Known values of HmatCacheAssociativity.
+const (
+	HmatCacheAssociativityNone HmatCacheAssociativity = iota
+	HmatCacheAssociativityDirect
+	HmatCacheAssociativityComplex
+)
+
+// String implements fmt.Stringer.
+func (e HmatCacheAssociativity) String() string {
+	switch e {
+	case HmatCacheAssociativityNone:
+		return "none"
+	case HmatCacheAssociativityDirect:
+		return "direct"
+	case HmatCacheAssociativityComplex:
+		return "complex"
+	default:
+		return fmt.Sprintf("HmatCacheAssociativity(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e HmatCacheAssociativity) MarshalJSON() ([]byte, error) {
+	switch e {
+	case HmatCacheAssociativityNone:
+		return json.Marshal("none")
+	case HmatCacheAssociativityDirect:
+		return json.Marshal("direct")
+	case HmatCacheAssociativityComplex:
+		return json.Marshal("complex")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for HmatCacheAssociativity", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *HmatCacheAssociativity) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = HmatCacheAssociativityNone
+	case "direct":
+		*e = HmatCacheAssociativityDirect
+	case "complex":
+		*e = HmatCacheAssociativityComplex
+	default:
+		return fmt.Errorf("unknown enum value %q for HmatCacheAssociativity", s)
+	}
+	return nil
+}
+
+// HmatCacheWritePolicy -> HmatCacheWritePolicy (enum)
+
+// HmatCacheWritePolicy implements the "HmatCacheWritePolicy" QMP API type.
+type HmatCacheWritePolicy int
+
+// Known values of HmatCacheWritePolicy.
+const (
+	HmatCacheWritePolicyNone HmatCacheWritePolicy = iota
+	HmatCacheWritePolicyWriteBack
+	HmatCacheWritePolicyWriteThrough
+)
+
+// String implements fmt.Stringer.
+func (e HmatCacheWritePolicy) String() string {
+	switch e {
+	case HmatCacheWritePolicyNone:
+		return "none"
+	case HmatCacheWritePolicyWriteBack:
+		return "write-back"
+	case HmatCacheWritePolicyWriteThrough:
+		return "write-through"
+	default:
+		return fmt.Sprintf("HmatCacheWritePolicy(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e HmatCacheWritePolicy) MarshalJSON() ([]byte, error) {
+	switch e {
+	case HmatCacheWritePolicyNone:
+		return json.Marshal("none")
+	case HmatCacheWritePolicyWriteBack:
+		return json.Marshal("write-back")
+	case HmatCacheWritePolicyWriteThrough:
+		return json.Marshal("write-through")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for HmatCacheWritePolicy", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *HmatCacheWritePolicy) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = HmatCacheWritePolicyNone
+	case "write-back":
+		*e = HmatCacheWritePolicyWriteBack
+	case "write-through":
+		*e = HmatCacheWritePolicyWriteThrough
+	default:
+		return fmt.Errorf("unknown enum value %q for HmatCacheWritePolicy", s)
+	}
+	return nil
+}
+
+// HmatLBDataType -> HmatLbDataType (enum)
+
+// HmatLbDataType implements the "HmatLBDataType" QMP API type.
+type HmatLbDataType int
+
+// Known values of HmatLbDataType.
+const (
+	HmatLbDataTypeAccessLatency HmatLbDataType = iota
+	HmatLbDataTypeReadLatency
+	HmatLbDataTypeWriteLatency
+	HmatLbDataTypeAccessBandwidth
+	HmatLbDataTypeReadBandwidth
+	HmatLbDataTypeWriteBandwidth
+)
+
+// String implements fmt.Stringer.
+func (e HmatLbDataType) String() string {
+	switch e {
+	case HmatLbDataTypeAccessLatency:
+		return "access-latency"
+	case HmatLbDataTypeReadLatency:
+		return "read-latency"
+	case HmatLbDataTypeWriteLatency:
+		return "write-latency"
+	case HmatLbDataTypeAccessBandwidth:
+		return "access-bandwidth"
+	case HmatLbDataTypeReadBandwidth:
+		return "read-bandwidth"
+	case HmatLbDataTypeWriteBandwidth:
+		return "write-bandwidth"
+	default:
+		return fmt.Sprintf("HmatLbDataType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e HmatLbDataType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case HmatLbDataTypeAccessLatency:
+		return json.Marshal("access-latency")
+	case HmatLbDataTypeReadLatency:
+		return json.Marshal("read-latency")
+	case HmatLbDataTypeWriteLatency:
+		return json.Marshal("write-latency")
+	case HmatLbDataTypeAccessBandwidth:
+		return json.Marshal("access-bandwidth")
+	case HmatLbDataTypeReadBandwidth:
+		return json.Marshal("read-bandwidth")
+	case HmatLbDataTypeWriteBandwidth:
+		return json.Marshal("write-bandwidth")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for HmatLbDataType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *HmatLbDataType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "access-latency":
+		*e = HmatLbDataTypeAccessLatency
+	case "read-latency":
+		*e = HmatLbDataTypeReadLatency
+	case "write-latency":
+		*e = HmatLbDataTypeWriteLatency
+	case "access-bandwidth":
+		*e = HmatLbDataTypeAccessBandwidth
+	case "read-bandwidth":
+		*e = HmatLbDataTypeReadBandwidth
+	case "write-bandwidth":
+		*e = HmatLbDataTypeWriteBandwidth
+	default:
+		return fmt.Errorf("unknown enum value %q for HmatLbDataType", s)
+	}
+	return nil
+}
+
+// HmatLBMemoryHierarchy -> HmatLbMemoryHierarchy (enum)
+
+// HmatLbMemoryHierarchy implements the "HmatLBMemoryHierarchy" QMP API type.
+type HmatLbMemoryHierarchy int
+
+// Known values of HmatLbMemoryHierarchy.
+const (
+	HmatLbMemoryHierarchyMemory HmatLbMemoryHierarchy = iota
+	HmatLbMemoryHierarchyFirstLevel
+	HmatLbMemoryHierarchySecondLevel
+	HmatLbMemoryHierarchyThirdLevel
+)
+
+// String implements fmt.Stringer.
+func (e HmatLbMemoryHierarchy) String() string {
+	switch e {
+	case HmatLbMemoryHierarchyMemory:
+		return "memory"
+	case HmatLbMemoryHierarchyFirstLevel:
+		return "first-level"
+	case HmatLbMemoryHierarchySecondLevel:
+		return "second-level"
+	case HmatLbMemoryHierarchyThirdLevel:
+		return "third-level"
+	default:
+		return fmt.Sprintf("HmatLbMemoryHierarchy(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e HmatLbMemoryHierarchy) MarshalJSON() ([]byte, error) {
+	switch e {
+	case HmatLbMemoryHierarchyMemory:
+		return json.Marshal("memory")
+	case HmatLbMemoryHierarchyFirstLevel:
+		return json.Marshal("first-level")
+	case HmatLbMemoryHierarchySecondLevel:
+		return json.Marshal("second-level")
+	case HmatLbMemoryHierarchyThirdLevel:
+		return json.Marshal("third-level")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for HmatLbMemoryHierarchy", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *HmatLbMemoryHierarchy) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "memory":
+		*e = HmatLbMemoryHierarchyMemory
+	case "first-level":
+		*e = HmatLbMemoryHierarchyFirstLevel
+	case "second-level":
+		*e = HmatLbMemoryHierarchySecondLevel
+	case "third-level":
+		*e = HmatLbMemoryHierarchyThirdLevel
+	default:
+		return fmt.Errorf("unknown enum value %q for HmatLbMemoryHierarchy", s)
+	}
+	return nil
 }
 
 // HostMemPolicy -> HostMemPolicy (enum)
@@ -4954,6 +8276,65 @@ func (e *HostMemPolicy) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// HotKeyMod -> HotKeyMod (enum)
+
+// HotKeyMod implements the "HotKeyMod" QMP API type.
+type HotKeyMod int
+
+// Known values of HotKeyMod.
+const (
+	HotKeyModLctrlLalt HotKeyMod = iota
+	HotKeyModLshiftLctrlLalt
+	HotKeyModRctrl
+)
+
+// String implements fmt.Stringer.
+func (e HotKeyMod) String() string {
+	switch e {
+	case HotKeyModLctrlLalt:
+		return "lctrl-lalt"
+	case HotKeyModLshiftLctrlLalt:
+		return "lshift-lctrl-lalt"
+	case HotKeyModRctrl:
+		return "rctrl"
+	default:
+		return fmt.Sprintf("HotKeyMod(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e HotKeyMod) MarshalJSON() ([]byte, error) {
+	switch e {
+	case HotKeyModLctrlLalt:
+		return json.Marshal("lctrl-lalt")
+	case HotKeyModLshiftLctrlLalt:
+		return json.Marshal("lshift-lctrl-lalt")
+	case HotKeyModRctrl:
+		return json.Marshal("rctrl")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for HotKeyMod", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *HotKeyMod) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "lctrl-lalt":
+		*e = HotKeyModLctrlLalt
+	case "lshift-lctrl-lalt":
+		*e = HotKeyModLshiftLctrlLalt
+	case "rctrl":
+		*e = HotKeyModRctrl
+	default:
+		return fmt.Errorf("unknown enum value %q for HotKeyMod", s)
+	}
+	return nil
+}
+
 // HotpluggableCPU -> HotpluggableCPU (struct)
 
 // HotpluggableCPU implements the "HotpluggableCPU" QMP API type.
@@ -4964,15 +8345,75 @@ type HotpluggableCPU struct {
 	QomPath    *string               `json:"qom-path,omitempty"`
 }
 
+// HumanReadableText -> HumanReadableText (struct)
+
+// HumanReadableText implements the "HumanReadableText" QMP API type.
+type HumanReadableText struct {
+	HumanReadableText string `json:"human-readable-text"`
+}
+
 // IOThreadInfo -> IOThreadInfo (struct)
 
 // IOThreadInfo implements the "IOThreadInfo" QMP API type.
 type IOThreadInfo struct {
-	ID         string `json:"id"`
-	ThreadID   int64  `json:"thread-id"`
-	PollMaxNs  int64  `json:"poll-max-ns"`
-	PollGrow   int64  `json:"poll-grow"`
-	PollShrink int64  `json:"poll-shrink"`
+	ID          string `json:"id"`
+	ThreadID    int64  `json:"thread-id"`
+	PollMaxNs   int64  `json:"poll-max-ns"`
+	PollGrow    int64  `json:"poll-grow"`
+	PollShrink  int64  `json:"poll-shrink"`
+	AIOMaxBatch int64  `json:"aio-max-batch"`
+}
+
+// ImageFormat -> ImageFormat (enum)
+
+// ImageFormat implements the "ImageFormat" QMP API type.
+type ImageFormat int
+
+// Known values of ImageFormat.
+const (
+	ImageFormatPpm ImageFormat = iota
+	ImageFormatPng
+)
+
+// String implements fmt.Stringer.
+func (e ImageFormat) String() string {
+	switch e {
+	case ImageFormatPpm:
+		return "ppm"
+	case ImageFormatPng:
+		return "png"
+	default:
+		return fmt.Sprintf("ImageFormat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ImageFormat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ImageFormatPpm:
+		return json.Marshal("ppm")
+	case ImageFormatPng:
+		return json.Marshal("png")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ImageFormat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ImageFormat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "ppm":
+		*e = ImageFormatPpm
+	case "png":
+		*e = ImageFormatPng
+	default:
+		return fmt.Errorf("unknown enum value %q for ImageFormat", s)
+	}
+	return nil
 }
 
 // ImageInfo -> ImageInfo (struct)
@@ -4995,101 +8436,204 @@ type ImageInfo struct {
 	FormatSpecific        *ImageInfoSpecific `json:"format-specific,omitempty"`
 }
 
-// ImageInfoSpecific -> ImageInfoSpecific (simple union)
+// ImageInfoSpecific -> ImageInfoSpecific (flat union)
 
 // ImageInfoSpecific implements the "ImageInfoSpecific" QMP API type.
 //
 // Can be one of:
 //   - ImageInfoSpecificVariantLUKS
 //   - ImageInfoSpecificVariantQcow2
+//   - ImageInfoSpecificVariantRbd
 //   - ImageInfoSpecificVariantVMDK
 type ImageInfoSpecific interface {
 	isImageInfoSpecific()
 }
 
 // ImageInfoSpecificVariantLUKS is an implementation of ImageInfoSpecific.
-type ImageInfoSpecificVariantLUKS QCryptoBlockInfoLUKS
+type ImageInfoSpecificVariantLUKS struct {
+	Data QCryptoBlockInfoLUKS `json:"data"`
+}
 
 func (ImageInfoSpecificVariantLUKS) isImageInfoSpecific() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ImageInfoSpecificVariantLUKS) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "luks",
-		"data": QCryptoBlockInfoLUKS(s),
+	v := struct {
+		Type ImageInfoSpecificKind `json:"type"`
+		ImageInfoSpecificVariantLUKS
+	}{
+		ImageInfoSpecificKindLUKS,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ImageInfoSpecificVariantQcow2 is an implementation of ImageInfoSpecific.
-type ImageInfoSpecificVariantQcow2 ImageInfoSpecificQCow2
+type ImageInfoSpecificVariantQcow2 struct {
+	Data ImageInfoSpecificQCow2 `json:"data"`
+}
 
 func (ImageInfoSpecificVariantQcow2) isImageInfoSpecific() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ImageInfoSpecificVariantQcow2) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "qcow2",
-		"data": ImageInfoSpecificQCow2(s),
+	v := struct {
+		Type ImageInfoSpecificKind `json:"type"`
+		ImageInfoSpecificVariantQcow2
+	}{
+		ImageInfoSpecificKindQcow2,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ImageInfoSpecificVariantRbd is an implementation of ImageInfoSpecific.
+type ImageInfoSpecificVariantRbd struct {
+	Data ImageInfoSpecificRbd `json:"data"`
+}
+
+func (ImageInfoSpecificVariantRbd) isImageInfoSpecific() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ImageInfoSpecificVariantRbd) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type ImageInfoSpecificKind `json:"type"`
+		ImageInfoSpecificVariantRbd
+	}{
+		ImageInfoSpecificKindRbd,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // ImageInfoSpecificVariantVMDK is an implementation of ImageInfoSpecific.
-type ImageInfoSpecificVariantVMDK ImageInfoSpecificVMDK
+type ImageInfoSpecificVariantVMDK struct {
+	Data ImageInfoSpecificVMDK `json:"data"`
+}
 
 func (ImageInfoSpecificVariantVMDK) isImageInfoSpecific() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s ImageInfoSpecificVariantVMDK) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "vmdk",
-		"data": ImageInfoSpecificVMDK(s),
+	v := struct {
+		Type ImageInfoSpecificKind `json:"type"`
+		ImageInfoSpecificVariantVMDK
+	}{
+		ImageInfoSpecificKindVMDK,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeImageInfoSpecific(bs json.RawMessage) (ImageInfoSpecific, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type ImageInfoSpecificKind `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "luks":
+	switch v.Type {
+	case ImageInfoSpecificKindLUKS:
 		var ret ImageInfoSpecificVariantLUKS
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "qcow2":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ImageInfoSpecificKindQcow2:
 		var ret ImageInfoSpecificVariantQcow2
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "vmdk":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ImageInfoSpecificKindRbd:
+		var ret ImageInfoSpecificVariantRbd
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ImageInfoSpecificKindVMDK:
 		var ret ImageInfoSpecificVariantVMDK
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union ImageInfoSpecific", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union ImageInfoSpecific", v.Type)
 	}
+}
+
+// ImageInfoSpecificKind -> ImageInfoSpecificKind (enum)
+
+// ImageInfoSpecificKind implements the "ImageInfoSpecificKind" QMP API type.
+type ImageInfoSpecificKind int
+
+// Known values of ImageInfoSpecificKind.
+const (
+	ImageInfoSpecificKindQcow2 ImageInfoSpecificKind = iota
+	ImageInfoSpecificKindVMDK
+	ImageInfoSpecificKindLUKS
+	ImageInfoSpecificKindRbd
+)
+
+// String implements fmt.Stringer.
+func (e ImageInfoSpecificKind) String() string {
+	switch e {
+	case ImageInfoSpecificKindQcow2:
+		return "qcow2"
+	case ImageInfoSpecificKindVMDK:
+		return "vmdk"
+	case ImageInfoSpecificKindLUKS:
+		return "luks"
+	case ImageInfoSpecificKindRbd:
+		return "rbd"
+	default:
+		return fmt.Sprintf("ImageInfoSpecificKind(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ImageInfoSpecificKind) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ImageInfoSpecificKindQcow2:
+		return json.Marshal("qcow2")
+	case ImageInfoSpecificKindVMDK:
+		return json.Marshal("vmdk")
+	case ImageInfoSpecificKindLUKS:
+		return json.Marshal("luks")
+	case ImageInfoSpecificKindRbd:
+		return json.Marshal("rbd")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ImageInfoSpecificKind", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ImageInfoSpecificKind) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "qcow2":
+		*e = ImageInfoSpecificKindQcow2
+	case "vmdk":
+		*e = ImageInfoSpecificKindVMDK
+	case "luks":
+		*e = ImageInfoSpecificKindLUKS
+	case "rbd":
+		*e = ImageInfoSpecificKindRbd
+	default:
+		return fmt.Errorf("unknown enum value %q for ImageInfoSpecificKind", s)
+	}
+	return nil
 }
 
 // ImageInfoSpecificQCow2 -> ImageInfoSpecificQCow2 (struct)
 
 // ImageInfoSpecificQCow2 implements the "ImageInfoSpecificQCow2" QMP API type.
 type ImageInfoSpecificQCow2 struct {
-	Compat        string                            `json:"compat"`
-	LazyRefcounts *bool                             `json:"lazy-refcounts,omitempty"`
-	Corrupt       *bool                             `json:"corrupt,omitempty"`
-	RefcountBits  int64                             `json:"refcount-bits"`
-	Encrypt       *ImageInfoSpecificQCow2Encryption `json:"encrypt,omitempty"`
+	Compat          string                            `json:"compat"`
+	DataFile        *string                           `json:"data-file,omitempty"`
+	DataFileRaw     *bool                             `json:"data-file-raw,omitempty"`
+	ExtendedL2      *bool                             `json:"extended-l2,omitempty"`
+	LazyRefcounts   *bool                             `json:"lazy-refcounts,omitempty"`
+	Corrupt         *bool                             `json:"corrupt,omitempty"`
+	RefcountBits    int64                             `json:"refcount-bits"`
+	Encrypt         *ImageInfoSpecificQCow2Encryption `json:"encrypt,omitempty"`
+	Bitmaps         []Qcow2BitmapInfo                 `json:"bitmaps,omitempty"`
+	CompressionType Qcow2CompressionType              `json:"compression-type"`
 }
 
 // ImageInfoSpecificQCow2Encryption -> ImageInfoSpecificQCow2Encryption (flat union)
@@ -5097,28 +8641,9 @@ type ImageInfoSpecificQCow2 struct {
 // ImageInfoSpecificQCow2Encryption implements the "ImageInfoSpecificQCow2Encryption" QMP API type.
 //
 // Can be one of:
-//   - ImageInfoSpecificQCow2EncryptionVariantAes
 //   - ImageInfoSpecificQCow2EncryptionVariantLUKS
 type ImageInfoSpecificQCow2Encryption interface {
 	isImageInfoSpecificQCow2Encryption()
-}
-
-// ImageInfoSpecificQCow2EncryptionVariantAes is an implementation of ImageInfoSpecificQCow2Encryption.
-type ImageInfoSpecificQCow2EncryptionVariantAes struct {
-}
-
-func (ImageInfoSpecificQCow2EncryptionVariantAes) isImageInfoSpecificQCow2Encryption() {}
-
-// MarshalJSON implements json.Marshaler.
-func (s ImageInfoSpecificQCow2EncryptionVariantAes) MarshalJSON() ([]byte, error) {
-	v := struct {
-		Format BlockdevQcow2EncryptionFormat `json:"format"`
-		ImageInfoSpecificQCow2EncryptionVariantAes
-	}{
-		BlockdevQcow2EncryptionFormatAes,
-		s,
-	}
-	return json.Marshal(v)
 }
 
 // ImageInfoSpecificQCow2EncryptionVariantLUKS is an implementation of ImageInfoSpecificQCow2Encryption.
@@ -5156,10 +8681,6 @@ func decodeImageInfoSpecificQCow2Encryption(bs json.RawMessage) (ImageInfoSpecif
 		return nil, err
 	}
 	switch v.Format {
-	case BlockdevQcow2EncryptionFormatAes:
-		var ret ImageInfoSpecificQCow2EncryptionVariantAes
-		err := json.Unmarshal([]byte(bs), &ret)
-		return ret, err
 	case BlockdevQcow2EncryptionFormatLUKS:
 		var ret ImageInfoSpecificQCow2EncryptionVariantLUKS
 		err := json.Unmarshal([]byte(bs), &ret)
@@ -5167,6 +8688,13 @@ func decodeImageInfoSpecificQCow2Encryption(bs json.RawMessage) (ImageInfoSpecif
 	default:
 		return nil, fmt.Errorf("unknown flat union subtype %q for flat union ImageInfoSpecificQCow2Encryption", v.Format)
 	}
+}
+
+// ImageInfoSpecificRbd -> ImageInfoSpecificRbd (struct)
+
+// ImageInfoSpecificRbd implements the "ImageInfoSpecificRbd" QMP API type.
+type ImageInfoSpecificRbd struct {
+	EncryptionFormat *RbdImageEncryptionFormat `json:"encryption-format,omitempty"`
 }
 
 // ImageInfoSpecificVmdk -> ImageInfoSpecificVMDK (struct)
@@ -5183,12 +8711,14 @@ type ImageInfoSpecificVMDK struct {
 
 // InetSocketAddress implements the "InetSocketAddress" QMP API type.
 type InetSocketAddress struct {
-	Host    string  `json:"host"`
-	Port    string  `json:"port"`
-	Numeric *bool   `json:"numeric,omitempty"`
-	To      *uint16 `json:"to,omitempty"`
-	Ipv4    *bool   `json:"ipv4,omitempty"`
-	Ipv6    *bool   `json:"ipv6,omitempty"`
+	Host      string  `json:"host"`
+	Port      string  `json:"port"`
+	Numeric   *bool   `json:"numeric,omitempty"`
+	To        *uint16 `json:"to,omitempty"`
+	Ipv4      *bool   `json:"ipv4,omitempty"`
+	Ipv6      *bool   `json:"ipv6,omitempty"`
+	KeepAlive *bool   `json:"keep-alive,omitempty"`
+	Mptcp     *bool   `json:"mptcp,omitempty"`
 }
 
 // InetSocketAddressBase -> InetSocketAddressBase (struct)
@@ -5273,6 +8803,8 @@ const (
 	InputButtonWheelDown
 	InputButtonSide
 	InputButtonExtra
+	InputButtonWheelLeft
+	InputButtonWheelRight
 )
 
 // String implements fmt.Stringer.
@@ -5292,6 +8824,10 @@ func (e InputButton) String() string {
 		return "side"
 	case InputButtonExtra:
 		return "extra"
+	case InputButtonWheelLeft:
+		return "wheel-left"
+	case InputButtonWheelRight:
+		return "wheel-right"
 	default:
 		return fmt.Sprintf("InputButton(%d)", e)
 	}
@@ -5314,6 +8850,10 @@ func (e InputButton) MarshalJSON() ([]byte, error) {
 		return json.Marshal("side")
 	case InputButtonExtra:
 		return json.Marshal("extra")
+	case InputButtonWheelLeft:
+		return json.Marshal("wheel-left")
+	case InputButtonWheelRight:
+		return json.Marshal("wheel-right")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for InputButton", e)
 	}
@@ -5340,13 +8880,17 @@ func (e *InputButton) UnmarshalJSON(bs []byte) error {
 		*e = InputButtonSide
 	case "extra":
 		*e = InputButtonExtra
+	case "wheel-left":
+		*e = InputButtonWheelLeft
+	case "wheel-right":
+		*e = InputButtonWheelRight
 	default:
 		return fmt.Errorf("unknown enum value %q for InputButton", s)
 	}
 	return nil
 }
 
-// InputEvent -> InputEvent (simple union)
+// InputEvent -> InputEvent (flat union)
 
 // InputEvent implements the "InputEvent" QMP API type.
 //
@@ -5360,97 +8904,174 @@ type InputEvent interface {
 }
 
 // InputEventVariantAbs is an implementation of InputEvent.
-type InputEventVariantAbs InputMoveEvent
+type InputEventVariantAbs struct {
+	Data InputMoveEvent `json:"data"`
+}
 
 func (InputEventVariantAbs) isInputEvent() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s InputEventVariantAbs) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "abs",
-		"data": InputMoveEvent(s),
+	v := struct {
+		Type InputEventKind `json:"type"`
+		InputEventVariantAbs
+	}{
+		InputEventKindAbs,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // InputEventVariantBtn is an implementation of InputEvent.
-type InputEventVariantBtn InputBtnEvent
+type InputEventVariantBtn struct {
+	Data InputBtnEvent `json:"data"`
+}
 
 func (InputEventVariantBtn) isInputEvent() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s InputEventVariantBtn) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "btn",
-		"data": InputBtnEvent(s),
+	v := struct {
+		Type InputEventKind `json:"type"`
+		InputEventVariantBtn
+	}{
+		InputEventKindBtn,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // InputEventVariantKey is an implementation of InputEvent.
-type InputEventVariantKey InputKeyEvent
+type InputEventVariantKey struct {
+	Data InputKeyEvent `json:"data"`
+}
 
 func (InputEventVariantKey) isInputEvent() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s InputEventVariantKey) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "key",
-		"data": InputKeyEvent(s),
+	v := struct {
+		Type InputEventKind `json:"type"`
+		InputEventVariantKey
+	}{
+		InputEventKindKey,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // InputEventVariantRel is an implementation of InputEvent.
-type InputEventVariantRel InputMoveEvent
+type InputEventVariantRel struct {
+	Data InputMoveEvent `json:"data"`
+}
 
 func (InputEventVariantRel) isInputEvent() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s InputEventVariantRel) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "rel",
-		"data": InputMoveEvent(s),
+	v := struct {
+		Type InputEventKind `json:"type"`
+		InputEventVariantRel
+	}{
+		InputEventKindRel,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeInputEvent(bs json.RawMessage) (InputEvent, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type InputEventKind `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "abs":
+	switch v.Type {
+	case InputEventKindAbs:
 		var ret InputEventVariantAbs
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "btn":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case InputEventKindBtn:
 		var ret InputEventVariantBtn
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "key":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case InputEventKindKey:
 		var ret InputEventVariantKey
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "rel":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case InputEventKindRel:
 		var ret InputEventVariantRel
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union InputEvent", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union InputEvent", v.Type)
 	}
+}
+
+// InputEventKind -> InputEventKind (enum)
+
+// InputEventKind implements the "InputEventKind" QMP API type.
+type InputEventKind int
+
+// Known values of InputEventKind.
+const (
+	InputEventKindKey InputEventKind = iota
+	InputEventKindBtn
+	InputEventKindRel
+	InputEventKindAbs
+)
+
+// String implements fmt.Stringer.
+func (e InputEventKind) String() string {
+	switch e {
+	case InputEventKindKey:
+		return "key"
+	case InputEventKindBtn:
+		return "btn"
+	case InputEventKindRel:
+		return "rel"
+	case InputEventKindAbs:
+		return "abs"
+	default:
+		return fmt.Sprintf("InputEventKind(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e InputEventKind) MarshalJSON() ([]byte, error) {
+	switch e {
+	case InputEventKindKey:
+		return json.Marshal("key")
+	case InputEventKindBtn:
+		return json.Marshal("btn")
+	case InputEventKindRel:
+		return json.Marshal("rel")
+	case InputEventKindAbs:
+		return json.Marshal("abs")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for InputEventKind", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *InputEventKind) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "key":
+		*e = InputEventKindKey
+	case "btn":
+		*e = InputEventKindBtn
+	case "rel":
+		*e = InputEventKindRel
+	case "abs":
+		*e = InputEventKindAbs
+	default:
+		return fmt.Errorf("unknown enum value %q for InputEventKind", s)
+	}
+	return nil
 }
 
 // InputKeyEvent -> InputKeyEvent (struct)
@@ -5639,6 +9260,8 @@ func (e *IscsiTransport) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// EVENT JOB_STATUS_CHANGE
+
 // JSONType -> JSONType (enum)
 
 // JSONType implements the "JSONType" QMP API type.
@@ -5733,7 +9356,235 @@ func (e *JSONType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// KeyValue -> KeyValue (simple union)
+// JobInfo -> JobInfo (struct)
+
+// JobInfo implements the "JobInfo" QMP API type.
+type JobInfo struct {
+	ID              string    `json:"id"`
+	Type            JobType   `json:"type"`
+	Status          JobStatus `json:"status"`
+	CurrentProgress int64     `json:"current-progress"`
+	TotalProgress   int64     `json:"total-progress"`
+	Error           *string   `json:"error,omitempty"`
+}
+
+// JobStatus -> JobStatus (enum)
+
+// JobStatus implements the "JobStatus" QMP API type.
+type JobStatus int
+
+// Known values of JobStatus.
+const (
+	JobStatusUndefined JobStatus = iota
+	JobStatusCreated
+	JobStatusRunning
+	JobStatusPaused
+	JobStatusReady
+	JobStatusStandby
+	JobStatusWaiting
+	JobStatusPending
+	JobStatusAborting
+	JobStatusConcluded
+	JobStatusNull
+)
+
+// String implements fmt.Stringer.
+func (e JobStatus) String() string {
+	switch e {
+	case JobStatusUndefined:
+		return "undefined"
+	case JobStatusCreated:
+		return "created"
+	case JobStatusRunning:
+		return "running"
+	case JobStatusPaused:
+		return "paused"
+	case JobStatusReady:
+		return "ready"
+	case JobStatusStandby:
+		return "standby"
+	case JobStatusWaiting:
+		return "waiting"
+	case JobStatusPending:
+		return "pending"
+	case JobStatusAborting:
+		return "aborting"
+	case JobStatusConcluded:
+		return "concluded"
+	case JobStatusNull:
+		return "null"
+	default:
+		return fmt.Sprintf("JobStatus(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e JobStatus) MarshalJSON() ([]byte, error) {
+	switch e {
+	case JobStatusUndefined:
+		return json.Marshal("undefined")
+	case JobStatusCreated:
+		return json.Marshal("created")
+	case JobStatusRunning:
+		return json.Marshal("running")
+	case JobStatusPaused:
+		return json.Marshal("paused")
+	case JobStatusReady:
+		return json.Marshal("ready")
+	case JobStatusStandby:
+		return json.Marshal("standby")
+	case JobStatusWaiting:
+		return json.Marshal("waiting")
+	case JobStatusPending:
+		return json.Marshal("pending")
+	case JobStatusAborting:
+		return json.Marshal("aborting")
+	case JobStatusConcluded:
+		return json.Marshal("concluded")
+	case JobStatusNull:
+		return json.Marshal("null")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for JobStatus", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *JobStatus) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "undefined":
+		*e = JobStatusUndefined
+	case "created":
+		*e = JobStatusCreated
+	case "running":
+		*e = JobStatusRunning
+	case "paused":
+		*e = JobStatusPaused
+	case "ready":
+		*e = JobStatusReady
+	case "standby":
+		*e = JobStatusStandby
+	case "waiting":
+		*e = JobStatusWaiting
+	case "pending":
+		*e = JobStatusPending
+	case "aborting":
+		*e = JobStatusAborting
+	case "concluded":
+		*e = JobStatusConcluded
+	case "null":
+		*e = JobStatusNull
+	default:
+		return fmt.Errorf("unknown enum value %q for JobStatus", s)
+	}
+	return nil
+}
+
+// JobType -> JobType (enum)
+
+// JobType implements the "JobType" QMP API type.
+type JobType int
+
+// Known values of JobType.
+const (
+	JobTypeCommit JobType = iota
+	JobTypeStream
+	JobTypeMirror
+	JobTypeBackup
+	JobTypeCreate
+	JobTypeAmend
+	JobTypeSnapshotLoad
+	JobTypeSnapshotSave
+	JobTypeSnapshotDelete
+)
+
+// String implements fmt.Stringer.
+func (e JobType) String() string {
+	switch e {
+	case JobTypeCommit:
+		return "commit"
+	case JobTypeStream:
+		return "stream"
+	case JobTypeMirror:
+		return "mirror"
+	case JobTypeBackup:
+		return "backup"
+	case JobTypeCreate:
+		return "create"
+	case JobTypeAmend:
+		return "amend"
+	case JobTypeSnapshotLoad:
+		return "snapshot-load"
+	case JobTypeSnapshotSave:
+		return "snapshot-save"
+	case JobTypeSnapshotDelete:
+		return "snapshot-delete"
+	default:
+		return fmt.Sprintf("JobType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e JobType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case JobTypeCommit:
+		return json.Marshal("commit")
+	case JobTypeStream:
+		return json.Marshal("stream")
+	case JobTypeMirror:
+		return json.Marshal("mirror")
+	case JobTypeBackup:
+		return json.Marshal("backup")
+	case JobTypeCreate:
+		return json.Marshal("create")
+	case JobTypeAmend:
+		return json.Marshal("amend")
+	case JobTypeSnapshotLoad:
+		return json.Marshal("snapshot-load")
+	case JobTypeSnapshotSave:
+		return json.Marshal("snapshot-save")
+	case JobTypeSnapshotDelete:
+		return json.Marshal("snapshot-delete")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for JobType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *JobType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "commit":
+		*e = JobTypeCommit
+	case "stream":
+		*e = JobTypeStream
+	case "mirror":
+		*e = JobTypeMirror
+	case "backup":
+		*e = JobTypeBackup
+	case "create":
+		*e = JobTypeCreate
+	case "amend":
+		*e = JobTypeAmend
+	case "snapshot-load":
+		*e = JobTypeSnapshotLoad
+	case "snapshot-save":
+		*e = JobTypeSnapshotSave
+	case "snapshot-delete":
+		*e = JobTypeSnapshotDelete
+	default:
+		return fmt.Errorf("unknown enum value %q for JobType", s)
+	}
+	return nil
+}
+
+// KeyValue -> KeyValue (flat union)
 
 // KeyValue implements the "KeyValue" QMP API type.
 //
@@ -5745,57 +9596,114 @@ type KeyValue interface {
 }
 
 // KeyValueVariantfloat64 is an implementation of KeyValue.
-type KeyValueVariantfloat64 int64
+type KeyValueVariantfloat64 struct {
+	Data int64 `json:"data"`
+}
 
 func (KeyValueVariantfloat64) isKeyValue() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s KeyValueVariantfloat64) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "number",
-		"data": int64(s),
+	v := struct {
+		Type KeyValueKind `json:"type"`
+		KeyValueVariantfloat64
+	}{
+		KeyValueKindfloat64,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // KeyValueVariantQcode is an implementation of KeyValue.
-type KeyValueVariantQcode QKeyCode
+type KeyValueVariantQcode struct {
+	Data QKeyCode `json:"data"`
+}
 
 func (KeyValueVariantQcode) isKeyValue() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s KeyValueVariantQcode) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "qcode",
-		"data": QKeyCode(s),
+	v := struct {
+		Type KeyValueKind `json:"type"`
+		KeyValueVariantQcode
+	}{
+		KeyValueKindQcode,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeKeyValue(bs json.RawMessage) (KeyValue, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type KeyValueKind `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "number":
+	switch v.Type {
+	case KeyValueKindfloat64:
 		var ret KeyValueVariantfloat64
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "qcode":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case KeyValueKindQcode:
 		var ret KeyValueVariantQcode
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union KeyValue", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union KeyValue", v.Type)
 	}
+}
+
+// KeyValueKind -> KeyValueKind (enum)
+
+// KeyValueKind implements the "KeyValueKind" QMP API type.
+type KeyValueKind int
+
+// Known values of KeyValueKind.
+const (
+	KeyValueKindfloat64 KeyValueKind = iota
+	KeyValueKindQcode
+)
+
+// String implements fmt.Stringer.
+func (e KeyValueKind) String() string {
+	switch e {
+	case KeyValueKindfloat64:
+		return "number"
+	case KeyValueKindQcode:
+		return "qcode"
+	default:
+		return fmt.Sprintf("KeyValueKind(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e KeyValueKind) MarshalJSON() ([]byte, error) {
+	switch e {
+	case KeyValueKindfloat64:
+		return json.Marshal("number")
+	case KeyValueKindQcode:
+		return json.Marshal("qcode")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for KeyValueKind", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *KeyValueKind) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "number":
+		*e = KeyValueKindfloat64
+	case "qcode":
+		*e = KeyValueKindQcode
+	default:
+		return fmt.Errorf("unknown enum value %q for KeyValueKind", s)
+	}
+	return nil
 }
 
 // KvmInfo -> KVMInfo (struct)
@@ -5805,6 +9713,10 @@ type KVMInfo struct {
 	Enabled bool `json:"enabled"`
 	Present bool `json:"present"`
 }
+
+// EVENT MEMORY_DEVICE_SIZE_CHANGE
+
+// EVENT MEMORY_FAILURE
 
 // EVENT MEM_UNPLUG_ERROR
 
@@ -5821,6 +9733,10 @@ type MachineInfo struct {
 	IsDefault        *bool   `json:"is-default,omitempty"`
 	CPUMax           int64   `json:"cpu-max"`
 	HotpluggableCpus bool    `json:"hotpluggable-cpus"`
+	NumaMemSupported bool    `json:"numa-mem-supported"`
+	Deprecated       bool    `json:"deprecated"`
+	DefaultCPUType   *string `json:"default-cpu-type,omitempty"`
+	DefaultRAMID     *string `json:"default-ram-id,omitempty"`
 }
 
 // Memdev -> Memdev (struct)
@@ -5832,52 +9748,351 @@ type Memdev struct {
 	Merge     bool          `json:"merge"`
 	Dump      bool          `json:"dump"`
 	Prealloc  bool          `json:"prealloc"`
+	Share     bool          `json:"share"`
+	Reserve   *bool         `json:"reserve,omitempty"`
 	HostNodes []uint16      `json:"host-nodes"`
 	Policy    HostMemPolicy `json:"policy"`
 }
 
-// MemoryDeviceInfo -> MemoryDeviceInfo (simple union)
+// MemoryDeviceInfo -> MemoryDeviceInfo (flat union)
 
 // MemoryDeviceInfo implements the "MemoryDeviceInfo" QMP API type.
 //
 // Can be one of:
 //   - MemoryDeviceInfoVariantDimm
+//   - MemoryDeviceInfoVariantNvdimm
+//   - MemoryDeviceInfoVariantSgxEpc
+//   - MemoryDeviceInfoVariantVirtioMem
+//   - MemoryDeviceInfoVariantVirtioPmem
 type MemoryDeviceInfo interface {
 	isMemoryDeviceInfo()
 }
 
 // MemoryDeviceInfoVariantDimm is an implementation of MemoryDeviceInfo.
-type MemoryDeviceInfoVariantDimm PcdimmDeviceInfo
+type MemoryDeviceInfoVariantDimm struct {
+	Data PcdimmDeviceInfo `json:"data"`
+}
 
 func (MemoryDeviceInfoVariantDimm) isMemoryDeviceInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s MemoryDeviceInfoVariantDimm) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "dimm",
-		"data": PcdimmDeviceInfo(s),
+	v := struct {
+		Type MemoryDeviceInfoKind `json:"type"`
+		MemoryDeviceInfoVariantDimm
+	}{
+		MemoryDeviceInfoKindDimm,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// MemoryDeviceInfoVariantNvdimm is an implementation of MemoryDeviceInfo.
+type MemoryDeviceInfoVariantNvdimm struct {
+	Data PcdimmDeviceInfo `json:"data"`
+}
+
+func (MemoryDeviceInfoVariantNvdimm) isMemoryDeviceInfo() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s MemoryDeviceInfoVariantNvdimm) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type MemoryDeviceInfoKind `json:"type"`
+		MemoryDeviceInfoVariantNvdimm
+	}{
+		MemoryDeviceInfoKindNvdimm,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// MemoryDeviceInfoVariantSgxEpc is an implementation of MemoryDeviceInfo.
+type MemoryDeviceInfoVariantSgxEpc struct {
+	Data SgxEpcDeviceInfo `json:"data"`
+}
+
+func (MemoryDeviceInfoVariantSgxEpc) isMemoryDeviceInfo() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s MemoryDeviceInfoVariantSgxEpc) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type MemoryDeviceInfoKind `json:"type"`
+		MemoryDeviceInfoVariantSgxEpc
+	}{
+		MemoryDeviceInfoKindSgxEpc,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// MemoryDeviceInfoVariantVirtioMem is an implementation of MemoryDeviceInfo.
+type MemoryDeviceInfoVariantVirtioMem struct {
+	Data VirtioMemDeviceInfo `json:"data"`
+}
+
+func (MemoryDeviceInfoVariantVirtioMem) isMemoryDeviceInfo() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s MemoryDeviceInfoVariantVirtioMem) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type MemoryDeviceInfoKind `json:"type"`
+		MemoryDeviceInfoVariantVirtioMem
+	}{
+		MemoryDeviceInfoKindVirtioMem,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// MemoryDeviceInfoVariantVirtioPmem is an implementation of MemoryDeviceInfo.
+type MemoryDeviceInfoVariantVirtioPmem struct {
+	Data VirtioPmemDeviceInfo `json:"data"`
+}
+
+func (MemoryDeviceInfoVariantVirtioPmem) isMemoryDeviceInfo() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s MemoryDeviceInfoVariantVirtioPmem) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type MemoryDeviceInfoKind `json:"type"`
+		MemoryDeviceInfoVariantVirtioPmem
+	}{
+		MemoryDeviceInfoKindVirtioPmem,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeMemoryDeviceInfo(bs json.RawMessage) (MemoryDeviceInfo, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type MemoryDeviceInfoKind `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "dimm":
+	switch v.Type {
+	case MemoryDeviceInfoKindDimm:
 		var ret MemoryDeviceInfoVariantDimm
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case MemoryDeviceInfoKindNvdimm:
+		var ret MemoryDeviceInfoVariantNvdimm
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case MemoryDeviceInfoKindSgxEpc:
+		var ret MemoryDeviceInfoVariantSgxEpc
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case MemoryDeviceInfoKindVirtioMem:
+		var ret MemoryDeviceInfoVariantVirtioMem
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case MemoryDeviceInfoKindVirtioPmem:
+		var ret MemoryDeviceInfoVariantVirtioPmem
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union MemoryDeviceInfo", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union MemoryDeviceInfo", v.Type)
 	}
+}
+
+// MemoryDeviceInfoKind -> MemoryDeviceInfoKind (enum)
+
+// MemoryDeviceInfoKind implements the "MemoryDeviceInfoKind" QMP API type.
+type MemoryDeviceInfoKind int
+
+// Known values of MemoryDeviceInfoKind.
+const (
+	MemoryDeviceInfoKindDimm MemoryDeviceInfoKind = iota
+	MemoryDeviceInfoKindNvdimm
+	MemoryDeviceInfoKindVirtioPmem
+	MemoryDeviceInfoKindVirtioMem
+	MemoryDeviceInfoKindSgxEpc
+)
+
+// String implements fmt.Stringer.
+func (e MemoryDeviceInfoKind) String() string {
+	switch e {
+	case MemoryDeviceInfoKindDimm:
+		return "dimm"
+	case MemoryDeviceInfoKindNvdimm:
+		return "nvdimm"
+	case MemoryDeviceInfoKindVirtioPmem:
+		return "virtio-pmem"
+	case MemoryDeviceInfoKindVirtioMem:
+		return "virtio-mem"
+	case MemoryDeviceInfoKindSgxEpc:
+		return "sgx-epc"
+	default:
+		return fmt.Sprintf("MemoryDeviceInfoKind(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e MemoryDeviceInfoKind) MarshalJSON() ([]byte, error) {
+	switch e {
+	case MemoryDeviceInfoKindDimm:
+		return json.Marshal("dimm")
+	case MemoryDeviceInfoKindNvdimm:
+		return json.Marshal("nvdimm")
+	case MemoryDeviceInfoKindVirtioPmem:
+		return json.Marshal("virtio-pmem")
+	case MemoryDeviceInfoKindVirtioMem:
+		return json.Marshal("virtio-mem")
+	case MemoryDeviceInfoKindSgxEpc:
+		return json.Marshal("sgx-epc")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for MemoryDeviceInfoKind", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *MemoryDeviceInfoKind) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "dimm":
+		*e = MemoryDeviceInfoKindDimm
+	case "nvdimm":
+		*e = MemoryDeviceInfoKindNvdimm
+	case "virtio-pmem":
+		*e = MemoryDeviceInfoKindVirtioPmem
+	case "virtio-mem":
+		*e = MemoryDeviceInfoKindVirtioMem
+	case "sgx-epc":
+		*e = MemoryDeviceInfoKindSgxEpc
+	default:
+		return fmt.Errorf("unknown enum value %q for MemoryDeviceInfoKind", s)
+	}
+	return nil
+}
+
+// MemoryFailureAction -> MemoryFailureAction (enum)
+
+// MemoryFailureAction implements the "MemoryFailureAction" QMP API type.
+type MemoryFailureAction int
+
+// Known values of MemoryFailureAction.
+const (
+	MemoryFailureActionIgnore MemoryFailureAction = iota
+	MemoryFailureActionInject
+	MemoryFailureActionFatal
+	MemoryFailureActionReset
+)
+
+// String implements fmt.Stringer.
+func (e MemoryFailureAction) String() string {
+	switch e {
+	case MemoryFailureActionIgnore:
+		return "ignore"
+	case MemoryFailureActionInject:
+		return "inject"
+	case MemoryFailureActionFatal:
+		return "fatal"
+	case MemoryFailureActionReset:
+		return "reset"
+	default:
+		return fmt.Sprintf("MemoryFailureAction(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e MemoryFailureAction) MarshalJSON() ([]byte, error) {
+	switch e {
+	case MemoryFailureActionIgnore:
+		return json.Marshal("ignore")
+	case MemoryFailureActionInject:
+		return json.Marshal("inject")
+	case MemoryFailureActionFatal:
+		return json.Marshal("fatal")
+	case MemoryFailureActionReset:
+		return json.Marshal("reset")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for MemoryFailureAction", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *MemoryFailureAction) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "ignore":
+		*e = MemoryFailureActionIgnore
+	case "inject":
+		*e = MemoryFailureActionInject
+	case "fatal":
+		*e = MemoryFailureActionFatal
+	case "reset":
+		*e = MemoryFailureActionReset
+	default:
+		return fmt.Errorf("unknown enum value %q for MemoryFailureAction", s)
+	}
+	return nil
+}
+
+// MemoryFailureFlags -> MemoryFailureFlags (struct)
+
+// MemoryFailureFlags implements the "MemoryFailureFlags" QMP API type.
+type MemoryFailureFlags struct {
+	ActionRequired bool `json:"action-required"`
+	Recursive      bool `json:"recursive"`
+}
+
+// MemoryFailureRecipient -> MemoryFailureRecipient (enum)
+
+// MemoryFailureRecipient implements the "MemoryFailureRecipient" QMP API type.
+type MemoryFailureRecipient int
+
+// Known values of MemoryFailureRecipient.
+const (
+	MemoryFailureRecipientHypervisor MemoryFailureRecipient = iota
+	MemoryFailureRecipientGuest
+)
+
+// String implements fmt.Stringer.
+func (e MemoryFailureRecipient) String() string {
+	switch e {
+	case MemoryFailureRecipientHypervisor:
+		return "hypervisor"
+	case MemoryFailureRecipientGuest:
+		return "guest"
+	default:
+		return fmt.Sprintf("MemoryFailureRecipient(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e MemoryFailureRecipient) MarshalJSON() ([]byte, error) {
+	switch e {
+	case MemoryFailureRecipientHypervisor:
+		return json.Marshal("hypervisor")
+	case MemoryFailureRecipientGuest:
+		return json.Marshal("guest")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for MemoryFailureRecipient", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *MemoryFailureRecipient) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "hypervisor":
+		*e = MemoryFailureRecipientHypervisor
+	case "guest":
+		*e = MemoryFailureRecipientGuest
+	default:
+		return fmt.Errorf("unknown enum value %q for MemoryFailureRecipient", s)
+	}
+	return nil
 }
 
 // MemoryInfo -> MemoryInfo (struct)
@@ -5892,20 +10107,33 @@ type MemoryInfo struct {
 
 // MigrateSetParameters implements the "MigrateSetParameters" QMP API type.
 type MigrateSetParameters struct {
-	CompressLevel        *int64     `json:"compress-level,omitempty"`
-	CompressThreads      *int64     `json:"compress-threads,omitempty"`
-	DecompressThreads    *int64     `json:"decompress-threads,omitempty"`
-	CPUThrottleInitial   *int64     `json:"cpu-throttle-initial,omitempty"`
-	CPUThrottleIncrement *int64     `json:"cpu-throttle-increment,omitempty"`
-	TLSCreds             *StrOrNull `json:"tls-creds,omitempty"`
-	TLSHostname          *StrOrNull `json:"tls-hostname,omitempty"`
-	MaxBandwidth         *int64     `json:"max-bandwidth,omitempty"`
-	DowntimeLimit        *int64     `json:"downtime-limit,omitempty"`
-	XCheckpointDelay     *int64     `json:"x-checkpoint-delay,omitempty"`
-	BlockIncremental     *bool      `json:"block-incremental,omitempty"`
-	XMultifdChannels     *int64     `json:"x-multifd-channels,omitempty"`
-	XMultifdPageCount    *int64     `json:"x-multifd-page-count,omitempty"`
-	XbzrleCacheSize      *uint64    `json:"xbzrle-cache-size,omitempty"`
+	AnnounceInitial          *uint64                    `json:"announce-initial,omitempty"`
+	AnnounceMax              *uint64                    `json:"announce-max,omitempty"`
+	AnnounceRounds           *uint64                    `json:"announce-rounds,omitempty"`
+	AnnounceStep             *uint64                    `json:"announce-step,omitempty"`
+	CompressLevel            *uint8                     `json:"compress-level,omitempty"`
+	CompressThreads          *uint8                     `json:"compress-threads,omitempty"`
+	CompressWaitThread       *bool                      `json:"compress-wait-thread,omitempty"`
+	DecompressThreads        *uint8                     `json:"decompress-threads,omitempty"`
+	ThrottleTriggerThreshold *uint8                     `json:"throttle-trigger-threshold,omitempty"`
+	CPUThrottleInitial       *uint8                     `json:"cpu-throttle-initial,omitempty"`
+	CPUThrottleIncrement     *uint8                     `json:"cpu-throttle-increment,omitempty"`
+	CPUThrottleTailslow      *bool                      `json:"cpu-throttle-tailslow,omitempty"`
+	TLSCreds                 *StrOrNull                 `json:"tls-creds,omitempty"`
+	TLSHostname              *StrOrNull                 `json:"tls-hostname,omitempty"`
+	TLSAuthz                 *StrOrNull                 `json:"tls-authz,omitempty"`
+	MaxBandwidth             *uint64                    `json:"max-bandwidth,omitempty"`
+	DowntimeLimit            *uint64                    `json:"downtime-limit,omitempty"`
+	XCheckpointDelay         *uint32                    `json:"x-checkpoint-delay,omitempty"`
+	BlockIncremental         *bool                      `json:"block-incremental,omitempty"`
+	MultifdChannels          *uint8                     `json:"multifd-channels,omitempty"`
+	XbzrleCacheSize          *uint64                    `json:"xbzrle-cache-size,omitempty"`
+	MaxPostcopyBandwidth     *uint64                    `json:"max-postcopy-bandwidth,omitempty"`
+	MaxCPUThrottle           *uint8                     `json:"max-cpu-throttle,omitempty"`
+	MultifdCompression       *MultiFDCompression        `json:"multifd-compression,omitempty"`
+	MultifdZlibLevel         *uint8                     `json:"multifd-zlib-level,omitempty"`
+	MultifdZstdLevel         *uint8                     `json:"multifd-zstd-level,omitempty"`
+	BlockBitmapMapping       []BitmapMigrationNodeAlias `json:"block-bitmap-mapping,omitempty"`
 }
 
 // MigrationCapability -> MigrationCapability (enum)
@@ -5927,7 +10155,15 @@ const (
 	MigrationCapabilityBlock
 	MigrationCapabilityReturnPath
 	MigrationCapabilityPauseBeforeSwitchover
-	MigrationCapabilityXMultifd
+	MigrationCapabilityMultifd
+	MigrationCapabilityDirtyBitmaps
+	MigrationCapabilityPostcopyBlocktime
+	MigrationCapabilityLateBlockActivate
+	MigrationCapabilityXIgnoreShared
+	MigrationCapabilityValidateUUID
+	MigrationCapabilityBackgroundSnapshot
+	MigrationCapabilityZeroCopySend
+	MigrationCapabilityPostcopyPreempt
 )
 
 // String implements fmt.Stringer.
@@ -5957,8 +10193,24 @@ func (e MigrationCapability) String() string {
 		return "return-path"
 	case MigrationCapabilityPauseBeforeSwitchover:
 		return "pause-before-switchover"
-	case MigrationCapabilityXMultifd:
-		return "x-multifd"
+	case MigrationCapabilityMultifd:
+		return "multifd"
+	case MigrationCapabilityDirtyBitmaps:
+		return "dirty-bitmaps"
+	case MigrationCapabilityPostcopyBlocktime:
+		return "postcopy-blocktime"
+	case MigrationCapabilityLateBlockActivate:
+		return "late-block-activate"
+	case MigrationCapabilityXIgnoreShared:
+		return "x-ignore-shared"
+	case MigrationCapabilityValidateUUID:
+		return "validate-uuid"
+	case MigrationCapabilityBackgroundSnapshot:
+		return "background-snapshot"
+	case MigrationCapabilityZeroCopySend:
+		return "zero-copy-send"
+	case MigrationCapabilityPostcopyPreempt:
+		return "postcopy-preempt"
 	default:
 		return fmt.Sprintf("MigrationCapability(%d)", e)
 	}
@@ -5991,8 +10243,24 @@ func (e MigrationCapability) MarshalJSON() ([]byte, error) {
 		return json.Marshal("return-path")
 	case MigrationCapabilityPauseBeforeSwitchover:
 		return json.Marshal("pause-before-switchover")
-	case MigrationCapabilityXMultifd:
-		return json.Marshal("x-multifd")
+	case MigrationCapabilityMultifd:
+		return json.Marshal("multifd")
+	case MigrationCapabilityDirtyBitmaps:
+		return json.Marshal("dirty-bitmaps")
+	case MigrationCapabilityPostcopyBlocktime:
+		return json.Marshal("postcopy-blocktime")
+	case MigrationCapabilityLateBlockActivate:
+		return json.Marshal("late-block-activate")
+	case MigrationCapabilityXIgnoreShared:
+		return json.Marshal("x-ignore-shared")
+	case MigrationCapabilityValidateUUID:
+		return json.Marshal("validate-uuid")
+	case MigrationCapabilityBackgroundSnapshot:
+		return json.Marshal("background-snapshot")
+	case MigrationCapabilityZeroCopySend:
+		return json.Marshal("zero-copy-send")
+	case MigrationCapabilityPostcopyPreempt:
+		return json.Marshal("postcopy-preempt")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationCapability", e)
 	}
@@ -6029,8 +10297,24 @@ func (e *MigrationCapability) UnmarshalJSON(bs []byte) error {
 		*e = MigrationCapabilityReturnPath
 	case "pause-before-switchover":
 		*e = MigrationCapabilityPauseBeforeSwitchover
-	case "x-multifd":
-		*e = MigrationCapabilityXMultifd
+	case "multifd":
+		*e = MigrationCapabilityMultifd
+	case "dirty-bitmaps":
+		*e = MigrationCapabilityDirtyBitmaps
+	case "postcopy-blocktime":
+		*e = MigrationCapabilityPostcopyBlocktime
+	case "late-block-activate":
+		*e = MigrationCapabilityLateBlockActivate
+	case "x-ignore-shared":
+		*e = MigrationCapabilityXIgnoreShared
+	case "validate-uuid":
+		*e = MigrationCapabilityValidateUUID
+	case "background-snapshot":
+		*e = MigrationCapabilityBackgroundSnapshot
+	case "zero-copy-send":
+		*e = MigrationCapabilityZeroCopySend
+	case "postcopy-preempt":
+		*e = MigrationCapabilityPostcopyPreempt
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationCapability", s)
 	}
@@ -6052,6 +10336,7 @@ type MigrationInfo struct {
 	Status                *MigrationStatus  `json:"status,omitempty"`
 	RAM                   *MigrationStats   `json:"ram,omitempty"`
 	Disk                  *MigrationStats   `json:"disk,omitempty"`
+	Vfio                  *VfioStats        `json:"vfio,omitempty"`
 	XbzrleCache           *XbzrleCacheStats `json:"xbzrle-cache,omitempty"`
 	TotalTime             *int64            `json:"total-time,omitempty"`
 	ExpectedDowntime      *int64            `json:"expected-downtime,omitempty"`
@@ -6059,44 +10344,68 @@ type MigrationInfo struct {
 	SetupTime             *int64            `json:"setup-time,omitempty"`
 	CPUThrottlePercentage *int64            `json:"cpu-throttle-percentage,omitempty"`
 	ErrorDesc             *string           `json:"error-desc,omitempty"`
+	BlockedReasons        []string          `json:"blocked-reasons,omitempty"`
+	PostcopyBlocktime     *uint32           `json:"postcopy-blocktime,omitempty"`
+	PostcopyVcpuBlocktime []uint32          `json:"postcopy-vcpu-blocktime,omitempty"`
+	Compression           *CompressionStats `json:"compression,omitempty"`
+	SocketAddress         []SocketAddress   `json:"socket-address,omitempty"`
 }
 
 // MigrationParameters -> MigrationParameters (struct)
 
 // MigrationParameters implements the "MigrationParameters" QMP API type.
 type MigrationParameters struct {
-	CompressLevel        *int64  `json:"compress-level,omitempty"`
-	CompressThreads      *int64  `json:"compress-threads,omitempty"`
-	DecompressThreads    *int64  `json:"decompress-threads,omitempty"`
-	CPUThrottleInitial   *int64  `json:"cpu-throttle-initial,omitempty"`
-	CPUThrottleIncrement *int64  `json:"cpu-throttle-increment,omitempty"`
-	TLSCreds             *string `json:"tls-creds,omitempty"`
-	TLSHostname          *string `json:"tls-hostname,omitempty"`
-	MaxBandwidth         *int64  `json:"max-bandwidth,omitempty"`
-	DowntimeLimit        *int64  `json:"downtime-limit,omitempty"`
-	XCheckpointDelay     *int64  `json:"x-checkpoint-delay,omitempty"`
-	BlockIncremental     *bool   `json:"block-incremental,omitempty"`
-	XMultifdChannels     *int64  `json:"x-multifd-channels,omitempty"`
-	XMultifdPageCount    *int64  `json:"x-multifd-page-count,omitempty"`
-	XbzrleCacheSize      *uint64 `json:"xbzrle-cache-size,omitempty"`
+	AnnounceInitial          *uint64                    `json:"announce-initial,omitempty"`
+	AnnounceMax              *uint64                    `json:"announce-max,omitempty"`
+	AnnounceRounds           *uint64                    `json:"announce-rounds,omitempty"`
+	AnnounceStep             *uint64                    `json:"announce-step,omitempty"`
+	CompressLevel            *uint8                     `json:"compress-level,omitempty"`
+	CompressThreads          *uint8                     `json:"compress-threads,omitempty"`
+	CompressWaitThread       *bool                      `json:"compress-wait-thread,omitempty"`
+	DecompressThreads        *uint8                     `json:"decompress-threads,omitempty"`
+	ThrottleTriggerThreshold *uint8                     `json:"throttle-trigger-threshold,omitempty"`
+	CPUThrottleInitial       *uint8                     `json:"cpu-throttle-initial,omitempty"`
+	CPUThrottleIncrement     *uint8                     `json:"cpu-throttle-increment,omitempty"`
+	CPUThrottleTailslow      *bool                      `json:"cpu-throttle-tailslow,omitempty"`
+	TLSCreds                 *string                    `json:"tls-creds,omitempty"`
+	TLSHostname              *string                    `json:"tls-hostname,omitempty"`
+	TLSAuthz                 *string                    `json:"tls-authz,omitempty"`
+	MaxBandwidth             *uint64                    `json:"max-bandwidth,omitempty"`
+	DowntimeLimit            *uint64                    `json:"downtime-limit,omitempty"`
+	XCheckpointDelay         *uint32                    `json:"x-checkpoint-delay,omitempty"`
+	BlockIncremental         *bool                      `json:"block-incremental,omitempty"`
+	MultifdChannels          *uint8                     `json:"multifd-channels,omitempty"`
+	XbzrleCacheSize          *uint64                    `json:"xbzrle-cache-size,omitempty"`
+	MaxPostcopyBandwidth     *uint64                    `json:"max-postcopy-bandwidth,omitempty"`
+	MaxCPUThrottle           *uint8                     `json:"max-cpu-throttle,omitempty"`
+	MultifdCompression       *MultiFDCompression        `json:"multifd-compression,omitempty"`
+	MultifdZlibLevel         *uint8                     `json:"multifd-zlib-level,omitempty"`
+	MultifdZstdLevel         *uint8                     `json:"multifd-zstd-level,omitempty"`
+	BlockBitmapMapping       []BitmapMigrationNodeAlias `json:"block-bitmap-mapping,omitempty"`
 }
 
 // MigrationStats -> MigrationStats (struct)
 
 // MigrationStats implements the "MigrationStats" QMP API type.
 type MigrationStats struct {
-	Transferred      int64   `json:"transferred"`
-	Remaining        int64   `json:"remaining"`
-	Total            int64   `json:"total"`
-	Duplicate        int64   `json:"duplicate"`
-	Skipped          int64   `json:"skipped"`
-	Normal           int64   `json:"normal"`
-	NormalBytes      int64   `json:"normal-bytes"`
-	DirtyPagesRate   int64   `json:"dirty-pages-rate"`
-	Mbps             float64 `json:"mbps"`
-	DirtySyncCount   int64   `json:"dirty-sync-count"`
-	PostcopyRequests int64   `json:"postcopy-requests"`
-	PageSize         int64   `json:"page-size"`
+	Transferred             int64   `json:"transferred"`
+	Remaining               int64   `json:"remaining"`
+	Total                   int64   `json:"total"`
+	Duplicate               int64   `json:"duplicate"`
+	Skipped                 int64   `json:"skipped"`
+	Normal                  int64   `json:"normal"`
+	NormalBytes             int64   `json:"normal-bytes"`
+	DirtyPagesRate          int64   `json:"dirty-pages-rate"`
+	Mbps                    float64 `json:"mbps"`
+	DirtySyncCount          int64   `json:"dirty-sync-count"`
+	PostcopyRequests        int64   `json:"postcopy-requests"`
+	PageSize                int64   `json:"page-size"`
+	MultifdBytes            uint64  `json:"multifd-bytes"`
+	PagesPerSecond          uint64  `json:"pages-per-second"`
+	PrecopyBytes            uint64  `json:"precopy-bytes"`
+	DowntimeBytes           uint64  `json:"downtime-bytes"`
+	PostcopyBytes           uint64  `json:"postcopy-bytes"`
+	DirtySyncMissedZeroCopy uint64  `json:"dirty-sync-missed-zero-copy"`
 }
 
 // MigrationStatus -> MigrationStatus (enum)
@@ -6112,11 +10421,14 @@ const (
 	MigrationStatusCancelled
 	MigrationStatusActive
 	MigrationStatusPostcopyActive
+	MigrationStatusPostcopyPaused
+	MigrationStatusPostcopyRecover
 	MigrationStatusCompleted
 	MigrationStatusFailed
 	MigrationStatusColo
 	MigrationStatusPreSwitchover
 	MigrationStatusDevice
+	MigrationStatusWaitUnplug
 )
 
 // String implements fmt.Stringer.
@@ -6134,6 +10446,10 @@ func (e MigrationStatus) String() string {
 		return "active"
 	case MigrationStatusPostcopyActive:
 		return "postcopy-active"
+	case MigrationStatusPostcopyPaused:
+		return "postcopy-paused"
+	case MigrationStatusPostcopyRecover:
+		return "postcopy-recover"
 	case MigrationStatusCompleted:
 		return "completed"
 	case MigrationStatusFailed:
@@ -6144,6 +10460,8 @@ func (e MigrationStatus) String() string {
 		return "pre-switchover"
 	case MigrationStatusDevice:
 		return "device"
+	case MigrationStatusWaitUnplug:
+		return "wait-unplug"
 	default:
 		return fmt.Sprintf("MigrationStatus(%d)", e)
 	}
@@ -6164,6 +10482,10 @@ func (e MigrationStatus) MarshalJSON() ([]byte, error) {
 		return json.Marshal("active")
 	case MigrationStatusPostcopyActive:
 		return json.Marshal("postcopy-active")
+	case MigrationStatusPostcopyPaused:
+		return json.Marshal("postcopy-paused")
+	case MigrationStatusPostcopyRecover:
+		return json.Marshal("postcopy-recover")
 	case MigrationStatusCompleted:
 		return json.Marshal("completed")
 	case MigrationStatusFailed:
@@ -6174,6 +10496,8 @@ func (e MigrationStatus) MarshalJSON() ([]byte, error) {
 		return json.Marshal("pre-switchover")
 	case MigrationStatusDevice:
 		return json.Marshal("device")
+	case MigrationStatusWaitUnplug:
+		return json.Marshal("wait-unplug")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MigrationStatus", e)
 	}
@@ -6198,6 +10522,10 @@ func (e *MigrationStatus) UnmarshalJSON(bs []byte) error {
 		*e = MigrationStatusActive
 	case "postcopy-active":
 		*e = MigrationStatusPostcopyActive
+	case "postcopy-paused":
+		*e = MigrationStatusPostcopyPaused
+	case "postcopy-recover":
+		*e = MigrationStatusPostcopyRecover
 	case "completed":
 		*e = MigrationStatusCompleted
 	case "failed":
@@ -6208,8 +10536,62 @@ func (e *MigrationStatus) UnmarshalJSON(bs []byte) error {
 		*e = MigrationStatusPreSwitchover
 	case "device":
 		*e = MigrationStatusDevice
+	case "wait-unplug":
+		*e = MigrationStatusWaitUnplug
 	default:
 		return fmt.Errorf("unknown enum value %q for MigrationStatus", s)
+	}
+	return nil
+}
+
+// MirrorCopyMode -> MirrorCopyMode (enum)
+
+// MirrorCopyMode implements the "MirrorCopyMode" QMP API type.
+type MirrorCopyMode int
+
+// Known values of MirrorCopyMode.
+const (
+	MirrorCopyModeBackground MirrorCopyMode = iota
+	MirrorCopyModeWriteBlocking
+)
+
+// String implements fmt.Stringer.
+func (e MirrorCopyMode) String() string {
+	switch e {
+	case MirrorCopyModeBackground:
+		return "background"
+	case MirrorCopyModeWriteBlocking:
+		return "write-blocking"
+	default:
+		return fmt.Sprintf("MirrorCopyMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e MirrorCopyMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case MirrorCopyModeBackground:
+		return json.Marshal("background")
+	case MirrorCopyModeWriteBlocking:
+		return json.Marshal("write-blocking")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for MirrorCopyMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *MirrorCopyMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "background":
+		*e = MirrorCopyModeBackground
+	case "write-blocking":
+		*e = MirrorCopyModeWriteBlocking
+	default:
+		return fmt.Errorf("unknown enum value %q for MirrorCopyMode", s)
 	}
 	return nil
 }
@@ -6225,6 +10607,7 @@ const (
 	MirrorSyncModeFull
 	MirrorSyncModeNone
 	MirrorSyncModeIncremental
+	MirrorSyncModeBitmap
 )
 
 // String implements fmt.Stringer.
@@ -6238,6 +10621,8 @@ func (e MirrorSyncMode) String() string {
 		return "none"
 	case MirrorSyncModeIncremental:
 		return "incremental"
+	case MirrorSyncModeBitmap:
+		return "bitmap"
 	default:
 		return fmt.Sprintf("MirrorSyncMode(%d)", e)
 	}
@@ -6254,6 +10639,8 @@ func (e MirrorSyncMode) MarshalJSON() ([]byte, error) {
 		return json.Marshal("none")
 	case MirrorSyncModeIncremental:
 		return json.Marshal("incremental")
+	case MirrorSyncModeBitmap:
+		return json.Marshal("bitmap")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for MirrorSyncMode", e)
 	}
@@ -6274,6 +10661,8 @@ func (e *MirrorSyncMode) UnmarshalJSON(bs []byte) error {
 		*e = MirrorSyncModeNone
 	case "incremental":
 		*e = MirrorSyncModeIncremental
+	case "bitmap":
+		*e = MirrorSyncModeBitmap
 	default:
 		return fmt.Errorf("unknown enum value %q for MirrorSyncMode", s)
 	}
@@ -6288,6 +10677,65 @@ type MouseInfo struct {
 	Index    int64  `json:"index"`
 	Current  bool   `json:"current"`
 	Absolute bool   `json:"absolute"`
+}
+
+// MultiFDCompression -> MultiFDCompression (enum)
+
+// MultiFDCompression implements the "MultiFDCompression" QMP API type.
+type MultiFDCompression int
+
+// Known values of MultiFDCompression.
+const (
+	MultiFDCompressionNone MultiFDCompression = iota
+	MultiFDCompressionZlib
+	MultiFDCompressionZstd
+)
+
+// String implements fmt.Stringer.
+func (e MultiFDCompression) String() string {
+	switch e {
+	case MultiFDCompressionNone:
+		return "none"
+	case MultiFDCompressionZlib:
+		return "zlib"
+	case MultiFDCompressionZstd:
+		return "zstd"
+	default:
+		return fmt.Sprintf("MultiFDCompression(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e MultiFDCompression) MarshalJSON() ([]byte, error) {
+	switch e {
+	case MultiFDCompressionNone:
+		return json.Marshal("none")
+	case MultiFDCompressionZlib:
+		return json.Marshal("zlib")
+	case MultiFDCompressionZstd:
+		return json.Marshal("zstd")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for MultiFDCompression", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *MultiFDCompression) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = MultiFDCompressionNone
+	case "zlib":
+		*e = MultiFDCompressionZlib
+	case "zstd":
+		*e = MultiFDCompressionZstd
+	default:
+		return fmt.Errorf("unknown enum value %q for MultiFDCompression", s)
+	}
+	return nil
 }
 
 // NFSServer -> NfsServer (struct)
@@ -6350,6 +10798,719 @@ func (e *NfsTransport) UnmarshalJSON(bs []byte) error {
 // NameInfo implements the "NameInfo" QMP API type.
 type NameInfo struct {
 	Name *string `json:"name,omitempty"`
+}
+
+// NbdServerAddOptions -> NBDServerAddOptions (struct)
+
+// NBDServerAddOptions implements the "NbdServerAddOptions" QMP API type.
+type NBDServerAddOptions struct {
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Device      string  `json:"device"`
+	Writable    *bool   `json:"writable,omitempty"`
+	Bitmap      *string `json:"bitmap,omitempty"`
+}
+
+// NetClientDriver -> NetClientDriver (enum)
+
+// NetClientDriver implements the "NetClientDriver" QMP API type.
+type NetClientDriver int
+
+// Known values of NetClientDriver.
+const (
+	NetClientDriverNone NetClientDriver = iota
+	NetClientDriverNic
+	NetClientDriverUser
+	NetClientDriverTap
+	NetClientDriverL2Tpv3
+	NetClientDriverSocket
+	NetClientDriverVde
+	NetClientDriverBridge
+	NetClientDriverHubport
+	NetClientDriverNetmap
+	NetClientDriverVhostUser
+	NetClientDriverVhostVdpa
+	NetClientDriverVmnetHost
+	NetClientDriverVmnetShared
+	NetClientDriverVmnetBridged
+)
+
+// String implements fmt.Stringer.
+func (e NetClientDriver) String() string {
+	switch e {
+	case NetClientDriverNone:
+		return "none"
+	case NetClientDriverNic:
+		return "nic"
+	case NetClientDriverUser:
+		return "user"
+	case NetClientDriverTap:
+		return "tap"
+	case NetClientDriverL2Tpv3:
+		return "l2tpv3"
+	case NetClientDriverSocket:
+		return "socket"
+	case NetClientDriverVde:
+		return "vde"
+	case NetClientDriverBridge:
+		return "bridge"
+	case NetClientDriverHubport:
+		return "hubport"
+	case NetClientDriverNetmap:
+		return "netmap"
+	case NetClientDriverVhostUser:
+		return "vhost-user"
+	case NetClientDriverVhostVdpa:
+		return "vhost-vdpa"
+	case NetClientDriverVmnetHost:
+		return "vmnet-host"
+	case NetClientDriverVmnetShared:
+		return "vmnet-shared"
+	case NetClientDriverVmnetBridged:
+		return "vmnet-bridged"
+	default:
+		return fmt.Sprintf("NetClientDriver(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e NetClientDriver) MarshalJSON() ([]byte, error) {
+	switch e {
+	case NetClientDriverNone:
+		return json.Marshal("none")
+	case NetClientDriverNic:
+		return json.Marshal("nic")
+	case NetClientDriverUser:
+		return json.Marshal("user")
+	case NetClientDriverTap:
+		return json.Marshal("tap")
+	case NetClientDriverL2Tpv3:
+		return json.Marshal("l2tpv3")
+	case NetClientDriverSocket:
+		return json.Marshal("socket")
+	case NetClientDriverVde:
+		return json.Marshal("vde")
+	case NetClientDriverBridge:
+		return json.Marshal("bridge")
+	case NetClientDriverHubport:
+		return json.Marshal("hubport")
+	case NetClientDriverNetmap:
+		return json.Marshal("netmap")
+	case NetClientDriverVhostUser:
+		return json.Marshal("vhost-user")
+	case NetClientDriverVhostVdpa:
+		return json.Marshal("vhost-vdpa")
+	case NetClientDriverVmnetHost:
+		return json.Marshal("vmnet-host")
+	case NetClientDriverVmnetShared:
+		return json.Marshal("vmnet-shared")
+	case NetClientDriverVmnetBridged:
+		return json.Marshal("vmnet-bridged")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for NetClientDriver", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *NetClientDriver) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = NetClientDriverNone
+	case "nic":
+		*e = NetClientDriverNic
+	case "user":
+		*e = NetClientDriverUser
+	case "tap":
+		*e = NetClientDriverTap
+	case "l2tpv3":
+		*e = NetClientDriverL2Tpv3
+	case "socket":
+		*e = NetClientDriverSocket
+	case "vde":
+		*e = NetClientDriverVde
+	case "bridge":
+		*e = NetClientDriverBridge
+	case "hubport":
+		*e = NetClientDriverHubport
+	case "netmap":
+		*e = NetClientDriverNetmap
+	case "vhost-user":
+		*e = NetClientDriverVhostUser
+	case "vhost-vdpa":
+		*e = NetClientDriverVhostVdpa
+	case "vmnet-host":
+		*e = NetClientDriverVmnetHost
+	case "vmnet-shared":
+		*e = NetClientDriverVmnetShared
+	case "vmnet-bridged":
+		*e = NetClientDriverVmnetBridged
+	default:
+		return fmt.Errorf("unknown enum value %q for NetClientDriver", s)
+	}
+	return nil
+}
+
+// NetFilterDirection -> NetFilterDirection (enum)
+
+// NetFilterDirection implements the "NetFilterDirection" QMP API type.
+type NetFilterDirection int
+
+// Known values of NetFilterDirection.
+const (
+	NetFilterDirectionAll NetFilterDirection = iota
+	NetFilterDirectionRx
+	NetFilterDirectionTx
+)
+
+// String implements fmt.Stringer.
+func (e NetFilterDirection) String() string {
+	switch e {
+	case NetFilterDirectionAll:
+		return "all"
+	case NetFilterDirectionRx:
+		return "rx"
+	case NetFilterDirectionTx:
+		return "tx"
+	default:
+		return fmt.Sprintf("NetFilterDirection(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e NetFilterDirection) MarshalJSON() ([]byte, error) {
+	switch e {
+	case NetFilterDirectionAll:
+		return json.Marshal("all")
+	case NetFilterDirectionRx:
+		return json.Marshal("rx")
+	case NetFilterDirectionTx:
+		return json.Marshal("tx")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for NetFilterDirection", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *NetFilterDirection) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "all":
+		*e = NetFilterDirectionAll
+	case "rx":
+		*e = NetFilterDirectionRx
+	case "tx":
+		*e = NetFilterDirectionTx
+	default:
+		return fmt.Errorf("unknown enum value %q for NetFilterDirection", s)
+	}
+	return nil
+}
+
+// Netdev -> Netdev (flat union)
+
+// Netdev implements the "Netdev" QMP API type.
+//
+// Can be one of:
+//   - NetdevVariantBridge
+//   - NetdevVariantHubport
+//   - NetdevVariantL2Tpv3
+//   - NetdevVariantNetmap
+//   - NetdevVariantNic
+//   - NetdevVariantSocket
+//   - NetdevVariantTap
+//   - NetdevVariantUser
+//   - NetdevVariantVde
+//   - NetdevVariantVhostUser
+//   - NetdevVariantVhostVdpa
+//   - NetdevVariantVmnetBridged
+//   - NetdevVariantVmnetHost
+//   - NetdevVariantVmnetShared
+type Netdev interface {
+	isNetdev()
+}
+
+// NetdevVariantBridge is an implementation of Netdev.
+type NetdevVariantBridge struct {
+	ID     string  `json:"id"`
+	Br     *string `json:"br,omitempty"`
+	Helper *string `json:"helper,omitempty"`
+}
+
+func (NetdevVariantBridge) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantBridge) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantBridge
+	}{
+		NetClientDriverBridge,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantHubport is an implementation of Netdev.
+type NetdevVariantHubport struct {
+	ID     string  `json:"id"`
+	Hubid  int32   `json:"hubid"`
+	Netdev *string `json:"netdev,omitempty"`
+}
+
+func (NetdevVariantHubport) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantHubport) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantHubport
+	}{
+		NetClientDriverHubport,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantL2Tpv3 is an implementation of Netdev.
+type NetdevVariantL2Tpv3 struct {
+	ID         string  `json:"id"`
+	Src        string  `json:"src"`
+	Dst        string  `json:"dst"`
+	Srcport    *string `json:"srcport,omitempty"`
+	Dstport    *string `json:"dstport,omitempty"`
+	Ipv6       *bool   `json:"ipv6,omitempty"`
+	UDP        *bool   `json:"udp,omitempty"`
+	Cookie64   *bool   `json:"cookie64,omitempty"`
+	Counter    *bool   `json:"counter,omitempty"`
+	Pincounter *bool   `json:"pincounter,omitempty"`
+	Txcookie   *uint64 `json:"txcookie,omitempty"`
+	Rxcookie   *uint64 `json:"rxcookie,omitempty"`
+	Txsession  uint32  `json:"txsession"`
+	Rxsession  *uint32 `json:"rxsession,omitempty"`
+	Offset     *uint32 `json:"offset,omitempty"`
+}
+
+func (NetdevVariantL2Tpv3) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantL2Tpv3) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantL2Tpv3
+	}{
+		NetClientDriverL2Tpv3,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantNetmap is an implementation of Netdev.
+type NetdevVariantNetmap struct {
+	ID      string  `json:"id"`
+	Ifname  string  `json:"ifname"`
+	Devname *string `json:"devname,omitempty"`
+}
+
+func (NetdevVariantNetmap) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantNetmap) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantNetmap
+	}{
+		NetClientDriverNetmap,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantNic is an implementation of Netdev.
+type NetdevVariantNic struct {
+	ID      string  `json:"id"`
+	Netdev  *string `json:"netdev,omitempty"`
+	Macaddr *string `json:"macaddr,omitempty"`
+	Model   *string `json:"model,omitempty"`
+	Addr    *string `json:"addr,omitempty"`
+	Vectors *uint32 `json:"vectors,omitempty"`
+}
+
+func (NetdevVariantNic) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantNic) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantNic
+	}{
+		NetClientDriverNic,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantSocket is an implementation of Netdev.
+type NetdevVariantSocket struct {
+	ID        string  `json:"id"`
+	FD        *string `json:"fd,omitempty"`
+	Listen    *string `json:"listen,omitempty"`
+	Connect   *string `json:"connect,omitempty"`
+	Mcast     *string `json:"mcast,omitempty"`
+	Localaddr *string `json:"localaddr,omitempty"`
+	UDP       *string `json:"udp,omitempty"`
+}
+
+func (NetdevVariantSocket) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantSocket) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantSocket
+	}{
+		NetClientDriverSocket,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantTap is an implementation of Netdev.
+type NetdevVariantTap struct {
+	ID         string  `json:"id"`
+	Ifname     *string `json:"ifname,omitempty"`
+	FD         *string `json:"fd,omitempty"`
+	Fds        *string `json:"fds,omitempty"`
+	Script     *string `json:"script,omitempty"`
+	Downscript *string `json:"downscript,omitempty"`
+	Br         *string `json:"br,omitempty"`
+	Helper     *string `json:"helper,omitempty"`
+	Sndbuf     *uint64 `json:"sndbuf,omitempty"`
+	VnetHdr    *bool   `json:"vnet_hdr,omitempty"`
+	Vhost      *bool   `json:"vhost,omitempty"`
+	Vhostfd    *string `json:"vhostfd,omitempty"`
+	Vhostfds   *string `json:"vhostfds,omitempty"`
+	Vhostforce *bool   `json:"vhostforce,omitempty"`
+	Queues     *uint32 `json:"queues,omitempty"`
+	PollUs     *uint32 `json:"poll-us,omitempty"`
+}
+
+func (NetdevVariantTap) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantTap) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantTap
+	}{
+		NetClientDriverTap,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantUser is an implementation of Netdev.
+type NetdevVariantUser struct {
+	ID             string   `json:"id"`
+	Hostname       *string  `json:"hostname,omitempty"`
+	Restrict       *bool    `json:"restrict,omitempty"`
+	Ipv4           *bool    `json:"ipv4,omitempty"`
+	Ipv6           *bool    `json:"ipv6,omitempty"`
+	IP             *string  `json:"ip,omitempty"`
+	Net            *string  `json:"net,omitempty"`
+	Host           *string  `json:"host,omitempty"`
+	Tftp           *string  `json:"tftp,omitempty"`
+	Bootfile       *string  `json:"bootfile,omitempty"`
+	Dhcpstart      *string  `json:"dhcpstart,omitempty"`
+	Dns            *string  `json:"dns,omitempty"`
+	Dnssearch      []String `json:"dnssearch,omitempty"`
+	Domainname     *string  `json:"domainname,omitempty"`
+	Ipv6Prefix     *string  `json:"ipv6-prefix,omitempty"`
+	Ipv6Prefixlen  *int64   `json:"ipv6-prefixlen,omitempty"`
+	Ipv6Host       *string  `json:"ipv6-host,omitempty"`
+	Ipv6Dns        *string  `json:"ipv6-dns,omitempty"`
+	Smb            *string  `json:"smb,omitempty"`
+	Smbserver      *string  `json:"smbserver,omitempty"`
+	Hostfwd        []String `json:"hostfwd,omitempty"`
+	Guestfwd       []String `json:"guestfwd,omitempty"`
+	TftpServerName *string  `json:"tftp-server-name,omitempty"`
+}
+
+func (NetdevVariantUser) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantUser) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantUser
+	}{
+		NetClientDriverUser,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantVde is an implementation of Netdev.
+type NetdevVariantVde struct {
+	ID    string  `json:"id"`
+	Sock  *string `json:"sock,omitempty"`
+	Port  *uint16 `json:"port,omitempty"`
+	Group *string `json:"group,omitempty"`
+	Mode  *uint16 `json:"mode,omitempty"`
+}
+
+func (NetdevVariantVde) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantVde) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantVde
+	}{
+		NetClientDriverVde,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantVhostUser is an implementation of Netdev.
+type NetdevVariantVhostUser struct {
+	ID         string `json:"id"`
+	Chardev    string `json:"chardev"`
+	Vhostforce *bool  `json:"vhostforce,omitempty"`
+	Queues     *int64 `json:"queues,omitempty"`
+}
+
+func (NetdevVariantVhostUser) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantVhostUser) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantVhostUser
+	}{
+		NetClientDriverVhostUser,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantVhostVdpa is an implementation of Netdev.
+type NetdevVariantVhostVdpa struct {
+	ID       string  `json:"id"`
+	Vhostdev *string `json:"vhostdev,omitempty"`
+	Queues   *int64  `json:"queues,omitempty"`
+	XSvq     *bool   `json:"x-svq,omitempty"`
+}
+
+func (NetdevVariantVhostVdpa) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantVhostVdpa) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantVhostVdpa
+	}{
+		NetClientDriverVhostVdpa,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantVmnetBridged is an implementation of Netdev.
+type NetdevVariantVmnetBridged struct {
+	ID       string `json:"id"`
+	Ifname   string `json:"ifname"`
+	Isolated *bool  `json:"isolated,omitempty"`
+}
+
+func (NetdevVariantVmnetBridged) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantVmnetBridged) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantVmnetBridged
+	}{
+		NetClientDriverVmnetBridged,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantVmnetHost is an implementation of Netdev.
+type NetdevVariantVmnetHost struct {
+	ID           string  `json:"id"`
+	StartAddress *string `json:"start-address,omitempty"`
+	EndAddress   *string `json:"end-address,omitempty"`
+	SubnetMask   *string `json:"subnet-mask,omitempty"`
+	Isolated     *bool   `json:"isolated,omitempty"`
+	NetUUID      *string `json:"net-uuid,omitempty"`
+}
+
+func (NetdevVariantVmnetHost) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantVmnetHost) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantVmnetHost
+	}{
+		NetClientDriverVmnetHost,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NetdevVariantVmnetShared is an implementation of Netdev.
+type NetdevVariantVmnetShared struct {
+	ID           string  `json:"id"`
+	StartAddress *string `json:"start-address,omitempty"`
+	EndAddress   *string `json:"end-address,omitempty"`
+	SubnetMask   *string `json:"subnet-mask,omitempty"`
+	Isolated     *bool   `json:"isolated,omitempty"`
+	Nat66Prefix  *string `json:"nat66-prefix,omitempty"`
+}
+
+func (NetdevVariantVmnetShared) isNetdev() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NetdevVariantVmnetShared) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+		NetdevVariantVmnetShared
+	}{
+		NetClientDriverVmnetShared,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeNetdev(bs json.RawMessage) (Netdev, error) {
+	v := struct {
+		Type NetClientDriver `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case NetClientDriverBridge:
+		var ret NetdevVariantBridge
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverHubport:
+		var ret NetdevVariantHubport
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverL2Tpv3:
+		var ret NetdevVariantL2Tpv3
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverNetmap:
+		var ret NetdevVariantNetmap
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverNic:
+		var ret NetdevVariantNic
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverSocket:
+		var ret NetdevVariantSocket
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverTap:
+		var ret NetdevVariantTap
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverUser:
+		var ret NetdevVariantUser
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverVde:
+		var ret NetdevVariantVde
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverVhostUser:
+		var ret NetdevVariantVhostUser
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverVhostVdpa:
+		var ret NetdevVariantVhostVdpa
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverVmnetBridged:
+		var ret NetdevVariantVmnetBridged
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverVmnetHost:
+		var ret NetdevVariantVmnetHost
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NetClientDriverVmnetShared:
+		var ret NetdevVariantVmnetShared
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union Netdev", v.Type)
+	}
+}
+
+// NetfilterInsert -> NetfilterInsert (enum)
+
+// NetfilterInsert implements the "NetfilterInsert" QMP API type.
+type NetfilterInsert int
+
+// Known values of NetfilterInsert.
+const (
+	NetfilterInsertBefore NetfilterInsert = iota
+	NetfilterInsertBehind
+)
+
+// String implements fmt.Stringer.
+func (e NetfilterInsert) String() string {
+	switch e {
+	case NetfilterInsertBefore:
+		return "before"
+	case NetfilterInsertBehind:
+		return "behind"
+	default:
+		return fmt.Sprintf("NetfilterInsert(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e NetfilterInsert) MarshalJSON() ([]byte, error) {
+	switch e {
+	case NetfilterInsertBefore:
+		return json.Marshal("before")
+	case NetfilterInsertBehind:
+		return json.Marshal("behind")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for NetfilterInsert", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *NetfilterInsert) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "before":
+		*e = NetfilterInsertBefore
+	case "behind":
+		*e = NetfilterInsertBehind
+	default:
+		return fmt.Errorf("unknown enum value %q for NetfilterInsert", s)
+	}
+	return nil
 }
 
 // NetworkAddressFamily -> NetworkAddressFamily (enum)
@@ -6477,12 +11638,1653 @@ func (e *NewImageMode) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// NumaOptions -> NumaOptions (flat union)
+
+// NumaOptions implements the "NumaOptions" QMP API type.
+//
+// Can be one of:
+//   - NumaOptionsVariantCPU
+//   - NumaOptionsVariantDist
+//   - NumaOptionsVariantHmatCache
+//   - NumaOptionsVariantHmatLb
+//   - NumaOptionsVariantNode
+type NumaOptions interface {
+	isNumaOptions()
+}
+
+// NumaOptionsVariantCPU is an implementation of NumaOptions.
+type NumaOptionsVariantCPU struct {
+}
+
+func (NumaOptionsVariantCPU) isNumaOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NumaOptionsVariantCPU) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NumaOptionsType `json:"type"`
+		NumaOptionsVariantCPU
+	}{
+		NumaOptionsTypeCPU,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NumaOptionsVariantDist is an implementation of NumaOptions.
+type NumaOptionsVariantDist struct {
+	Src uint16 `json:"src"`
+	Dst uint16 `json:"dst"`
+	Val uint8  `json:"val"`
+}
+
+func (NumaOptionsVariantDist) isNumaOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NumaOptionsVariantDist) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NumaOptionsType `json:"type"`
+		NumaOptionsVariantDist
+	}{
+		NumaOptionsTypeDist,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NumaOptionsVariantHmatCache is an implementation of NumaOptions.
+type NumaOptionsVariantHmatCache struct {
+	NodeID        uint32                 `json:"node-id"`
+	Size          uint64                 `json:"size"`
+	Level         uint8                  `json:"level"`
+	Associativity HmatCacheAssociativity `json:"associativity"`
+	Policy        HmatCacheWritePolicy   `json:"policy"`
+	Line          uint16                 `json:"line"`
+}
+
+func (NumaOptionsVariantHmatCache) isNumaOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NumaOptionsVariantHmatCache) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NumaOptionsType `json:"type"`
+		NumaOptionsVariantHmatCache
+	}{
+		NumaOptionsTypeHmatCache,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NumaOptionsVariantHmatLb is an implementation of NumaOptions.
+type NumaOptionsVariantHmatLb struct {
+	Initiator uint16                `json:"initiator"`
+	Target    uint16                `json:"target"`
+	Hierarchy HmatLbMemoryHierarchy `json:"hierarchy"`
+	DataType  HmatLbDataType        `json:"data-type"`
+	Latency   *uint64               `json:"latency,omitempty"`
+	Bandwidth *uint64               `json:"bandwidth,omitempty"`
+}
+
+func (NumaOptionsVariantHmatLb) isNumaOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NumaOptionsVariantHmatLb) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NumaOptionsType `json:"type"`
+		NumaOptionsVariantHmatLb
+	}{
+		NumaOptionsTypeHmatLb,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// NumaOptionsVariantNode is an implementation of NumaOptions.
+type NumaOptionsVariantNode struct {
+	Nodeid    *uint16  `json:"nodeid,omitempty"`
+	Cpus      []uint16 `json:"cpus,omitempty"`
+	Mem       *uint64  `json:"mem,omitempty"`
+	Memdev    *string  `json:"memdev,omitempty"`
+	Initiator *uint16  `json:"initiator,omitempty"`
+}
+
+func (NumaOptionsVariantNode) isNumaOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s NumaOptionsVariantNode) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type NumaOptionsType `json:"type"`
+		NumaOptionsVariantNode
+	}{
+		NumaOptionsTypeNode,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeNumaOptions(bs json.RawMessage) (NumaOptions, error) {
+	v := struct {
+		Type NumaOptionsType `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case NumaOptionsTypeCPU:
+		var ret NumaOptionsVariantCPU
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NumaOptionsTypeDist:
+		var ret NumaOptionsVariantDist
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NumaOptionsTypeHmatCache:
+		var ret NumaOptionsVariantHmatCache
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NumaOptionsTypeHmatLb:
+		var ret NumaOptionsVariantHmatLb
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case NumaOptionsTypeNode:
+		var ret NumaOptionsVariantNode
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union NumaOptions", v.Type)
+	}
+}
+
+// NumaOptionsType -> NumaOptionsType (enum)
+
+// NumaOptionsType implements the "NumaOptionsType" QMP API type.
+type NumaOptionsType int
+
+// Known values of NumaOptionsType.
+const (
+	NumaOptionsTypeNode NumaOptionsType = iota
+	NumaOptionsTypeDist
+	NumaOptionsTypeCPU
+	NumaOptionsTypeHmatLb
+	NumaOptionsTypeHmatCache
+)
+
+// String implements fmt.Stringer.
+func (e NumaOptionsType) String() string {
+	switch e {
+	case NumaOptionsTypeNode:
+		return "node"
+	case NumaOptionsTypeDist:
+		return "dist"
+	case NumaOptionsTypeCPU:
+		return "cpu"
+	case NumaOptionsTypeHmatLb:
+		return "hmat-lb"
+	case NumaOptionsTypeHmatCache:
+		return "hmat-cache"
+	default:
+		return fmt.Sprintf("NumaOptionsType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e NumaOptionsType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case NumaOptionsTypeNode:
+		return json.Marshal("node")
+	case NumaOptionsTypeDist:
+		return json.Marshal("dist")
+	case NumaOptionsTypeCPU:
+		return json.Marshal("cpu")
+	case NumaOptionsTypeHmatLb:
+		return json.Marshal("hmat-lb")
+	case NumaOptionsTypeHmatCache:
+		return json.Marshal("hmat-cache")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for NumaOptionsType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *NumaOptionsType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "node":
+		*e = NumaOptionsTypeNode
+	case "dist":
+		*e = NumaOptionsTypeDist
+	case "cpu":
+		*e = NumaOptionsTypeCPU
+	case "hmat-lb":
+		*e = NumaOptionsTypeHmatLb
+	case "hmat-cache":
+		*e = NumaOptionsTypeHmatCache
+	default:
+		return fmt.Errorf("unknown enum value %q for NumaOptionsType", s)
+	}
+	return nil
+}
+
+// ObjectOptions -> ObjectOptions (flat union)
+
+// ObjectOptions implements the "ObjectOptions" QMP API type.
+//
+// Can be one of:
+//   - ObjectOptionsVariantAuthzList
+//   - ObjectOptionsVariantAuthzListfile
+//   - ObjectOptionsVariantAuthzPam
+//   - ObjectOptionsVariantAuthzSimple
+//   - ObjectOptionsVariantCanHostSocketcan
+//   - ObjectOptionsVariantColoCompare
+//   - ObjectOptionsVariantCryptodevBackend
+//   - ObjectOptionsVariantCryptodevBackendBuiltin
+//   - ObjectOptionsVariantCryptodevVhostUser
+//   - ObjectOptionsVariantDbusVmstate
+//   - ObjectOptionsVariantFilterBuffer
+//   - ObjectOptionsVariantFilterDump
+//   - ObjectOptionsVariantFilterMirror
+//   - ObjectOptionsVariantFilterRedirector
+//   - ObjectOptionsVariantFilterReplay
+//   - ObjectOptionsVariantFilterRewriter
+//   - ObjectOptionsVariantInputBarrier
+//   - ObjectOptionsVariantInputLinux
+//   - ObjectOptionsVariantIothread
+//   - ObjectOptionsVariantMainLoop
+//   - ObjectOptionsVariantMemoryBackendEpc
+//   - ObjectOptionsVariantMemoryBackendFile
+//   - ObjectOptionsVariantMemoryBackendMemfd
+//   - ObjectOptionsVariantMemoryBackendRAM
+//   - ObjectOptionsVariantPrManagerHelper
+//   - ObjectOptionsVariantQtest
+//   - ObjectOptionsVariantRngBuiltin
+//   - ObjectOptionsVariantRngEgd
+//   - ObjectOptionsVariantRngRandom
+//   - ObjectOptionsVariantSecret
+//   - ObjectOptionsVariantSecretKeyring
+//   - ObjectOptionsVariantSevGuest
+//   - ObjectOptionsVariantThrottleGroup
+//   - ObjectOptionsVariantTLSCipherSuites
+//   - ObjectOptionsVariantTLSCredsAnon
+//   - ObjectOptionsVariantTLSCredsPsk
+//   - ObjectOptionsVariantTLSCredsX509
+//   - ObjectOptionsVariantXRemoteObject
+//   - ObjectOptionsVariantXVfioUserServer
+type ObjectOptions interface {
+	isObjectOptions()
+}
+
+// ObjectOptionsVariantAuthzList is an implementation of ObjectOptions.
+type ObjectOptionsVariantAuthzList struct {
+	ID     string            `json:"id"`
+	Policy *QAuthZListPolicy `json:"policy,omitempty"`
+	Rules  []QAuthZListRule  `json:"rules,omitempty"`
+}
+
+func (ObjectOptionsVariantAuthzList) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantAuthzList) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantAuthzList
+	}{
+		ObjectTypeAuthzList,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantAuthzListfile is an implementation of ObjectOptions.
+type ObjectOptionsVariantAuthzListfile struct {
+	ID       string `json:"id"`
+	Filename string `json:"filename"`
+	Refresh  *bool  `json:"refresh,omitempty"`
+}
+
+func (ObjectOptionsVariantAuthzListfile) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantAuthzListfile) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantAuthzListfile
+	}{
+		ObjectTypeAuthzListfile,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantAuthzPam is an implementation of ObjectOptions.
+type ObjectOptionsVariantAuthzPam struct {
+	ID      string `json:"id"`
+	Service string `json:"service"`
+}
+
+func (ObjectOptionsVariantAuthzPam) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantAuthzPam) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantAuthzPam
+	}{
+		ObjectTypeAuthzPam,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantAuthzSimple is an implementation of ObjectOptions.
+type ObjectOptionsVariantAuthzSimple struct {
+	ID       string `json:"id"`
+	Identity string `json:"identity"`
+}
+
+func (ObjectOptionsVariantAuthzSimple) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantAuthzSimple) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantAuthzSimple
+	}{
+		ObjectTypeAuthzSimple,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantCanHostSocketcan is an implementation of ObjectOptions.
+type ObjectOptionsVariantCanHostSocketcan struct {
+	ID     string `json:"id"`
+	If     string `json:"if"`
+	Canbus string `json:"canbus"`
+}
+
+func (ObjectOptionsVariantCanHostSocketcan) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantCanHostSocketcan) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantCanHostSocketcan
+	}{
+		ObjectTypeCanHostSocketcan,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantColoCompare is an implementation of ObjectOptions.
+type ObjectOptionsVariantColoCompare struct {
+	ID               string  `json:"id"`
+	PrimaryIn        string  `json:"primary_in"`
+	SecondaryIn      string  `json:"secondary_in"`
+	Outdev           string  `json:"outdev"`
+	Iothread         string  `json:"iothread"`
+	NotifyDev        *string `json:"notify_dev,omitempty"`
+	CompareTimeout   *uint64 `json:"compare_timeout,omitempty"`
+	ExpiredScanCycle *uint32 `json:"expired_scan_cycle,omitempty"`
+	MaxQueueSize     *uint32 `json:"max_queue_size,omitempty"`
+	VnetHdrSupport   *bool   `json:"vnet_hdr_support,omitempty"`
+}
+
+func (ObjectOptionsVariantColoCompare) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantColoCompare) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantColoCompare
+	}{
+		ObjectTypeColoCompare,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantCryptodevBackend is an implementation of ObjectOptions.
+type ObjectOptionsVariantCryptodevBackend struct {
+	ID     string  `json:"id"`
+	Queues *uint32 `json:"queues,omitempty"`
+}
+
+func (ObjectOptionsVariantCryptodevBackend) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantCryptodevBackend) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantCryptodevBackend
+	}{
+		ObjectTypeCryptodevBackend,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantCryptodevBackendBuiltin is an implementation of ObjectOptions.
+type ObjectOptionsVariantCryptodevBackendBuiltin struct {
+	ID     string  `json:"id"`
+	Queues *uint32 `json:"queues,omitempty"`
+}
+
+func (ObjectOptionsVariantCryptodevBackendBuiltin) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantCryptodevBackendBuiltin) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantCryptodevBackendBuiltin
+	}{
+		ObjectTypeCryptodevBackendBuiltin,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantCryptodevVhostUser is an implementation of ObjectOptions.
+type ObjectOptionsVariantCryptodevVhostUser struct {
+	ID      string `json:"id"`
+	Chardev string `json:"chardev"`
+}
+
+func (ObjectOptionsVariantCryptodevVhostUser) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantCryptodevVhostUser) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantCryptodevVhostUser
+	}{
+		ObjectTypeCryptodevVhostUser,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantDbusVmstate is an implementation of ObjectOptions.
+type ObjectOptionsVariantDbusVmstate struct {
+	ID     string  `json:"id"`
+	Addr   string  `json:"addr"`
+	IDList *string `json:"id-list,omitempty"`
+}
+
+func (ObjectOptionsVariantDbusVmstate) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantDbusVmstate) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantDbusVmstate
+	}{
+		ObjectTypeDbusVmstate,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantFilterBuffer is an implementation of ObjectOptions.
+type ObjectOptionsVariantFilterBuffer struct {
+	ID       string `json:"id"`
+	Interval uint32 `json:"interval"`
+}
+
+func (ObjectOptionsVariantFilterBuffer) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantFilterBuffer) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantFilterBuffer
+	}{
+		ObjectTypeFilterBuffer,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantFilterDump is an implementation of ObjectOptions.
+type ObjectOptionsVariantFilterDump struct {
+	ID     string  `json:"id"`
+	File   string  `json:"file"`
+	Maxlen *uint32 `json:"maxlen,omitempty"`
+}
+
+func (ObjectOptionsVariantFilterDump) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantFilterDump) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantFilterDump
+	}{
+		ObjectTypeFilterDump,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantFilterMirror is an implementation of ObjectOptions.
+type ObjectOptionsVariantFilterMirror struct {
+	ID             string `json:"id"`
+	Outdev         string `json:"outdev"`
+	VnetHdrSupport *bool  `json:"vnet_hdr_support,omitempty"`
+}
+
+func (ObjectOptionsVariantFilterMirror) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantFilterMirror) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantFilterMirror
+	}{
+		ObjectTypeFilterMirror,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantFilterRedirector is an implementation of ObjectOptions.
+type ObjectOptionsVariantFilterRedirector struct {
+	ID             string  `json:"id"`
+	Indev          *string `json:"indev,omitempty"`
+	Outdev         *string `json:"outdev,omitempty"`
+	VnetHdrSupport *bool   `json:"vnet_hdr_support,omitempty"`
+}
+
+func (ObjectOptionsVariantFilterRedirector) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantFilterRedirector) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantFilterRedirector
+	}{
+		ObjectTypeFilterRedirector,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantFilterReplay is an implementation of ObjectOptions.
+type ObjectOptionsVariantFilterReplay struct {
+	ID       string              `json:"id"`
+	Netdev   string              `json:"netdev"`
+	Queue    *NetFilterDirection `json:"queue,omitempty"`
+	Status   *string             `json:"status,omitempty"`
+	Position *string             `json:"position,omitempty"`
+	Insert   *NetfilterInsert    `json:"insert,omitempty"`
+}
+
+func (ObjectOptionsVariantFilterReplay) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantFilterReplay) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantFilterReplay
+	}{
+		ObjectTypeFilterReplay,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantFilterRewriter is an implementation of ObjectOptions.
+type ObjectOptionsVariantFilterRewriter struct {
+	ID             string `json:"id"`
+	VnetHdrSupport *bool  `json:"vnet_hdr_support,omitempty"`
+}
+
+func (ObjectOptionsVariantFilterRewriter) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantFilterRewriter) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantFilterRewriter
+	}{
+		ObjectTypeFilterRewriter,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantInputBarrier is an implementation of ObjectOptions.
+type ObjectOptionsVariantInputBarrier struct {
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	Server  *string `json:"server,omitempty"`
+	Port    *string `json:"port,omitempty"`
+	XOrigin *string `json:"x-origin,omitempty"`
+	YOrigin *string `json:"y-origin,omitempty"`
+	Width   *string `json:"width,omitempty"`
+	Height  *string `json:"height,omitempty"`
+}
+
+func (ObjectOptionsVariantInputBarrier) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantInputBarrier) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantInputBarrier
+	}{
+		ObjectTypeInputBarrier,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantInputLinux is an implementation of ObjectOptions.
+type ObjectOptionsVariantInputLinux struct {
+	ID         string          `json:"id"`
+	Evdev      string          `json:"evdev"`
+	GrabAll    *bool           `json:"grab_all,omitempty"`
+	Repeat     *bool           `json:"repeat,omitempty"`
+	GrabToggle *GrabToggleKeys `json:"grab-toggle,omitempty"`
+}
+
+func (ObjectOptionsVariantInputLinux) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantInputLinux) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantInputLinux
+	}{
+		ObjectTypeInputLinux,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantIothread is an implementation of ObjectOptions.
+type ObjectOptionsVariantIothread struct {
+	ID         string `json:"id"`
+	PollMaxNs  *int64 `json:"poll-max-ns,omitempty"`
+	PollGrow   *int64 `json:"poll-grow,omitempty"`
+	PollShrink *int64 `json:"poll-shrink,omitempty"`
+}
+
+func (ObjectOptionsVariantIothread) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantIothread) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantIothread
+	}{
+		ObjectTypeIothread,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantMainLoop is an implementation of ObjectOptions.
+type ObjectOptionsVariantMainLoop struct {
+	ID string `json:"id"`
+}
+
+func (ObjectOptionsVariantMainLoop) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantMainLoop) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantMainLoop
+	}{
+		ObjectTypeMainLoop,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantMemoryBackendEpc is an implementation of ObjectOptions.
+type ObjectOptionsVariantMemoryBackendEpc struct {
+	ID string `json:"id"`
+}
+
+func (ObjectOptionsVariantMemoryBackendEpc) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantMemoryBackendEpc) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantMemoryBackendEpc
+	}{
+		ObjectTypeMemoryBackendEpc,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantMemoryBackendFile is an implementation of ObjectOptions.
+type ObjectOptionsVariantMemoryBackendFile struct {
+	ID          string  `json:"id"`
+	Align       *uint64 `json:"align,omitempty"`
+	DiscardData *bool   `json:"discard-data,omitempty"`
+	MemPath     string  `json:"mem-path"`
+	Pmem        *bool   `json:"pmem,omitempty"`
+	Readonly    *bool   `json:"readonly,omitempty"`
+}
+
+func (ObjectOptionsVariantMemoryBackendFile) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantMemoryBackendFile) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantMemoryBackendFile
+	}{
+		ObjectTypeMemoryBackendFile,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantMemoryBackendMemfd is an implementation of ObjectOptions.
+type ObjectOptionsVariantMemoryBackendMemfd struct {
+	ID          string  `json:"id"`
+	Hugetlb     *bool   `json:"hugetlb,omitempty"`
+	Hugetlbsize *uint64 `json:"hugetlbsize,omitempty"`
+	Seal        *bool   `json:"seal,omitempty"`
+}
+
+func (ObjectOptionsVariantMemoryBackendMemfd) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantMemoryBackendMemfd) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantMemoryBackendMemfd
+	}{
+		ObjectTypeMemoryBackendMemfd,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantMemoryBackendRAM is an implementation of ObjectOptions.
+type ObjectOptionsVariantMemoryBackendRAM struct {
+	ID                             string         `json:"id"`
+	Dump                           *bool          `json:"dump,omitempty"`
+	HostNodes                      []uint16       `json:"host-nodes,omitempty"`
+	Merge                          *bool          `json:"merge,omitempty"`
+	Policy                         *HostMemPolicy `json:"policy,omitempty"`
+	Prealloc                       *bool          `json:"prealloc,omitempty"`
+	PreallocThreads                *uint32        `json:"prealloc-threads,omitempty"`
+	Share                          *bool          `json:"share,omitempty"`
+	Reserve                        *bool          `json:"reserve,omitempty"`
+	Size                           uint64         `json:"size"`
+	XUseCanonicalPathForRamblockID *bool          `json:"x-use-canonical-path-for-ramblock-id,omitempty"`
+}
+
+func (ObjectOptionsVariantMemoryBackendRAM) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantMemoryBackendRAM) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantMemoryBackendRAM
+	}{
+		ObjectTypeMemoryBackendRAM,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantPrManagerHelper is an implementation of ObjectOptions.
+type ObjectOptionsVariantPrManagerHelper struct {
+	ID   string `json:"id"`
+	Path string `json:"path"`
+}
+
+func (ObjectOptionsVariantPrManagerHelper) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantPrManagerHelper) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantPrManagerHelper
+	}{
+		ObjectTypePrManagerHelper,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantQtest is an implementation of ObjectOptions.
+type ObjectOptionsVariantQtest struct {
+	ID      string  `json:"id"`
+	Chardev string  `json:"chardev"`
+	Log     *string `json:"log,omitempty"`
+}
+
+func (ObjectOptionsVariantQtest) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantQtest) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantQtest
+	}{
+		ObjectTypeQtest,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantRngBuiltin is an implementation of ObjectOptions.
+type ObjectOptionsVariantRngBuiltin struct {
+	ID     string `json:"id"`
+	Opened *bool  `json:"opened,omitempty"`
+}
+
+func (ObjectOptionsVariantRngBuiltin) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantRngBuiltin) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantRngBuiltin
+	}{
+		ObjectTypeRngBuiltin,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantRngEgd is an implementation of ObjectOptions.
+type ObjectOptionsVariantRngEgd struct {
+	ID      string `json:"id"`
+	Chardev string `json:"chardev"`
+}
+
+func (ObjectOptionsVariantRngEgd) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantRngEgd) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantRngEgd
+	}{
+		ObjectTypeRngEgd,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantRngRandom is an implementation of ObjectOptions.
+type ObjectOptionsVariantRngRandom struct {
+	ID       string  `json:"id"`
+	Filename *string `json:"filename,omitempty"`
+}
+
+func (ObjectOptionsVariantRngRandom) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantRngRandom) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantRngRandom
+	}{
+		ObjectTypeRngRandom,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantSecret is an implementation of ObjectOptions.
+type ObjectOptionsVariantSecret struct {
+	ID   string  `json:"id"`
+	Data *string `json:"data,omitempty"`
+	File *string `json:"file,omitempty"`
+}
+
+func (ObjectOptionsVariantSecret) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantSecret) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantSecret
+	}{
+		ObjectTypeSecret,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantSecretKeyring is an implementation of ObjectOptions.
+type ObjectOptionsVariantSecretKeyring struct {
+	ID     string `json:"id"`
+	Serial int32  `json:"serial"`
+}
+
+func (ObjectOptionsVariantSecretKeyring) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantSecretKeyring) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantSecretKeyring
+	}{
+		ObjectTypeSecretKeyring,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantSevGuest is an implementation of ObjectOptions.
+type ObjectOptionsVariantSevGuest struct {
+	ID              string  `json:"id"`
+	SevDevice       *string `json:"sev-device,omitempty"`
+	DhCertFile      *string `json:"dh-cert-file,omitempty"`
+	SessionFile     *string `json:"session-file,omitempty"`
+	Policy          *uint32 `json:"policy,omitempty"`
+	Handle          *uint32 `json:"handle,omitempty"`
+	Cbitpos         *uint32 `json:"cbitpos,omitempty"`
+	ReducedPhysBits uint32  `json:"reduced-phys-bits"`
+	KernelHashes    *bool   `json:"kernel-hashes,omitempty"`
+}
+
+func (ObjectOptionsVariantSevGuest) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantSevGuest) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantSevGuest
+	}{
+		ObjectTypeSevGuest,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantThrottleGroup is an implementation of ObjectOptions.
+type ObjectOptionsVariantThrottleGroup struct {
+	ID                  string          `json:"id"`
+	Limits              *ThrottleLimits `json:"limits,omitempty"`
+	XIopsTotal          *int64          `json:"x-iops-total,omitempty"`
+	XIopsTotalMax       *int64          `json:"x-iops-total-max,omitempty"`
+	XIopsTotalMaxLength *int64          `json:"x-iops-total-max-length,omitempty"`
+	XIopsRead           *int64          `json:"x-iops-read,omitempty"`
+	XIopsReadMax        *int64          `json:"x-iops-read-max,omitempty"`
+	XIopsReadMaxLength  *int64          `json:"x-iops-read-max-length,omitempty"`
+	XIopsWrite          *int64          `json:"x-iops-write,omitempty"`
+	XIopsWriteMax       *int64          `json:"x-iops-write-max,omitempty"`
+	XIopsWriteMaxLength *int64          `json:"x-iops-write-max-length,omitempty"`
+	XBpsTotal           *int64          `json:"x-bps-total,omitempty"`
+	XBpsTotalMax        *int64          `json:"x-bps-total-max,omitempty"`
+	XBpsTotalMaxLength  *int64          `json:"x-bps-total-max-length,omitempty"`
+	XBpsRead            *int64          `json:"x-bps-read,omitempty"`
+	XBpsReadMax         *int64          `json:"x-bps-read-max,omitempty"`
+	XBpsReadMaxLength   *int64          `json:"x-bps-read-max-length,omitempty"`
+	XBpsWrite           *int64          `json:"x-bps-write,omitempty"`
+	XBpsWriteMax        *int64          `json:"x-bps-write-max,omitempty"`
+	XBpsWriteMaxLength  *int64          `json:"x-bps-write-max-length,omitempty"`
+	XIopsSize           *int64          `json:"x-iops-size,omitempty"`
+}
+
+func (ObjectOptionsVariantThrottleGroup) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantThrottleGroup) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantThrottleGroup
+	}{
+		ObjectTypeThrottleGroup,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantTLSCipherSuites is an implementation of ObjectOptions.
+type ObjectOptionsVariantTLSCipherSuites struct {
+	ID         string                   `json:"id"`
+	VerifyPeer *bool                    `json:"verify-peer,omitempty"`
+	Dir        *string                  `json:"dir,omitempty"`
+	Endpoint   *QCryptoTLSCredsEndpoint `json:"endpoint,omitempty"`
+	Priority   *string                  `json:"priority,omitempty"`
+}
+
+func (ObjectOptionsVariantTLSCipherSuites) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantTLSCipherSuites) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantTLSCipherSuites
+	}{
+		ObjectTypeTLSCipherSuites,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantTLSCredsAnon is an implementation of ObjectOptions.
+type ObjectOptionsVariantTLSCredsAnon struct {
+	ID     string `json:"id"`
+	Loaded *bool  `json:"loaded,omitempty"`
+}
+
+func (ObjectOptionsVariantTLSCredsAnon) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantTLSCredsAnon) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantTLSCredsAnon
+	}{
+		ObjectTypeTLSCredsAnon,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantTLSCredsPsk is an implementation of ObjectOptions.
+type ObjectOptionsVariantTLSCredsPsk struct {
+	ID       string  `json:"id"`
+	Loaded   *bool   `json:"loaded,omitempty"`
+	Username *string `json:"username,omitempty"`
+}
+
+func (ObjectOptionsVariantTLSCredsPsk) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantTLSCredsPsk) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantTLSCredsPsk
+	}{
+		ObjectTypeTLSCredsPsk,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantTLSCredsX509 is an implementation of ObjectOptions.
+type ObjectOptionsVariantTLSCredsX509 struct {
+	ID          string  `json:"id"`
+	Loaded      *bool   `json:"loaded,omitempty"`
+	SanityCheck *bool   `json:"sanity-check,omitempty"`
+	Passwordid  *string `json:"passwordid,omitempty"`
+}
+
+func (ObjectOptionsVariantTLSCredsX509) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantTLSCredsX509) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantTLSCredsX509
+	}{
+		ObjectTypeTLSCredsX509,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantXRemoteObject is an implementation of ObjectOptions.
+type ObjectOptionsVariantXRemoteObject struct {
+	ID    string `json:"id"`
+	FD    string `json:"fd"`
+	Devid string `json:"devid"`
+}
+
+func (ObjectOptionsVariantXRemoteObject) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantXRemoteObject) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantXRemoteObject
+	}{
+		ObjectTypeXRemoteObject,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// ObjectOptionsVariantXVfioUserServer is an implementation of ObjectOptions.
+type ObjectOptionsVariantXVfioUserServer struct {
+	ID     string        `json:"id"`
+	Socket SocketAddress `json:"socket"`
+	Device string        `json:"device"`
+}
+
+func (ObjectOptionsVariantXVfioUserServer) isObjectOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s ObjectOptionsVariantXVfioUserServer) MarshalJSON() ([]byte, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+		ObjectOptionsVariantXVfioUserServer
+	}{
+		ObjectTypeXVfioUserServer,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeObjectOptions(bs json.RawMessage) (ObjectOptions, error) {
+	v := struct {
+		QomType ObjectType `json:"qom-type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.QomType {
+	case ObjectTypeAuthzList:
+		var ret ObjectOptionsVariantAuthzList
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeAuthzListfile:
+		var ret ObjectOptionsVariantAuthzListfile
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeAuthzPam:
+		var ret ObjectOptionsVariantAuthzPam
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeAuthzSimple:
+		var ret ObjectOptionsVariantAuthzSimple
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeCanHostSocketcan:
+		var ret ObjectOptionsVariantCanHostSocketcan
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeColoCompare:
+		var ret ObjectOptionsVariantColoCompare
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeCryptodevBackend:
+		var ret ObjectOptionsVariantCryptodevBackend
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeCryptodevBackendBuiltin:
+		var ret ObjectOptionsVariantCryptodevBackendBuiltin
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeCryptodevVhostUser:
+		var ret ObjectOptionsVariantCryptodevVhostUser
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeDbusVmstate:
+		var ret ObjectOptionsVariantDbusVmstate
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeFilterBuffer:
+		var ret ObjectOptionsVariantFilterBuffer
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeFilterDump:
+		var ret ObjectOptionsVariantFilterDump
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeFilterMirror:
+		var ret ObjectOptionsVariantFilterMirror
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeFilterRedirector:
+		var ret ObjectOptionsVariantFilterRedirector
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeFilterReplay:
+		var ret ObjectOptionsVariantFilterReplay
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeFilterRewriter:
+		var ret ObjectOptionsVariantFilterRewriter
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeInputBarrier:
+		var ret ObjectOptionsVariantInputBarrier
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeInputLinux:
+		var ret ObjectOptionsVariantInputLinux
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeIothread:
+		var ret ObjectOptionsVariantIothread
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeMainLoop:
+		var ret ObjectOptionsVariantMainLoop
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeMemoryBackendEpc:
+		var ret ObjectOptionsVariantMemoryBackendEpc
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeMemoryBackendFile:
+		var ret ObjectOptionsVariantMemoryBackendFile
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeMemoryBackendMemfd:
+		var ret ObjectOptionsVariantMemoryBackendMemfd
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeMemoryBackendRAM:
+		var ret ObjectOptionsVariantMemoryBackendRAM
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypePrManagerHelper:
+		var ret ObjectOptionsVariantPrManagerHelper
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeQtest:
+		var ret ObjectOptionsVariantQtest
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeRngBuiltin:
+		var ret ObjectOptionsVariantRngBuiltin
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeRngEgd:
+		var ret ObjectOptionsVariantRngEgd
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeRngRandom:
+		var ret ObjectOptionsVariantRngRandom
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeSecret:
+		var ret ObjectOptionsVariantSecret
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeSecretKeyring:
+		var ret ObjectOptionsVariantSecretKeyring
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeSevGuest:
+		var ret ObjectOptionsVariantSevGuest
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeThrottleGroup:
+		var ret ObjectOptionsVariantThrottleGroup
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeTLSCipherSuites:
+		var ret ObjectOptionsVariantTLSCipherSuites
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeTLSCredsAnon:
+		var ret ObjectOptionsVariantTLSCredsAnon
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeTLSCredsPsk:
+		var ret ObjectOptionsVariantTLSCredsPsk
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeTLSCredsX509:
+		var ret ObjectOptionsVariantTLSCredsX509
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeXRemoteObject:
+		var ret ObjectOptionsVariantXRemoteObject
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case ObjectTypeXVfioUserServer:
+		var ret ObjectOptionsVariantXVfioUserServer
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union ObjectOptions", v.QomType)
+	}
+}
+
 // ObjectPropertyInfo -> ObjectPropertyInfo (struct)
 
 // ObjectPropertyInfo implements the "ObjectPropertyInfo" QMP API type.
 type ObjectPropertyInfo struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name         string       `json:"name"`
+	Type         string       `json:"type"`
+	Description  *string      `json:"description,omitempty"`
+	DefaultValue *interface{} `json:"default-value,omitempty"`
+}
+
+// ObjectType -> ObjectType (enum)
+
+// ObjectType implements the "ObjectType" QMP API type.
+type ObjectType int
+
+// Known values of ObjectType.
+const (
+	ObjectTypeAuthzList ObjectType = iota
+	ObjectTypeAuthzListfile
+	ObjectTypeAuthzPam
+	ObjectTypeAuthzSimple
+	ObjectTypeCanBus
+	ObjectTypeCanHostSocketcan
+	ObjectTypeColoCompare
+	ObjectTypeCryptodevBackend
+	ObjectTypeCryptodevBackendBuiltin
+	ObjectTypeCryptodevVhostUser
+	ObjectTypeDbusVmstate
+	ObjectTypeFilterBuffer
+	ObjectTypeFilterDump
+	ObjectTypeFilterMirror
+	ObjectTypeFilterRedirector
+	ObjectTypeFilterReplay
+	ObjectTypeFilterRewriter
+	ObjectTypeInputBarrier
+	ObjectTypeInputLinux
+	ObjectTypeIothread
+	ObjectTypeMainLoop
+	ObjectTypeMemoryBackendEpc
+	ObjectTypeMemoryBackendFile
+	ObjectTypeMemoryBackendMemfd
+	ObjectTypeMemoryBackendRAM
+	ObjectTypePefGuest
+	ObjectTypePrManagerHelper
+	ObjectTypeQtest
+	ObjectTypeRngBuiltin
+	ObjectTypeRngEgd
+	ObjectTypeRngRandom
+	ObjectTypeSecret
+	ObjectTypeSecretKeyring
+	ObjectTypeSevGuest
+	ObjectTypeS390PvGuest
+	ObjectTypeThrottleGroup
+	ObjectTypeTLSCredsAnon
+	ObjectTypeTLSCredsPsk
+	ObjectTypeTLSCredsX509
+	ObjectTypeTLSCipherSuites
+	ObjectTypeXRemoteObject
+	ObjectTypeXVfioUserServer
+)
+
+// String implements fmt.Stringer.
+func (e ObjectType) String() string {
+	switch e {
+	case ObjectTypeAuthzList:
+		return "authz-list"
+	case ObjectTypeAuthzListfile:
+		return "authz-listfile"
+	case ObjectTypeAuthzPam:
+		return "authz-pam"
+	case ObjectTypeAuthzSimple:
+		return "authz-simple"
+	case ObjectTypeCanBus:
+		return "can-bus"
+	case ObjectTypeCanHostSocketcan:
+		return "can-host-socketcan"
+	case ObjectTypeColoCompare:
+		return "colo-compare"
+	case ObjectTypeCryptodevBackend:
+		return "cryptodev-backend"
+	case ObjectTypeCryptodevBackendBuiltin:
+		return "cryptodev-backend-builtin"
+	case ObjectTypeCryptodevVhostUser:
+		return "cryptodev-vhost-user"
+	case ObjectTypeDbusVmstate:
+		return "dbus-vmstate"
+	case ObjectTypeFilterBuffer:
+		return "filter-buffer"
+	case ObjectTypeFilterDump:
+		return "filter-dump"
+	case ObjectTypeFilterMirror:
+		return "filter-mirror"
+	case ObjectTypeFilterRedirector:
+		return "filter-redirector"
+	case ObjectTypeFilterReplay:
+		return "filter-replay"
+	case ObjectTypeFilterRewriter:
+		return "filter-rewriter"
+	case ObjectTypeInputBarrier:
+		return "input-barrier"
+	case ObjectTypeInputLinux:
+		return "input-linux"
+	case ObjectTypeIothread:
+		return "iothread"
+	case ObjectTypeMainLoop:
+		return "main-loop"
+	case ObjectTypeMemoryBackendEpc:
+		return "memory-backend-epc"
+	case ObjectTypeMemoryBackendFile:
+		return "memory-backend-file"
+	case ObjectTypeMemoryBackendMemfd:
+		return "memory-backend-memfd"
+	case ObjectTypeMemoryBackendRAM:
+		return "memory-backend-ram"
+	case ObjectTypePefGuest:
+		return "pef-guest"
+	case ObjectTypePrManagerHelper:
+		return "pr-manager-helper"
+	case ObjectTypeQtest:
+		return "qtest"
+	case ObjectTypeRngBuiltin:
+		return "rng-builtin"
+	case ObjectTypeRngEgd:
+		return "rng-egd"
+	case ObjectTypeRngRandom:
+		return "rng-random"
+	case ObjectTypeSecret:
+		return "secret"
+	case ObjectTypeSecretKeyring:
+		return "secret_keyring"
+	case ObjectTypeSevGuest:
+		return "sev-guest"
+	case ObjectTypeS390PvGuest:
+		return "s390-pv-guest"
+	case ObjectTypeThrottleGroup:
+		return "throttle-group"
+	case ObjectTypeTLSCredsAnon:
+		return "tls-creds-anon"
+	case ObjectTypeTLSCredsPsk:
+		return "tls-creds-psk"
+	case ObjectTypeTLSCredsX509:
+		return "tls-creds-x509"
+	case ObjectTypeTLSCipherSuites:
+		return "tls-cipher-suites"
+	case ObjectTypeXRemoteObject:
+		return "x-remote-object"
+	case ObjectTypeXVfioUserServer:
+		return "x-vfio-user-server"
+	default:
+		return fmt.Sprintf("ObjectType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ObjectType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ObjectTypeAuthzList:
+		return json.Marshal("authz-list")
+	case ObjectTypeAuthzListfile:
+		return json.Marshal("authz-listfile")
+	case ObjectTypeAuthzPam:
+		return json.Marshal("authz-pam")
+	case ObjectTypeAuthzSimple:
+		return json.Marshal("authz-simple")
+	case ObjectTypeCanBus:
+		return json.Marshal("can-bus")
+	case ObjectTypeCanHostSocketcan:
+		return json.Marshal("can-host-socketcan")
+	case ObjectTypeColoCompare:
+		return json.Marshal("colo-compare")
+	case ObjectTypeCryptodevBackend:
+		return json.Marshal("cryptodev-backend")
+	case ObjectTypeCryptodevBackendBuiltin:
+		return json.Marshal("cryptodev-backend-builtin")
+	case ObjectTypeCryptodevVhostUser:
+		return json.Marshal("cryptodev-vhost-user")
+	case ObjectTypeDbusVmstate:
+		return json.Marshal("dbus-vmstate")
+	case ObjectTypeFilterBuffer:
+		return json.Marshal("filter-buffer")
+	case ObjectTypeFilterDump:
+		return json.Marshal("filter-dump")
+	case ObjectTypeFilterMirror:
+		return json.Marshal("filter-mirror")
+	case ObjectTypeFilterRedirector:
+		return json.Marshal("filter-redirector")
+	case ObjectTypeFilterReplay:
+		return json.Marshal("filter-replay")
+	case ObjectTypeFilterRewriter:
+		return json.Marshal("filter-rewriter")
+	case ObjectTypeInputBarrier:
+		return json.Marshal("input-barrier")
+	case ObjectTypeInputLinux:
+		return json.Marshal("input-linux")
+	case ObjectTypeIothread:
+		return json.Marshal("iothread")
+	case ObjectTypeMainLoop:
+		return json.Marshal("main-loop")
+	case ObjectTypeMemoryBackendEpc:
+		return json.Marshal("memory-backend-epc")
+	case ObjectTypeMemoryBackendFile:
+		return json.Marshal("memory-backend-file")
+	case ObjectTypeMemoryBackendMemfd:
+		return json.Marshal("memory-backend-memfd")
+	case ObjectTypeMemoryBackendRAM:
+		return json.Marshal("memory-backend-ram")
+	case ObjectTypePefGuest:
+		return json.Marshal("pef-guest")
+	case ObjectTypePrManagerHelper:
+		return json.Marshal("pr-manager-helper")
+	case ObjectTypeQtest:
+		return json.Marshal("qtest")
+	case ObjectTypeRngBuiltin:
+		return json.Marshal("rng-builtin")
+	case ObjectTypeRngEgd:
+		return json.Marshal("rng-egd")
+	case ObjectTypeRngRandom:
+		return json.Marshal("rng-random")
+	case ObjectTypeSecret:
+		return json.Marshal("secret")
+	case ObjectTypeSecretKeyring:
+		return json.Marshal("secret_keyring")
+	case ObjectTypeSevGuest:
+		return json.Marshal("sev-guest")
+	case ObjectTypeS390PvGuest:
+		return json.Marshal("s390-pv-guest")
+	case ObjectTypeThrottleGroup:
+		return json.Marshal("throttle-group")
+	case ObjectTypeTLSCredsAnon:
+		return json.Marshal("tls-creds-anon")
+	case ObjectTypeTLSCredsPsk:
+		return json.Marshal("tls-creds-psk")
+	case ObjectTypeTLSCredsX509:
+		return json.Marshal("tls-creds-x509")
+	case ObjectTypeTLSCipherSuites:
+		return json.Marshal("tls-cipher-suites")
+	case ObjectTypeXRemoteObject:
+		return json.Marshal("x-remote-object")
+	case ObjectTypeXVfioUserServer:
+		return json.Marshal("x-vfio-user-server")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ObjectType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ObjectType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "authz-list":
+		*e = ObjectTypeAuthzList
+	case "authz-listfile":
+		*e = ObjectTypeAuthzListfile
+	case "authz-pam":
+		*e = ObjectTypeAuthzPam
+	case "authz-simple":
+		*e = ObjectTypeAuthzSimple
+	case "can-bus":
+		*e = ObjectTypeCanBus
+	case "can-host-socketcan":
+		*e = ObjectTypeCanHostSocketcan
+	case "colo-compare":
+		*e = ObjectTypeColoCompare
+	case "cryptodev-backend":
+		*e = ObjectTypeCryptodevBackend
+	case "cryptodev-backend-builtin":
+		*e = ObjectTypeCryptodevBackendBuiltin
+	case "cryptodev-vhost-user":
+		*e = ObjectTypeCryptodevVhostUser
+	case "dbus-vmstate":
+		*e = ObjectTypeDbusVmstate
+	case "filter-buffer":
+		*e = ObjectTypeFilterBuffer
+	case "filter-dump":
+		*e = ObjectTypeFilterDump
+	case "filter-mirror":
+		*e = ObjectTypeFilterMirror
+	case "filter-redirector":
+		*e = ObjectTypeFilterRedirector
+	case "filter-replay":
+		*e = ObjectTypeFilterReplay
+	case "filter-rewriter":
+		*e = ObjectTypeFilterRewriter
+	case "input-barrier":
+		*e = ObjectTypeInputBarrier
+	case "input-linux":
+		*e = ObjectTypeInputLinux
+	case "iothread":
+		*e = ObjectTypeIothread
+	case "main-loop":
+		*e = ObjectTypeMainLoop
+	case "memory-backend-epc":
+		*e = ObjectTypeMemoryBackendEpc
+	case "memory-backend-file":
+		*e = ObjectTypeMemoryBackendFile
+	case "memory-backend-memfd":
+		*e = ObjectTypeMemoryBackendMemfd
+	case "memory-backend-ram":
+		*e = ObjectTypeMemoryBackendRAM
+	case "pef-guest":
+		*e = ObjectTypePefGuest
+	case "pr-manager-helper":
+		*e = ObjectTypePrManagerHelper
+	case "qtest":
+		*e = ObjectTypeQtest
+	case "rng-builtin":
+		*e = ObjectTypeRngBuiltin
+	case "rng-egd":
+		*e = ObjectTypeRngEgd
+	case "rng-random":
+		*e = ObjectTypeRngRandom
+	case "secret":
+		*e = ObjectTypeSecret
+	case "secret_keyring":
+		*e = ObjectTypeSecretKeyring
+	case "sev-guest":
+		*e = ObjectTypeSevGuest
+	case "s390-pv-guest":
+		*e = ObjectTypeS390PvGuest
+	case "throttle-group":
+		*e = ObjectTypeThrottleGroup
+	case "tls-creds-anon":
+		*e = ObjectTypeTLSCredsAnon
+	case "tls-creds-psk":
+		*e = ObjectTypeTLSCredsPsk
+	case "tls-creds-x509":
+		*e = ObjectTypeTLSCredsX509
+	case "tls-cipher-suites":
+		*e = ObjectTypeTLSCipherSuites
+	case "x-remote-object":
+		*e = ObjectTypeXRemoteObject
+	case "x-vfio-user-server":
+		*e = ObjectTypeXVfioUserServer
+	default:
+		return fmt.Errorf("unknown enum value %q for ObjectType", s)
+	}
+	return nil
 }
 
 // ObjectTypeInfo -> ObjectTypeInfo (struct)
@@ -6492,6 +13294,58 @@ type ObjectTypeInfo struct {
 	Name     string  `json:"name"`
 	Abstract *bool   `json:"abstract,omitempty"`
 	Parent   *string `json:"parent,omitempty"`
+}
+
+// OnCbwError -> OnCbwError (enum)
+
+// OnCbwError implements the "OnCbwError" QMP API type.
+type OnCbwError int
+
+// Known values of OnCbwError.
+const (
+	OnCbwErrorBreakGuestWrite OnCbwError = iota
+	OnCbwErrorBreakSnapshot
+)
+
+// String implements fmt.Stringer.
+func (e OnCbwError) String() string {
+	switch e {
+	case OnCbwErrorBreakGuestWrite:
+		return "break-guest-write"
+	case OnCbwErrorBreakSnapshot:
+		return "break-snapshot"
+	default:
+		return fmt.Sprintf("OnCbwError(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e OnCbwError) MarshalJSON() ([]byte, error) {
+	switch e {
+	case OnCbwErrorBreakGuestWrite:
+		return json.Marshal("break-guest-write")
+	case OnCbwErrorBreakSnapshot:
+		return json.Marshal("break-snapshot")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for OnCbwError", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *OnCbwError) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "break-guest-write":
+		*e = OnCbwErrorBreakGuestWrite
+	case "break-snapshot":
+		*e = OnCbwErrorBreakSnapshot
+	default:
+		return fmt.Errorf("unknown enum value %q for OnCbwError", s)
+	}
+	return nil
 }
 
 // OnOffAuto -> OnOffAuto (enum)
@@ -6569,6 +13423,82 @@ type PcdimmDeviceInfo struct {
 
 // EVENT POWERDOWN
 
+// PRManagerInfo -> PrManagerInfo (struct)
+
+// PrManagerInfo implements the "PRManagerInfo" QMP API type.
+type PrManagerInfo struct {
+	ID        string `json:"id"`
+	Connected bool   `json:"connected"`
+}
+
+// EVENT PR_MANAGER_STATUS_CHANGED
+
+// PanicAction -> PanicAction (enum)
+
+// PanicAction implements the "PanicAction" QMP API type.
+type PanicAction int
+
+// Known values of PanicAction.
+const (
+	PanicActionPause PanicAction = iota
+	PanicActionShutdown
+	PanicActionExitFailure
+	PanicActionNone
+)
+
+// String implements fmt.Stringer.
+func (e PanicAction) String() string {
+	switch e {
+	case PanicActionPause:
+		return "pause"
+	case PanicActionShutdown:
+		return "shutdown"
+	case PanicActionExitFailure:
+		return "exit-failure"
+	case PanicActionNone:
+		return "none"
+	default:
+		return fmt.Sprintf("PanicAction(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e PanicAction) MarshalJSON() ([]byte, error) {
+	switch e {
+	case PanicActionPause:
+		return json.Marshal("pause")
+	case PanicActionShutdown:
+		return json.Marshal("shutdown")
+	case PanicActionExitFailure:
+		return json.Marshal("exit-failure")
+	case PanicActionNone:
+		return json.Marshal("none")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for PanicAction", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *PanicAction) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "pause":
+		*e = PanicActionPause
+	case "shutdown":
+		*e = PanicActionShutdown
+	case "exit-failure":
+		*e = PanicActionExitFailure
+	case "none":
+		*e = PanicActionNone
+	default:
+		return fmt.Errorf("unknown enum value %q for PanicAction", s)
+	}
+	return nil
+}
+
 // PciBridgeInfo -> PCIBridgeInfo (struct)
 
 // PCIBridgeInfo implements the "PciBridgeInfo" QMP API type.
@@ -6601,8 +13531,10 @@ type PCIDeviceClass struct {
 
 // PCIDeviceID implements the "PciDeviceId" QMP API type.
 type PCIDeviceID struct {
-	Device int64 `json:"device"`
-	Vendor int64 `json:"vendor"`
+	Device          int64  `json:"device"`
+	Vendor          int64  `json:"vendor"`
+	Subsystem       *int64 `json:"subsystem,omitempty"`
+	SubsystemVendor *int64 `json:"subsystem-vendor,omitempty"`
 }
 
 // PciDeviceInfo -> PCIDeviceInfo (struct)
@@ -6615,6 +13547,7 @@ type PCIDeviceInfo struct {
 	ClassInfo PCIDeviceClass    `json:"class_info"`
 	ID        PCIDeviceID       `json:"id"`
 	Irq       *int64            `json:"irq,omitempty"`
+	IrqPin    int64             `json:"irq_pin"`
 	QdevID    string            `json:"qdev_id"`
 	PCIBridge *PCIBridgeInfo    `json:"pci_bridge,omitempty"`
 	Regions   []PCIMemoryRegion `json:"regions"`
@@ -6648,6 +13581,363 @@ type PCIMemoryRegion struct {
 	MemType64 *bool  `json:"mem_type_64,omitempty"`
 }
 
+// PreallocMode -> PreallocMode (enum)
+
+// PreallocMode implements the "PreallocMode" QMP API type.
+type PreallocMode int
+
+// Known values of PreallocMode.
+const (
+	PreallocModeOff PreallocMode = iota
+	PreallocModeMetadata
+	PreallocModeFalloc
+	PreallocModeFull
+)
+
+// String implements fmt.Stringer.
+func (e PreallocMode) String() string {
+	switch e {
+	case PreallocModeOff:
+		return "off"
+	case PreallocModeMetadata:
+		return "metadata"
+	case PreallocModeFalloc:
+		return "falloc"
+	case PreallocModeFull:
+		return "full"
+	default:
+		return fmt.Sprintf("PreallocMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e PreallocMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case PreallocModeOff:
+		return json.Marshal("off")
+	case PreallocModeMetadata:
+		return json.Marshal("metadata")
+	case PreallocModeFalloc:
+		return json.Marshal("falloc")
+	case PreallocModeFull:
+		return json.Marshal("full")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for PreallocMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *PreallocMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "off":
+		*e = PreallocModeOff
+	case "metadata":
+		*e = PreallocModeMetadata
+	case "falloc":
+		*e = PreallocModeFalloc
+	case "full":
+		*e = PreallocModeFull
+	default:
+		return fmt.Errorf("unknown enum value %q for PreallocMode", s)
+	}
+	return nil
+}
+
+// QAuthZListFormat -> QAuthZListFormat (enum)
+
+// QAuthZListFormat implements the "QAuthZListFormat" QMP API type.
+type QAuthZListFormat int
+
+// Known values of QAuthZListFormat.
+const (
+	QAuthZListFormatExact QAuthZListFormat = iota
+	QAuthZListFormatGlob
+)
+
+// String implements fmt.Stringer.
+func (e QAuthZListFormat) String() string {
+	switch e {
+	case QAuthZListFormatExact:
+		return "exact"
+	case QAuthZListFormatGlob:
+		return "glob"
+	default:
+		return fmt.Sprintf("QAuthZListFormat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e QAuthZListFormat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case QAuthZListFormatExact:
+		return json.Marshal("exact")
+	case QAuthZListFormatGlob:
+		return json.Marshal("glob")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for QAuthZListFormat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *QAuthZListFormat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "exact":
+		*e = QAuthZListFormatExact
+	case "glob":
+		*e = QAuthZListFormatGlob
+	default:
+		return fmt.Errorf("unknown enum value %q for QAuthZListFormat", s)
+	}
+	return nil
+}
+
+// QAuthZListPolicy -> QAuthZListPolicy (enum)
+
+// QAuthZListPolicy implements the "QAuthZListPolicy" QMP API type.
+type QAuthZListPolicy int
+
+// Known values of QAuthZListPolicy.
+const (
+	QAuthZListPolicyDeny QAuthZListPolicy = iota
+	QAuthZListPolicyAllow
+)
+
+// String implements fmt.Stringer.
+func (e QAuthZListPolicy) String() string {
+	switch e {
+	case QAuthZListPolicyDeny:
+		return "deny"
+	case QAuthZListPolicyAllow:
+		return "allow"
+	default:
+		return fmt.Sprintf("QAuthZListPolicy(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e QAuthZListPolicy) MarshalJSON() ([]byte, error) {
+	switch e {
+	case QAuthZListPolicyDeny:
+		return json.Marshal("deny")
+	case QAuthZListPolicyAllow:
+		return json.Marshal("allow")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for QAuthZListPolicy", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *QAuthZListPolicy) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "deny":
+		*e = QAuthZListPolicyDeny
+	case "allow":
+		*e = QAuthZListPolicyAllow
+	default:
+		return fmt.Errorf("unknown enum value %q for QAuthZListPolicy", s)
+	}
+	return nil
+}
+
+// QAuthZListRule -> QAuthZListRule (struct)
+
+// QAuthZListRule implements the "QAuthZListRule" QMP API type.
+type QAuthZListRule struct {
+	Match  string            `json:"match"`
+	Policy QAuthZListPolicy  `json:"policy"`
+	Format *QAuthZListFormat `json:"format,omitempty"`
+}
+
+// QCryptoBlockAmendOptions -> QCryptoBlockAmendOptions (flat union)
+
+// QCryptoBlockAmendOptions implements the "QCryptoBlockAmendOptions" QMP API type.
+//
+// Can be one of:
+//   - QCryptoBlockAmendOptionsVariantLUKS
+type QCryptoBlockAmendOptions interface {
+	isQCryptoBlockAmendOptions()
+}
+
+// QCryptoBlockAmendOptionsVariantLUKS is an implementation of QCryptoBlockAmendOptions.
+type QCryptoBlockAmendOptionsVariantLUKS struct {
+	State     QCryptoBlockLUKSKeyslotState `json:"state"`
+	NewSecret *string                      `json:"new-secret,omitempty"`
+	OldSecret *string                      `json:"old-secret,omitempty"`
+	Keyslot   *int64                       `json:"keyslot,omitempty"`
+	IterTime  *int64                       `json:"iter-time,omitempty"`
+	Secret    *string                      `json:"secret,omitempty"`
+}
+
+func (QCryptoBlockAmendOptionsVariantLUKS) isQCryptoBlockAmendOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s QCryptoBlockAmendOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format QCryptoBlockFormat `json:"format"`
+		QCryptoBlockAmendOptionsVariantLUKS
+	}{
+		QCryptoBlockFormatLUKS,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeQCryptoBlockAmendOptions(bs json.RawMessage) (QCryptoBlockAmendOptions, error) {
+	v := struct {
+		Format QCryptoBlockFormat `json:"format"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Format {
+	case QCryptoBlockFormatLUKS:
+		var ret QCryptoBlockAmendOptionsVariantLUKS
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union QCryptoBlockAmendOptions", v.Format)
+	}
+}
+
+// QCryptoBlockCreateOptions -> QCryptoBlockCreateOptions (flat union)
+
+// QCryptoBlockCreateOptions implements the "QCryptoBlockCreateOptions" QMP API type.
+//
+// Can be one of:
+//   - QCryptoBlockCreateOptionsVariantLUKS
+//   - QCryptoBlockCreateOptionsVariantQcow
+type QCryptoBlockCreateOptions interface {
+	isQCryptoBlockCreateOptions()
+}
+
+// QCryptoBlockCreateOptionsVariantLUKS is an implementation of QCryptoBlockCreateOptions.
+type QCryptoBlockCreateOptionsVariantLUKS struct {
+	CipherAlg    *QCryptoCipherAlgorithm `json:"cipher-alg,omitempty"`
+	CipherMode   *QCryptoCipherMode      `json:"cipher-mode,omitempty"`
+	IvgenAlg     *QCryptoIvGenAlgorithm  `json:"ivgen-alg,omitempty"`
+	IvgenHashAlg *QCryptoHashAlgorithm   `json:"ivgen-hash-alg,omitempty"`
+	HashAlg      *QCryptoHashAlgorithm   `json:"hash-alg,omitempty"`
+	IterTime     *int64                  `json:"iter-time,omitempty"`
+}
+
+func (QCryptoBlockCreateOptionsVariantLUKS) isQCryptoBlockCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s QCryptoBlockCreateOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format QCryptoBlockFormat `json:"format"`
+		QCryptoBlockCreateOptionsVariantLUKS
+	}{
+		QCryptoBlockFormatLUKS,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// QCryptoBlockCreateOptionsVariantQcow is an implementation of QCryptoBlockCreateOptions.
+type QCryptoBlockCreateOptionsVariantQcow struct {
+	KeySecret *string `json:"key-secret,omitempty"`
+}
+
+func (QCryptoBlockCreateOptionsVariantQcow) isQCryptoBlockCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s QCryptoBlockCreateOptionsVariantQcow) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format QCryptoBlockFormat `json:"format"`
+		QCryptoBlockCreateOptionsVariantQcow
+	}{
+		QCryptoBlockFormatQcow,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeQCryptoBlockCreateOptions(bs json.RawMessage) (QCryptoBlockCreateOptions, error) {
+	v := struct {
+		Format QCryptoBlockFormat `json:"format"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Format {
+	case QCryptoBlockFormatLUKS:
+		var ret QCryptoBlockCreateOptionsVariantLUKS
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case QCryptoBlockFormatQcow:
+		var ret QCryptoBlockCreateOptionsVariantQcow
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union QCryptoBlockCreateOptions", v.Format)
+	}
+}
+
+// QCryptoBlockFormat -> QCryptoBlockFormat (enum)
+
+// QCryptoBlockFormat implements the "QCryptoBlockFormat" QMP API type.
+type QCryptoBlockFormat int
+
+// Known values of QCryptoBlockFormat.
+const (
+	QCryptoBlockFormatQcow QCryptoBlockFormat = iota
+	QCryptoBlockFormatLUKS
+)
+
+// String implements fmt.Stringer.
+func (e QCryptoBlockFormat) String() string {
+	switch e {
+	case QCryptoBlockFormatQcow:
+		return "qcow"
+	case QCryptoBlockFormatLUKS:
+		return "luks"
+	default:
+		return fmt.Sprintf("QCryptoBlockFormat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e QCryptoBlockFormat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case QCryptoBlockFormatQcow:
+		return json.Marshal("qcow")
+	case QCryptoBlockFormatLUKS:
+		return json.Marshal("luks")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for QCryptoBlockFormat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *QCryptoBlockFormat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "qcow":
+		*e = QCryptoBlockFormatQcow
+	case "luks":
+		*e = QCryptoBlockFormatLUKS
+	default:
+		return fmt.Errorf("unknown enum value %q for QCryptoBlockFormat", s)
+	}
+	return nil
+}
+
 // QCryptoBlockInfoLUKS -> QCryptoBlockInfoLUKS (struct)
 
 // QCryptoBlockInfoLUKS implements the "QCryptoBlockInfoLUKS" QMP API type.
@@ -6673,6 +13963,58 @@ type QCryptoBlockInfoLUKSSlot struct {
 	KeyOffset int64  `json:"key-offset"`
 }
 
+// QCryptoBlockLUKSKeyslotState -> QCryptoBlockLUKSKeyslotState (enum)
+
+// QCryptoBlockLUKSKeyslotState implements the "QCryptoBlockLUKSKeyslotState" QMP API type.
+type QCryptoBlockLUKSKeyslotState int
+
+// Known values of QCryptoBlockLUKSKeyslotState.
+const (
+	QCryptoBlockLUKSKeyslotStateActive QCryptoBlockLUKSKeyslotState = iota
+	QCryptoBlockLUKSKeyslotStateInactive
+)
+
+// String implements fmt.Stringer.
+func (e QCryptoBlockLUKSKeyslotState) String() string {
+	switch e {
+	case QCryptoBlockLUKSKeyslotStateActive:
+		return "active"
+	case QCryptoBlockLUKSKeyslotStateInactive:
+		return "inactive"
+	default:
+		return fmt.Sprintf("QCryptoBlockLUKSKeyslotState(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e QCryptoBlockLUKSKeyslotState) MarshalJSON() ([]byte, error) {
+	switch e {
+	case QCryptoBlockLUKSKeyslotStateActive:
+		return json.Marshal("active")
+	case QCryptoBlockLUKSKeyslotStateInactive:
+		return json.Marshal("inactive")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for QCryptoBlockLUKSKeyslotState", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *QCryptoBlockLUKSKeyslotState) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "active":
+		*e = QCryptoBlockLUKSKeyslotStateActive
+	case "inactive":
+		*e = QCryptoBlockLUKSKeyslotStateInactive
+	default:
+		return fmt.Errorf("unknown enum value %q for QCryptoBlockLUKSKeyslotState", s)
+	}
+	return nil
+}
+
 // QCryptoCipherAlgorithm -> QCryptoCipherAlgorithm (enum)
 
 // QCryptoCipherAlgorithm implements the "QCryptoCipherAlgorithm" QMP API type.
@@ -6683,7 +14025,7 @@ const (
 	QCryptoCipherAlgorithmAes128 QCryptoCipherAlgorithm = iota
 	QCryptoCipherAlgorithmAes192
 	QCryptoCipherAlgorithmAes256
-	QCryptoCipherAlgorithmDesRfb
+	QCryptoCipherAlgorithmDes
 	QCryptoCipherAlgorithm3Des
 	QCryptoCipherAlgorithmCast5128
 	QCryptoCipherAlgorithmSerpent128
@@ -6703,8 +14045,8 @@ func (e QCryptoCipherAlgorithm) String() string {
 		return "aes-192"
 	case QCryptoCipherAlgorithmAes256:
 		return "aes-256"
-	case QCryptoCipherAlgorithmDesRfb:
-		return "des-rfb"
+	case QCryptoCipherAlgorithmDes:
+		return "des"
 	case QCryptoCipherAlgorithm3Des:
 		return "3des"
 	case QCryptoCipherAlgorithmCast5128:
@@ -6735,8 +14077,8 @@ func (e QCryptoCipherAlgorithm) MarshalJSON() ([]byte, error) {
 		return json.Marshal("aes-192")
 	case QCryptoCipherAlgorithmAes256:
 		return json.Marshal("aes-256")
-	case QCryptoCipherAlgorithmDesRfb:
-		return json.Marshal("des-rfb")
+	case QCryptoCipherAlgorithmDes:
+		return json.Marshal("des")
 	case QCryptoCipherAlgorithm3Des:
 		return json.Marshal("3des")
 	case QCryptoCipherAlgorithmCast5128:
@@ -6771,8 +14113,8 @@ func (e *QCryptoCipherAlgorithm) UnmarshalJSON(bs []byte) error {
 		*e = QCryptoCipherAlgorithmAes192
 	case "aes-256":
 		*e = QCryptoCipherAlgorithmAes256
-	case "des-rfb":
-		*e = QCryptoCipherAlgorithmDesRfb
+	case "des":
+		*e = QCryptoCipherAlgorithmDes
 	case "3des":
 		*e = QCryptoCipherAlgorithm3Des
 	case "cast5-128":
@@ -7007,6 +14349,58 @@ func (e *QCryptoIvGenAlgorithm) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// QCryptoTLSCredsEndpoint -> QCryptoTLSCredsEndpoint (enum)
+
+// QCryptoTLSCredsEndpoint implements the "QCryptoTLSCredsEndpoint" QMP API type.
+type QCryptoTLSCredsEndpoint int
+
+// Known values of QCryptoTLSCredsEndpoint.
+const (
+	QCryptoTLSCredsEndpointClient QCryptoTLSCredsEndpoint = iota
+	QCryptoTLSCredsEndpointServer
+)
+
+// String implements fmt.Stringer.
+func (e QCryptoTLSCredsEndpoint) String() string {
+	switch e {
+	case QCryptoTLSCredsEndpointClient:
+		return "client"
+	case QCryptoTLSCredsEndpointServer:
+		return "server"
+	default:
+		return fmt.Sprintf("QCryptoTLSCredsEndpoint(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e QCryptoTLSCredsEndpoint) MarshalJSON() ([]byte, error) {
+	switch e {
+	case QCryptoTLSCredsEndpointClient:
+		return json.Marshal("client")
+	case QCryptoTLSCredsEndpointServer:
+		return json.Marshal("server")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for QCryptoTLSCredsEndpoint", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *QCryptoTLSCredsEndpoint) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "client":
+		*e = QCryptoTLSCredsEndpointClient
+	case "server":
+		*e = QCryptoTLSCredsEndpointServer
+	default:
+		return fmt.Errorf("unknown enum value %q for QCryptoTLSCredsEndpoint", s)
+	}
+	return nil
+}
+
 // QKeyCode -> QKeyCode (enum)
 
 // QKeyCode implements the "QKeyCode" QMP API type.
@@ -7139,6 +14533,8 @@ const (
 	QKeyCodeHiragana
 	QKeyCodeHenkan
 	QKeyCodeYen
+	QKeyCodeMuhenkan
+	QKeyCodeKatakanahiragana
 	QKeyCodeKpComma
 	QKeyCodeKpEquals
 	QKeyCodePower
@@ -7160,6 +14556,8 @@ const (
 	QKeyCodeAcForward
 	QKeyCodeAcRefresh
 	QKeyCodeAcBookmarks
+	QKeyCodeLang1
+	QKeyCodeLang2
 )
 
 // String implements fmt.Stringer.
@@ -7415,6 +14813,10 @@ func (e QKeyCode) String() string {
 		return "henkan"
 	case QKeyCodeYen:
 		return "yen"
+	case QKeyCodeMuhenkan:
+		return "muhenkan"
+	case QKeyCodeKatakanahiragana:
+		return "katakanahiragana"
 	case QKeyCodeKpComma:
 		return "kp_comma"
 	case QKeyCodeKpEquals:
@@ -7457,6 +14859,10 @@ func (e QKeyCode) String() string {
 		return "ac_refresh"
 	case QKeyCodeAcBookmarks:
 		return "ac_bookmarks"
+	case QKeyCodeLang1:
+		return "lang1"
+	case QKeyCodeLang2:
+		return "lang2"
 	default:
 		return fmt.Sprintf("QKeyCode(%d)", e)
 	}
@@ -7715,6 +15121,10 @@ func (e QKeyCode) MarshalJSON() ([]byte, error) {
 		return json.Marshal("henkan")
 	case QKeyCodeYen:
 		return json.Marshal("yen")
+	case QKeyCodeMuhenkan:
+		return json.Marshal("muhenkan")
+	case QKeyCodeKatakanahiragana:
+		return json.Marshal("katakanahiragana")
 	case QKeyCodeKpComma:
 		return json.Marshal("kp_comma")
 	case QKeyCodeKpEquals:
@@ -7757,6 +15167,10 @@ func (e QKeyCode) MarshalJSON() ([]byte, error) {
 		return json.Marshal("ac_refresh")
 	case QKeyCodeAcBookmarks:
 		return json.Marshal("ac_bookmarks")
+	case QKeyCodeLang1:
+		return json.Marshal("lang1")
+	case QKeyCodeLang2:
+		return json.Marshal("lang2")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for QKeyCode", e)
 	}
@@ -8019,6 +15433,10 @@ func (e *QKeyCode) UnmarshalJSON(bs []byte) error {
 		*e = QKeyCodeHenkan
 	case "yen":
 		*e = QKeyCodeYen
+	case "muhenkan":
+		*e = QKeyCodeMuhenkan
+	case "katakanahiragana":
+		*e = QKeyCodeKatakanahiragana
 	case "kp_comma":
 		*e = QKeyCodeKpComma
 	case "kp_equals":
@@ -8061,8 +15479,57 @@ func (e *QKeyCode) UnmarshalJSON(bs []byte) error {
 		*e = QKeyCodeAcRefresh
 	case "ac_bookmarks":
 		*e = QKeyCodeAcBookmarks
+	case "lang1":
+		*e = QKeyCodeLang1
+	case "lang2":
+		*e = QKeyCodeLang2
 	default:
 		return fmt.Errorf("unknown enum value %q for QKeyCode", s)
+	}
+	return nil
+}
+
+// QMPCapability -> QMPCapability (enum)
+
+// QMPCapability implements the "QMPCapability" QMP API type.
+type QMPCapability int
+
+// Known values of QMPCapability.
+const (
+	QMPCapabilityOob QMPCapability = iota
+)
+
+// String implements fmt.Stringer.
+func (e QMPCapability) String() string {
+	switch e {
+	case QMPCapabilityOob:
+		return "oob"
+	default:
+		return fmt.Sprintf("QMPCapability(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e QMPCapability) MarshalJSON() ([]byte, error) {
+	switch e {
+	case QMPCapabilityOob:
+		return json.Marshal("oob")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for QMPCapability", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *QMPCapability) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "oob":
+		*e = QMPCapabilityOob
+	default:
+		return fmt.Errorf("unknown enum value %q for QMPCapability", s)
 	}
 	return nil
 }
@@ -8071,19 +15538,133 @@ func (e *QKeyCode) UnmarshalJSON(bs []byte) error {
 
 // EVENT QUORUM_REPORT_BAD
 
+// Qcow2BitmapInfo -> Qcow2BitmapInfo (struct)
+
+// Qcow2BitmapInfo implements the "Qcow2BitmapInfo" QMP API type.
+type Qcow2BitmapInfo struct {
+	Name        string                 `json:"name"`
+	Granularity uint32                 `json:"granularity"`
+	Flags       []Qcow2BitmapInfoFlags `json:"flags"`
+}
+
+// Qcow2BitmapInfoFlags -> Qcow2BitmapInfoFlags (enum)
+
+// Qcow2BitmapInfoFlags implements the "Qcow2BitmapInfoFlags" QMP API type.
+type Qcow2BitmapInfoFlags int
+
+// Known values of Qcow2BitmapInfoFlags.
+const (
+	Qcow2BitmapInfoFlagsInUse Qcow2BitmapInfoFlags = iota
+	Qcow2BitmapInfoFlagsAuto
+)
+
+// String implements fmt.Stringer.
+func (e Qcow2BitmapInfoFlags) String() string {
+	switch e {
+	case Qcow2BitmapInfoFlagsInUse:
+		return "in-use"
+	case Qcow2BitmapInfoFlagsAuto:
+		return "auto"
+	default:
+		return fmt.Sprintf("Qcow2BitmapInfoFlags(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e Qcow2BitmapInfoFlags) MarshalJSON() ([]byte, error) {
+	switch e {
+	case Qcow2BitmapInfoFlagsInUse:
+		return json.Marshal("in-use")
+	case Qcow2BitmapInfoFlagsAuto:
+		return json.Marshal("auto")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for Qcow2BitmapInfoFlags", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *Qcow2BitmapInfoFlags) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "in-use":
+		*e = Qcow2BitmapInfoFlagsInUse
+	case "auto":
+		*e = Qcow2BitmapInfoFlagsAuto
+	default:
+		return fmt.Errorf("unknown enum value %q for Qcow2BitmapInfoFlags", s)
+	}
+	return nil
+}
+
+// Qcow2CompressionType -> Qcow2CompressionType (enum)
+
+// Qcow2CompressionType implements the "Qcow2CompressionType" QMP API type.
+type Qcow2CompressionType int
+
+// Known values of Qcow2CompressionType.
+const (
+	Qcow2CompressionTypeZlib Qcow2CompressionType = iota
+	Qcow2CompressionTypeZstd
+)
+
+// String implements fmt.Stringer.
+func (e Qcow2CompressionType) String() string {
+	switch e {
+	case Qcow2CompressionTypeZlib:
+		return "zlib"
+	case Qcow2CompressionTypeZstd:
+		return "zstd"
+	default:
+		return fmt.Sprintf("Qcow2CompressionType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e Qcow2CompressionType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case Qcow2CompressionTypeZlib:
+		return json.Marshal("zlib")
+	case Qcow2CompressionTypeZstd:
+		return json.Marshal("zstd")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for Qcow2CompressionType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *Qcow2CompressionType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "zlib":
+		*e = Qcow2CompressionTypeZlib
+	case "zstd":
+		*e = Qcow2CompressionTypeZstd
+	default:
+		return fmt.Errorf("unknown enum value %q for Qcow2CompressionType", s)
+	}
+	return nil
+}
+
 // Qcow2OverlapCheckFlags -> Qcow2OverlapCheckFlags (struct)
 
 // Qcow2OverlapCheckFlags implements the "Qcow2OverlapCheckFlags" QMP API type.
 type Qcow2OverlapCheckFlags struct {
-	Template      *Qcow2OverlapCheckMode `json:"template,omitempty"`
-	MainHeader    *bool                  `json:"main-header,omitempty"`
-	ActiveL1      *bool                  `json:"active-l1,omitempty"`
-	ActiveL2      *bool                  `json:"active-l2,omitempty"`
-	RefcountTable *bool                  `json:"refcount-table,omitempty"`
-	RefcountBlock *bool                  `json:"refcount-block,omitempty"`
-	SnapshotTable *bool                  `json:"snapshot-table,omitempty"`
-	InactiveL1    *bool                  `json:"inactive-l1,omitempty"`
-	InactiveL2    *bool                  `json:"inactive-l2,omitempty"`
+	Template        *Qcow2OverlapCheckMode `json:"template,omitempty"`
+	MainHeader      *bool                  `json:"main-header,omitempty"`
+	ActiveL1        *bool                  `json:"active-l1,omitempty"`
+	ActiveL2        *bool                  `json:"active-l2,omitempty"`
+	RefcountTable   *bool                  `json:"refcount-table,omitempty"`
+	RefcountBlock   *bool                  `json:"refcount-block,omitempty"`
+	SnapshotTable   *bool                  `json:"snapshot-table,omitempty"`
+	InactiveL1      *bool                  `json:"inactive-l1,omitempty"`
+	InactiveL2      *bool                  `json:"inactive-l2,omitempty"`
+	BitmapDirectory *bool                  `json:"bitmap-directory,omitempty"`
 }
 
 // Qcow2OverlapCheckMode -> Qcow2OverlapCheckMode (enum)
@@ -8298,11 +15879,373 @@ func (e *QuorumReadPattern) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// EVENT RDMA_GID_STATUS_CHANGED
+
 // EVENT RESET
 
 // EVENT RESUME
 
 // EVENT RTC_CHANGE
+
+// RbdAuthMode -> RbdAuthMode (enum)
+
+// RbdAuthMode implements the "RbdAuthMode" QMP API type.
+type RbdAuthMode int
+
+// Known values of RbdAuthMode.
+const (
+	RbdAuthModeCephx RbdAuthMode = iota
+	RbdAuthModeNone
+)
+
+// String implements fmt.Stringer.
+func (e RbdAuthMode) String() string {
+	switch e {
+	case RbdAuthModeCephx:
+		return "cephx"
+	case RbdAuthModeNone:
+		return "none"
+	default:
+		return fmt.Sprintf("RbdAuthMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e RbdAuthMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case RbdAuthModeCephx:
+		return json.Marshal("cephx")
+	case RbdAuthModeNone:
+		return json.Marshal("none")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for RbdAuthMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *RbdAuthMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "cephx":
+		*e = RbdAuthModeCephx
+	case "none":
+		*e = RbdAuthModeNone
+	default:
+		return fmt.Errorf("unknown enum value %q for RbdAuthMode", s)
+	}
+	return nil
+}
+
+// RbdEncryptionCreateOptions -> RbdEncryptionCreateOptions (flat union)
+
+// RbdEncryptionCreateOptions implements the "RbdEncryptionCreateOptions" QMP API type.
+//
+// Can be one of:
+//   - RbdEncryptionCreateOptionsVariantLUKS
+//   - RbdEncryptionCreateOptionsVariantLUKS2
+type RbdEncryptionCreateOptions interface {
+	isRbdEncryptionCreateOptions()
+}
+
+// RbdEncryptionCreateOptionsVariantLUKS is an implementation of RbdEncryptionCreateOptions.
+type RbdEncryptionCreateOptionsVariantLUKS struct {
+}
+
+func (RbdEncryptionCreateOptionsVariantLUKS) isRbdEncryptionCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s RbdEncryptionCreateOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format RbdImageEncryptionFormat `json:"format"`
+		RbdEncryptionCreateOptionsVariantLUKS
+	}{
+		RbdImageEncryptionFormatLUKS,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// RbdEncryptionCreateOptionsVariantLUKS2 is an implementation of RbdEncryptionCreateOptions.
+type RbdEncryptionCreateOptionsVariantLUKS2 struct {
+}
+
+func (RbdEncryptionCreateOptionsVariantLUKS2) isRbdEncryptionCreateOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s RbdEncryptionCreateOptionsVariantLUKS2) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format RbdImageEncryptionFormat `json:"format"`
+		RbdEncryptionCreateOptionsVariantLUKS2
+	}{
+		RbdImageEncryptionFormatLUKS2,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeRbdEncryptionCreateOptions(bs json.RawMessage) (RbdEncryptionCreateOptions, error) {
+	v := struct {
+		Format RbdImageEncryptionFormat `json:"format"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Format {
+	case RbdImageEncryptionFormatLUKS:
+		var ret RbdEncryptionCreateOptionsVariantLUKS
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case RbdImageEncryptionFormatLUKS2:
+		var ret RbdEncryptionCreateOptionsVariantLUKS2
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union RbdEncryptionCreateOptions", v.Format)
+	}
+}
+
+// RbdEncryptionOptions -> RbdEncryptionOptions (flat union)
+
+// RbdEncryptionOptions implements the "RbdEncryptionOptions" QMP API type.
+//
+// Can be one of:
+//   - RbdEncryptionOptionsVariantLUKS
+//   - RbdEncryptionOptionsVariantLUKS2
+type RbdEncryptionOptions interface {
+	isRbdEncryptionOptions()
+}
+
+// RbdEncryptionOptionsVariantLUKS is an implementation of RbdEncryptionOptions.
+type RbdEncryptionOptionsVariantLUKS struct {
+}
+
+func (RbdEncryptionOptionsVariantLUKS) isRbdEncryptionOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s RbdEncryptionOptionsVariantLUKS) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format RbdImageEncryptionFormat `json:"format"`
+		RbdEncryptionOptionsVariantLUKS
+	}{
+		RbdImageEncryptionFormatLUKS,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// RbdEncryptionOptionsVariantLUKS2 is an implementation of RbdEncryptionOptions.
+type RbdEncryptionOptionsVariantLUKS2 struct {
+}
+
+func (RbdEncryptionOptionsVariantLUKS2) isRbdEncryptionOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s RbdEncryptionOptionsVariantLUKS2) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Format RbdImageEncryptionFormat `json:"format"`
+		RbdEncryptionOptionsVariantLUKS2
+	}{
+		RbdImageEncryptionFormatLUKS2,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeRbdEncryptionOptions(bs json.RawMessage) (RbdEncryptionOptions, error) {
+	v := struct {
+		Format RbdImageEncryptionFormat `json:"format"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Format {
+	case RbdImageEncryptionFormatLUKS:
+		var ret RbdEncryptionOptionsVariantLUKS
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case RbdImageEncryptionFormatLUKS2:
+		var ret RbdEncryptionOptionsVariantLUKS2
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union RbdEncryptionOptions", v.Format)
+	}
+}
+
+// RbdImageEncryptionFormat -> RbdImageEncryptionFormat (enum)
+
+// RbdImageEncryptionFormat implements the "RbdImageEncryptionFormat" QMP API type.
+type RbdImageEncryptionFormat int
+
+// Known values of RbdImageEncryptionFormat.
+const (
+	RbdImageEncryptionFormatLUKS RbdImageEncryptionFormat = iota
+	RbdImageEncryptionFormatLUKS2
+)
+
+// String implements fmt.Stringer.
+func (e RbdImageEncryptionFormat) String() string {
+	switch e {
+	case RbdImageEncryptionFormatLUKS:
+		return "luks"
+	case RbdImageEncryptionFormatLUKS2:
+		return "luks2"
+	default:
+		return fmt.Sprintf("RbdImageEncryptionFormat(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e RbdImageEncryptionFormat) MarshalJSON() ([]byte, error) {
+	switch e {
+	case RbdImageEncryptionFormatLUKS:
+		return json.Marshal("luks")
+	case RbdImageEncryptionFormatLUKS2:
+		return json.Marshal("luks2")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for RbdImageEncryptionFormat", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *RbdImageEncryptionFormat) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "luks":
+		*e = RbdImageEncryptionFormatLUKS
+	case "luks2":
+		*e = RbdImageEncryptionFormatLUKS2
+	default:
+		return fmt.Errorf("unknown enum value %q for RbdImageEncryptionFormat", s)
+	}
+	return nil
+}
+
+// RebootAction -> RebootAction (enum)
+
+// RebootAction implements the "RebootAction" QMP API type.
+type RebootAction int
+
+// Known values of RebootAction.
+const (
+	RebootActionReset RebootAction = iota
+	RebootActionShutdown
+)
+
+// String implements fmt.Stringer.
+func (e RebootAction) String() string {
+	switch e {
+	case RebootActionReset:
+		return "reset"
+	case RebootActionShutdown:
+		return "shutdown"
+	default:
+		return fmt.Sprintf("RebootAction(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e RebootAction) MarshalJSON() ([]byte, error) {
+	switch e {
+	case RebootActionReset:
+		return json.Marshal("reset")
+	case RebootActionShutdown:
+		return json.Marshal("shutdown")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for RebootAction", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *RebootAction) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "reset":
+		*e = RebootActionReset
+	case "shutdown":
+		*e = RebootActionShutdown
+	default:
+		return fmt.Errorf("unknown enum value %q for RebootAction", s)
+	}
+	return nil
+}
+
+// ReplayInfo -> ReplayInfo (struct)
+
+// ReplayInfo implements the "ReplayInfo" QMP API type.
+type ReplayInfo struct {
+	Mode     ReplayMode `json:"mode"`
+	Filename *string    `json:"filename,omitempty"`
+	Icount   int64      `json:"icount"`
+}
+
+// ReplayMode -> ReplayMode (enum)
+
+// ReplayMode implements the "ReplayMode" QMP API type.
+type ReplayMode int
+
+// Known values of ReplayMode.
+const (
+	ReplayModeNone ReplayMode = iota
+	ReplayModeRecord
+	ReplayModePlay
+)
+
+// String implements fmt.Stringer.
+func (e ReplayMode) String() string {
+	switch e {
+	case ReplayModeNone:
+		return "none"
+	case ReplayModeRecord:
+		return "record"
+	case ReplayModePlay:
+		return "play"
+	default:
+		return fmt.Sprintf("ReplayMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ReplayMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ReplayModeNone:
+		return json.Marshal("none")
+	case ReplayModeRecord:
+		return json.Marshal("record")
+	case ReplayModePlay:
+		return json.Marshal("play")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ReplayMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ReplayMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = ReplayModeNone
+	case "record":
+		*e = ReplayModeRecord
+	case "play":
+		*e = ReplayModePlay
+	default:
+		return fmt.Errorf("unknown enum value %q for ReplayMode", s)
+	}
+	return nil
+}
 
 // ReplicationMode -> ReplicationMode (enum)
 
@@ -8788,6 +16731,99 @@ func (e *RxState) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// S390CrashReason -> S390CrashReason (enum)
+
+// S390CrashReason implements the "S390CrashReason" QMP API type.
+type S390CrashReason int
+
+// Known values of S390CrashReason.
+const (
+	S390CrashReasonUnknown S390CrashReason = iota
+	S390CrashReasonDisabledWait
+	S390CrashReasonExtintLoop
+	S390CrashReasonPgmintLoop
+	S390CrashReasonOpintLoop
+)
+
+// String implements fmt.Stringer.
+func (e S390CrashReason) String() string {
+	switch e {
+	case S390CrashReasonUnknown:
+		return "unknown"
+	case S390CrashReasonDisabledWait:
+		return "disabled-wait"
+	case S390CrashReasonExtintLoop:
+		return "extint-loop"
+	case S390CrashReasonPgmintLoop:
+		return "pgmint-loop"
+	case S390CrashReasonOpintLoop:
+		return "opint-loop"
+	default:
+		return fmt.Sprintf("S390CrashReason(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e S390CrashReason) MarshalJSON() ([]byte, error) {
+	switch e {
+	case S390CrashReasonUnknown:
+		return json.Marshal("unknown")
+	case S390CrashReasonDisabledWait:
+		return json.Marshal("disabled-wait")
+	case S390CrashReasonExtintLoop:
+		return json.Marshal("extint-loop")
+	case S390CrashReasonPgmintLoop:
+		return json.Marshal("pgmint-loop")
+	case S390CrashReasonOpintLoop:
+		return json.Marshal("opint-loop")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for S390CrashReason", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *S390CrashReason) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "unknown":
+		*e = S390CrashReasonUnknown
+	case "disabled-wait":
+		*e = S390CrashReasonDisabledWait
+	case "extint-loop":
+		*e = S390CrashReasonExtintLoop
+	case "pgmint-loop":
+		*e = S390CrashReasonPgmintLoop
+	case "opint-loop":
+		*e = S390CrashReasonOpintLoop
+	default:
+		return fmt.Errorf("unknown enum value %q for S390CrashReason", s)
+	}
+	return nil
+}
+
+// SGXEPCSection -> SgxepcSection (struct)
+
+// SgxepcSection implements the "SGXEPCSection" QMP API type.
+type SgxepcSection struct {
+	Node int64  `json:"node"`
+	Size uint64 `json:"size"`
+}
+
+// SGXInfo -> SgxInfo (struct)
+
+// SgxInfo implements the "SGXInfo" QMP API type.
+type SgxInfo struct {
+	Sgx         bool            `json:"sgx"`
+	Sgx1        bool            `json:"sgx1"`
+	Sgx2        bool            `json:"sgx2"`
+	Flc         bool            `json:"flc"`
+	SectionSize uint64          `json:"section-size"`
+	Sections    []SgxepcSection `json:"sections"`
+}
+
 // EVENT SHUTDOWN
 
 // EVENT SPICE_CONNECTED
@@ -8822,8 +16858,9 @@ type SchemaInfo interface {
 
 // SchemaInfoVariantAlternate is an implementation of SchemaInfo.
 type SchemaInfoVariantAlternate struct {
-	Name    string                      `json:"name"`
-	Members []SchemaInfoAlternateMember `json:"members"`
+	Name     string                      `json:"name"`
+	Features []string                    `json:"features,omitempty"`
+	Members  []SchemaInfoAlternateMember `json:"members"`
 }
 
 func (SchemaInfoVariantAlternate) isSchemaInfo() {}
@@ -8842,8 +16879,9 @@ func (s SchemaInfoVariantAlternate) MarshalJSON() ([]byte, error) {
 
 // SchemaInfoVariantArray is an implementation of SchemaInfo.
 type SchemaInfoVariantArray struct {
-	Name        string `json:"name"`
-	ElementType string `json:"element-type"`
+	Name        string   `json:"name"`
+	Features    []string `json:"features,omitempty"`
+	ElementType string   `json:"element-type"`
 }
 
 func (SchemaInfoVariantArray) isSchemaInfo() {}
@@ -8863,6 +16901,7 @@ func (s SchemaInfoVariantArray) MarshalJSON() ([]byte, error) {
 // SchemaInfoVariantBuiltin is an implementation of SchemaInfo.
 type SchemaInfoVariantBuiltin struct {
 	Name     string   `json:"name"`
+	Features []string `json:"features,omitempty"`
 	JSONType JSONType `json:"json-type"`
 }
 
@@ -8882,9 +16921,11 @@ func (s SchemaInfoVariantBuiltin) MarshalJSON() ([]byte, error) {
 
 // SchemaInfoVariantCommand is an implementation of SchemaInfo.
 type SchemaInfoVariantCommand struct {
-	Name    string `json:"name"`
-	ArgType string `json:"arg-type"`
-	RetType string `json:"ret-type"`
+	Name     string   `json:"name"`
+	Features []string `json:"features,omitempty"`
+	ArgType  string   `json:"arg-type"`
+	RetType  string   `json:"ret-type"`
+	AllowOob *bool    `json:"allow-oob,omitempty"`
 }
 
 func (SchemaInfoVariantCommand) isSchemaInfo() {}
@@ -8903,8 +16944,10 @@ func (s SchemaInfoVariantCommand) MarshalJSON() ([]byte, error) {
 
 // SchemaInfoVariantEnum is an implementation of SchemaInfo.
 type SchemaInfoVariantEnum struct {
-	Name   string   `json:"name"`
-	Values []string `json:"values"`
+	Name     string                 `json:"name"`
+	Features []string               `json:"features,omitempty"`
+	Members  []SchemaInfoEnumMember `json:"members"`
+	Values   []string               `json:"values"`
 }
 
 func (SchemaInfoVariantEnum) isSchemaInfo() {}
@@ -8923,8 +16966,9 @@ func (s SchemaInfoVariantEnum) MarshalJSON() ([]byte, error) {
 
 // SchemaInfoVariantEvent is an implementation of SchemaInfo.
 type SchemaInfoVariantEvent struct {
-	Name    string `json:"name"`
-	ArgType string `json:"arg-type"`
+	Name     string   `json:"name"`
+	Features []string `json:"features,omitempty"`
+	ArgType  string   `json:"arg-type"`
 }
 
 func (SchemaInfoVariantEvent) isSchemaInfo() {}
@@ -8944,6 +16988,7 @@ func (s SchemaInfoVariantEvent) MarshalJSON() ([]byte, error) {
 // SchemaInfoVariantObject is an implementation of SchemaInfo.
 type SchemaInfoVariantObject struct {
 	Name     string                    `json:"name"`
+	Features []string                  `json:"features,omitempty"`
 	Members  []SchemaInfoObjectMember  `json:"members"`
 	Tag      *string                   `json:"tag,omitempty"`
 	Variants []SchemaInfoObjectVariant `json:"variants,omitempty"`
@@ -9011,13 +17056,22 @@ type SchemaInfoAlternateMember struct {
 	Type string `json:"type"`
 }
 
+// SchemaInfoEnumMember -> SchemaInfoEnumMember (struct)
+
+// SchemaInfoEnumMember implements the "SchemaInfoEnumMember" QMP API type.
+type SchemaInfoEnumMember struct {
+	Name     string   `json:"name"`
+	Features []string `json:"features,omitempty"`
+}
+
 // SchemaInfoObjectMember -> SchemaInfoObjectMember (struct)
 
 // SchemaInfoObjectMember implements the "SchemaInfoObjectMember" QMP API type.
 type SchemaInfoObjectMember struct {
-	Name    string       `json:"name"`
-	Type    string       `json:"type"`
-	Default *interface{} `json:"default,omitempty"`
+	Name     string       `json:"name"`
+	Type     string       `json:"type"`
+	Default  *interface{} `json:"default,omitempty"`
+	Features []string     `json:"features,omitempty"`
 }
 
 // SchemaInfoObjectVariant -> SchemaInfoObjectVariant (struct)
@@ -9115,6 +17169,402 @@ func (e *SchemaMetaType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// SetPasswordAction -> SetPasswordAction (enum)
+
+// SetPasswordAction implements the "SetPasswordAction" QMP API type.
+type SetPasswordAction int
+
+// Known values of SetPasswordAction.
+const (
+	SetPasswordActionKeep SetPasswordAction = iota
+	SetPasswordActionFail
+	SetPasswordActionDisconnect
+)
+
+// String implements fmt.Stringer.
+func (e SetPasswordAction) String() string {
+	switch e {
+	case SetPasswordActionKeep:
+		return "keep"
+	case SetPasswordActionFail:
+		return "fail"
+	case SetPasswordActionDisconnect:
+		return "disconnect"
+	default:
+		return fmt.Sprintf("SetPasswordAction(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e SetPasswordAction) MarshalJSON() ([]byte, error) {
+	switch e {
+	case SetPasswordActionKeep:
+		return json.Marshal("keep")
+	case SetPasswordActionFail:
+		return json.Marshal("fail")
+	case SetPasswordActionDisconnect:
+		return json.Marshal("disconnect")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for SetPasswordAction", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *SetPasswordAction) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "keep":
+		*e = SetPasswordActionKeep
+	case "fail":
+		*e = SetPasswordActionFail
+	case "disconnect":
+		*e = SetPasswordActionDisconnect
+	default:
+		return fmt.Errorf("unknown enum value %q for SetPasswordAction", s)
+	}
+	return nil
+}
+
+// SetPasswordOptions -> SetPasswordOptions (flat union)
+
+// SetPasswordOptions implements the "SetPasswordOptions" QMP API type.
+//
+// Can be one of:
+//   - SetPasswordOptionsVariantVNC
+type SetPasswordOptions interface {
+	isSetPasswordOptions()
+}
+
+// SetPasswordOptionsVariantVNC is an implementation of SetPasswordOptions.
+type SetPasswordOptionsVariantVNC struct {
+	Password  string             `json:"password"`
+	Connected *SetPasswordAction `json:"connected,omitempty"`
+	Display   *string            `json:"display,omitempty"`
+}
+
+func (SetPasswordOptionsVariantVNC) isSetPasswordOptions() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s SetPasswordOptionsVariantVNC) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Protocol DisplayProtocol `json:"protocol"`
+		SetPasswordOptionsVariantVNC
+	}{
+		DisplayProtocolVNC,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeSetPasswordOptions(bs json.RawMessage) (SetPasswordOptions, error) {
+	v := struct {
+		Protocol DisplayProtocol `json:"protocol"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Protocol {
+	case DisplayProtocolVNC:
+		var ret SetPasswordOptionsVariantVNC
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union SetPasswordOptions", v.Protocol)
+	}
+}
+
+// SevAttestationReport -> SevAttestationReport (struct)
+
+// SevAttestationReport implements the "SevAttestationReport" QMP API type.
+type SevAttestationReport struct {
+	Data string `json:"data"`
+}
+
+// SevCapability -> SevCapability (struct)
+
+// SevCapability implements the "SevCapability" QMP API type.
+type SevCapability struct {
+	Pdh             string `json:"pdh"`
+	CertChain       string `json:"cert-chain"`
+	CPU0ID          string `json:"cpu0-id"`
+	Cbitpos         int64  `json:"cbitpos"`
+	ReducedPhysBits int64  `json:"reduced-phys-bits"`
+}
+
+// SevInfo -> SevInfo (struct)
+
+// SevInfo implements the "SevInfo" QMP API type.
+type SevInfo struct {
+	Enabled  bool     `json:"enabled"`
+	ApiMajor uint8    `json:"api-major"`
+	ApiMinor uint8    `json:"api-minor"`
+	BuildID  uint8    `json:"build-id"`
+	Policy   uint32   `json:"policy"`
+	State    SevState `json:"state"`
+	Handle   uint32   `json:"handle"`
+}
+
+// SevLaunchMeasureInfo -> SevLaunchMeasureInfo (struct)
+
+// SevLaunchMeasureInfo implements the "SevLaunchMeasureInfo" QMP API type.
+type SevLaunchMeasureInfo struct {
+	Data string `json:"data"`
+}
+
+// SevState -> SevState (enum)
+
+// SevState implements the "SevState" QMP API type.
+type SevState int
+
+// Known values of SevState.
+const (
+	SevStateUninit SevState = iota
+	SevStateLaunchUpdate
+	SevStateLaunchSecret
+	SevStateRunning
+	SevStateSendUpdate
+	SevStateReceiveUpdate
+)
+
+// String implements fmt.Stringer.
+func (e SevState) String() string {
+	switch e {
+	case SevStateUninit:
+		return "uninit"
+	case SevStateLaunchUpdate:
+		return "launch-update"
+	case SevStateLaunchSecret:
+		return "launch-secret"
+	case SevStateRunning:
+		return "running"
+	case SevStateSendUpdate:
+		return "send-update"
+	case SevStateReceiveUpdate:
+		return "receive-update"
+	default:
+		return fmt.Sprintf("SevState(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e SevState) MarshalJSON() ([]byte, error) {
+	switch e {
+	case SevStateUninit:
+		return json.Marshal("uninit")
+	case SevStateLaunchUpdate:
+		return json.Marshal("launch-update")
+	case SevStateLaunchSecret:
+		return json.Marshal("launch-secret")
+	case SevStateRunning:
+		return json.Marshal("running")
+	case SevStateSendUpdate:
+		return json.Marshal("send-update")
+	case SevStateReceiveUpdate:
+		return json.Marshal("receive-update")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for SevState", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *SevState) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "uninit":
+		*e = SevStateUninit
+	case "launch-update":
+		*e = SevStateLaunchUpdate
+	case "launch-secret":
+		*e = SevStateLaunchSecret
+	case "running":
+		*e = SevStateRunning
+	case "send-update":
+		*e = SevStateSendUpdate
+	case "receive-update":
+		*e = SevStateReceiveUpdate
+	default:
+		return fmt.Errorf("unknown enum value %q for SevState", s)
+	}
+	return nil
+}
+
+// SgxEPCDeviceInfo -> SgxEpcDeviceInfo (struct)
+
+// SgxEpcDeviceInfo implements the "SgxEPCDeviceInfo" QMP API type.
+type SgxEpcDeviceInfo struct {
+	ID      *string `json:"id,omitempty"`
+	Memaddr uint64  `json:"memaddr"`
+	Size    uint64  `json:"size"`
+	Node    int64   `json:"node"`
+	Memdev  string  `json:"memdev"`
+}
+
+// ShutdownAction -> ShutdownAction (enum)
+
+// ShutdownAction implements the "ShutdownAction" QMP API type.
+type ShutdownAction int
+
+// Known values of ShutdownAction.
+const (
+	ShutdownActionPoweroff ShutdownAction = iota
+	ShutdownActionPause
+)
+
+// String implements fmt.Stringer.
+func (e ShutdownAction) String() string {
+	switch e {
+	case ShutdownActionPoweroff:
+		return "poweroff"
+	case ShutdownActionPause:
+		return "pause"
+	default:
+		return fmt.Sprintf("ShutdownAction(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ShutdownAction) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ShutdownActionPoweroff:
+		return json.Marshal("poweroff")
+	case ShutdownActionPause:
+		return json.Marshal("pause")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ShutdownAction", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ShutdownAction) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "poweroff":
+		*e = ShutdownActionPoweroff
+	case "pause":
+		*e = ShutdownActionPause
+	default:
+		return fmt.Errorf("unknown enum value %q for ShutdownAction", s)
+	}
+	return nil
+}
+
+// ShutdownCause -> ShutdownCause (enum)
+
+// ShutdownCause implements the "ShutdownCause" QMP API type.
+type ShutdownCause int
+
+// Known values of ShutdownCause.
+const (
+	ShutdownCauseNone ShutdownCause = iota
+	ShutdownCauseHostError
+	ShutdownCauseHostQMPQuit
+	ShutdownCauseHostQMPSystemReset
+	ShutdownCauseHostSignal
+	ShutdownCauseHostUi
+	ShutdownCauseGuestShutdown
+	ShutdownCauseGuestReset
+	ShutdownCauseGuestPanic
+	ShutdownCauseSubsystemReset
+)
+
+// String implements fmt.Stringer.
+func (e ShutdownCause) String() string {
+	switch e {
+	case ShutdownCauseNone:
+		return "none"
+	case ShutdownCauseHostError:
+		return "host-error"
+	case ShutdownCauseHostQMPQuit:
+		return "host-qmp-quit"
+	case ShutdownCauseHostQMPSystemReset:
+		return "host-qmp-system-reset"
+	case ShutdownCauseHostSignal:
+		return "host-signal"
+	case ShutdownCauseHostUi:
+		return "host-ui"
+	case ShutdownCauseGuestShutdown:
+		return "guest-shutdown"
+	case ShutdownCauseGuestReset:
+		return "guest-reset"
+	case ShutdownCauseGuestPanic:
+		return "guest-panic"
+	case ShutdownCauseSubsystemReset:
+		return "subsystem-reset"
+	default:
+		return fmt.Sprintf("ShutdownCause(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e ShutdownCause) MarshalJSON() ([]byte, error) {
+	switch e {
+	case ShutdownCauseNone:
+		return json.Marshal("none")
+	case ShutdownCauseHostError:
+		return json.Marshal("host-error")
+	case ShutdownCauseHostQMPQuit:
+		return json.Marshal("host-qmp-quit")
+	case ShutdownCauseHostQMPSystemReset:
+		return json.Marshal("host-qmp-system-reset")
+	case ShutdownCauseHostSignal:
+		return json.Marshal("host-signal")
+	case ShutdownCauseHostUi:
+		return json.Marshal("host-ui")
+	case ShutdownCauseGuestShutdown:
+		return json.Marshal("guest-shutdown")
+	case ShutdownCauseGuestReset:
+		return json.Marshal("guest-reset")
+	case ShutdownCauseGuestPanic:
+		return json.Marshal("guest-panic")
+	case ShutdownCauseSubsystemReset:
+		return json.Marshal("subsystem-reset")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for ShutdownCause", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *ShutdownCause) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = ShutdownCauseNone
+	case "host-error":
+		*e = ShutdownCauseHostError
+	case "host-qmp-quit":
+		*e = ShutdownCauseHostQMPQuit
+	case "host-qmp-system-reset":
+		*e = ShutdownCauseHostQMPSystemReset
+	case "host-signal":
+		*e = ShutdownCauseHostSignal
+	case "host-ui":
+		*e = ShutdownCauseHostUi
+	case "guest-shutdown":
+		*e = ShutdownCauseGuestShutdown
+	case "guest-reset":
+		*e = ShutdownCauseGuestReset
+	case "guest-panic":
+		*e = ShutdownCauseGuestPanic
+	case "subsystem-reset":
+		*e = ShutdownCauseSubsystemReset
+	default:
+		return fmt.Errorf("unknown enum value %q for ShutdownCause", s)
+	}
+	return nil
+}
+
 // SnapshotInfo -> SnapshotInfo (struct)
 
 // SnapshotInfo implements the "SnapshotInfo" QMP API type.
@@ -9126,6 +17576,7 @@ type SnapshotInfo struct {
 	DateNsec    int64  `json:"date-nsec"`
 	VMClockSec  int64  `json:"vm-clock-sec"`
 	VMClockNsec int64  `json:"vm-clock-nsec"`
+	Icount      *int64 `json:"icount,omitempty"`
 }
 
 // SocketAddress -> SocketAddress (flat union)
@@ -9162,10 +17613,12 @@ func (s SocketAddressVariantFD) MarshalJSON() ([]byte, error) {
 
 // SocketAddressVariantInet is an implementation of SocketAddress.
 type SocketAddressVariantInet struct {
-	Numeric *bool   `json:"numeric,omitempty"`
-	To      *uint16 `json:"to,omitempty"`
-	Ipv4    *bool   `json:"ipv4,omitempty"`
-	Ipv6    *bool   `json:"ipv6,omitempty"`
+	Numeric   *bool   `json:"numeric,omitempty"`
+	To        *uint16 `json:"to,omitempty"`
+	Ipv4      *bool   `json:"ipv4,omitempty"`
+	Ipv6      *bool   `json:"ipv6,omitempty"`
+	KeepAlive *bool   `json:"keep-alive,omitempty"`
+	Mptcp     *bool   `json:"mptcp,omitempty"`
 }
 
 func (SocketAddressVariantInet) isSocketAddress() {}
@@ -9184,7 +17637,9 @@ func (s SocketAddressVariantInet) MarshalJSON() ([]byte, error) {
 
 // SocketAddressVariantUnix is an implementation of SocketAddress.
 type SocketAddressVariantUnix struct {
-	Path string `json:"path"`
+	Path     string `json:"path"`
+	Abstract *bool  `json:"abstract,omitempty"`
+	Tight    *bool  `json:"tight,omitempty"`
 }
 
 func (SocketAddressVariantUnix) isSocketAddress() {}
@@ -9250,7 +17705,7 @@ func decodeSocketAddress(bs json.RawMessage) (SocketAddress, error) {
 	}
 }
 
-// SocketAddressLegacy -> SocketAddressLegacy (simple union)
+// SocketAddressLegacy -> SocketAddressLegacy (flat union)
 
 // SocketAddressLegacy implements the "SocketAddressLegacy" QMP API type.
 //
@@ -9264,96 +17719,107 @@ type SocketAddressLegacy interface {
 }
 
 // SocketAddressLegacyVariantFD is an implementation of SocketAddressLegacy.
-type SocketAddressLegacyVariantFD String
+type SocketAddressLegacyVariantFD struct {
+	Data String `json:"data"`
+}
 
 func (SocketAddressLegacyVariantFD) isSocketAddressLegacy() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressLegacyVariantFD) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "fd",
-		"data": String(s),
+	v := struct {
+		Type SocketAddressType `json:"type"`
+		SocketAddressLegacyVariantFD
+	}{
+		SocketAddressTypeFD,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // SocketAddressLegacyVariantInet is an implementation of SocketAddressLegacy.
-type SocketAddressLegacyVariantInet InetSocketAddress
+type SocketAddressLegacyVariantInet struct {
+	Data InetSocketAddress `json:"data"`
+}
 
 func (SocketAddressLegacyVariantInet) isSocketAddressLegacy() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressLegacyVariantInet) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "inet",
-		"data": InetSocketAddress(s),
+	v := struct {
+		Type SocketAddressType `json:"type"`
+		SocketAddressLegacyVariantInet
+	}{
+		SocketAddressTypeInet,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // SocketAddressLegacyVariantUnix is an implementation of SocketAddressLegacy.
-type SocketAddressLegacyVariantUnix UnixSocketAddress
+type SocketAddressLegacyVariantUnix struct {
+	Data UnixSocketAddress `json:"data"`
+}
 
 func (SocketAddressLegacyVariantUnix) isSocketAddressLegacy() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressLegacyVariantUnix) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "unix",
-		"data": UnixSocketAddress(s),
+	v := struct {
+		Type SocketAddressType `json:"type"`
+		SocketAddressLegacyVariantUnix
+	}{
+		SocketAddressTypeUnix,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // SocketAddressLegacyVariantVsock is an implementation of SocketAddressLegacy.
-type SocketAddressLegacyVariantVsock VsockSocketAddress
+type SocketAddressLegacyVariantVsock struct {
+	Data VsockSocketAddress `json:"data"`
+}
 
 func (SocketAddressLegacyVariantVsock) isSocketAddressLegacy() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressLegacyVariantVsock) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "vsock",
-		"data": VsockSocketAddress(s),
+	v := struct {
+		Type SocketAddressType `json:"type"`
+		SocketAddressLegacyVariantVsock
+	}{
+		SocketAddressTypeVsock,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeSocketAddressLegacy(bs json.RawMessage) (SocketAddressLegacy, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type SocketAddressType `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "fd":
+	switch v.Type {
+	case SocketAddressTypeFD:
 		var ret SocketAddressLegacyVariantFD
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "inet":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case SocketAddressTypeInet:
 		var ret SocketAddressLegacyVariantInet
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "unix":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case SocketAddressTypeUnix:
 		var ret SocketAddressLegacyVariantUnix
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "vsock":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case SocketAddressTypeVsock:
 		var ret SocketAddressLegacyVariantVsock
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union SocketAddressLegacy", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union SocketAddressLegacy", v.Type)
 	}
 }
 
@@ -9529,6 +17995,544 @@ type SpiceServerInfo struct {
 	Auth   *string              `json:"auth,omitempty"`
 }
 
+// SshHostKeyCheck -> SSHHostKeyCheck (flat union)
+
+// SSHHostKeyCheck implements the "SshHostKeyCheck" QMP API type.
+//
+// Can be one of:
+//   - SSHHostKeyCheckVariantHash
+type SSHHostKeyCheck interface {
+	isSSHHostKeyCheck()
+}
+
+// SSHHostKeyCheckVariantHash is an implementation of SSHHostKeyCheck.
+type SSHHostKeyCheckVariantHash struct {
+	Type SSHHostKeyCheckHashType `json:"type"`
+	Hash string                  `json:"hash"`
+}
+
+func (SSHHostKeyCheckVariantHash) isSSHHostKeyCheck() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s SSHHostKeyCheckVariantHash) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Mode SSHHostKeyCheckMode `json:"mode"`
+		SSHHostKeyCheckVariantHash
+	}{
+		SSHHostKeyCheckModeHash,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeSSHHostKeyCheck(bs json.RawMessage) (SSHHostKeyCheck, error) {
+	v := struct {
+		Mode SSHHostKeyCheckMode `json:"mode"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Mode {
+	case SSHHostKeyCheckModeHash:
+		var ret SSHHostKeyCheckVariantHash
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union SSHHostKeyCheck", v.Mode)
+	}
+}
+
+// SshHostKeyCheckHashType -> SSHHostKeyCheckHashType (enum)
+
+// SSHHostKeyCheckHashType implements the "SshHostKeyCheckHashType" QMP API type.
+type SSHHostKeyCheckHashType int
+
+// Known values of SSHHostKeyCheckHashType.
+const (
+	SSHHostKeyCheckHashTypeMd5 SSHHostKeyCheckHashType = iota
+	SSHHostKeyCheckHashTypeSha1
+	SSHHostKeyCheckHashTypeSha256
+)
+
+// String implements fmt.Stringer.
+func (e SSHHostKeyCheckHashType) String() string {
+	switch e {
+	case SSHHostKeyCheckHashTypeMd5:
+		return "md5"
+	case SSHHostKeyCheckHashTypeSha1:
+		return "sha1"
+	case SSHHostKeyCheckHashTypeSha256:
+		return "sha256"
+	default:
+		return fmt.Sprintf("SSHHostKeyCheckHashType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e SSHHostKeyCheckHashType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case SSHHostKeyCheckHashTypeMd5:
+		return json.Marshal("md5")
+	case SSHHostKeyCheckHashTypeSha1:
+		return json.Marshal("sha1")
+	case SSHHostKeyCheckHashTypeSha256:
+		return json.Marshal("sha256")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for SSHHostKeyCheckHashType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *SSHHostKeyCheckHashType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "md5":
+		*e = SSHHostKeyCheckHashTypeMd5
+	case "sha1":
+		*e = SSHHostKeyCheckHashTypeSha1
+	case "sha256":
+		*e = SSHHostKeyCheckHashTypeSha256
+	default:
+		return fmt.Errorf("unknown enum value %q for SSHHostKeyCheckHashType", s)
+	}
+	return nil
+}
+
+// SshHostKeyCheckMode -> SSHHostKeyCheckMode (enum)
+
+// SSHHostKeyCheckMode implements the "SshHostKeyCheckMode" QMP API type.
+type SSHHostKeyCheckMode int
+
+// Known values of SSHHostKeyCheckMode.
+const (
+	SSHHostKeyCheckModeNone SSHHostKeyCheckMode = iota
+	SSHHostKeyCheckModeHash
+	SSHHostKeyCheckModeKnownHosts
+)
+
+// String implements fmt.Stringer.
+func (e SSHHostKeyCheckMode) String() string {
+	switch e {
+	case SSHHostKeyCheckModeNone:
+		return "none"
+	case SSHHostKeyCheckModeHash:
+		return "hash"
+	case SSHHostKeyCheckModeKnownHosts:
+		return "known_hosts"
+	default:
+		return fmt.Sprintf("SSHHostKeyCheckMode(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e SSHHostKeyCheckMode) MarshalJSON() ([]byte, error) {
+	switch e {
+	case SSHHostKeyCheckModeNone:
+		return json.Marshal("none")
+	case SSHHostKeyCheckModeHash:
+		return json.Marshal("hash")
+	case SSHHostKeyCheckModeKnownHosts:
+		return json.Marshal("known_hosts")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for SSHHostKeyCheckMode", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *SSHHostKeyCheckMode) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "none":
+		*e = SSHHostKeyCheckModeNone
+	case "hash":
+		*e = SSHHostKeyCheckModeHash
+	case "known_hosts":
+		*e = SSHHostKeyCheckModeKnownHosts
+	default:
+		return fmt.Errorf("unknown enum value %q for SSHHostKeyCheckMode", s)
+	}
+	return nil
+}
+
+// Stats -> Stats (struct)
+
+// Stats implements the "Stats" QMP API type.
+type Stats struct {
+	Name  string     `json:"name"`
+	Value StatsValue `json:"value"`
+}
+
+// StatsFilter -> StatsFilter (flat union)
+
+// StatsFilter implements the "StatsFilter" QMP API type.
+//
+// Can be one of:
+//   - StatsFilterVariantVcpu
+type StatsFilter interface {
+	isStatsFilter()
+}
+
+// StatsFilterVariantVcpu is an implementation of StatsFilter.
+type StatsFilterVariantVcpu struct {
+	Providers []StatsRequest `json:"providers,omitempty"`
+	Vcpus     []string       `json:"vcpus,omitempty"`
+}
+
+func (StatsFilterVariantVcpu) isStatsFilter() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s StatsFilterVariantVcpu) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Target StatsTarget `json:"target"`
+		StatsFilterVariantVcpu
+	}{
+		StatsTargetVcpu,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeStatsFilter(bs json.RawMessage) (StatsFilter, error) {
+	v := struct {
+		Target StatsTarget `json:"target"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Target {
+	case StatsTargetVcpu:
+		var ret StatsFilterVariantVcpu
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union StatsFilter", v.Target)
+	}
+}
+
+// StatsProvider -> StatsProvider (enum)
+
+// StatsProvider implements the "StatsProvider" QMP API type.
+type StatsProvider int
+
+// Known values of StatsProvider.
+const (
+	StatsProviderKVM StatsProvider = iota
+)
+
+// String implements fmt.Stringer.
+func (e StatsProvider) String() string {
+	switch e {
+	case StatsProviderKVM:
+		return "kvm"
+	default:
+		return fmt.Sprintf("StatsProvider(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e StatsProvider) MarshalJSON() ([]byte, error) {
+	switch e {
+	case StatsProviderKVM:
+		return json.Marshal("kvm")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for StatsProvider", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *StatsProvider) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "kvm":
+		*e = StatsProviderKVM
+	default:
+		return fmt.Errorf("unknown enum value %q for StatsProvider", s)
+	}
+	return nil
+}
+
+// StatsRequest -> StatsRequest (struct)
+
+// StatsRequest implements the "StatsRequest" QMP API type.
+type StatsRequest struct {
+	Provider StatsProvider `json:"provider"`
+	Names    []string      `json:"names,omitempty"`
+}
+
+// StatsResult -> StatsResult (struct)
+
+// StatsResult implements the "StatsResult" QMP API type.
+type StatsResult struct {
+	Provider StatsProvider `json:"provider"`
+	QomPath  *string       `json:"qom-path,omitempty"`
+	Stats    []Stats       `json:"stats"`
+}
+
+// StatsSchema -> StatsSchema (struct)
+
+// StatsSchema implements the "StatsSchema" QMP API type.
+type StatsSchema struct {
+	Provider StatsProvider      `json:"provider"`
+	Target   StatsTarget        `json:"target"`
+	Stats    []StatsSchemaValue `json:"stats"`
+}
+
+// StatsSchemaValue -> StatsSchemaValue (struct)
+
+// StatsSchemaValue implements the "StatsSchemaValue" QMP API type.
+type StatsSchemaValue struct {
+	Name       string     `json:"name"`
+	Type       StatsType  `json:"type"`
+	Unit       *StatsUnit `json:"unit,omitempty"`
+	Base       *int8      `json:"base,omitempty"`
+	Exponent   int16      `json:"exponent"`
+	BucketSize *uint32    `json:"bucket-size,omitempty"`
+}
+
+// StatsTarget -> StatsTarget (enum)
+
+// StatsTarget implements the "StatsTarget" QMP API type.
+type StatsTarget int
+
+// Known values of StatsTarget.
+const (
+	StatsTargetVM StatsTarget = iota
+	StatsTargetVcpu
+)
+
+// String implements fmt.Stringer.
+func (e StatsTarget) String() string {
+	switch e {
+	case StatsTargetVM:
+		return "vm"
+	case StatsTargetVcpu:
+		return "vcpu"
+	default:
+		return fmt.Sprintf("StatsTarget(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e StatsTarget) MarshalJSON() ([]byte, error) {
+	switch e {
+	case StatsTargetVM:
+		return json.Marshal("vm")
+	case StatsTargetVcpu:
+		return json.Marshal("vcpu")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for StatsTarget", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *StatsTarget) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "vm":
+		*e = StatsTargetVM
+	case "vcpu":
+		*e = StatsTargetVcpu
+	default:
+		return fmt.Errorf("unknown enum value %q for StatsTarget", s)
+	}
+	return nil
+}
+
+// StatsType -> StatsType (enum)
+
+// StatsType implements the "StatsType" QMP API type.
+type StatsType int
+
+// Known values of StatsType.
+const (
+	StatsTypeCumulative StatsType = iota
+	StatsTypeInstant
+	StatsTypePeak
+	StatsTypeLinearHistogram
+	StatsTypeLog2Histogram
+)
+
+// String implements fmt.Stringer.
+func (e StatsType) String() string {
+	switch e {
+	case StatsTypeCumulative:
+		return "cumulative"
+	case StatsTypeInstant:
+		return "instant"
+	case StatsTypePeak:
+		return "peak"
+	case StatsTypeLinearHistogram:
+		return "linear-histogram"
+	case StatsTypeLog2Histogram:
+		return "log2-histogram"
+	default:
+		return fmt.Sprintf("StatsType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e StatsType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case StatsTypeCumulative:
+		return json.Marshal("cumulative")
+	case StatsTypeInstant:
+		return json.Marshal("instant")
+	case StatsTypePeak:
+		return json.Marshal("peak")
+	case StatsTypeLinearHistogram:
+		return json.Marshal("linear-histogram")
+	case StatsTypeLog2Histogram:
+		return json.Marshal("log2-histogram")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for StatsType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *StatsType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "cumulative":
+		*e = StatsTypeCumulative
+	case "instant":
+		*e = StatsTypeInstant
+	case "peak":
+		*e = StatsTypePeak
+	case "linear-histogram":
+		*e = StatsTypeLinearHistogram
+	case "log2-histogram":
+		*e = StatsTypeLog2Histogram
+	default:
+		return fmt.Errorf("unknown enum value %q for StatsType", s)
+	}
+	return nil
+}
+
+// StatsUnit -> StatsUnit (enum)
+
+// StatsUnit implements the "StatsUnit" QMP API type.
+type StatsUnit int
+
+// Known values of StatsUnit.
+const (
+	StatsUnitBytes StatsUnit = iota
+	StatsUnitSeconds
+	StatsUnitCycles
+	StatsUnitBoolean
+)
+
+// String implements fmt.Stringer.
+func (e StatsUnit) String() string {
+	switch e {
+	case StatsUnitBytes:
+		return "bytes"
+	case StatsUnitSeconds:
+		return "seconds"
+	case StatsUnitCycles:
+		return "cycles"
+	case StatsUnitBoolean:
+		return "boolean"
+	default:
+		return fmt.Sprintf("StatsUnit(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e StatsUnit) MarshalJSON() ([]byte, error) {
+	switch e {
+	case StatsUnitBytes:
+		return json.Marshal("bytes")
+	case StatsUnitSeconds:
+		return json.Marshal("seconds")
+	case StatsUnitCycles:
+		return json.Marshal("cycles")
+	case StatsUnitBoolean:
+		return json.Marshal("boolean")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for StatsUnit", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *StatsUnit) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "bytes":
+		*e = StatsUnitBytes
+	case "seconds":
+		*e = StatsUnitSeconds
+	case "cycles":
+		*e = StatsUnitCycles
+	case "boolean":
+		*e = StatsUnitBoolean
+	default:
+		return fmt.Errorf("unknown enum value %q for StatsUnit", s)
+	}
+	return nil
+}
+
+// StatsValue -> StatsValue (alternate)
+
+// StatsValue implements the "StatsValue" QMP API type.
+//
+// Can be one of:
+//   - StatsValueVariantBoolean
+//   - StatsValueVariantList
+//   - StatsValueVariantScalar
+type StatsValue interface {
+	isStatsValue()
+}
+
+// StatsValueVariantBoolean is an implementation of StatsValue
+type StatsValueVariantBoolean bool
+
+func (StatsValueVariantBoolean) isStatsValue() {}
+
+// StatsValueVariantList is an implementation of StatsValue
+type StatsValueVariantList uint64
+
+func (StatsValueVariantList) isStatsValue() {}
+
+// StatsValueVariantScalar is an implementation of StatsValue
+type StatsValueVariantScalar uint64
+
+func (StatsValueVariantScalar) isStatsValue() {}
+
+func decodeStatsValue(bs json.RawMessage) (StatsValue, error) {
+
+	var boolean StatsValueVariantBoolean
+	if err := json.Unmarshal([]byte(bs), &boolean); err == nil {
+		return boolean, nil
+	}
+	var list StatsValueVariantList
+	if err := json.Unmarshal([]byte(bs), &list); err == nil {
+		return list, nil
+	}
+	var scalar StatsValueVariantScalar
+	if err := json.Unmarshal([]byte(bs), &scalar); err == nil {
+		return scalar, nil
+	}
+	return nil, fmt.Errorf("unable to decode %q as a StatsValue", string(bs))
+}
+
 // StatusInfo -> StatusInfo (struct)
 
 // StatusInfo implements the "StatusInfo" QMP API type.
@@ -9586,6 +18590,261 @@ type String struct {
 	Str string `json:"str"`
 }
 
+// SysEmuTarget -> SysEmuTarget (enum)
+
+// SysEmuTarget implements the "SysEmuTarget" QMP API type.
+type SysEmuTarget int
+
+// Known values of SysEmuTarget.
+const (
+	SysEmuTargetAarch64 SysEmuTarget = iota
+	SysEmuTargetAlpha
+	SysEmuTargetArm
+	SysEmuTargetAvr
+	SysEmuTargetCris
+	SysEmuTargetHppa
+	SysEmuTargetI386
+	SysEmuTargetLoongarch64
+	SysEmuTargetM68K
+	SysEmuTargetMicroblaze
+	SysEmuTargetMicroblazeel
+	SysEmuTargetMIPS
+	SysEmuTargetMIPS64
+	SysEmuTargetMIPS64El
+	SysEmuTargetMipsel
+	SysEmuTargetNios2
+	SysEmuTargetOr1K
+	SysEmuTargetPPC
+	SysEmuTargetPPC64
+	SysEmuTargetRiscv32
+	SysEmuTargetRiscv64
+	SysEmuTargetRx
+	SysEmuTargetS390X
+	SysEmuTargetSh4
+	SysEmuTargetSh4Eb
+	SysEmuTargetSPARC
+	SysEmuTargetSPARC64
+	SysEmuTargetTricore
+	SysEmuTargetX8664
+	SysEmuTargetXtensa
+	SysEmuTargetXtensaeb
+)
+
+// String implements fmt.Stringer.
+func (e SysEmuTarget) String() string {
+	switch e {
+	case SysEmuTargetAarch64:
+		return "aarch64"
+	case SysEmuTargetAlpha:
+		return "alpha"
+	case SysEmuTargetArm:
+		return "arm"
+	case SysEmuTargetAvr:
+		return "avr"
+	case SysEmuTargetCris:
+		return "cris"
+	case SysEmuTargetHppa:
+		return "hppa"
+	case SysEmuTargetI386:
+		return "i386"
+	case SysEmuTargetLoongarch64:
+		return "loongarch64"
+	case SysEmuTargetM68K:
+		return "m68k"
+	case SysEmuTargetMicroblaze:
+		return "microblaze"
+	case SysEmuTargetMicroblazeel:
+		return "microblazeel"
+	case SysEmuTargetMIPS:
+		return "mips"
+	case SysEmuTargetMIPS64:
+		return "mips64"
+	case SysEmuTargetMIPS64El:
+		return "mips64el"
+	case SysEmuTargetMipsel:
+		return "mipsel"
+	case SysEmuTargetNios2:
+		return "nios2"
+	case SysEmuTargetOr1K:
+		return "or1k"
+	case SysEmuTargetPPC:
+		return "ppc"
+	case SysEmuTargetPPC64:
+		return "ppc64"
+	case SysEmuTargetRiscv32:
+		return "riscv32"
+	case SysEmuTargetRiscv64:
+		return "riscv64"
+	case SysEmuTargetRx:
+		return "rx"
+	case SysEmuTargetS390X:
+		return "s390x"
+	case SysEmuTargetSh4:
+		return "sh4"
+	case SysEmuTargetSh4Eb:
+		return "sh4eb"
+	case SysEmuTargetSPARC:
+		return "sparc"
+	case SysEmuTargetSPARC64:
+		return "sparc64"
+	case SysEmuTargetTricore:
+		return "tricore"
+	case SysEmuTargetX8664:
+		return "x86_64"
+	case SysEmuTargetXtensa:
+		return "xtensa"
+	case SysEmuTargetXtensaeb:
+		return "xtensaeb"
+	default:
+		return fmt.Sprintf("SysEmuTarget(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e SysEmuTarget) MarshalJSON() ([]byte, error) {
+	switch e {
+	case SysEmuTargetAarch64:
+		return json.Marshal("aarch64")
+	case SysEmuTargetAlpha:
+		return json.Marshal("alpha")
+	case SysEmuTargetArm:
+		return json.Marshal("arm")
+	case SysEmuTargetAvr:
+		return json.Marshal("avr")
+	case SysEmuTargetCris:
+		return json.Marshal("cris")
+	case SysEmuTargetHppa:
+		return json.Marshal("hppa")
+	case SysEmuTargetI386:
+		return json.Marshal("i386")
+	case SysEmuTargetLoongarch64:
+		return json.Marshal("loongarch64")
+	case SysEmuTargetM68K:
+		return json.Marshal("m68k")
+	case SysEmuTargetMicroblaze:
+		return json.Marshal("microblaze")
+	case SysEmuTargetMicroblazeel:
+		return json.Marshal("microblazeel")
+	case SysEmuTargetMIPS:
+		return json.Marshal("mips")
+	case SysEmuTargetMIPS64:
+		return json.Marshal("mips64")
+	case SysEmuTargetMIPS64El:
+		return json.Marshal("mips64el")
+	case SysEmuTargetMipsel:
+		return json.Marshal("mipsel")
+	case SysEmuTargetNios2:
+		return json.Marshal("nios2")
+	case SysEmuTargetOr1K:
+		return json.Marshal("or1k")
+	case SysEmuTargetPPC:
+		return json.Marshal("ppc")
+	case SysEmuTargetPPC64:
+		return json.Marshal("ppc64")
+	case SysEmuTargetRiscv32:
+		return json.Marshal("riscv32")
+	case SysEmuTargetRiscv64:
+		return json.Marshal("riscv64")
+	case SysEmuTargetRx:
+		return json.Marshal("rx")
+	case SysEmuTargetS390X:
+		return json.Marshal("s390x")
+	case SysEmuTargetSh4:
+		return json.Marshal("sh4")
+	case SysEmuTargetSh4Eb:
+		return json.Marshal("sh4eb")
+	case SysEmuTargetSPARC:
+		return json.Marshal("sparc")
+	case SysEmuTargetSPARC64:
+		return json.Marshal("sparc64")
+	case SysEmuTargetTricore:
+		return json.Marshal("tricore")
+	case SysEmuTargetX8664:
+		return json.Marshal("x86_64")
+	case SysEmuTargetXtensa:
+		return json.Marshal("xtensa")
+	case SysEmuTargetXtensaeb:
+		return json.Marshal("xtensaeb")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for SysEmuTarget", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *SysEmuTarget) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "aarch64":
+		*e = SysEmuTargetAarch64
+	case "alpha":
+		*e = SysEmuTargetAlpha
+	case "arm":
+		*e = SysEmuTargetArm
+	case "avr":
+		*e = SysEmuTargetAvr
+	case "cris":
+		*e = SysEmuTargetCris
+	case "hppa":
+		*e = SysEmuTargetHppa
+	case "i386":
+		*e = SysEmuTargetI386
+	case "loongarch64":
+		*e = SysEmuTargetLoongarch64
+	case "m68k":
+		*e = SysEmuTargetM68K
+	case "microblaze":
+		*e = SysEmuTargetMicroblaze
+	case "microblazeel":
+		*e = SysEmuTargetMicroblazeel
+	case "mips":
+		*e = SysEmuTargetMIPS
+	case "mips64":
+		*e = SysEmuTargetMIPS64
+	case "mips64el":
+		*e = SysEmuTargetMIPS64El
+	case "mipsel":
+		*e = SysEmuTargetMipsel
+	case "nios2":
+		*e = SysEmuTargetNios2
+	case "or1k":
+		*e = SysEmuTargetOr1K
+	case "ppc":
+		*e = SysEmuTargetPPC
+	case "ppc64":
+		*e = SysEmuTargetPPC64
+	case "riscv32":
+		*e = SysEmuTargetRiscv32
+	case "riscv64":
+		*e = SysEmuTargetRiscv64
+	case "rx":
+		*e = SysEmuTargetRx
+	case "s390x":
+		*e = SysEmuTargetS390X
+	case "sh4":
+		*e = SysEmuTargetSh4
+	case "sh4eb":
+		*e = SysEmuTargetSh4Eb
+	case "sparc":
+		*e = SysEmuTargetSPARC
+	case "sparc64":
+		*e = SysEmuTargetSPARC64
+	case "tricore":
+		*e = SysEmuTargetTricore
+	case "x86_64":
+		*e = SysEmuTargetX8664
+	case "xtensa":
+		*e = SysEmuTargetXtensa
+	case "xtensaeb":
+		*e = SysEmuTargetXtensaeb
+	default:
+		return fmt.Errorf("unknown enum value %q for SysEmuTarget", s)
+	}
+	return nil
+}
+
 // TPMEmulatorOptions -> TPMEmulatorOptions (struct)
 
 // TPMEmulatorOptions implements the "TPMEmulatorOptions" QMP API type.
@@ -9614,7 +18873,32 @@ type TPMPassthroughOptions struct {
 
 // TargetInfo implements the "TargetInfo" QMP API type.
 type TargetInfo struct {
-	Arch string `json:"arch"`
+	Arch SysEmuTarget `json:"arch"`
+}
+
+// ThrottleLimits -> ThrottleLimits (struct)
+
+// ThrottleLimits implements the "ThrottleLimits" QMP API type.
+type ThrottleLimits struct {
+	IopsTotal          *int64 `json:"iops-total,omitempty"`
+	IopsTotalMax       *int64 `json:"iops-total-max,omitempty"`
+	IopsTotalMaxLength *int64 `json:"iops-total-max-length,omitempty"`
+	IopsRead           *int64 `json:"iops-read,omitempty"`
+	IopsReadMax        *int64 `json:"iops-read-max,omitempty"`
+	IopsReadMaxLength  *int64 `json:"iops-read-max-length,omitempty"`
+	IopsWrite          *int64 `json:"iops-write,omitempty"`
+	IopsWriteMax       *int64 `json:"iops-write-max,omitempty"`
+	IopsWriteMaxLength *int64 `json:"iops-write-max-length,omitempty"`
+	BpsTotal           *int64 `json:"bps-total,omitempty"`
+	BpsTotalMax        *int64 `json:"bps-total-max,omitempty"`
+	BpsTotalMaxLength  *int64 `json:"bps-total-max-length,omitempty"`
+	BpsRead            *int64 `json:"bps-read,omitempty"`
+	BpsReadMax         *int64 `json:"bps-read-max,omitempty"`
+	BpsReadMaxLength   *int64 `json:"bps-read-max-length,omitempty"`
+	BpsWrite           *int64 `json:"bps-write,omitempty"`
+	BpsWriteMax        *int64 `json:"bps-write-max,omitempty"`
+	BpsWriteMaxLength  *int64 `json:"bps-write-max-length,omitempty"`
+	IopsSize           *int64 `json:"iops-size,omitempty"`
 }
 
 // TpmModel -> TPMModel (enum)
@@ -9625,6 +18909,8 @@ type TPMModel int
 // Known values of TPMModel.
 const (
 	TPMModelTPMTis TPMModel = iota
+	TPMModelTPMCrb
+	TPMModelTPMSpapr
 )
 
 // String implements fmt.Stringer.
@@ -9632,6 +18918,10 @@ func (e TPMModel) String() string {
 	switch e {
 	case TPMModelTPMTis:
 		return "tpm-tis"
+	case TPMModelTPMCrb:
+		return "tpm-crb"
+	case TPMModelTPMSpapr:
+		return "tpm-spapr"
 	default:
 		return fmt.Sprintf("TPMModel(%d)", e)
 	}
@@ -9642,6 +18932,10 @@ func (e TPMModel) MarshalJSON() ([]byte, error) {
 	switch e {
 	case TPMModelTPMTis:
 		return json.Marshal("tpm-tis")
+	case TPMModelTPMCrb:
+		return json.Marshal("tpm-crb")
+	case TPMModelTPMSpapr:
+		return json.Marshal("tpm-spapr")
 	default:
 		return nil, fmt.Errorf("unknown enum value %q for TPMModel", e)
 	}
@@ -9656,6 +18950,10 @@ func (e *TPMModel) UnmarshalJSON(bs []byte) error {
 	switch s {
 	case "tpm-tis":
 		*e = TPMModelTPMTis
+	case "tpm-crb":
+		*e = TPMModelTPMCrb
+	case "tpm-spapr":
+		*e = TPMModelTPMSpapr
 	default:
 		return fmt.Errorf("unknown enum value %q for TPMModel", s)
 	}
@@ -9714,7 +19012,7 @@ func (e *TPMType) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// TpmTypeOptions -> TPMTypeOptions (simple union)
+// TpmTypeOptions -> TPMTypeOptions (flat union)
 
 // TPMTypeOptions implements the "TpmTypeOptions" QMP API type.
 //
@@ -9726,56 +19024,61 @@ type TPMTypeOptions interface {
 }
 
 // TPMTypeOptionsVariantEmulator is an implementation of TPMTypeOptions.
-type TPMTypeOptionsVariantEmulator TPMEmulatorOptions
+type TPMTypeOptionsVariantEmulator struct {
+	Data TPMEmulatorOptions `json:"data"`
+}
 
 func (TPMTypeOptionsVariantEmulator) isTPMTypeOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TPMTypeOptionsVariantEmulator) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "emulator",
-		"data": TPMEmulatorOptions(s),
+	v := struct {
+		Type TPMType `json:"type"`
+		TPMTypeOptionsVariantEmulator
+	}{
+		TPMTypeEmulator,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TPMTypeOptionsVariantPassthrough is an implementation of TPMTypeOptions.
-type TPMTypeOptionsVariantPassthrough TPMPassthroughOptions
+type TPMTypeOptionsVariantPassthrough struct {
+	Data TPMPassthroughOptions `json:"data"`
+}
 
 func (TPMTypeOptionsVariantPassthrough) isTPMTypeOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TPMTypeOptionsVariantPassthrough) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "passthrough",
-		"data": TPMPassthroughOptions(s),
+	v := struct {
+		Type TPMType `json:"type"`
+		TPMTypeOptionsVariantPassthrough
+	}{
+		TPMTypePassthrough,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeTPMTypeOptions(bs json.RawMessage) (TPMTypeOptions, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type TPMType `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "emulator":
+	switch v.Type {
+	case TPMTypeEmulator:
 		var ret TPMTypeOptionsVariantEmulator
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "passthrough":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TPMTypePassthrough:
 		var ret TPMTypeOptionsVariantPassthrough
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union TPMTypeOptions", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union TPMTypeOptions", v.Type)
 	}
 }
 
@@ -9847,7 +19150,7 @@ func (e *TraceEventState) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// TransactionAction -> TransactionAction (simple union)
+// TransactionAction -> TransactionAction (flat union)
 
 // TransactionAction implements the "TransactionAction" QMP API type.
 //
@@ -9855,6 +19158,10 @@ func (e *TraceEventState) UnmarshalJSON(bs []byte) error {
 //   - TransactionActionVariantAbort
 //   - TransactionActionVariantBlockDirtyBitmapAdd
 //   - TransactionActionVariantBlockDirtyBitmapClear
+//   - TransactionActionVariantBlockDirtyBitmapDisable
+//   - TransactionActionVariantBlockDirtyBitmapEnable
+//   - TransactionActionVariantBlockDirtyBitmapMerge
+//   - TransactionActionVariantBlockDirtyBitmapRemove
 //   - TransactionActionVariantBlockdevBackup
 //   - TransactionActionVariantBlockdevSnapshot
 //   - TransactionActionVariantBlockdevSnapshotInternalSync
@@ -9865,177 +19172,414 @@ type TransactionAction interface {
 }
 
 // TransactionActionVariantAbort is an implementation of TransactionAction.
-type TransactionActionVariantAbort Abort
+type TransactionActionVariantAbort struct {
+	Data Abort `json:"data"`
+}
 
 func (TransactionActionVariantAbort) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantAbort) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "abort",
-		"data": Abort(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantAbort
+	}{
+		TransactionActionKindAbort,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantBlockDirtyBitmapAdd is an implementation of TransactionAction.
-type TransactionActionVariantBlockDirtyBitmapAdd BlockDirtyBitmapAdd
+type TransactionActionVariantBlockDirtyBitmapAdd struct {
+	Data BlockDirtyBitmapAdd `json:"data"`
+}
 
 func (TransactionActionVariantBlockDirtyBitmapAdd) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantBlockDirtyBitmapAdd) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "block-dirty-bitmap-add",
-		"data": BlockDirtyBitmapAdd(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockDirtyBitmapAdd
+	}{
+		TransactionActionKindBlockDirtyBitmapAdd,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantBlockDirtyBitmapClear is an implementation of TransactionAction.
-type TransactionActionVariantBlockDirtyBitmapClear BlockDirtyBitmap
+type TransactionActionVariantBlockDirtyBitmapClear struct {
+	Data BlockDirtyBitmap `json:"data"`
+}
 
 func (TransactionActionVariantBlockDirtyBitmapClear) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantBlockDirtyBitmapClear) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "block-dirty-bitmap-clear",
-		"data": BlockDirtyBitmap(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockDirtyBitmapClear
+	}{
+		TransactionActionKindBlockDirtyBitmapClear,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// TransactionActionVariantBlockDirtyBitmapDisable is an implementation of TransactionAction.
+type TransactionActionVariantBlockDirtyBitmapDisable struct {
+	Data BlockDirtyBitmap `json:"data"`
+}
+
+func (TransactionActionVariantBlockDirtyBitmapDisable) isTransactionAction() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s TransactionActionVariantBlockDirtyBitmapDisable) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockDirtyBitmapDisable
+	}{
+		TransactionActionKindBlockDirtyBitmapDisable,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// TransactionActionVariantBlockDirtyBitmapEnable is an implementation of TransactionAction.
+type TransactionActionVariantBlockDirtyBitmapEnable struct {
+	Data BlockDirtyBitmap `json:"data"`
+}
+
+func (TransactionActionVariantBlockDirtyBitmapEnable) isTransactionAction() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s TransactionActionVariantBlockDirtyBitmapEnable) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockDirtyBitmapEnable
+	}{
+		TransactionActionKindBlockDirtyBitmapEnable,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// TransactionActionVariantBlockDirtyBitmapMerge is an implementation of TransactionAction.
+type TransactionActionVariantBlockDirtyBitmapMerge struct {
+	Data BlockDirtyBitmapMerge `json:"data"`
+}
+
+func (TransactionActionVariantBlockDirtyBitmapMerge) isTransactionAction() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s TransactionActionVariantBlockDirtyBitmapMerge) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockDirtyBitmapMerge
+	}{
+		TransactionActionKindBlockDirtyBitmapMerge,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// TransactionActionVariantBlockDirtyBitmapRemove is an implementation of TransactionAction.
+type TransactionActionVariantBlockDirtyBitmapRemove struct {
+	Data BlockDirtyBitmap `json:"data"`
+}
+
+func (TransactionActionVariantBlockDirtyBitmapRemove) isTransactionAction() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s TransactionActionVariantBlockDirtyBitmapRemove) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockDirtyBitmapRemove
+	}{
+		TransactionActionKindBlockDirtyBitmapRemove,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantBlockdevBackup is an implementation of TransactionAction.
-type TransactionActionVariantBlockdevBackup BlockdevBackup
+type TransactionActionVariantBlockdevBackup struct {
+	Data BlockdevBackup `json:"data"`
+}
 
 func (TransactionActionVariantBlockdevBackup) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantBlockdevBackup) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "blockdev-backup",
-		"data": BlockdevBackup(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockdevBackup
+	}{
+		TransactionActionKindBlockdevBackup,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantBlockdevSnapshot is an implementation of TransactionAction.
-type TransactionActionVariantBlockdevSnapshot BlockdevSnapshot
+type TransactionActionVariantBlockdevSnapshot struct {
+	Data BlockdevSnapshot `json:"data"`
+}
 
 func (TransactionActionVariantBlockdevSnapshot) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantBlockdevSnapshot) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "blockdev-snapshot",
-		"data": BlockdevSnapshot(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockdevSnapshot
+	}{
+		TransactionActionKindBlockdevSnapshot,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantBlockdevSnapshotInternalSync is an implementation of TransactionAction.
-type TransactionActionVariantBlockdevSnapshotInternalSync BlockdevSnapshotInternal
+type TransactionActionVariantBlockdevSnapshotInternalSync struct {
+	Data BlockdevSnapshotInternal `json:"data"`
+}
 
 func (TransactionActionVariantBlockdevSnapshotInternalSync) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantBlockdevSnapshotInternalSync) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "blockdev-snapshot-internal-sync",
-		"data": BlockdevSnapshotInternal(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockdevSnapshotInternalSync
+	}{
+		TransactionActionKindBlockdevSnapshotInternalSync,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantBlockdevSnapshotSync is an implementation of TransactionAction.
-type TransactionActionVariantBlockdevSnapshotSync BlockdevSnapshotSync
+type TransactionActionVariantBlockdevSnapshotSync struct {
+	Data BlockdevSnapshotSync `json:"data"`
+}
 
 func (TransactionActionVariantBlockdevSnapshotSync) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantBlockdevSnapshotSync) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "blockdev-snapshot-sync",
-		"data": BlockdevSnapshotSync(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantBlockdevSnapshotSync
+	}{
+		TransactionActionKindBlockdevSnapshotSync,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 // TransactionActionVariantDriveBackup is an implementation of TransactionAction.
-type TransactionActionVariantDriveBackup DriveBackup
+type TransactionActionVariantDriveBackup struct {
+	Data DriveBackup `json:"data"`
+}
 
 func (TransactionActionVariantDriveBackup) isTransactionAction() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s TransactionActionVariantDriveBackup) MarshalJSON() ([]byte, error) {
-	v := map[string]interface{}{
-		"type": "drive-backup",
-		"data": DriveBackup(s),
+	v := struct {
+		Type TransactionActionKind `json:"type"`
+		TransactionActionVariantDriveBackup
+	}{
+		TransactionActionKindDriveBackup,
+		s,
 	}
 	return json.Marshal(v)
 }
 
 func decodeTransactionAction(bs json.RawMessage) (TransactionAction, error) {
 	v := struct {
-		T string          `json:"type"`
-		V json.RawMessage `json:"data"`
+		Type TransactionActionKind `json:"type"`
 	}{}
 	if err := json.Unmarshal([]byte(bs), &v); err != nil {
 		return nil, err
 	}
-	switch v.T {
-	case "abort":
+	switch v.Type {
+	case TransactionActionKindAbort:
 		var ret TransactionActionVariantAbort
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "block-dirty-bitmap-add":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockDirtyBitmapAdd:
 		var ret TransactionActionVariantBlockDirtyBitmapAdd
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "block-dirty-bitmap-clear":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockDirtyBitmapClear:
 		var ret TransactionActionVariantBlockDirtyBitmapClear
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "blockdev-backup":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockDirtyBitmapDisable:
+		var ret TransactionActionVariantBlockDirtyBitmapDisable
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockDirtyBitmapEnable:
+		var ret TransactionActionVariantBlockDirtyBitmapEnable
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockDirtyBitmapMerge:
+		var ret TransactionActionVariantBlockDirtyBitmapMerge
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockDirtyBitmapRemove:
+		var ret TransactionActionVariantBlockDirtyBitmapRemove
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockdevBackup:
 		var ret TransactionActionVariantBlockdevBackup
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "blockdev-snapshot":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockdevSnapshot:
 		var ret TransactionActionVariantBlockdevSnapshot
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "blockdev-snapshot-internal-sync":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockdevSnapshotInternalSync:
 		var ret TransactionActionVariantBlockdevSnapshotInternalSync
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "blockdev-snapshot-sync":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindBlockdevSnapshotSync:
 		var ret TransactionActionVariantBlockdevSnapshotSync
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
-	case "drive-backup":
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case TransactionActionKindDriveBackup:
 		var ret TransactionActionVariantDriveBackup
-		if err := json.Unmarshal([]byte(v.V), &ret); err != nil {
-			return nil, err
-		}
-		return ret, nil
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
 	default:
-		return nil, fmt.Errorf("unknown subtype %q for union TransactionAction", v.T)
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union TransactionAction", v.Type)
 	}
+}
+
+// TransactionActionKind -> TransactionActionKind (enum)
+
+// TransactionActionKind implements the "TransactionActionKind" QMP API type.
+type TransactionActionKind int
+
+// Known values of TransactionActionKind.
+const (
+	TransactionActionKindAbort TransactionActionKind = iota
+	TransactionActionKindBlockDirtyBitmapAdd
+	TransactionActionKindBlockDirtyBitmapRemove
+	TransactionActionKindBlockDirtyBitmapClear
+	TransactionActionKindBlockDirtyBitmapEnable
+	TransactionActionKindBlockDirtyBitmapDisable
+	TransactionActionKindBlockDirtyBitmapMerge
+	TransactionActionKindBlockdevBackup
+	TransactionActionKindBlockdevSnapshot
+	TransactionActionKindBlockdevSnapshotInternalSync
+	TransactionActionKindBlockdevSnapshotSync
+	TransactionActionKindDriveBackup
+)
+
+// String implements fmt.Stringer.
+func (e TransactionActionKind) String() string {
+	switch e {
+	case TransactionActionKindAbort:
+		return "abort"
+	case TransactionActionKindBlockDirtyBitmapAdd:
+		return "block-dirty-bitmap-add"
+	case TransactionActionKindBlockDirtyBitmapRemove:
+		return "block-dirty-bitmap-remove"
+	case TransactionActionKindBlockDirtyBitmapClear:
+		return "block-dirty-bitmap-clear"
+	case TransactionActionKindBlockDirtyBitmapEnable:
+		return "block-dirty-bitmap-enable"
+	case TransactionActionKindBlockDirtyBitmapDisable:
+		return "block-dirty-bitmap-disable"
+	case TransactionActionKindBlockDirtyBitmapMerge:
+		return "block-dirty-bitmap-merge"
+	case TransactionActionKindBlockdevBackup:
+		return "blockdev-backup"
+	case TransactionActionKindBlockdevSnapshot:
+		return "blockdev-snapshot"
+	case TransactionActionKindBlockdevSnapshotInternalSync:
+		return "blockdev-snapshot-internal-sync"
+	case TransactionActionKindBlockdevSnapshotSync:
+		return "blockdev-snapshot-sync"
+	case TransactionActionKindDriveBackup:
+		return "drive-backup"
+	default:
+		return fmt.Sprintf("TransactionActionKind(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e TransactionActionKind) MarshalJSON() ([]byte, error) {
+	switch e {
+	case TransactionActionKindAbort:
+		return json.Marshal("abort")
+	case TransactionActionKindBlockDirtyBitmapAdd:
+		return json.Marshal("block-dirty-bitmap-add")
+	case TransactionActionKindBlockDirtyBitmapRemove:
+		return json.Marshal("block-dirty-bitmap-remove")
+	case TransactionActionKindBlockDirtyBitmapClear:
+		return json.Marshal("block-dirty-bitmap-clear")
+	case TransactionActionKindBlockDirtyBitmapEnable:
+		return json.Marshal("block-dirty-bitmap-enable")
+	case TransactionActionKindBlockDirtyBitmapDisable:
+		return json.Marshal("block-dirty-bitmap-disable")
+	case TransactionActionKindBlockDirtyBitmapMerge:
+		return json.Marshal("block-dirty-bitmap-merge")
+	case TransactionActionKindBlockdevBackup:
+		return json.Marshal("blockdev-backup")
+	case TransactionActionKindBlockdevSnapshot:
+		return json.Marshal("blockdev-snapshot")
+	case TransactionActionKindBlockdevSnapshotInternalSync:
+		return json.Marshal("blockdev-snapshot-internal-sync")
+	case TransactionActionKindBlockdevSnapshotSync:
+		return json.Marshal("blockdev-snapshot-sync")
+	case TransactionActionKindDriveBackup:
+		return json.Marshal("drive-backup")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for TransactionActionKind", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *TransactionActionKind) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "abort":
+		*e = TransactionActionKindAbort
+	case "block-dirty-bitmap-add":
+		*e = TransactionActionKindBlockDirtyBitmapAdd
+	case "block-dirty-bitmap-remove":
+		*e = TransactionActionKindBlockDirtyBitmapRemove
+	case "block-dirty-bitmap-clear":
+		*e = TransactionActionKindBlockDirtyBitmapClear
+	case "block-dirty-bitmap-enable":
+		*e = TransactionActionKindBlockDirtyBitmapEnable
+	case "block-dirty-bitmap-disable":
+		*e = TransactionActionKindBlockDirtyBitmapDisable
+	case "block-dirty-bitmap-merge":
+		*e = TransactionActionKindBlockDirtyBitmapMerge
+	case "blockdev-backup":
+		*e = TransactionActionKindBlockdevBackup
+	case "blockdev-snapshot":
+		*e = TransactionActionKindBlockdevSnapshot
+	case "blockdev-snapshot-internal-sync":
+		*e = TransactionActionKindBlockdevSnapshotInternalSync
+	case "blockdev-snapshot-sync":
+		*e = TransactionActionKindBlockdevSnapshotSync
+	case "drive-backup":
+		*e = TransactionActionKindDriveBackup
+	default:
+		return fmt.Errorf("unknown enum value %q for TransactionActionKind", s)
+	}
+	return nil
 }
 
 // TransactionProperties -> TransactionProperties (struct)
@@ -10045,11 +19589,15 @@ type TransactionProperties struct {
 	CompletionMode *ActionCompletionMode `json:"completion-mode,omitempty"`
 }
 
+// EVENT UNPLUG_PRIMARY
+
 // UnixSocketAddress -> UnixSocketAddress (struct)
 
 // UnixSocketAddress implements the "UnixSocketAddress" QMP API type.
 type UnixSocketAddress struct {
-	Path string `json:"path"`
+	Path     string `json:"path"`
+	Abstract *bool  `json:"abstract,omitempty"`
+	Tight    *bool  `json:"tight,omitempty"`
 }
 
 // UuidInfo -> UUIDInfo (struct)
@@ -10058,6 +19606,8 @@ type UnixSocketAddress struct {
 type UUIDInfo struct {
 	UUID string `json:"UUID"`
 }
+
+// EVENT VFU_CLIENT_HANGUP
 
 // EVENT VNC_CONNECTED
 
@@ -10082,6 +19632,37 @@ type VersionTriple struct {
 	Major int64 `json:"major"`
 	Minor int64 `json:"minor"`
 	Micro int64 `json:"micro"`
+}
+
+// VfioStats -> VfioStats (struct)
+
+// VfioStats implements the "VfioStats" QMP API type.
+type VfioStats struct {
+	Transferred int64 `json:"transferred"`
+}
+
+// VirtioMEMDeviceInfo -> VirtioMemDeviceInfo (struct)
+
+// VirtioMemDeviceInfo implements the "VirtioMEMDeviceInfo" QMP API type.
+type VirtioMemDeviceInfo struct {
+	ID            *string `json:"id,omitempty"`
+	Memaddr       uint64  `json:"memaddr"`
+	RequestedSize uint64  `json:"requested-size"`
+	Size          uint64  `json:"size"`
+	MaxSize       uint64  `json:"max-size"`
+	BlockSize     uint64  `json:"block-size"`
+	Node          int64   `json:"node"`
+	Memdev        string  `json:"memdev"`
+}
+
+// VirtioPMEMDeviceInfo -> VirtioPmemDeviceInfo (struct)
+
+// VirtioPmemDeviceInfo implements the "VirtioPMEMDeviceInfo" QMP API type.
+type VirtioPmemDeviceInfo struct {
+	ID      *string `json:"id,omitempty"`
+	Memaddr uint64  `json:"memaddr"`
+	Size    uint64  `json:"size"`
+	Memdev  string  `json:"memdev"`
 }
 
 // VncBasicInfo -> VNCBasicInfo (struct)
@@ -10458,12 +20039,229 @@ func (e *WatchdogAction) UnmarshalJSON(bs []byte) error {
 
 // XbzrleCacheStats implements the "XBZRLECacheStats" QMP API type.
 type XbzrleCacheStats struct {
-	CacheSize     int64   `json:"cache-size"`
+	CacheSize     uint64  `json:"cache-size"`
 	Bytes         int64   `json:"bytes"`
 	Pages         int64   `json:"pages"`
 	CacheMiss     int64   `json:"cache-miss"`
 	CacheMissRate float64 `json:"cache-miss-rate"`
+	EncodingRate  float64 `json:"encoding-rate"`
 	Overflow      int64   `json:"overflow"`
+}
+
+// XDbgBlockGraph -> XDbgBlockGraph (struct)
+
+// XDbgBlockGraph implements the "XDbgBlockGraph" QMP API type.
+type XDbgBlockGraph struct {
+	Nodes []XDbgBlockGraphNode `json:"nodes"`
+	Edges []XDbgBlockGraphEdge `json:"edges"`
+}
+
+// XDbgBlockGraphEdge -> XDbgBlockGraphEdge (struct)
+
+// XDbgBlockGraphEdge implements the "XDbgBlockGraphEdge" QMP API type.
+type XDbgBlockGraphEdge struct {
+	Parent     uint64            `json:"parent"`
+	Child      uint64            `json:"child"`
+	Name       string            `json:"name"`
+	Perm       []BlockPermission `json:"perm"`
+	SharedPerm []BlockPermission `json:"shared-perm"`
+}
+
+// XDbgBlockGraphNode -> XDbgBlockGraphNode (struct)
+
+// XDbgBlockGraphNode implements the "XDbgBlockGraphNode" QMP API type.
+type XDbgBlockGraphNode struct {
+	ID   uint64                 `json:"id"`
+	Type XDbgBlockGraphNodeType `json:"type"`
+	Name string                 `json:"name"`
+}
+
+// XDbgBlockGraphNodeType -> XDbgBlockGraphNodeType (enum)
+
+// XDbgBlockGraphNodeType implements the "XDbgBlockGraphNodeType" QMP API type.
+type XDbgBlockGraphNodeType int
+
+// Known values of XDbgBlockGraphNodeType.
+const (
+	XDbgBlockGraphNodeTypeBlockBackend XDbgBlockGraphNodeType = iota
+	XDbgBlockGraphNodeTypeBlockJob
+	XDbgBlockGraphNodeTypeBlockDriver
+)
+
+// String implements fmt.Stringer.
+func (e XDbgBlockGraphNodeType) String() string {
+	switch e {
+	case XDbgBlockGraphNodeTypeBlockBackend:
+		return "block-backend"
+	case XDbgBlockGraphNodeTypeBlockJob:
+		return "block-job"
+	case XDbgBlockGraphNodeTypeBlockDriver:
+		return "block-driver"
+	default:
+		return fmt.Sprintf("XDbgBlockGraphNodeType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e XDbgBlockGraphNodeType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case XDbgBlockGraphNodeTypeBlockBackend:
+		return json.Marshal("block-backend")
+	case XDbgBlockGraphNodeTypeBlockJob:
+		return json.Marshal("block-job")
+	case XDbgBlockGraphNodeTypeBlockDriver:
+		return json.Marshal("block-driver")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for XDbgBlockGraphNodeType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *XDbgBlockGraphNodeType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "block-backend":
+		*e = XDbgBlockGraphNodeTypeBlockBackend
+	case "block-job":
+		*e = XDbgBlockGraphNodeTypeBlockJob
+	case "block-driver":
+		*e = XDbgBlockGraphNodeTypeBlockDriver
+	default:
+		return fmt.Errorf("unknown enum value %q for XDbgBlockGraphNodeType", s)
+	}
+	return nil
+}
+
+// YankInstance -> YankInstance (flat union)
+
+// YankInstance implements the "YankInstance" QMP API type.
+//
+// Can be one of:
+//   - YankInstanceVariantBlockNode
+//   - YankInstanceVariantChardev
+type YankInstance interface {
+	isYankInstance()
+}
+
+// YankInstanceVariantBlockNode is an implementation of YankInstance.
+type YankInstanceVariantBlockNode struct {
+	NodeName string `json:"node-name"`
+}
+
+func (YankInstanceVariantBlockNode) isYankInstance() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s YankInstanceVariantBlockNode) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type YankInstanceType `json:"type"`
+		YankInstanceVariantBlockNode
+	}{
+		YankInstanceTypeBlockNode,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+// YankInstanceVariantChardev is an implementation of YankInstance.
+type YankInstanceVariantChardev struct {
+	ID string `json:"id"`
+}
+
+func (YankInstanceVariantChardev) isYankInstance() {}
+
+// MarshalJSON implements json.Marshaler.
+func (s YankInstanceVariantChardev) MarshalJSON() ([]byte, error) {
+	v := struct {
+		Type YankInstanceType `json:"type"`
+		YankInstanceVariantChardev
+	}{
+		YankInstanceTypeChardev,
+		s,
+	}
+	return json.Marshal(v)
+}
+
+func decodeYankInstance(bs json.RawMessage) (YankInstance, error) {
+	v := struct {
+		Type YankInstanceType `json:"type"`
+	}{}
+	if err := json.Unmarshal([]byte(bs), &v); err != nil {
+		return nil, err
+	}
+	switch v.Type {
+	case YankInstanceTypeBlockNode:
+		var ret YankInstanceVariantBlockNode
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	case YankInstanceTypeChardev:
+		var ret YankInstanceVariantChardev
+		err := json.Unmarshal([]byte(bs), &ret)
+		return ret, err
+	default:
+		return nil, fmt.Errorf("unknown flat union subtype %q for flat union YankInstance", v.Type)
+	}
+}
+
+// YankInstanceType -> YankInstanceType (enum)
+
+// YankInstanceType implements the "YankInstanceType" QMP API type.
+type YankInstanceType int
+
+// Known values of YankInstanceType.
+const (
+	YankInstanceTypeBlockNode YankInstanceType = iota
+	YankInstanceTypeChardev
+	YankInstanceTypeMigration
+)
+
+// String implements fmt.Stringer.
+func (e YankInstanceType) String() string {
+	switch e {
+	case YankInstanceTypeBlockNode:
+		return "block-node"
+	case YankInstanceTypeChardev:
+		return "chardev"
+	case YankInstanceTypeMigration:
+		return "migration"
+	default:
+		return fmt.Sprintf("YankInstanceType(%d)", e)
+	}
+}
+
+// MarshalJSON implements json.Marshaler.
+func (e YankInstanceType) MarshalJSON() ([]byte, error) {
+	switch e {
+	case YankInstanceTypeBlockNode:
+		return json.Marshal("block-node")
+	case YankInstanceTypeChardev:
+		return json.Marshal("chardev")
+	case YankInstanceTypeMigration:
+		return json.Marshal("migration")
+	default:
+		return nil, fmt.Errorf("unknown enum value %q for YankInstanceType", e)
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (e *YankInstanceType) UnmarshalJSON(bs []byte) error {
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "block-node":
+		*e = YankInstanceTypeBlockNode
+	case "chardev":
+		*e = YankInstanceTypeChardev
+	case "migration":
+		*e = YankInstanceTypeMigration
+	default:
+		return fmt.Errorf("unknown enum value %q for YankInstanceType", s)
+	}
+	return nil
 }
 
 // add-fd -> AddFD (command)
@@ -10529,6 +20327,24 @@ func (m *Monitor) AddClient(protocol string, fdname string, skipauth *bool, tls 
 	return
 }
 
+// announce-self -> AnnounceSelf (command)
+
+// AnnounceSelf implements the "announce-self" QMP API call.
+func (m *Monitor) AnnounceSelf(cmd *AnnounceParameters) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "announce-self",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // balloon -> Balloon (command)
 
 // Balloon implements the "balloon" QMP API call.
@@ -10555,23 +20371,33 @@ func (m *Monitor) Balloon(value int64) (err error) {
 // block-commit -> BlockCommit (command)
 
 // BlockCommit implements the "block-commit" QMP API call.
-func (m *Monitor) BlockCommit(jobID *string, device string, base *string, top *string, backingFile *string, speed *int64, filterNodeName *string) (err error) {
+func (m *Monitor) BlockCommit(jobID *string, device string, baseNode *string, base *string, topNode *string, top *string, backingFile *string, speed *int64, onError *BlockdevOnError, filterNodeName *string, autoFinalize *bool, autoDismiss *bool) (err error) {
 	cmd := struct {
-		JobID          *string `json:"job-id,omitempty"`
-		Device         string  `json:"device"`
-		Base           *string `json:"base,omitempty"`
-		Top            *string `json:"top,omitempty"`
-		BackingFile    *string `json:"backing-file,omitempty"`
-		Speed          *int64  `json:"speed,omitempty"`
-		FilterNodeName *string `json:"filter-node-name,omitempty"`
+		JobID          *string          `json:"job-id,omitempty"`
+		Device         string           `json:"device"`
+		BaseNode       *string          `json:"base-node,omitempty"`
+		Base           *string          `json:"base,omitempty"`
+		TopNode        *string          `json:"top-node,omitempty"`
+		Top            *string          `json:"top,omitempty"`
+		BackingFile    *string          `json:"backing-file,omitempty"`
+		Speed          *int64           `json:"speed,omitempty"`
+		OnError        *BlockdevOnError `json:"on-error,omitempty"`
+		FilterNodeName *string          `json:"filter-node-name,omitempty"`
+		AutoFinalize   *bool            `json:"auto-finalize,omitempty"`
+		AutoDismiss    *bool            `json:"auto-dismiss,omitempty"`
 	}{
 		jobID,
 		device,
+		baseNode,
 		base,
+		topNode,
 		top,
 		backingFile,
 		speed,
+		onError,
 		filterNodeName,
+		autoFinalize,
+		autoDismiss,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "block-commit",
@@ -10590,19 +20416,19 @@ func (m *Monitor) BlockCommit(jobID *string, device string, base *string, top *s
 // block-dirty-bitmap-add -> BlockDirtyBitmapAdd (command)
 
 // BlockDirtyBitmapAdd implements the "block-dirty-bitmap-add" QMP API call.
-func (m *Monitor) BlockDirtyBitmapAdd(node string, name string, granularity *uint32, persistent *bool, autoload *bool) (err error) {
+func (m *Monitor) BlockDirtyBitmapAdd(node string, name string, granularity *uint32, persistent *bool, disabled *bool) (err error) {
 	cmd := struct {
 		Node        string  `json:"node"`
 		Name        string  `json:"name"`
 		Granularity *uint32 `json:"granularity,omitempty"`
 		Persistent  *bool   `json:"persistent,omitempty"`
-		Autoload    *bool   `json:"autoload,omitempty"`
+		Disabled    *bool   `json:"disabled,omitempty"`
 	}{
 		node,
 		name,
 		granularity,
 		persistent,
-		autoload,
+		disabled,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "block-dirty-bitmap-add",
@@ -10643,6 +20469,83 @@ func (m *Monitor) BlockDirtyBitmapClear(node string, name string) (err error) {
 	return
 }
 
+// block-dirty-bitmap-disable -> BlockDirtyBitmapDisable (command)
+
+// BlockDirtyBitmapDisable implements the "block-dirty-bitmap-disable" QMP API call.
+func (m *Monitor) BlockDirtyBitmapDisable(node string, name string) (err error) {
+	cmd := struct {
+		Node string `json:"node"`
+		Name string `json:"name"`
+	}{
+		node,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-dirty-bitmap-disable",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-dirty-bitmap-enable -> BlockDirtyBitmapEnable (command)
+
+// BlockDirtyBitmapEnable implements the "block-dirty-bitmap-enable" QMP API call.
+func (m *Monitor) BlockDirtyBitmapEnable(node string, name string) (err error) {
+	cmd := struct {
+		Node string `json:"node"`
+		Name string `json:"name"`
+	}{
+		node,
+		name,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-dirty-bitmap-enable",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-dirty-bitmap-merge -> BlockDirtyBitmapMerge (command)
+
+// BlockDirtyBitmapMerge implements the "block-dirty-bitmap-merge" QMP API call.
+func (m *Monitor) BlockDirtyBitmapMerge(node string, target string, bitmaps []BlockDirtyBitmapOrStr) (err error) {
+	cmd := struct {
+		Node    string                  `json:"node"`
+		Target  string                  `json:"target"`
+		Bitmaps []BlockDirtyBitmapOrStr `json:"bitmaps"`
+	}{
+		node,
+		target,
+		bitmaps,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-dirty-bitmap-merge",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // block-dirty-bitmap-remove -> BlockDirtyBitmapRemove (command)
 
 // BlockDirtyBitmapRemove implements the "block-dirty-bitmap-remove" QMP API call.
@@ -10656,6 +20559,49 @@ func (m *Monitor) BlockDirtyBitmapRemove(node string, name string) (err error) {
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "block-dirty-bitmap-remove",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-export-add -> BlockExportAdd (command)
+
+// BlockExportAdd implements the "block-export-add" QMP API call.
+func (m *Monitor) BlockExportAdd(cmd *BlockExportOptions) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-export-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-export-del -> BlockExportDel (command)
+
+// BlockExportDel implements the "block-export-del" QMP API call.
+func (m *Monitor) BlockExportDel(id string, mode *BlockExportRemoveMode) (err error) {
+	cmd := struct {
+		ID   string                 `json:"id"`
+		Mode *BlockExportRemoveMode `json:"mode,omitempty"`
+	}{
+		id,
+		mode,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-export-del",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -10704,6 +20650,52 @@ func (m *Monitor) BlockJobComplete(device string) (err error) {
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "block-job-complete",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-dismiss -> BlockJobDismiss (command)
+
+// BlockJobDismiss implements the "block-job-dismiss" QMP API call.
+func (m *Monitor) BlockJobDismiss(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-dismiss",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// block-job-finalize -> BlockJobFinalize (command)
+
+// BlockJobFinalize implements the "block-job-finalize" QMP API call.
+func (m *Monitor) BlockJobFinalize(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-job-finalize",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -10787,6 +20779,37 @@ func (m *Monitor) BlockJobSetSpeed(device string, speed int64) (err error) {
 	return
 }
 
+// block-latency-histogram-set -> BlockLatencyHistogramSet (command)
+
+// BlockLatencyHistogramSet implements the "block-latency-histogram-set" QMP API call.
+func (m *Monitor) BlockLatencyHistogramSet(id string, boundaries []uint64, boundariesRead []uint64, boundariesWrite []uint64, boundariesFlush []uint64) (err error) {
+	cmd := struct {
+		ID              string   `json:"id"`
+		Boundaries      []uint64 `json:"boundaries,omitempty"`
+		BoundariesRead  []uint64 `json:"boundaries-read,omitempty"`
+		BoundariesWrite []uint64 `json:"boundaries-write,omitempty"`
+		BoundariesFlush []uint64 `json:"boundaries-flush,omitempty"`
+	}{
+		id,
+		boundaries,
+		boundariesRead,
+		boundariesWrite,
+		boundariesFlush,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "block-latency-histogram-set",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // block-set-write-threshold -> BlockSetWriteThreshold (command)
 
 // BlockSetWriteThreshold implements the "block-set-write-threshold" QMP API call.
@@ -10815,53 +20838,34 @@ func (m *Monitor) BlockSetWriteThreshold(nodeName string, writeThreshold uint64)
 // block-stream -> BlockStream (command)
 
 // BlockStream implements the "block-stream" QMP API call.
-func (m *Monitor) BlockStream(jobID *string, device string, base *string, baseNode *string, backingFile *string, speed *int64, onError *BlockdevOnError) (err error) {
+func (m *Monitor) BlockStream(jobID *string, device string, base *string, baseNode *string, backingFile *string, bottom *string, speed *int64, onError *BlockdevOnError, filterNodeName *string, autoFinalize *bool, autoDismiss *bool) (err error) {
 	cmd := struct {
-		JobID       *string          `json:"job-id,omitempty"`
-		Device      string           `json:"device"`
-		Base        *string          `json:"base,omitempty"`
-		BaseNode    *string          `json:"base-node,omitempty"`
-		BackingFile *string          `json:"backing-file,omitempty"`
-		Speed       *int64           `json:"speed,omitempty"`
-		OnError     *BlockdevOnError `json:"on-error,omitempty"`
+		JobID          *string          `json:"job-id,omitempty"`
+		Device         string           `json:"device"`
+		Base           *string          `json:"base,omitempty"`
+		BaseNode       *string          `json:"base-node,omitempty"`
+		BackingFile    *string          `json:"backing-file,omitempty"`
+		Bottom         *string          `json:"bottom,omitempty"`
+		Speed          *int64           `json:"speed,omitempty"`
+		OnError        *BlockdevOnError `json:"on-error,omitempty"`
+		FilterNodeName *string          `json:"filter-node-name,omitempty"`
+		AutoFinalize   *bool            `json:"auto-finalize,omitempty"`
+		AutoDismiss    *bool            `json:"auto-dismiss,omitempty"`
 	}{
 		jobID,
 		device,
 		base,
 		baseNode,
 		backingFile,
+		bottom,
 		speed,
 		onError,
+		filterNodeName,
+		autoFinalize,
+		autoDismiss,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "block-stream",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// block_passwd -> BlockPasswd (command)
-
-// BlockPasswd implements the "block_passwd" QMP API call.
-func (m *Monitor) BlockPasswd(device *string, nodeName *string, password string) (err error) {
-	cmd := struct {
-		Device   *string `json:"device,omitempty"`
-		NodeName *string `json:"node-name,omitempty"`
-		Password string  `json:"password"`
-	}{
-		device,
-		nodeName,
-		password,
-	}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "block_passwd",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -10958,18 +20962,20 @@ func (m *Monitor) BlockdevBackup(cmd *BlockdevBackup) (err error) {
 // blockdev-change-medium -> BlockdevChangeMedium (command)
 
 // BlockdevChangeMedium implements the "blockdev-change-medium" QMP API call.
-func (m *Monitor) BlockdevChangeMedium(device *string, id *string, filename string, format *string, readOnlyMode *BlockdevChangeReadOnlyMode) (err error) {
+func (m *Monitor) BlockdevChangeMedium(device *string, id *string, filename string, format *string, force *bool, readOnlyMode *BlockdevChangeReadOnlyMode) (err error) {
 	cmd := struct {
 		Device       *string                     `json:"device,omitempty"`
 		ID           *string                     `json:"id,omitempty"`
 		Filename     string                      `json:"filename"`
 		Format       *string                     `json:"format,omitempty"`
+		Force        *bool                       `json:"force,omitempty"`
 		ReadOnlyMode *BlockdevChangeReadOnlyMode `json:"read-only-mode,omitempty"`
 	}{
 		device,
 		id,
 		filename,
 		format,
+		force,
 		readOnlyMode,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
@@ -11011,6 +21017,31 @@ func (m *Monitor) BlockdevCloseTray(device *string, id *string) (err error) {
 	return
 }
 
+// blockdev-create -> BlockdevCreate (command)
+
+// BlockdevCreate implements the "blockdev-create" QMP API call.
+func (m *Monitor) BlockdevCreate(jobID string, options BlockdevCreateOptions) (err error) {
+	cmd := struct {
+		JobID   string                `json:"job-id"`
+		Options BlockdevCreateOptions `json:"options"`
+	}{
+		jobID,
+		options,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-create",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // blockdev-del -> BlockdevDel (command)
 
 // BlockdevDel implements the "blockdev-del" QMP API call.
@@ -11034,10 +21065,35 @@ func (m *Monitor) BlockdevDel(nodeName string) (err error) {
 	return
 }
 
+// blockdev-insert-medium -> BlockdevInsertMedium (command)
+
+// BlockdevInsertMedium implements the "blockdev-insert-medium" QMP API call.
+func (m *Monitor) BlockdevInsertMedium(id string, nodeName string) (err error) {
+	cmd := struct {
+		ID       string `json:"id"`
+		NodeName string `json:"node-name"`
+	}{
+		id,
+		nodeName,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-insert-medium",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // blockdev-mirror -> BlockdevMirror (command)
 
 // BlockdevMirror implements the "blockdev-mirror" QMP API call.
-func (m *Monitor) BlockdevMirror(jobID *string, device string, target string, replaces *string, sync MirrorSyncMode, speed *int64, granularity *uint32, bufSize *int64, onSourceError *BlockdevOnError, onTargetError *BlockdevOnError, filterNodeName *string) (err error) {
+func (m *Monitor) BlockdevMirror(jobID *string, device string, target string, replaces *string, sync MirrorSyncMode, speed *int64, granularity *uint32, bufSize *int64, onSourceError *BlockdevOnError, onTargetError *BlockdevOnError, filterNodeName *string, copyMode *MirrorCopyMode, autoFinalize *bool, autoDismiss *bool) (err error) {
 	cmd := struct {
 		JobID          *string          `json:"job-id,omitempty"`
 		Device         string           `json:"device"`
@@ -11050,6 +21106,9 @@ func (m *Monitor) BlockdevMirror(jobID *string, device string, target string, re
 		OnSourceError  *BlockdevOnError `json:"on-source-error,omitempty"`
 		OnTargetError  *BlockdevOnError `json:"on-target-error,omitempty"`
 		FilterNodeName *string          `json:"filter-node-name,omitempty"`
+		CopyMode       *MirrorCopyMode  `json:"copy-mode,omitempty"`
+		AutoFinalize   *bool            `json:"auto-finalize,omitempty"`
+		AutoDismiss    *bool            `json:"auto-dismiss,omitempty"`
 	}{
 		jobID,
 		device,
@@ -11062,6 +21121,9 @@ func (m *Monitor) BlockdevMirror(jobID *string, device string, target string, re
 		onSourceError,
 		onTargetError,
 		filterNodeName,
+		copyMode,
+		autoFinalize,
+		autoDismiss,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "blockdev-mirror",
@@ -11092,6 +21154,52 @@ func (m *Monitor) BlockdevOpenTray(device *string, id *string, force *bool) (err
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "blockdev-open-tray",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-remove-medium -> BlockdevRemoveMedium (command)
+
+// BlockdevRemoveMedium implements the "blockdev-remove-medium" QMP API call.
+func (m *Monitor) BlockdevRemoveMedium(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-remove-medium",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// blockdev-reopen -> BlockdevReopen (command)
+
+// BlockdevReopen implements the "blockdev-reopen" QMP API call.
+func (m *Monitor) BlockdevReopen(options []BlockdevOptions) (err error) {
+	cmd := struct {
+		Options []BlockdevOptions `json:"options"`
+	}{
+		options,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "blockdev-reopen",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -11223,21 +21331,44 @@ func (m *Monitor) BlockdevSnapshotSync(device *string, nodeName *string, snapsho
 	return
 }
 
-// change -> Change (command)
+// calc-dirty-rate -> CalcDirtyRate (command)
 
-// Change implements the "change" QMP API call.
-func (m *Monitor) Change(device string, target string, arg *string) (err error) {
+// CalcDirtyRate implements the "calc-dirty-rate" QMP API call.
+func (m *Monitor) CalcDirtyRate(calcTime int64, samplePages *int64, mode *DirtyRateMeasureMode) (err error) {
 	cmd := struct {
-		Device string  `json:"device"`
-		Target string  `json:"target"`
-		Arg    *string `json:"arg,omitempty"`
+		CalcTime    int64                 `json:"calc-time"`
+		SamplePages *int64                `json:"sample-pages,omitempty"`
+		Mode        *DirtyRateMeasureMode `json:"mode,omitempty"`
 	}{
-		device,
-		target,
-		arg,
+		calcTime,
+		samplePages,
+		mode,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "change",
+		"execute":   "calc-dirty-rate",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// cancel-vcpu-dirty-limit -> CancelVcpuDirtyLimit (command)
+
+// CancelVcpuDirtyLimit implements the "cancel-vcpu-dirty-limit" QMP API call.
+func (m *Monitor) CancelVcpuDirtyLimit(cpuIndex *int64) (err error) {
+	cmd := struct {
+		CPUIndex *int64 `json:"cpu-index,omitempty"`
+	}{
+		cpuIndex,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "cancel-vcpu-dirty-limit",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -11488,56 +21619,10 @@ func (m *Monitor) Cont() (err error) {
 	return
 }
 
-// cpu -> CPU (command)
-
-// CPU implements the "cpu" QMP API call.
-func (m *Monitor) CPU(index int64) (err error) {
-	cmd := struct {
-		Index int64 `json:"index"`
-	}{
-		index,
-	}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "cpu",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// cpu-add -> CPUAdd (command)
-
-// CPUAdd implements the "cpu-add" QMP API call.
-func (m *Monitor) CPUAdd(id int64) (err error) {
-	cmd := struct {
-		ID int64 `json:"id"`
-	}{
-		id,
-	}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "cpu-add",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	return
-}
-
 // device-list-properties -> DeviceListProperties (command)
 
 // DeviceListProperties implements the "device-list-properties" QMP API call.
-func (m *Monitor) DeviceListProperties(typename string) (ret []DevicePropertyInfo, err error) {
+func (m *Monitor) DeviceListProperties(typename string) (ret []ObjectPropertyInfo, err error) {
 	cmd := struct {
 		Typename string `json:"typename"`
 	}{
@@ -11604,6 +21689,42 @@ func (m *Monitor) DeviceDel(id string) (err error) {
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "device_del",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// display-reload -> DisplayReload (command)
+
+// DisplayReload implements the "display-reload" QMP API call.
+func (m *Monitor) DisplayReload(cmd *DisplayReloadOptions) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "display-reload",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// display-update -> DisplayUpdate (command)
+
+// DisplayUpdate implements the "display-update" QMP API call.
+func (m *Monitor) DisplayUpdate(cmd *DisplayUpdateOptions) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "display-update",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -11738,14 +21859,7 @@ func (m *Monitor) Eject(device *string, id *string, force *bool) (err error) {
 // expire_password -> ExpirePassword (command)
 
 // ExpirePassword implements the "expire_password" QMP API call.
-func (m *Monitor) ExpirePassword(protocol string, time string) (err error) {
-	cmd := struct {
-		Protocol string `json:"protocol"`
-		Time     string `json:"time"`
-	}{
-		protocol,
-		time,
-	}
+func (m *Monitor) ExpirePassword(cmd *ExpirePasswordOptions) (err error) {
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "expire_password",
 		"arguments": cmd,
@@ -11864,6 +21978,144 @@ func (m *Monitor) InputSendEvent(device *string, head *int64, events []InputEven
 	return
 }
 
+// job-cancel -> JobCancel (command)
+
+// JobCancel implements the "job-cancel" QMP API call.
+func (m *Monitor) JobCancel(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "job-cancel",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// job-complete -> JobComplete (command)
+
+// JobComplete implements the "job-complete" QMP API call.
+func (m *Monitor) JobComplete(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "job-complete",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// job-dismiss -> JobDismiss (command)
+
+// JobDismiss implements the "job-dismiss" QMP API call.
+func (m *Monitor) JobDismiss(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "job-dismiss",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// job-finalize -> JobFinalize (command)
+
+// JobFinalize implements the "job-finalize" QMP API call.
+func (m *Monitor) JobFinalize(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "job-finalize",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// job-pause -> JobPause (command)
+
+// JobPause implements the "job-pause" QMP API call.
+func (m *Monitor) JobPause(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "job-pause",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// job-resume -> JobResume (command)
+
+// JobResume implements the "job-resume" QMP API call.
+func (m *Monitor) JobResume(id string) (err error) {
+	cmd := struct {
+		ID string `json:"id"`
+	}{
+		id,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "job-resume",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // memsave -> Memsave (command)
 
 // Memsave implements the "memsave" QMP API call.
@@ -11896,17 +22148,19 @@ func (m *Monitor) Memsave(val int64, size int64, filename string, cpuIndex *int6
 // migrate -> Migrate (command)
 
 // Migrate implements the "migrate" QMP API call.
-func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool) (err error) {
+func (m *Monitor) Migrate(uri string, blk *bool, inc *bool, detach *bool, resume *bool) (err error) {
 	cmd := struct {
 		URI    string `json:"uri"`
 		Blk    *bool  `json:"blk,omitempty"`
 		Inc    *bool  `json:"inc,omitempty"`
 		Detach *bool  `json:"detach,omitempty"`
+		Resume *bool  `json:"resume,omitempty"`
 	}{
 		uri,
 		blk,
 		inc,
 		detach,
+		resume,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "migrate",
@@ -11968,17 +22222,37 @@ func (m *Monitor) MigrateIncoming(uri string) (err error) {
 	return
 }
 
-// migrate-set-cache-size -> MigrateSetCacheSize (command)
+// migrate-pause -> MigratePause (command)
 
-// MigrateSetCacheSize implements the "migrate-set-cache-size" QMP API call.
-func (m *Monitor) MigrateSetCacheSize(value int64) (err error) {
+// MigratePause implements the "migrate-pause" QMP API call.
+func (m *Monitor) MigratePause() (err error) {
 	cmd := struct {
-		Value int64 `json:"value"`
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "migrate-pause",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// migrate-recover -> MigrateRecover (command)
+
+// MigrateRecover implements the "migrate-recover" QMP API call.
+func (m *Monitor) MigrateRecover(uri string) (err error) {
+	cmd := struct {
+		URI string `json:"uri"`
 	}{
-		value,
+		uri,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "migrate-set-cache-size",
+		"execute":   "migrate-recover",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -12072,65 +22346,37 @@ func (m *Monitor) MigrateCancel() (err error) {
 	return
 }
 
-// migrate_set_downtime -> MigrateSetDowntime (command)
-
-// MigrateSetDowntime implements the "migrate_set_downtime" QMP API call.
-func (m *Monitor) MigrateSetDowntime(value float64) (err error) {
-	cmd := struct {
-		Value float64 `json:"value"`
-	}{
-		value,
-	}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "migrate_set_downtime",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// migrate_set_speed -> MigrateSetSpeed (command)
-
-// MigrateSetSpeed implements the "migrate_set_speed" QMP API call.
-func (m *Monitor) MigrateSetSpeed(value int64) (err error) {
-	cmd := struct {
-		Value int64 `json:"value"`
-	}{
-		value,
-	}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "migrate_set_speed",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	return
-}
-
 // nbd-server-add -> NBDServerAdd (command)
 
 // NBDServerAdd implements the "nbd-server-add" QMP API call.
-func (m *Monitor) NBDServerAdd(device string, writable *bool) (err error) {
-	cmd := struct {
-		Device   string `json:"device"`
-		Writable *bool  `json:"writable,omitempty"`
-	}{
-		device,
-		writable,
-	}
+func (m *Monitor) NBDServerAdd(cmd *NBDServerAddOptions) (err error) {
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "nbd-server-add",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// nbd-server-remove -> NBDServerRemove (command)
+
+// NBDServerRemove implements the "nbd-server-remove" QMP API call.
+func (m *Monitor) NBDServerRemove(name string, mode *BlockExportRemoveMode) (err error) {
+	cmd := struct {
+		Name string                 `json:"name"`
+		Mode *BlockExportRemoveMode `json:"mode,omitempty"`
+	}{
+		name,
+		mode,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "nbd-server-remove",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -12146,13 +22392,17 @@ func (m *Monitor) NBDServerAdd(device string, writable *bool) (err error) {
 // nbd-server-start -> NBDServerStart (command)
 
 // NBDServerStart implements the "nbd-server-start" QMP API call.
-func (m *Monitor) NBDServerStart(addr SocketAddressLegacy, tlsCreds *string) (err error) {
+func (m *Monitor) NBDServerStart(addr SocketAddressLegacy, tlsCreds *string, tlsAuthz *string, maxConnections *uint32) (err error) {
 	cmd := struct {
-		Addr     SocketAddressLegacy `json:"addr"`
-		TLSCreds *string             `json:"tls-creds,omitempty"`
+		Addr           SocketAddressLegacy `json:"addr"`
+		TLSCreds       *string             `json:"tls-creds,omitempty"`
+		TLSAuthz       *string             `json:"tls-authz,omitempty"`
+		MaxConnections *uint32             `json:"max-connections,omitempty"`
 	}{
 		addr,
 		tlsCreds,
+		tlsAuthz,
+		maxConnections,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "nbd-server-start",
@@ -12191,14 +22441,7 @@ func (m *Monitor) NBDServerStop() (err error) {
 // netdev_add -> NetdevAdd (command)
 
 // NetdevAdd implements the "netdev_add" QMP API call.
-func (m *Monitor) NetdevAdd(typ string, id string) (err error) {
-	cmd := struct {
-		Type string `json:"type"`
-		ID   string `json:"id"`
-	}{
-		typ,
-		id,
-	}
+func (m *Monitor) NetdevAdd(cmd *Netdev) (err error) {
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "netdev_add",
 		"arguments": cmd,
@@ -12239,16 +22482,7 @@ func (m *Monitor) NetdevDel(id string) (err error) {
 // object-add -> ObjectAdd (command)
 
 // ObjectAdd implements the "object-add" QMP API call.
-func (m *Monitor) ObjectAdd(qomType string, id string, props *interface{}) (err error) {
-	cmd := struct {
-		QomType string       `json:"qom-type"`
-		ID      string       `json:"id"`
-		Props   *interface{} `json:"props,omitempty"`
-	}{
-		qomType,
-		id,
-		props,
-	}
+func (m *Monitor) ObjectAdd(cmd *ObjectOptions) (err error) {
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "object-add",
 		"arguments": cmd,
@@ -12316,9 +22550,12 @@ func (m *Monitor) Pmemsave(val int64, size int64, filename string) (err error) {
 // qmp_capabilities -> QMPCapabilities (command)
 
 // QMPCapabilities implements the "qmp_capabilities" QMP API call.
-func (m *Monitor) QMPCapabilities() (err error) {
+func (m *Monitor) QMPCapabilities(enable []QMPCapability) (err error) {
 	cmd := struct {
-	}{}
+		Enable []QMPCapability `json:"enable,omitempty"`
+	}{
+		enable,
+	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "qmp_capabilities",
 		"arguments": cmd,
@@ -12378,6 +22615,38 @@ func (m *Monitor) QomList(path string) (ret []ObjectPropertyInfo, err error) {
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "qom-list",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// qom-list-properties -> QomListProperties (command)
+
+// QomListProperties implements the "qom-list-properties" QMP API call.
+func (m *Monitor) QomListProperties(typename string) (ret []ObjectPropertyInfo, err error) {
+	cmd := struct {
+		Typename string `json:"typename"`
+	}{
+		typename,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "qom-list-properties",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -12547,6 +22816,35 @@ func (m *Monitor) QueryBlock() (ret []BlockInfo, err error) {
 	return
 }
 
+// query-block-exports -> QueryBlockExports (command)
+
+// QueryBlockExports implements the "query-block-exports" QMP API call.
+func (m *Monitor) QueryBlockExports() (ret []BlockExportInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-block-exports",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
 // query-block-jobs -> QueryBlockJobs (command)
 
 // QueryBlockJobs implements the "query-block-jobs" QMP API call.
@@ -12645,6 +22943,35 @@ func (m *Monitor) QueryChardevBackends() (ret []ChardevBackendInfo, err error) {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "query-chardev-backends",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-colo-status -> QueryColoStatus (command)
+
+// QueryColoStatus implements the "query-colo-status" QMP API call.
+func (m *Monitor) QueryColoStatus() (ret ColoStatus, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-colo-status",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -12858,14 +23185,101 @@ func (m *Monitor) QueryCPUModelExpansion(typ CPUModelExpansionType, model CPUMod
 	return
 }
 
-// query-cpus -> QueryCpus (command)
+// query-cpus-fast -> QueryCpusFast (command)
 
-// QueryCpus implements the "query-cpus" QMP API call.
-func (m *Monitor) QueryCpus() (ret []CPUInfo, err error) {
+// QueryCpusFast implements the "query-cpus-fast" QMP API call.
+func (m *Monitor) QueryCpusFast() (ret []CPUInfoFast, err error) {
 	cmd := struct {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "query-cpus",
+		"execute":   "query-cpus-fast",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-current-machine -> QueryCurrentMachine (command)
+
+// QueryCurrentMachine implements the "query-current-machine" QMP API call.
+func (m *Monitor) QueryCurrentMachine() (ret CurrentMachineParams, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-current-machine",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-dirty-rate -> QueryDirtyRate (command)
+
+// QueryDirtyRate implements the "query-dirty-rate" QMP API call.
+func (m *Monitor) QueryDirtyRate() (ret DirtyRateInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-dirty-rate",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-display-options -> QueryDisplayOptions (command)
+
+// QueryDisplayOptions implements the "query-display-options" QMP API call.
+func (m *Monitor) QueryDisplayOptions() (ret DisplayOptions, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-display-options",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -12924,35 +23338,6 @@ func (m *Monitor) QueryDumpGuestMemoryCapability() (ret DumpGuestMemoryCapabilit
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "query-dump-guest-memory-capability",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	res := struct {
-		Res json.RawMessage `json:"return"`
-	}{}
-	if err = json.Unmarshal(bs, &res); err != nil {
-		return
-	}
-	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
-		return
-	}
-	return
-}
-
-// query-events -> QueryEvents (command)
-
-// QueryEvents implements the "query-events" QMP API call.
-func (m *Monitor) QueryEvents() (ret []EventInfo, err error) {
-	cmd := struct {
-	}{}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "query-events",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -13069,6 +23454,35 @@ func (m *Monitor) QueryIothreads() (ret []IOThreadInfo, err error) {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "query-iothreads",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-jobs -> QueryJobs (command)
+
+// QueryJobs implements the "query-jobs" QMP API call.
+func (m *Monitor) QueryJobs() (ret []JobInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-jobs",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -13293,35 +23707,6 @@ func (m *Monitor) QueryMigrate() (ret MigrationInfo, err error) {
 	return
 }
 
-// query-migrate-cache-size -> QueryMigrateCacheSize (command)
-
-// QueryMigrateCacheSize implements the "query-migrate-cache-size" QMP API call.
-func (m *Monitor) QueryMigrateCacheSize() (ret int64, err error) {
-	cmd := struct {
-	}{}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "query-migrate-cache-size",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	res := struct {
-		Res json.RawMessage `json:"return"`
-	}{}
-	if err = json.Unmarshal(bs, &res); err != nil {
-		return
-	}
-	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
-		return
-	}
-	return
-}
-
 // query-migrate-capabilities -> QueryMigrateCapabilities (command)
 
 // QueryMigrateCapabilities implements the "query-migrate-capabilities" QMP API call.
@@ -13412,9 +23797,12 @@ func (m *Monitor) QueryName() (ret NameInfo, err error) {
 // query-named-block-nodes -> QueryNamedBlockNodes (command)
 
 // QueryNamedBlockNodes implements the "query-named-block-nodes" QMP API call.
-func (m *Monitor) QueryNamedBlockNodes() (ret []BlockDeviceInfo, err error) {
+func (m *Monitor) QueryNamedBlockNodes(flat *bool) (ret []BlockDeviceInfo, err error) {
 	cmd := struct {
-	}{}
+		Flat *bool `json:"flat,omitempty"`
+	}{
+		flat,
+	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "query-named-block-nodes",
 		"arguments": cmd,
@@ -13467,6 +23855,35 @@ func (m *Monitor) QueryPCI() (ret []PCIInfo, err error) {
 	return
 }
 
+// query-pr-managers -> QueryPrManagers (command)
+
+// QueryPrManagers implements the "query-pr-managers" QMP API call.
+func (m *Monitor) QueryPrManagers() (ret []PrManagerInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-pr-managers",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
 // query-qmp-schema -> QueryQMPSchema (command)
 
 // QueryQMPSchema implements the "query-qmp-schema" QMP API call.
@@ -13475,6 +23892,35 @@ func (m *Monitor) QueryQMPSchema() (ret []SchemaInfo, err error) {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "query-qmp-schema",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-replay -> QueryReplay (command)
+
+// QueryReplay implements the "query-replay" QMP API call.
+func (m *Monitor) QueryReplay() (ret ReplayInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-replay",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -13660,6 +24106,183 @@ func (m *Monitor) QueryRxFilter(name *string) (ret []RxFilterInfo, err error) {
 	return
 }
 
+// query-sev -> QuerySev (command)
+
+// QuerySev implements the "query-sev" QMP API call.
+func (m *Monitor) QuerySev() (ret SevInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-sev",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-sev-attestation-report -> QuerySevAttestationReport (command)
+
+// QuerySevAttestationReport implements the "query-sev-attestation-report" QMP API call.
+func (m *Monitor) QuerySevAttestationReport(mnonce string) (ret SevAttestationReport, err error) {
+	cmd := struct {
+		Mnonce string `json:"mnonce"`
+	}{
+		mnonce,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-sev-attestation-report",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-sev-capabilities -> QuerySevCapabilities (command)
+
+// QuerySevCapabilities implements the "query-sev-capabilities" QMP API call.
+func (m *Monitor) QuerySevCapabilities() (ret SevCapability, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-sev-capabilities",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-sev-launch-measure -> QuerySevLaunchMeasure (command)
+
+// QuerySevLaunchMeasure implements the "query-sev-launch-measure" QMP API call.
+func (m *Monitor) QuerySevLaunchMeasure() (ret SevLaunchMeasureInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-sev-launch-measure",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-sgx -> QuerySgx (command)
+
+// QuerySgx implements the "query-sgx" QMP API call.
+func (m *Monitor) QuerySgx() (ret SgxInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-sgx",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-sgx-capabilities -> QuerySgxCapabilities (command)
+
+// QuerySgxCapabilities implements the "query-sgx-capabilities" QMP API call.
+func (m *Monitor) QuerySgxCapabilities() (ret SgxInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-sgx-capabilities",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
 // query-spice -> QuerySpice (command)
 
 // QuerySpice implements the "query-spice" QMP API call.
@@ -13668,6 +24291,65 @@ func (m *Monitor) QuerySpice() (ret SpiceInfo, err error) {
 	}{}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "query-spice",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-stats -> QueryStats (command)
+
+// QueryStats implements the "query-stats" QMP API call.
+func (m *Monitor) QueryStats(cmd *StatsFilter) (ret []StatsResult, err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-stats",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// query-stats-schemas -> QueryStatsSchemas (command)
+
+// QueryStatsSchemas implements the "query-stats-schemas" QMP API call.
+func (m *Monitor) QueryStatsSchemas(provider *StatsProvider) (ret []StatsSchema, err error) {
+	cmd := struct {
+		Provider *StatsProvider `json:"provider,omitempty"`
+	}{
+		provider,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-stats-schemas",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -13863,6 +24545,35 @@ func (m *Monitor) QueryUUID() (ret UUIDInfo, err error) {
 	return
 }
 
+// query-vcpu-dirty-limit -> QueryVcpuDirtyLimit (command)
+
+// QueryVcpuDirtyLimit implements the "query-vcpu-dirty-limit" QMP API call.
+func (m *Monitor) QueryVcpuDirtyLimit() (ret []DirtyLimitInfo, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-vcpu-dirty-limit",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
 // query-version -> QueryVersion (command)
 
 // QueryVersion implements the "query-version" QMP API call.
@@ -14008,6 +24719,35 @@ func (m *Monitor) QueryXenReplicationStatus() (ret ReplicationStatus, err error)
 	return
 }
 
+// query-yank -> QueryYank (command)
+
+// QueryYank implements the "query-yank" QMP API call.
+func (m *Monitor) QueryYank() (ret []YankInstance, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "query-yank",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
 // quit -> Quit (command)
 
 // Quit implements the "quit" QMP API call.
@@ -14041,6 +24781,72 @@ func (m *Monitor) RemoveFD(fdsetID int64, fd *int64) (err error) {
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "remove-fd",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// replay-break -> ReplayBreak (command)
+
+// ReplayBreak implements the "replay-break" QMP API call.
+func (m *Monitor) ReplayBreak(icount int64) (err error) {
+	cmd := struct {
+		Icount int64 `json:"icount"`
+	}{
+		icount,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "replay-break",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// replay-delete-break -> ReplayDeleteBreak (command)
+
+// ReplayDeleteBreak implements the "replay-delete-break" QMP API call.
+func (m *Monitor) ReplayDeleteBreak() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "replay-delete-break",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// replay-seek -> ReplaySeek (command)
+
+// ReplaySeek implements the "replay-seek" QMP API call.
+func (m *Monitor) ReplaySeek(icount int64) (err error) {
+	cmd := struct {
+		Icount int64 `json:"icount"`
+	}{
+		icount,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "replay-seek",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -14139,11 +24945,17 @@ func (m *Monitor) RtcResetReinjection() (err error) {
 // screendump -> Screendump (command)
 
 // Screendump implements the "screendump" QMP API call.
-func (m *Monitor) Screendump(filename string) (err error) {
+func (m *Monitor) Screendump(filename string, device *string, head *int64, format *ImageFormat) (err error) {
 	cmd := struct {
-		Filename string `json:"filename"`
+		Filename string       `json:"filename"`
+		Device   *string      `json:"device,omitempty"`
+		Head     *int64       `json:"head,omitempty"`
+		Format   *ImageFormat `json:"format,omitempty"`
 	}{
 		filename,
+		device,
+		head,
+		format,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "screendump",
@@ -14184,6 +24996,78 @@ func (m *Monitor) SendKey(keys []KeyValue, holdTime *int64) (err error) {
 	return
 }
 
+// set-action -> SetAction (command)
+
+// SetAction implements the "set-action" QMP API call.
+func (m *Monitor) SetAction(reboot *RebootAction, shutdown *ShutdownAction, panic *PanicAction, watchdog *WatchdogAction) (err error) {
+	cmd := struct {
+		Reboot   *RebootAction   `json:"reboot,omitempty"`
+		Shutdown *ShutdownAction `json:"shutdown,omitempty"`
+		Panic    *PanicAction    `json:"panic,omitempty"`
+		Watchdog *WatchdogAction `json:"watchdog,omitempty"`
+	}{
+		reboot,
+		shutdown,
+		panic,
+		watchdog,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "set-action",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// set-numa-node -> SetNumaNode (command)
+
+// SetNumaNode implements the "set-numa-node" QMP API call.
+func (m *Monitor) SetNumaNode(cmd *NumaOptions) (err error) {
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "set-numa-node",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// set-vcpu-dirty-limit -> SetVcpuDirtyLimit (command)
+
+// SetVcpuDirtyLimit implements the "set-vcpu-dirty-limit" QMP API call.
+func (m *Monitor) SetVcpuDirtyLimit(cpuIndex *int64, dirtyRate uint64) (err error) {
+	cmd := struct {
+		CPUIndex  *int64 `json:"cpu-index,omitempty"`
+		DirtyRate uint64 `json:"dirty-rate"`
+	}{
+		cpuIndex,
+		dirtyRate,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "set-vcpu-dirty-limit",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // set_link -> SetLink (command)
 
 // SetLink implements the "set_link" QMP API call.
@@ -14212,18 +25096,121 @@ func (m *Monitor) SetLink(name string, up bool) (err error) {
 // set_password -> SetPassword (command)
 
 // SetPassword implements the "set_password" QMP API call.
-func (m *Monitor) SetPassword(protocol string, password string, connected *string) (err error) {
-	cmd := struct {
-		Protocol  string  `json:"protocol"`
-		Password  string  `json:"password"`
-		Connected *string `json:"connected,omitempty"`
-	}{
-		protocol,
-		password,
-		connected,
-	}
+func (m *Monitor) SetPassword(cmd *SetPasswordOptions) (err error) {
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "set_password",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// sev-inject-launch-secret -> SevInjectLaunchSecret (command)
+
+// SevInjectLaunchSecret implements the "sev-inject-launch-secret" QMP API call.
+func (m *Monitor) SevInjectLaunchSecret(packetHeader string, secret string, gpa *uint64) (err error) {
+	cmd := struct {
+		PacketHeader string  `json:"packet-header"`
+		Secret       string  `json:"secret"`
+		Gpa          *uint64 `json:"gpa,omitempty"`
+	}{
+		packetHeader,
+		secret,
+		gpa,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "sev-inject-launch-secret",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// snapshot-delete -> SnapshotDelete (command)
+
+// SnapshotDelete implements the "snapshot-delete" QMP API call.
+func (m *Monitor) SnapshotDelete(jobID string, tag string, devices []string) (err error) {
+	cmd := struct {
+		JobID   string   `json:"job-id"`
+		Tag     string   `json:"tag"`
+		Devices []string `json:"devices"`
+	}{
+		jobID,
+		tag,
+		devices,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "snapshot-delete",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// snapshot-load -> SnapshotLoad (command)
+
+// SnapshotLoad implements the "snapshot-load" QMP API call.
+func (m *Monitor) SnapshotLoad(jobID string, tag string, vmstate string, devices []string) (err error) {
+	cmd := struct {
+		JobID   string   `json:"job-id"`
+		Tag     string   `json:"tag"`
+		Vmstate string   `json:"vmstate"`
+		Devices []string `json:"devices"`
+	}{
+		jobID,
+		tag,
+		vmstate,
+		devices,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "snapshot-load",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// snapshot-save -> SnapshotSave (command)
+
+// SnapshotSave implements the "snapshot-save" QMP API call.
+func (m *Monitor) SnapshotSave(jobID string, tag string, vmstate string, devices []string) (err error) {
+	cmd := struct {
+		JobID   string   `json:"job-id"`
+		Tag     string   `json:"tag"`
+		Vmstate string   `json:"vmstate"`
+		Devices []string `json:"devices"`
+	}{
+		jobID,
+		tag,
+		vmstate,
+		devices,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "snapshot-save",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -14427,6 +25414,35 @@ func (m *Monitor) WatchdogSetAction(action WatchdogAction) (err error) {
 	return
 }
 
+// x-blockdev-amend -> XBlockdevAmend (command)
+
+// XBlockdevAmend implements the "x-blockdev-amend" QMP API call.
+func (m *Monitor) XBlockdevAmend(jobID string, nodeName string, options BlockdevAmendOptions, force *bool) (err error) {
+	cmd := struct {
+		JobID    string               `json:"job-id"`
+		NodeName string               `json:"node-name"`
+		Options  BlockdevAmendOptions `json:"options"`
+		Force    *bool                `json:"force,omitempty"`
+	}{
+		jobID,
+		nodeName,
+		options,
+		force,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-blockdev-amend",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // x-blockdev-change -> XBlockdevChange (command)
 
 // XBlockdevChange implements the "x-blockdev-change" QMP API call.
@@ -14454,46 +25470,21 @@ func (m *Monitor) XBlockdevChange(parent string, child *string, node *string) (e
 	return
 }
 
-// x-blockdev-insert-medium -> XBlockdevInsertMedium (command)
+// x-blockdev-set-iothread -> XBlockdevSetIothread (command)
 
-// XBlockdevInsertMedium implements the "x-blockdev-insert-medium" QMP API call.
-func (m *Monitor) XBlockdevInsertMedium(device *string, id *string, nodeName string) (err error) {
+// XBlockdevSetIothread implements the "x-blockdev-set-iothread" QMP API call.
+func (m *Monitor) XBlockdevSetIothread(nodeName string, iothread StrOrNull, force *bool) (err error) {
 	cmd := struct {
-		Device   *string `json:"device,omitempty"`
-		ID       *string `json:"id,omitempty"`
-		NodeName string  `json:"node-name"`
+		NodeName string    `json:"node-name"`
+		Iothread StrOrNull `json:"iothread"`
+		Force    *bool     `json:"force,omitempty"`
 	}{
-		device,
-		id,
 		nodeName,
+		iothread,
+		force,
 	}
 	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "x-blockdev-insert-medium",
-		"arguments": cmd,
-	})
-	if err != nil {
-		return
-	}
-	bs, err = m.mon.Run(bs)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// x-blockdev-remove-medium -> XBlockdevRemoveMedium (command)
-
-// XBlockdevRemoveMedium implements the "x-blockdev-remove-medium" QMP API call.
-func (m *Monitor) XBlockdevRemoveMedium(device *string, id *string) (err error) {
-	cmd := struct {
-		Device *string `json:"device,omitempty"`
-		ID     *string `json:"id,omitempty"`
-	}{
-		device,
-		id,
-	}
-	bs, err := json.Marshal(map[string]interface{}{
-		"execute":   "x-blockdev-remove-medium",
+		"execute":   "x-blockdev-set-iothread",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -14539,6 +25530,316 @@ func (m *Monitor) XDebugBlockDirtyBitmapSha256(node string, name string) (ret Bl
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "x-debug-block-dirty-bitmap-sha256",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-debug-query-block-graph -> XDebugQueryBlockGraph (command)
+
+// XDebugQueryBlockGraph implements the "x-debug-query-block-graph" QMP API call.
+func (m *Monitor) XDebugQueryBlockGraph() (ret XDbgBlockGraph, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-debug-query-block-graph",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-exit-preconfig -> XExitPreconfig (command)
+
+// XExitPreconfig implements the "x-exit-preconfig" QMP API call.
+func (m *Monitor) XExitPreconfig() (err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-exit-preconfig",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// x-query-irq -> XQueryIrq (command)
+
+// XQueryIrq implements the "x-query-irq" QMP API call.
+func (m *Monitor) XQueryIrq() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-irq",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-jit -> XQueryJit (command)
+
+// XQueryJit implements the "x-query-jit" QMP API call.
+func (m *Monitor) XQueryJit() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-jit",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-numa -> XQueryNuma (command)
+
+// XQueryNuma implements the "x-query-numa" QMP API call.
+func (m *Monitor) XQueryNuma() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-numa",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-opcount -> XQueryOpcount (command)
+
+// XQueryOpcount implements the "x-query-opcount" QMP API call.
+func (m *Monitor) XQueryOpcount() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-opcount",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-profile -> XQueryProfile (command)
+
+// XQueryProfile implements the "x-query-profile" QMP API call.
+func (m *Monitor) XQueryProfile() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-profile",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-ramblock -> XQueryRamblock (command)
+
+// XQueryRamblock implements the "x-query-ramblock" QMP API call.
+func (m *Monitor) XQueryRamblock() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-ramblock",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-rdma -> XQueryRdma (command)
+
+// XQueryRdma implements the "x-query-rdma" QMP API call.
+func (m *Monitor) XQueryRdma() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-rdma",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-roms -> XQueryRoms (command)
+
+// XQueryRoms implements the "x-query-roms" QMP API call.
+func (m *Monitor) XQueryRoms() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-roms",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	res := struct {
+		Res json.RawMessage `json:"return"`
+	}{}
+	if err = json.Unmarshal(bs, &res); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Res), &ret); err != nil {
+		return
+	}
+	return
+}
+
+// x-query-usb -> XQueryUsb (command)
+
+// XQueryUsb implements the "x-query-usb" QMP API call.
+func (m *Monitor) XQueryUsb() (ret HumanReadableText, err error) {
+	cmd := struct {
+	}{}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "x-query-usb",
 		"arguments": cmd,
 	})
 	if err != nil {
@@ -14666,6 +25967,29 @@ func (m *Monitor) XenSetReplication(enable bool, primary bool, failover *bool) (
 	}
 	bs, err := json.Marshal(map[string]interface{}{
 		"execute":   "xen-set-replication",
+		"arguments": cmd,
+	})
+	if err != nil {
+		return
+	}
+	bs, err = m.mon.Run(bs)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// yank -> Yank (command)
+
+// Yank implements the "yank" QMP API call.
+func (m *Monitor) Yank(instances []YankInstance) (err error) {
+	cmd := struct {
+		Instances []YankInstance `json:"instances"`
+	}{
+		instances,
+	}
+	bs, err := json.Marshal(map[string]interface{}{
+		"execute":   "yank",
 		"arguments": cmd,
 	})
 	if err != nil {

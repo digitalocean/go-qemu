@@ -23,7 +23,7 @@ import (
 	qapischema "github.com/digitalocean/go-qemu/qapi-schema"
 )
 
-const specURL = `https://raw.githubusercontent.com/qemu/qemu/stable-2.11/qapi-schema.json`
+const specURL = `https://gitlab.com/qemu-project/qemu/-/raw/v7.1.0/qapi/qapi-schema.json`
 
 var (
 	inputSpec = flag.String("input", specURL, "Input spec")
