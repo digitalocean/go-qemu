@@ -266,7 +266,7 @@ func (mon *SocketMonitor) RunWithFile(command []byte, file *os.File) ([]byte, er
 type banner struct {
 	QMP struct {
 		Capabilities []string `json:"capabilities"`
-		Version Version `json:"version"`
+		Version      Version  `json:"version"`
 	} `json:"QMP"`
 }
 
