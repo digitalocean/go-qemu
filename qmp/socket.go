@@ -166,6 +166,13 @@ func (mon *SocketMonitor) Events(context.Context) (<-chan Event, error) {
 	return mon.events, nil
 }
 
+// SetRWDeadline sets the read and write deadlines for the underlying socket.
+// Set deadline to prevent the Command from hanging due to other processes
+// (e.g. libvirt) occupying the QEMU monitor socket.
+func (mon *SocketMonitor) SetRWDeadline(t time.Time) error {
+	return mon.c.SetDeadline(t)
+}
+
 // listen listens for incoming data from a QEMU monitor socket.  It determines
 // if the data is an asynchronous event or a response to a command, and returns
 // the data on the appropriate channel.
