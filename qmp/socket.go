@@ -137,13 +137,29 @@ func (mon *SocketMonitor) Connect() error {
 		return err
 	}
 
-	// Check for no error on return
-	var r response
-	if err := dec.Decode(&r); err != nil {
-		return err
-	}
-	if err := r.Err(); err != nil {
-		return err
+	// Wait for response
+	scanner := bufio.NewScanner(mon.c)
+	for scanner.Scan() {
+		var e Event
+
+		b := scanner.Bytes()
+		if err := json.Unmarshal(b, &e); err != nil {
+			return err
+		}
+
+		// If not an event then our qmp capabilities response
+		if e.Event == "" {
+			var r response
+			if err := json.Unmarshal(b, &r); err != nil {
+				return err
+			}
+			// Check response on errors
+			if err := r.Err(); err != nil {
+				return err
+			}
+			break
+		}
+		// Drop possible event, continue reading
 	}
 
 	// Initialize socket listener for command responses and asynchronous
