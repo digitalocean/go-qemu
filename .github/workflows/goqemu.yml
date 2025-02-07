@@ -9,7 +9,7 @@ jobs:
         # track upstream Go's currently supported stable versions.
         gorelease: ['stable', 'oldstable']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/cache@v3
         with:
