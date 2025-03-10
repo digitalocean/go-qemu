@@ -34,16 +34,17 @@ func ({{ $subname }}) is{{ $basename }}() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s {{ $subname }}) MarshalJSON() ([]byte, error) {
+    type Intermediate{{ $subname }} {{ $subname }}
      v := struct{
           {{- range $u.Base.Fields API }}
           {{- if eq .Name $u.Discriminator }}
           {{ render . }}
           {{- end }}
           {{- end }}
-          {{ $subname }}
+          Intermediate{{ $subname }}
      }{
           {{ $discriminatorField.Type.Go }}{{ $suffix.Go }},
-          s,
+          Intermediate{{ $subname }}(s),
      }
      return json.Marshal(v)
 }

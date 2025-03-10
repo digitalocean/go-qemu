@@ -1619,12 +1619,13 @@ func (BlockdevOptionsBlkdebug) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsBlkdebug) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsBlkdebug BlockdevOptionsBlkdebug
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsBlkdebug
+		IntermediateBlockdevOptionsBlkdebug
 	}{
 		BlockdevDriverBlkdebug,
-		s,
+		IntermediateBlockdevOptionsBlkdebug(s),
 	}
 	return json.Marshal(v)
 }
@@ -1645,12 +1646,13 @@ func (BlockdevOptionsBlkverify) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsBlkverify) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsBlkverify BlockdevOptionsBlkverify
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsBlkverify
+		IntermediateBlockdevOptionsBlkverify
 	}{
 		BlockdevDriverBlkverify,
-		s,
+		IntermediateBlockdevOptionsBlkverify(s),
 	}
 	return json.Marshal(v)
 }
@@ -1670,12 +1672,13 @@ func (BlockdevOptionsBochs) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsBochs) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsBochs BlockdevOptionsBochs
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsBochs
+		IntermediateBlockdevOptionsBochs
 	}{
 		BlockdevDriverBochs,
-		s,
+		IntermediateBlockdevOptionsBochs(s),
 	}
 	return json.Marshal(v)
 }
@@ -1695,12 +1698,13 @@ func (BlockdevOptionsCloop) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsCloop) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsCloop BlockdevOptionsCloop
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsCloop
+		IntermediateBlockdevOptionsCloop
 	}{
 		BlockdevDriverCloop,
-		s,
+		IntermediateBlockdevOptionsCloop(s),
 	}
 	return json.Marshal(v)
 }
@@ -1720,12 +1724,13 @@ func (BlockdevOptionsDmg) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsDmg) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsDmg BlockdevOptionsDmg
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsDmg
+		IntermediateBlockdevOptionsDmg
 	}{
 		BlockdevDriverDmg,
-		s,
+		IntermediateBlockdevOptionsDmg(s),
 	}
 	return json.Marshal(v)
 }
@@ -1748,12 +1753,13 @@ func (BlockdevOptionsFile) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsFile) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsFile BlockdevOptionsFile
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsFile
+		IntermediateBlockdevOptionsFile
 	}{
 		BlockdevDriverFile,
-		s,
+		IntermediateBlockdevOptionsFile(s),
 	}
 	return json.Marshal(v)
 }
@@ -1772,12 +1778,13 @@ func (BlockdevOptionsFTP) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsFTP) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsFTP BlockdevOptionsFTP
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsFTP
+		IntermediateBlockdevOptionsFTP
 	}{
 		BlockdevDriverFTP,
-		s,
+		IntermediateBlockdevOptionsFTP(s),
 	}
 	return json.Marshal(v)
 }
@@ -1797,12 +1804,13 @@ func (BlockdevOptionsFTPS) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsFTPS) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsFTPS BlockdevOptionsFTPS
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsFTPS
+		IntermediateBlockdevOptionsFTPS
 	}{
 		BlockdevDriverFTPS,
-		s,
+		IntermediateBlockdevOptionsFTPS(s),
 	}
 	return json.Marshal(v)
 }
@@ -1826,12 +1834,13 @@ func (BlockdevOptionsGluster) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsGluster) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsGluster BlockdevOptionsGluster
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsGluster
+		IntermediateBlockdevOptionsGluster
 	}{
 		BlockdevDriverGluster,
-		s,
+		IntermediateBlockdevOptionsGluster(s),
 	}
 	return json.Marshal(v)
 }
@@ -1854,12 +1863,13 @@ func (BlockdevOptionsHostCdrom) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsHostCdrom) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsHostCdrom BlockdevOptionsHostCdrom
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsHostCdrom
+		IntermediateBlockdevOptionsHostCdrom
 	}{
 		BlockdevDriverHostCdrom,
-		s,
+		IntermediateBlockdevOptionsHostCdrom(s),
 	}
 	return json.Marshal(v)
 }
@@ -1882,12 +1892,13 @@ func (BlockdevOptionsHostDevice) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsHostDevice) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsHostDevice BlockdevOptionsHostDevice
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsHostDevice
+		IntermediateBlockdevOptionsHostDevice
 	}{
 		BlockdevDriverHostDevice,
-		s,
+		IntermediateBlockdevOptionsHostDevice(s),
 	}
 	return json.Marshal(v)
 }
@@ -1908,12 +1919,13 @@ func (BlockdevOptionsHTTP) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsHTTP) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsHTTP BlockdevOptionsHTTP
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsHTTP
+		IntermediateBlockdevOptionsHTTP
 	}{
 		BlockdevDriverHTTP,
-		s,
+		IntermediateBlockdevOptionsHTTP(s),
 	}
 	return json.Marshal(v)
 }
@@ -1935,12 +1947,13 @@ func (BlockdevOptionsHTTPS) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsHTTPS) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsHTTPS BlockdevOptionsHTTPS
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsHTTPS
+		IntermediateBlockdevOptionsHTTPS
 	}{
 		BlockdevDriverHTTPS,
-		s,
+		IntermediateBlockdevOptionsHTTPS(s),
 	}
 	return json.Marshal(v)
 }
@@ -1968,12 +1981,13 @@ func (BlockdevOptionsIscsi) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsIscsi) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsIscsi BlockdevOptionsIscsi
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsIscsi
+		IntermediateBlockdevOptionsIscsi
 	}{
 		BlockdevDriverIscsi,
-		s,
+		IntermediateBlockdevOptionsIscsi(s),
 	}
 	return json.Marshal(v)
 }
@@ -1993,12 +2007,13 @@ func (BlockdevOptionsLUKS) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsLUKS) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsLUKS BlockdevOptionsLUKS
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsLUKS
+		IntermediateBlockdevOptionsLUKS
 	}{
 		BlockdevDriverLUKS,
-		s,
+		IntermediateBlockdevOptionsLUKS(s),
 	}
 	return json.Marshal(v)
 }
@@ -2020,12 +2035,13 @@ func (BlockdevOptionsNBD) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsNBD) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsNBD BlockdevOptionsNBD
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsNBD
+		IntermediateBlockdevOptionsNBD
 	}{
 		BlockdevDriverNBD,
-		s,
+		IntermediateBlockdevOptionsNBD(s),
 	}
 	return json.Marshal(v)
 }
@@ -2052,12 +2068,13 @@ func (BlockdevOptionsNfs) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsNfs) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsNfs BlockdevOptionsNfs
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsNfs
+		IntermediateBlockdevOptionsNfs
 	}{
 		BlockdevDriverNfs,
-		s,
+		IntermediateBlockdevOptionsNfs(s),
 	}
 	return json.Marshal(v)
 }
@@ -2078,12 +2095,13 @@ func (BlockdevOptionsNullAIO) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsNullAIO) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsNullAIO BlockdevOptionsNullAIO
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsNullAIO
+		IntermediateBlockdevOptionsNullAIO
 	}{
 		BlockdevDriverNullAIO,
-		s,
+		IntermediateBlockdevOptionsNullAIO(s),
 	}
 	return json.Marshal(v)
 }
@@ -2104,12 +2122,13 @@ func (BlockdevOptionsNullCo) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsNullCo) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsNullCo BlockdevOptionsNullCo
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsNullCo
+		IntermediateBlockdevOptionsNullCo
 	}{
 		BlockdevDriverNullCo,
-		s,
+		IntermediateBlockdevOptionsNullCo(s),
 	}
 	return json.Marshal(v)
 }
@@ -2129,12 +2148,13 @@ func (BlockdevOptionsParallels) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsParallels) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsParallels BlockdevOptionsParallels
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsParallels
+		IntermediateBlockdevOptionsParallels
 	}{
 		BlockdevDriverParallels,
-		s,
+		IntermediateBlockdevOptionsParallels(s),
 	}
 	return json.Marshal(v)
 }
@@ -2154,12 +2174,13 @@ func (BlockdevOptionsQcow) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsQcow) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsQcow BlockdevOptionsQcow
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsQcow
+		IntermediateBlockdevOptionsQcow
 	}{
 		BlockdevDriverQcow,
-		s,
+		IntermediateBlockdevOptionsQcow(s),
 	}
 	return json.Marshal(v)
 }
@@ -2188,12 +2209,13 @@ func (BlockdevOptionsQcow2) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsQcow2) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsQcow2 BlockdevOptionsQcow2
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsQcow2
+		IntermediateBlockdevOptionsQcow2
 	}{
 		BlockdevDriverQcow2,
-		s,
+		IntermediateBlockdevOptionsQcow2(s),
 	}
 	return json.Marshal(v)
 }
@@ -2213,12 +2235,13 @@ func (BlockdevOptionsQed) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsQed) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsQed BlockdevOptionsQed
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsQed
+		IntermediateBlockdevOptionsQed
 	}{
 		BlockdevDriverQed,
-		s,
+		IntermediateBlockdevOptionsQed(s),
 	}
 	return json.Marshal(v)
 }
@@ -2242,12 +2265,13 @@ func (BlockdevOptionsQuorum) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsQuorum) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsQuorum BlockdevOptionsQuorum
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsQuorum
+		IntermediateBlockdevOptionsQuorum
 	}{
 		BlockdevDriverQuorum,
-		s,
+		IntermediateBlockdevOptionsQuorum(s),
 	}
 	return json.Marshal(v)
 }
@@ -2268,12 +2292,13 @@ func (BlockdevOptionsRaw) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsRaw) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsRaw BlockdevOptionsRaw
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsRaw
+		IntermediateBlockdevOptionsRaw
 	}{
 		BlockdevDriverRaw,
-		s,
+		IntermediateBlockdevOptionsRaw(s),
 	}
 	return json.Marshal(v)
 }
@@ -2298,12 +2323,13 @@ func (BlockdevOptionsRbd) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsRbd) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsRbd BlockdevOptionsRbd
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsRbd
+		IntermediateBlockdevOptionsRbd
 	}{
 		BlockdevDriverRbd,
-		s,
+		IntermediateBlockdevOptionsRbd(s),
 	}
 	return json.Marshal(v)
 }
@@ -2324,12 +2350,13 @@ func (BlockdevOptionsReplication) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsReplication) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsReplication BlockdevOptionsReplication
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsReplication
+		IntermediateBlockdevOptionsReplication
 	}{
 		BlockdevDriverReplication,
-		s,
+		IntermediateBlockdevOptionsReplication(s),
 	}
 	return json.Marshal(v)
 }
@@ -2352,12 +2379,13 @@ func (BlockdevOptionsSheepdog) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsSheepdog) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsSheepdog BlockdevOptionsSheepdog
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsSheepdog
+		IntermediateBlockdevOptionsSheepdog
 	}{
 		BlockdevDriverSheepdog,
-		s,
+		IntermediateBlockdevOptionsSheepdog(s),
 	}
 	return json.Marshal(v)
 }
@@ -2379,12 +2407,13 @@ func (BlockdevOptionsSSH) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsSSH) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsSSH BlockdevOptionsSSH
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsSSH
+		IntermediateBlockdevOptionsSSH
 	}{
 		BlockdevDriverSSH,
-		s,
+		IntermediateBlockdevOptionsSSH(s),
 	}
 	return json.Marshal(v)
 }
@@ -2405,12 +2434,13 @@ func (BlockdevOptionsThrottle) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsThrottle) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsThrottle BlockdevOptionsThrottle
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsThrottle
+		IntermediateBlockdevOptionsThrottle
 	}{
 		BlockdevDriverThrottle,
-		s,
+		IntermediateBlockdevOptionsThrottle(s),
 	}
 	return json.Marshal(v)
 }
@@ -2430,12 +2460,13 @@ func (BlockdevOptionsVdi) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsVdi) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsVdi BlockdevOptionsVdi
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVdi
+		IntermediateBlockdevOptionsVdi
 	}{
 		BlockdevDriverVdi,
-		s,
+		IntermediateBlockdevOptionsVdi(s),
 	}
 	return json.Marshal(v)
 }
@@ -2455,12 +2486,13 @@ func (BlockdevOptionsVhdx) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsVhdx) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsVhdx BlockdevOptionsVhdx
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVhdx
+		IntermediateBlockdevOptionsVhdx
 	}{
 		BlockdevDriverVhdx,
-		s,
+		IntermediateBlockdevOptionsVhdx(s),
 	}
 	return json.Marshal(v)
 }
@@ -2480,12 +2512,13 @@ func (BlockdevOptionsVMDK) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsVMDK) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsVMDK BlockdevOptionsVMDK
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVMDK
+		IntermediateBlockdevOptionsVMDK
 	}{
 		BlockdevDriverVMDK,
-		s,
+		IntermediateBlockdevOptionsVMDK(s),
 	}
 	return json.Marshal(v)
 }
@@ -2505,12 +2538,13 @@ func (BlockdevOptionsVpc) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsVpc) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsVpc BlockdevOptionsVpc
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVpc
+		IntermediateBlockdevOptionsVpc
 	}{
 		BlockdevDriverVpc,
-		s,
+		IntermediateBlockdevOptionsVpc(s),
 	}
 	return json.Marshal(v)
 }
@@ -2534,12 +2568,13 @@ func (BlockdevOptionsVvfat) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsVvfat) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsVvfat BlockdevOptionsVvfat
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVvfat
+		IntermediateBlockdevOptionsVvfat
 	}{
 		BlockdevDriverVvfat,
-		s,
+		IntermediateBlockdevOptionsVvfat(s),
 	}
 	return json.Marshal(v)
 }
@@ -2561,12 +2596,13 @@ func (BlockdevOptionsVxhs) isBlockdevOptions() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevOptionsVxhs) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevOptionsVxhs BlockdevOptionsVxhs
 	v := struct {
 		Driver BlockdevDriver `json:"driver"`
-		BlockdevOptionsVxhs
+		IntermediateBlockdevOptionsVxhs
 	}{
 		BlockdevDriverVxhs,
-		s,
+		IntermediateBlockdevOptionsVxhs(s),
 	}
 	return json.Marshal(v)
 }
@@ -2748,12 +2784,13 @@ func (BlockdevQcow2EncryptionAes) isBlockdevQcow2Encryption() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevQcow2EncryptionAes) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevQcow2EncryptionAes BlockdevQcow2EncryptionAes
 	v := struct {
 		Format BlockdevQcow2EncryptionFormat `json:"format"`
-		BlockdevQcow2EncryptionAes
+		IntermediateBlockdevQcow2EncryptionAes
 	}{
 		BlockdevQcow2EncryptionFormatAes,
-		s,
+		IntermediateBlockdevQcow2EncryptionAes(s),
 	}
 	return json.Marshal(v)
 }
@@ -2767,12 +2804,13 @@ func (BlockdevQcow2EncryptionLUKS) isBlockdevQcow2Encryption() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevQcow2EncryptionLUKS) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevQcow2EncryptionLUKS BlockdevQcow2EncryptionLUKS
 	v := struct {
 		Format BlockdevQcow2EncryptionFormat `json:"format"`
-		BlockdevQcow2EncryptionLUKS
+		IntermediateBlockdevQcow2EncryptionLUKS
 	}{
 		BlockdevQcow2EncryptionFormatLUKS,
-		s,
+		IntermediateBlockdevQcow2EncryptionLUKS(s),
 	}
 	return json.Marshal(v)
 }
@@ -2869,12 +2907,13 @@ func (BlockdevQcowEncryptionAes) isBlockdevQcowEncryption() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s BlockdevQcowEncryptionAes) MarshalJSON() ([]byte, error) {
+	type IntermediateBlockdevQcowEncryptionAes BlockdevQcowEncryptionAes
 	v := struct {
 		Format BlockdevQcowEncryptionFormat `json:"format"`
-		BlockdevQcowEncryptionAes
+		IntermediateBlockdevQcowEncryptionAes
 	}{
 		BlockdevQcowEncryptionFormatAes,
-		s,
+		IntermediateBlockdevQcowEncryptionAes(s),
 	}
 	return json.Marshal(v)
 }
@@ -4044,12 +4083,13 @@ func (CPUInfoMIPS) isCPUInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s CPUInfoMIPS) MarshalJSON() ([]byte, error) {
+	type IntermediateCPUInfoMIPS CPUInfoMIPS
 	v := struct {
 		Arch CPUInfoArch `json:"arch"`
-		CPUInfoMIPS
+		IntermediateCPUInfoMIPS
 	}{
 		CPUInfoArchMIPS,
-		s,
+		IntermediateCPUInfoMIPS(s),
 	}
 	return json.Marshal(v)
 }
@@ -4068,12 +4108,13 @@ func (CPUInfoOther) isCPUInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s CPUInfoOther) MarshalJSON() ([]byte, error) {
+	type IntermediateCPUInfoOther CPUInfoOther
 	v := struct {
 		Arch CPUInfoArch `json:"arch"`
-		CPUInfoOther
+		IntermediateCPUInfoOther
 	}{
 		CPUInfoArchOther,
-		s,
+		IntermediateCPUInfoOther(s),
 	}
 	return json.Marshal(v)
 }
@@ -4093,12 +4134,13 @@ func (CPUInfoPPC) isCPUInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s CPUInfoPPC) MarshalJSON() ([]byte, error) {
+	type IntermediateCPUInfoPPC CPUInfoPPC
 	v := struct {
 		Arch CPUInfoArch `json:"arch"`
-		CPUInfoPPC
+		IntermediateCPUInfoPPC
 	}{
 		CPUInfoArchPPC,
-		s,
+		IntermediateCPUInfoPPC(s),
 	}
 	return json.Marshal(v)
 }
@@ -4119,12 +4161,13 @@ func (CPUInfoSPARC) isCPUInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s CPUInfoSPARC) MarshalJSON() ([]byte, error) {
+	type IntermediateCPUInfoSPARC CPUInfoSPARC
 	v := struct {
 		Arch CPUInfoArch `json:"arch"`
-		CPUInfoSPARC
+		IntermediateCPUInfoSPARC
 	}{
 		CPUInfoArchSPARC,
-		s,
+		IntermediateCPUInfoSPARC(s),
 	}
 	return json.Marshal(v)
 }
@@ -4144,12 +4187,13 @@ func (CPUInfoTricore) isCPUInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s CPUInfoTricore) MarshalJSON() ([]byte, error) {
+	type IntermediateCPUInfoTricore CPUInfoTricore
 	v := struct {
 		Arch CPUInfoArch `json:"arch"`
-		CPUInfoTricore
+		IntermediateCPUInfoTricore
 	}{
 		CPUInfoArchTricore,
-		s,
+		IntermediateCPUInfoTricore(s),
 	}
 	return json.Marshal(v)
 }
@@ -4169,12 +4213,13 @@ func (CPUInfoX86) isCPUInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s CPUInfoX86) MarshalJSON() ([]byte, error) {
+	type IntermediateCPUInfoX86 CPUInfoX86
 	v := struct {
 		Arch CPUInfoArch `json:"arch"`
-		CPUInfoX86
+		IntermediateCPUInfoX86
 	}{
 		CPUInfoArchX86,
-		s,
+		IntermediateCPUInfoX86(s),
 	}
 	return json.Marshal(v)
 }
@@ -4874,12 +4919,13 @@ func (GuestPanicInformationHyperV) isGuestPanicInformation() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s GuestPanicInformationHyperV) MarshalJSON() ([]byte, error) {
+	type IntermediateGuestPanicInformationHyperV GuestPanicInformationHyperV
 	v := struct {
 		Type GuestPanicInformationType `json:"type"`
-		GuestPanicInformationHyperV
+		IntermediateGuestPanicInformationHyperV
 	}{
 		GuestPanicInformationTypeHyperV,
-		s,
+		IntermediateGuestPanicInformationHyperV(s),
 	}
 	return json.Marshal(v)
 }
@@ -5249,12 +5295,13 @@ func (ImageInfoSpecificQCow2EncryptionAes) isImageInfoSpecificQCow2Encryption() 
 
 // MarshalJSON implements json.Marshaler.
 func (s ImageInfoSpecificQCow2EncryptionAes) MarshalJSON() ([]byte, error) {
+	type IntermediateImageInfoSpecificQCow2EncryptionAes ImageInfoSpecificQCow2EncryptionAes
 	v := struct {
 		Format BlockdevQcow2EncryptionFormat `json:"format"`
-		ImageInfoSpecificQCow2EncryptionAes
+		IntermediateImageInfoSpecificQCow2EncryptionAes
 	}{
 		BlockdevQcow2EncryptionFormatAes,
-		s,
+		IntermediateImageInfoSpecificQCow2EncryptionAes(s),
 	}
 	return json.Marshal(v)
 }
@@ -5276,12 +5323,13 @@ func (ImageInfoSpecificQCow2EncryptionLUKS) isImageInfoSpecificQCow2Encryption()
 
 // MarshalJSON implements json.Marshaler.
 func (s ImageInfoSpecificQCow2EncryptionLUKS) MarshalJSON() ([]byte, error) {
+	type IntermediateImageInfoSpecificQCow2EncryptionLUKS ImageInfoSpecificQCow2EncryptionLUKS
 	v := struct {
 		Format BlockdevQcow2EncryptionFormat `json:"format"`
-		ImageInfoSpecificQCow2EncryptionLUKS
+		IntermediateImageInfoSpecificQCow2EncryptionLUKS
 	}{
 		BlockdevQcow2EncryptionFormatLUKS,
-		s,
+		IntermediateImageInfoSpecificQCow2EncryptionLUKS(s),
 	}
 	return json.Marshal(v)
 }
@@ -9041,12 +9089,13 @@ func (SchemaInfoAlternate) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoAlternate) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoAlternate SchemaInfoAlternate
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoAlternate
+		IntermediateSchemaInfoAlternate
 	}{
 		SchemaMetaTypeAlternate,
-		s,
+		IntermediateSchemaInfoAlternate(s),
 	}
 	return json.Marshal(v)
 }
@@ -9061,12 +9110,13 @@ func (SchemaInfoArray) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoArray) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoArray SchemaInfoArray
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoArray
+		IntermediateSchemaInfoArray
 	}{
 		SchemaMetaTypeArray,
-		s,
+		IntermediateSchemaInfoArray(s),
 	}
 	return json.Marshal(v)
 }
@@ -9081,12 +9131,13 @@ func (SchemaInfoBuiltin) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoBuiltin) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoBuiltin SchemaInfoBuiltin
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoBuiltin
+		IntermediateSchemaInfoBuiltin
 	}{
 		SchemaMetaTypeBuiltin,
-		s,
+		IntermediateSchemaInfoBuiltin(s),
 	}
 	return json.Marshal(v)
 }
@@ -9102,12 +9153,13 @@ func (SchemaInfoCommand) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoCommand) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoCommand SchemaInfoCommand
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoCommand
+		IntermediateSchemaInfoCommand
 	}{
 		SchemaMetaTypeCommand,
-		s,
+		IntermediateSchemaInfoCommand(s),
 	}
 	return json.Marshal(v)
 }
@@ -9122,12 +9174,13 @@ func (SchemaInfoEnum) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoEnum) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoEnum SchemaInfoEnum
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoEnum
+		IntermediateSchemaInfoEnum
 	}{
 		SchemaMetaTypeEnum,
-		s,
+		IntermediateSchemaInfoEnum(s),
 	}
 	return json.Marshal(v)
 }
@@ -9142,12 +9195,13 @@ func (SchemaInfoEvent) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoEvent) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoEvent SchemaInfoEvent
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoEvent
+		IntermediateSchemaInfoEvent
 	}{
 		SchemaMetaTypeEvent,
-		s,
+		IntermediateSchemaInfoEvent(s),
 	}
 	return json.Marshal(v)
 }
@@ -9164,12 +9218,13 @@ func (SchemaInfoObject) isSchemaInfo() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SchemaInfoObject) MarshalJSON() ([]byte, error) {
+	type IntermediateSchemaInfoObject SchemaInfoObject
 	v := struct {
 		MetaType SchemaMetaType `json:"meta-type"`
-		SchemaInfoObject
+		IntermediateSchemaInfoObject
 	}{
 		SchemaMetaTypeObject,
-		s,
+		IntermediateSchemaInfoObject(s),
 	}
 	return json.Marshal(v)
 }
@@ -9361,12 +9416,13 @@ func (SocketAddressFD) isSocketAddress() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressFD) MarshalJSON() ([]byte, error) {
+	type IntermediateSocketAddressFD SocketAddressFD
 	v := struct {
 		Type SocketAddressType `json:"type"`
-		SocketAddressFD
+		IntermediateSocketAddressFD
 	}{
 		SocketAddressTypeFD,
-		s,
+		IntermediateSocketAddressFD(s),
 	}
 	return json.Marshal(v)
 }
@@ -9383,12 +9439,13 @@ func (SocketAddressInet) isSocketAddress() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressInet) MarshalJSON() ([]byte, error) {
+	type IntermediateSocketAddressInet SocketAddressInet
 	v := struct {
 		Type SocketAddressType `json:"type"`
-		SocketAddressInet
+		IntermediateSocketAddressInet
 	}{
 		SocketAddressTypeInet,
-		s,
+		IntermediateSocketAddressInet(s),
 	}
 	return json.Marshal(v)
 }
@@ -9402,12 +9459,13 @@ func (SocketAddressUnix) isSocketAddress() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressUnix) MarshalJSON() ([]byte, error) {
+	type IntermediateSocketAddressUnix SocketAddressUnix
 	v := struct {
 		Type SocketAddressType `json:"type"`
-		SocketAddressUnix
+		IntermediateSocketAddressUnix
 	}{
 		SocketAddressTypeUnix,
-		s,
+		IntermediateSocketAddressUnix(s),
 	}
 	return json.Marshal(v)
 }
@@ -9422,12 +9480,13 @@ func (SocketAddressVsock) isSocketAddress() {}
 
 // MarshalJSON implements json.Marshaler.
 func (s SocketAddressVsock) MarshalJSON() ([]byte, error) {
+	type IntermediateSocketAddressVsock SocketAddressVsock
 	v := struct {
 		Type SocketAddressType `json:"type"`
-		SocketAddressVsock
+		IntermediateSocketAddressVsock
 	}{
 		SocketAddressTypeVsock,
-		s,
+		IntermediateSocketAddressVsock(s),
 	}
 	return json.Marshal(v)
 }
