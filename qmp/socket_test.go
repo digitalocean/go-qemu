@@ -15,6 +15,7 @@
 package qmp
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -167,6 +168,38 @@ func TestSocketMonitor_listenStreamResponse(t *testing.T) {
 
 	if want, got := str, string(res.buf); want != got {
 		t.Fatalf("unexpected response:\n- want: %q\n-  got: %q", want, got)
+	}
+}
+
+func TestSocketMonitor_listenLargeMessages(t *testing.T) {
+	for _, size := range []int{bufio.MaxScanTokenSize, 1024 * 1024} {
+		t.Run(fmt.Sprint(size), func(t *testing.T) {
+			for _, event := range []bool{false, true} {
+				t.Run(fmt.Sprint(event), func(t *testing.T) {
+					listeners := int32(1)
+					mon := &SocketMonitor{listeners: &listeners}
+					payload := strings.Repeat("x", size)
+					message := fmt.Sprintf(`{"return":%q}`, payload)
+					if event {
+						message = fmt.Sprintf(`{"event":"TEST","data":{"payload":%q}}`, payload)
+					}
+					events := make(chan Event, 1)
+					stream := make(chan streamResponse, 1)
+					mon.listen(strings.NewReader(message+"\r\n"), events, stream)
+					if event {
+						e, ok := <-events
+						if !ok || e.Event != "TEST" || e.Data["payload"] != payload {
+							t.Fatal("large event was not delivered intact")
+						}
+					} else {
+						res, ok := <-stream
+						if !ok || res.err != nil || string(res.buf) != message {
+							t.Fatalf("large response was not delivered intact: %v", res.err)
+						}
+					}
+				})
+			}
+		})
 	}
 }
 
